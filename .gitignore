@@ -1,0 +1,31 @@
+_# Dependencies (any depth)_
+node_modules/
+.pnp
+.pnp.js
+ 
+_# Builds_
+.next/
+_nextbuild/
+/out/
+/build/
+dist/
+ 
+_# Env files (any depth)_
+.env
+.env.local
+.env.*.local
+ 
+_# Vercel / misc_
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+ 
+_# Logs / OS_
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+ 
+_# Testing_
+/coverage
