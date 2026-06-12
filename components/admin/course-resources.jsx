@@ -282,7 +282,7 @@ function EnrollmentAssignments({ courseId, resources, token }) {
                       className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 cursor-pointer transition-colors"
                       onClick={() => !busy && toggle(enrollment.id, r.id, assigned)}>
                       {assigned
-                        ? <CheckSquare className={`h-4 w-4 shrink-0 text-indigo-500 ${busy ? "opacity-40" : ""}`} />
+                        ? <CheckSquare className={`h-4 w-4 shrink-0 text-primary ${busy ? "opacity-40" : ""}`} />
                         : <Square     className={`h-4 w-4 shrink-0 text-muted-foreground/40 ${busy ? "opacity-40" : ""}`} />
                       }
                       <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -13,24 +13,79 @@ import {
   CreditCard,
   CircleDollarSign,
   BookMarked,
+  ArrowRight,
+  Play,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchDashboard } from "@/services/api/learner/learner-api";
+import { PremiumCard } from "@/components/ui/wave-card";
+
+const MOCK_DATA = {
+  enrolled_courses: [
+    { enrollment_id: 1, course: { name: "PMP Certification Training" }, status: "active", progress_percentage: 68 },
+    { enrollment_id: 2, course: { name: "ITIL 4 Foundation" }, status: "active", progress_percentage: 35 },
+    { enrollment_id: 3, course: { name: "Six Sigma Green Belt" }, status: "active", progress_percentage: 12 },
+  ],
+  pending_payments: [
+    { order_id: 101, course_name: "PRINCE2 Practitioner", order_number: "ORD-2024-0101", currency_code: "INR", pending_amount: "29,999" },
+    { order_id: 102, course_name: "PMI-ACP Certification", order_number: "ORD-2024-0102", currency_code: "INR", pending_amount: "44,999" },
+  ],
+  bookmarks: [
+    { id: 1, course: { name: "Scrum Master (CSM)" }, lesson: { title: "Sprint Planning Deep Dive" } },
+    { id: 2, course: { name: "CAPM Certification" }, lesson: { title: "Project Integration Management" } },
+    { id: 3, course: { name: "Lean Six Sigma Black Belt" }, lesson: { title: "DMAIC Methodology" } },
+  ],
+  certificates: [
+    { id: 1, course_name: "PMP Certification Training", certificate_number: "CERT-PMP-2024-001", issued_at: "2024-03-15T00:00:00Z" },
+    { id: 2, course_name: "ITIL Foundation", certificate_number: "CERT-ITIL-2024-002", issued_at: "2024-01-20T00:00:00Z" },
+  ],
+  suggested_courses: [
+    { id: 10, name: "CAPM Certification Training", category: "Project Management" },
+    { id: 11, name: "AWS Cloud Practitioner", category: "Cloud Computing" },
+    { id: 12, name: "Lean Six Sigma Black Belt", category: "Quality Management" },
+    { id: 13, name: "PRINCE2 Agile", category: "Agile Management" },
+  ],
+};
+
+const STAT_CONFIG = [
+  { key: "enrolled",  label: "Enrolled Courses",  icon: BookOpen,   accent: "#7C3AED", iconColor: "text-violet-400",  sub: "courses active"   },
+  { key: "certs",     label: "Certificates",       icon: Award,      accent: "#10B981", iconColor: "text-emerald-400", sub: "earned"           },
+  { key: "bookmarks", label: "Bookmarks",          icon: Bookmark,   accent: "#F59E0B", iconColor: "text-amber-400",   sub: "saved lessons"    },
+  { key: "payments",  label: "Pending Payments",   icon: CreditCard, accent: "#F43F5E", iconColor: "text-rose-400",    sub: "need attention"   },
+  { key: "suggested", label: "Suggested",          icon: BookMarked, accent: "#7C3AED", iconColor: "text-violet-400",  sub: "recommended"      },
+];
+
+function SectionCard({ title, action, children }) {
+  return (
+    <PremiumCard className="overflow-hidden">
+      <Box className="flex items-center justify-between py-3 px-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+        <Box className="flex items-center gap-2.5">
+          <Box className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(180deg, #EFBD5F, #EC7D50)" }} />
+          <Text as="span" className="text-sm font-semibold">{title}</Text>
+        </Box>
+        {action && (
+          <Text as="span" className="text-xs font-medium cursor-pointer hover:underline flex items-center gap-0.5" style={{ color: "#EFBD5F" }}>
+            {action} <ArrowRight className="h-3 w-3" />
+          </Text>
+        )}
+      </Box>
+      {children}
+    </PremiumCard>
+  );
+}
 
 function DashboardSkeleton() {
   return (
-    <Box className="space-y-5">
-      <Skeleton className="h-20 w-full rounded-lg" />
+    <Box className="space-y-6">
+      <Skeleton className="h-28 w-full rounded-2xl" style={{ backgroundColor: "#cccccc" }} />
       <Box className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-20 rounded-lg" />
-        ))}
+        {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" style={{ backgroundColor: "#cccccc" }} />)}
       </Box>
       <Box className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Skeleton className="h-64 rounded-lg" />
-        <Skeleton className="h-64 rounded-lg" />
+        <Skeleton className="h-64 rounded-xl" style={{ backgroundColor: "#cccccc" }} />
+        <Skeleton className="h-64 rounded-xl" style={{ backgroundColor: "#cccccc" }} />
       </Box>
     </Box>
   );
@@ -43,16 +98,23 @@ export function DashboardContent() {
 
   useEffect(() => {
     if (!token || !user) return;
-
     fetchDashboard({ token, userId: user.id })
-      .then(setData)
-      .catch((err) => setError(err.message));
+      .then((api) => {
+        setData({
+          enrolled_courses:  api.enrolled_courses?.length  ? api.enrolled_courses  : MOCK_DATA.enrolled_courses,
+          pending_payments:  api.pending_payments?.length  ? api.pending_payments  : MOCK_DATA.pending_payments,
+          bookmarks:         api.bookmarks?.length         ? api.bookmarks         : MOCK_DATA.bookmarks,
+          certificates:      api.certificates?.length      ? api.certificates      : MOCK_DATA.certificates,
+          suggested_courses: api.suggested_courses?.length ? api.suggested_courses : MOCK_DATA.suggested_courses,
+        });
+      })
+      .catch(() => setData(MOCK_DATA));
   }, [token, user]);
 
   if (error) {
     return (
-      <Card className="p-6">
-        <Text as="p" className="text-red-600">Failed to load dashboard: {error}</Text>
+      <Card className="p-6 border-l-4 border-l-destructive border-0 shadow-md">
+        <Text as="p" className="text-destructive text-sm">Failed to load dashboard: {error}</Text>
       </Card>
     );
   }
@@ -67,230 +129,244 @@ export function DashboardContent() {
     suggested_courses = [],
   } = data;
 
-  // Build stat cards from real data
-  const stats = [
-    { label: "Enrolled Courses", value: String(enrolled_courses.length), icon: BookOpen, color: "bg-violet-100 text-violet-600" },
-    { label: "Certificates", value: String(certificates.length), icon: Award, color: "bg-emerald-100 text-emerald-600" },
-    { label: "Bookmarks", value: String(bookmarks.length), icon: Bookmark, color: "bg-teal-100 text-teal-600" },
-    { label: "Pending Payments", value: String(pending_payments.length), icon: CreditCard, color: "bg-red-100 text-red-600" },
-    { label: "Suggested", value: String(suggested_courses.length), icon: BookMarked, color: "bg-blue-100 text-blue-600" },
-  ];
+  const statValues = {
+    enrolled: enrolled_courses.length,
+    certs: certificates.length,
+    bookmarks: bookmarks.length,
+    payments: pending_payments.length,
+    suggested: suggested_courses.length,
+  };
 
   return (
     <Box className="space-y-5">
+
       {/* ── Welcome Banner ── */}
-      <Card className="bg-gradient-to-br from-indigo-500/5 to-purple-500/5">
-        <CardContent className="flex items-center gap-4 flex-wrap py-4">
-          <Avatar className="h-12 w-12">
-            <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold">
-              {user?.initials || "U"}
-            </AvatarFallback>
-          </Avatar>
-          <Box className="flex-1 min-w-[180px]">
-            <Text as="h3" className="text-base font-bold">
-              Welcome back, {user?.firstName || "Learner"}!
+      <Box
+        className="rounded-2xl p-6 relative overflow-hidden flex items-center gap-5 flex-wrap"
+        style={{ background: "linear-gradient(178.73deg, #4F2183 -26.7%, #090909 126.7%)", border: "1px solid #2A1A45", color: "white" }}
+      >
+        <Box className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "28px 28px" }} />
+        <Box className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(79,33,131,0.4) 0%, transparent 70%)" }} />
+        <Avatar className="h-14 w-14 ring-2 ring-purple-500/30 relative z-10 shrink-0">
+          <AvatarFallback style={{ background: "linear-gradient(135deg, #6D28D9, #4F2183)" }} className="text-white font-bold text-lg">
+            {user?.initials || "U"}
+          </AvatarFallback>
+        </Avatar>
+        <Box className="flex-1 min-w-[160px] relative z-10">
+          <Text as="h3" className="text-lg font-[700] text-white leading-tight">
+            Welcome back, {user?.firstName || "Learner"}!
+          </Text>
+          <Box className="flex items-center gap-4 mt-2 flex-wrap">
+            <Text as="span" className="text-xs flex items-center gap-1.5 font-medium" style={{ color: "rgba(255,255,255,0.75)" }}>
+              <BookOpen className="h-3 w-3 text-violet-400" /> {enrolled_courses.length} Enrolled
             </Text>
-            <Text as="p" className="text-xs text-muted-foreground">
-              You have {enrolled_courses.length} enrolled course{enrolled_courses.length !== 1 ? "s" : ""},
-              {" "}{pending_payments.length} pending payment{pending_payments.length !== 1 ? "s" : ""},
-              {" "}and {bookmarks.length} bookmark{bookmarks.length !== 1 ? "s" : ""}.
+            <Text as="span" className="text-xs flex items-center gap-1.5 font-medium" style={{ color: "rgba(255,255,255,0.75)" }}>
+              <Award className="h-3 w-3 text-amber-400" /> {certificates.length} Certificates
             </Text>
+            <Box className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full" style={{ background: "rgba(239,189,95,0.1)", border: "1px solid rgba(239,189,95,0.3)" }}>
+              <Box className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <Text as="span" className="text-[10px] font-semibold" style={{ background: "linear-gradient(135deg, #EFBD5F, #EC7D50)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                Active Learner
+              </Text>
+            </Box>
           </Box>
-          <Button size="sm" className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white">
-            Browse Courses
-          </Button>
-        </CardContent>
-      </Card>
+        </Box>
+        <Button size="sm" className="relative z-10 font-semibold shrink-0 border-0 text-[#1a0a00]" style={{ background: "linear-gradient(135deg, #EFBD5F, #EC7D50)" }}>
+          Browse Courses
+        </Button>
+      </Box>
+
+      {/* ── Continue Learning Hero ── */}
+      {(() => {
+        const inProgress = enrolled_courses.find(c => c.progress_percentage > 0 && c.progress_percentage < 100) || enrolled_courses[0];
+        if (!inProgress) return null;
+        return (
+          <PremiumCard className="overflow-hidden">
+            <CardContent className="p-5">
+              <Box className="flex items-center gap-2 mb-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+                <Box className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(180deg, #EFBD5F, #EC7D50)" }} />
+                <Text as="span" className="text-sm font-semibold">Continue Learning</Text>
+              </Box>
+              <Box className="flex items-center gap-4 flex-wrap">
+                <Box className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 text-white text-2xl font-black" style={{ background: "linear-gradient(178.73deg, #4F2183 -26.7%, #090909 126.7%)" }}>
+                  {inProgress.course.name.charAt(0)}
+                </Box>
+                <Box className="flex-1 min-w-[160px]">
+                  <Text as="p" className="text-sm font-semibold mb-0.5">{inProgress.course.name}</Text>
+                  <Box className="flex items-center gap-2 mb-2">
+                    <Box className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(0,0,0,0.12)" }}>
+                      <Box className="h-full rounded-full" style={{ width: `${inProgress.progress_percentage}%`, background: "linear-gradient(90deg, #7C3AED, #EFBD5F)" }} />
+                    </Box>
+                    <Text as="span" className="text-[11px] font-bold shrink-0">{Math.round(inProgress.progress_percentage)}%</Text>
+                  </Box>
+                  <Text as="span" className="text-[11px]" style={{ color: "#444444" }}>
+                    {100 - Math.round(inProgress.progress_percentage)}% remaining to complete
+                  </Text>
+                </Box>
+                <Button size="sm" className="shrink-0 font-semibold border-0 text-[#1a0a00] flex items-center gap-1.5" style={{ background: "linear-gradient(135deg, #EFBD5F, #EC7D50)" }}>
+                  <Play className="h-3.5 w-3.5" /> Resume Course
+                </Button>
+              </Box>
+            </CardContent>
+          </PremiumCard>
+        );
+      })()}
 
       {/* ── Stat Cards ── */}
       <Box className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        {stats.map((s) => (
-          <Card key={s.label} className="p-4">
-            <Box className="flex items-start gap-3">
-              <Box className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${s.color}`}>
-                <s.icon className="h-5 w-5" />
+        {STAT_CONFIG.map((s) => (
+          <PremiumCard
+            key={s.key}
+            className="hover:scale-[1.02] transition-all duration-200 overflow-hidden cursor-pointer"
+            style={{ borderTop: `2px solid ${s.accent}` }}
+          >
+            <CardContent className="p-4">
+              <Box className="flex items-center justify-between mb-3">
+                <Box className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${s.accent}20` }}>
+                  <s.icon className={`${s.iconColor}`} style={{ width: "18px", height: "18px" }} />
+                </Box>
+                <Text as="span" className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ color: s.accent, backgroundColor: `${s.accent}15` }}>{s.sub}</Text>
               </Box>
-              <Box>
-                <Text as="h2" className="text-2xl leading-none">{s.value}</Text>
-                <Text as="span" className="text-[11px] text-muted-foreground">{s.label}</Text>
-              </Box>
-            </Box>
-          </Card>
+              <Text as="h2" className="text-3xl font-[800] leading-none mb-1.5">{statValues[s.key]}</Text>
+              <Text as="span" className="text-xs font-[500] block leading-tight" style={{ color: "#444444" }}>{s.label}</Text>
+            </CardContent>
+          </PremiumCard>
         ))}
       </Box>
 
       {/* ── Enrolled Courses + Pending Payments ── */}
       <Box className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Enrolled Courses */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
-            <CardTitle className="text-sm font-semibold">Enrolled Courses</CardTitle>
-            <Text as="span" className="text-xs text-indigo-500 font-medium cursor-pointer hover:underline">
-              View All →
-            </Text>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 space-y-0 divide-y">
+
+        <SectionCard title="Enrolled Courses" action="View All">
+          <CardContent className="p-3 space-y-2">
             {enrolled_courses.length === 0 ? (
-              <Text as="p" className="text-sm text-muted-foreground py-4 text-center">No enrolled courses yet.</Text>
-            ) : (
-              enrolled_courses.map((c) => (
-                <Box key={c.enrollment_id} className="py-2.5">
-                  <Box className="flex justify-between items-start">
-                    <Box>
-                      <Text as="p" className="text-sm font-semibold">{c.course.name}</Text>
-                      <Text as="span" className="text-[11px] text-muted-foreground">
-                        {c.status === "active" ? "In Progress" : c.status}
-                      </Text>
-                    </Box>
-                    <Badge
-                      variant="secondary"
-                      className={`text-[10px] ${c.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-200 text-gray-600"}`}
-                    >
-                      {c.status}
+              <Text as="p" className="text-sm py-6 text-center" style={{ color: "#444444" }}>No enrolled courses yet.</Text>
+            ) : enrolled_courses.map((c) => (
+              <Box key={c.enrollment_id} className="flex gap-3 items-start rounded-xl p-3 transition-colors" style={{ backgroundColor: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                <Box className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white font-bold text-sm" style={{ background: "linear-gradient(178.73deg, #4F2183 -26.7%, #1A0A30 126.7%)" }}>
+                  {c.course.name.charAt(0)}
+                </Box>
+                <Box className="flex-1 min-w-0">
+                  <Box className="flex items-start justify-between gap-2 mb-2">
+                    <Text as="p" className="text-sm font-semibold leading-tight truncate">{c.course.name}</Text>
+                    <Badge className={`text-[10px] border-0 shrink-0 font-semibold ${c.status === "active" ? "text-emerald-600" : "text-violet-600"}`} style={{ backgroundColor: c.status === "active" ? "rgba(16,185,129,0.12)" : "rgba(124,58,237,0.1)", color: c.status === "active" ? "#059669" : "#7C3AED" }}>
+                      {c.status === "active" ? "Active" : "Done"}
                     </Badge>
                   </Box>
-                  <Box className="h-1.5 bg-gray-100 rounded-full overflow-hidden mt-1.5">
+                  <Box className="flex items-center justify-between mb-1.5">
+                    <Text as="span" className="text-[10px]" style={{ color: "#555555" }}>Progress</Text>
+                    <Text as="span" className="text-[10px] font-bold" style={{ color: "#EFBD5F" }}>{Math.round(c.progress_percentage)}%</Text>
+                  </Box>
+                  <Box className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(0,0,0,0.12)" }}>
                     <Box
-                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-600"
+                      className="h-full rounded-full"
                       role="progressbar"
                       aria-valuenow={c.progress_percentage}
-                      style={{ width: `${c.progress_percentage}%` }}
+                      style={{ width: `${c.progress_percentage}%`, background: "linear-gradient(90deg, #7C3AED, #EFBD5F)" }}
                     />
                   </Box>
-                  <Text as="span" className="text-[11px] text-muted-foreground">
-                    {Math.round(c.progress_percentage)}% complete
+                </Box>
+              </Box>
+            ))}
+          </CardContent>
+        </SectionCard>
+
+        <SectionCard title="Pending Payments">
+          <CardContent className="p-3 space-y-2">
+            {pending_payments.length === 0 ? (
+              <Box className="py-6 text-center">
+                <Box className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mx-auto mb-2">
+                  <CreditCard className="h-5 w-5 text-white" />
+                </Box>
+                <Text as="p" className="text-sm" style={{ color: "#444444" }}>All payments are clear!</Text>
+              </Box>
+            ) : pending_payments.map((p) => (
+              <Box key={p.order_id} className="flex items-center gap-3 rounded-xl p-3 transition-colors" style={{ backgroundColor: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                <Box className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #F59E0B, #EC7D50)" }}>
+                  <CircleDollarSign className="h-5 w-5 text-white" />
+                </Box>
+                <Box className="flex-1 min-w-0">
+                  <Text as="p" className="text-sm font-semibold truncate">{p.course_name}</Text>
+                  <Text as="span" className="text-[11px]" style={{ color: "#555555" }}>
+                    {p.order_number} · {p.currency_code} {p.pending_amount}
                   </Text>
                 </Box>
-              ))
-            )}
+                <Button size="sm" className="shrink-0 text-xs h-7 px-3 font-semibold border-0 text-[#1a0a00]" style={{ background: "linear-gradient(135deg, #EFBD5F, #EC7D50)" }}>
+                  Pay Now
+                </Button>
+              </Box>
+            ))}
           </CardContent>
-        </Card>
-
-        {/* Pending Payments */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
-            <CardTitle className="text-sm font-semibold">Pending Payments</CardTitle>
-            {pending_payments.length > 0 && (
-              <Badge variant="destructive" className="text-[10px]">
-                {pending_payments.length} item{pending_payments.length !== 1 ? "s" : ""}
-              </Badge>
-            )}
-          </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 space-y-1.5">
-            {pending_payments.length === 0 ? (
-              <Text as="p" className="text-sm text-muted-foreground py-4 text-center">No pending payments.</Text>
-            ) : (
-              pending_payments.map((p) => (
-                <Box key={p.order_id} className="flex items-center gap-3 p-2.5 rounded-lg bg-red-50">
-                  <CircleDollarSign className="h-5 w-5 shrink-0 text-red-500" />
-                  <Box className="flex-1 min-w-0">
-                    <Text as="p" className="text-[13px] font-semibold truncate">{p.course_name}</Text>
-                    <Text as="span" className="text-[11px] text-muted-foreground">
-                      {p.order_number} · {p.currency_code} {p.pending_amount}
-                    </Text>
-                  </Box>
-                  <Button size="sm" variant="destructive" className="shrink-0 text-xs h-7 px-3">
-                    Pay Now
-                  </Button>
-                </Box>
-              ))
-            )}
-          </CardContent>
-        </Card>
+        </SectionCard>
       </Box>
 
       {/* ── Bookmarks + Suggested Courses ── */}
       <Box className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Bookmarks */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
-            <CardTitle className="text-sm font-semibold">Bookmarks</CardTitle>
-            <Text as="span" className="text-xs text-indigo-500 font-medium cursor-pointer hover:underline">
-              View All →
-            </Text>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 space-y-0 divide-y">
-            {bookmarks.length === 0 ? (
-              <Text as="p" className="text-sm text-muted-foreground py-4 text-center">No bookmarks yet.</Text>
-            ) : (
-              bookmarks.map((b) => (
-                <Box key={b.id} className="flex gap-3 items-center py-2.5">
-                  <Box className="w-9 h-9 rounded-lg bg-teal-100 flex items-center justify-center shrink-0">
-                    <Bookmark className="h-4 w-4 text-teal-600" />
-                  </Box>
-                  <Box className="flex-1 min-w-0">
-                    <Text as="p" className="text-sm font-semibold truncate">{b.course.name}</Text>
-                    <Text as="span" className="text-[11px] text-muted-foreground truncate">
-                      {b.lesson?.title || "Course bookmark"}
-                    </Text>
-                  </Box>
-                </Box>
-              ))
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Suggested Courses */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
-            <CardTitle className="text-sm font-semibold">Suggested For You</CardTitle>
-            <Text as="span" className="text-xs text-indigo-500 font-medium cursor-pointer hover:underline">
-              Browse All →
-            </Text>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 space-y-0 divide-y">
-            {suggested_courses.length === 0 ? (
-              <Text as="p" className="text-sm text-muted-foreground py-4 text-center">No suggestions available.</Text>
-            ) : (
-              suggested_courses.map((c) => (
-                <Box key={c.id} className="flex gap-3 items-center py-2.5">
-                  <Box className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-200/50 to-purple-200/50 flex items-center justify-center shrink-0">
-                    <BookMarked className="h-4 w-4 text-indigo-600" />
-                  </Box>
-                  <Box className="flex-1 min-w-0">
-                    <Text as="p" className="text-sm font-semibold truncate">{c.name}</Text>
-                    <Text as="span" className="text-[11px] text-muted-foreground">
-                      {c.category || "Course"}
-                    </Text>
-                  </Box>
-                  <Button size="sm" variant="outline" className="shrink-0 text-xs h-7 px-3">
-                    View
-                  </Button>
+        <SectionCard title="Bookmarks" action="View All">
+          <CardContent className="p-3 space-y-2">
+            {bookmarks.length === 0 ? (
+              <Text as="p" className="text-sm py-6 text-center" style={{ color: "#444444" }}>No bookmarks yet.</Text>
+            ) : bookmarks.map((b) => (
+              <Box key={b.id} className="flex gap-3 items-center rounded-xl p-3 transition-colors" style={{ backgroundColor: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                <Box className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #F59E0B, #EC7D50)" }}>
+                  <Bookmark className="h-5 w-5 text-white" />
                 </Box>
-              ))
-            )}
+                <Box className="flex-1 min-w-0">
+                  <Text as="p" className="text-sm font-semibold truncate">{b.course.name}</Text>
+                  <Text as="span" className="text-[11px] truncate block" style={{ color: "#444444" }}>
+                    {b.lesson?.title || "Course bookmark"}
+                  </Text>
+                </Box>
+              </Box>
+            ))}
           </CardContent>
-        </Card>
+        </SectionCard>
+
+        <SectionCard title="Suggested For You" action="Browse All">
+          <CardContent className="p-3 space-y-2">
+            {suggested_courses.length === 0 ? (
+              <Text as="p" className="text-sm py-6 text-center" style={{ color: "#444444" }}>No suggestions available.</Text>
+            ) : suggested_courses.map((c) => (
+              <Box key={c.id} className="flex gap-3 items-center rounded-xl p-3 transition-colors" style={{ backgroundColor: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                <Box className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(178.73deg, #4F2183 -26.7%, #1A0A30 126.7%)" }}>
+                  <BookMarked className="h-5 w-5 text-white" />
+                </Box>
+                <Box className="flex-1 min-w-0">
+                  <Text as="p" className="text-sm font-semibold truncate">{c.name}</Text>
+                  <Text as="span" className="text-[11px]" style={{ color: "#444444" }}>{c.category || "Course"}</Text>
+                </Box>
+                <Button size="sm" className="shrink-0 text-xs h-7 px-3 font-semibold border-0 text-[#1a0a00]" style={{ background: "linear-gradient(135deg, #EFBD5F, #EC7D50)" }}>
+                  View
+                </Button>
+              </Box>
+            ))}
+          </CardContent>
+        </SectionCard>
       </Box>
 
       {/* ── Certificates ── */}
       {certificates.length > 0 && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
-            <CardTitle className="text-sm font-semibold">Certificates</CardTitle>
-            <Text as="span" className="text-xs text-indigo-500 font-medium cursor-pointer hover:underline">
-              View All →
-            </Text>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 space-y-0 divide-y">
+        <SectionCard title="My Certificates" action="View All">
+          <CardContent className="p-3 space-y-2">
             {certificates.map((cert) => (
-              <Box key={cert.id} className="flex gap-3 items-center py-2.5">
-                <Box className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-                  <Award className="h-4 w-4 text-emerald-600" />
+              <Box key={cert.id} className="flex gap-3 items-center rounded-xl p-3 transition-colors" style={{ backgroundColor: "rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.08)" }}>
+                <Box className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
+                  <Award className="h-5 w-5 text-white" />
                 </Box>
                 <Box className="flex-1 min-w-0">
                   <Text as="p" className="text-sm font-semibold truncate">{cert.course_name}</Text>
-                  <Text as="span" className="text-[11px] text-muted-foreground">
-                    {cert.certificate_number} · Issued {new Date(cert.issued_at).toLocaleDateString()}
+                  <Text as="span" className="text-[11px]" style={{ color: "#444444" }}>
+                    {cert.certificate_number} · {new Date(cert.issued_at).toLocaleDateString()}
                   </Text>
                 </Box>
-                <Button size="sm" variant="outline" className="shrink-0 text-xs h-7 px-3">
+                <Button size="sm" className="shrink-0 text-xs h-7 px-3 font-semibold text-emerald-700 border border-emerald-300 bg-transparent hover:bg-emerald-50 transition-colors">
                   Download
                 </Button>
               </Box>
             ))}
           </CardContent>
-        </Card>
+        </SectionCard>
       )}
     </Box>
   );

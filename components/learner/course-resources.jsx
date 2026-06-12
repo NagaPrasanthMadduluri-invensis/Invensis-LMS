@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,13 +10,14 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchCourseResources } from "@/services/api/learner/learner-api";
+import { PremiumCard } from "@/components/ui/wave-card";
 
 const TYPE_CONFIG = {
-  brochure: { icon: FileText, badge: "bg-blue-100 text-blue-700",   label: "Brochure" },
-  pdf:      { icon: FileText, badge: "bg-red-100 text-red-700",    label: "PDF"      },
-  video:    { icon: Video,    badge: "bg-purple-100 text-purple-700", label: "Video"  },
-  link:     { icon: Link2,    badge: "bg-gray-100 text-gray-600",   label: "Link"     },
-  document: { icon: File,     badge: "bg-orange-100 text-orange-700", label: "Document"},
+  brochure: { icon: FileText, badgeStyle: { backgroundColor: "rgba(124,58,237,0.08)", color: "#A78BFA" }, label: "Brochure" },
+  pdf:      { icon: FileText, badgeStyle: { backgroundColor: "rgba(244,63,94,0.08)",  color: "#F87171"  }, label: "PDF"      },
+  video:    { icon: Video,    badgeStyle: { backgroundColor: "rgba(124,58,237,0.08)", color: "#A78BFA"  }, label: "Video"    },
+  link:     { icon: Link2,    badgeStyle: { backgroundColor: "#c8c8c8",               color: "#555555"  }, label: "Link"     },
+  document: { icon: File,     badgeStyle: { backgroundColor: "rgba(245,158,11,0.1)",  color: "#F59E0B"  }, label: "Document" },
 };
 
 export function LearnerCourseResources({ courseId }) {
@@ -37,52 +38,61 @@ export function LearnerCourseResources({ courseId }) {
 
   if (!resources) {
     return (
-      <Card>
+      <PremiumCard className="border">
         <CardHeader className="py-3 px-4">
-          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-32" style={{ backgroundColor: "rgba(0,0,0,0.06)" }} />
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-0 space-y-2">
-          <Skeleton className="h-12 rounded-lg" />
-          <Skeleton className="h-12 rounded-lg" />
+          <Skeleton className="h-12 rounded-lg" style={{ backgroundColor: "rgba(0,0,0,0.06)" }} />
+          <Skeleton className="h-12 rounded-lg" style={{ backgroundColor: "rgba(0,0,0,0.06)" }} />
         </CardContent>
-      </Card>
+      </PremiumCard>
     );
   }
 
   if (resources.length === 0) return null;
 
   return (
-    <Card>
-      <CardHeader className="py-3 px-4 flex-row items-center gap-2 space-y-0">
-        <FolderOpen className="h-4 w-4 text-muted-foreground" />
+    <PremiumCard className="border overflow-hidden">
+      <CardHeader className="py-3 px-4 flex-row items-center gap-2 space-y-0" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+        <Box className="w-1 h-4 rounded-full mr-0.5" style={{ background: "linear-gradient(180deg, #EFBD5F, #EC7D50)" }} />
+        <FolderOpen className="h-4 w-4" style={{ color: "#666666" }} />
         <CardTitle className="text-sm font-semibold">Course Resources</CardTitle>
-        <Badge variant="secondary" className="text-[10px] ml-auto">{resources.length}</Badge>
+        <Badge className="text-[10px] ml-auto border-0" style={{ backgroundColor: "rgba(239,189,95,0.1)", color: "#EFBD5F" }}>
+          {resources.length}
+        </Badge>
       </CardHeader>
       <CardContent className="px-4 pb-4 pt-0">
-        <Box className="divide-y">
+        <Box className="space-y-1 pt-1">
           {resources.map((r) => {
             const cfg  = TYPE_CONFIG[r.type] || TYPE_CONFIG.document;
             const Icon = cfg.icon;
             return (
-              <Box key={r.id} className="flex items-center gap-3 py-3 group">
-                <Box className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                  <Icon className="h-4 w-4 text-muted-foreground" />
+              <Box
+                key={r.id}
+                className="flex items-center gap-3 py-3 px-2 rounded-lg transition-colors"
+                style={{ backgroundColor: "transparent" }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.06)"}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                <Box className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(0,0,0,0.06)" }}>
+                  <Icon className="h-4 w-4" style={{ color: "#666666" }} />
                 </Box>
                 <Box className="flex-1 min-w-0">
                   <Text as="p" className="text-sm font-medium truncate">{r.title}</Text>
                   {r.description && (
-                    <Text as="span" className="text-[11px] text-muted-foreground line-clamp-1">
+                    <Text as="span" className="text-[11px] line-clamp-1" style={{ color: "#444444" }}>
                       {r.description}
                     </Text>
                   )}
                 </Box>
-                <Badge className={`text-[9px] border-0 shrink-0 capitalize ${cfg.badge}`}>
+                <Badge className="text-[9px] border-0 shrink-0 capitalize font-semibold" style={cfg.badgeStyle}>
                   {cfg.label}
                 </Badge>
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="h-7 text-xs gap-1 shrink-0"
+                  className="h-7 text-xs gap-1 shrink-0 font-medium"
+                  style={{ backgroundColor: "transparent", border: "1px solid rgba(0,0,0,0.1)", color: "#555555" }}
                   onClick={() => window.open(r.url, "_blank")}
                 >
                   <ExternalLink className="h-3 w-3" />
@@ -93,6 +103,6 @@ export function LearnerCourseResources({ courseId }) {
           })}
         </Box>
       </CardContent>
-    </Card>
+    </PremiumCard>
   );
 }

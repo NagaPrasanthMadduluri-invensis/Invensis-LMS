@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,37 +18,38 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchCourseAssessments } from "@/services/api/learner/learner-api";
+import { PremiumCard } from "@/components/ui/wave-card";
 
 const LEVEL_CONFIG = {
   basic: {
-    label:    "Basic",
-    icon:     TrendingUp,
-    badge:    "bg-emerald-100 text-emerald-700",
-    border:   "border-emerald-200",
-    iconBg:   "bg-emerald-100 text-emerald-600",
-    headerBg: "bg-emerald-50",
-    btnClass: "bg-emerald-600 hover:bg-emerald-700 text-white",
-    desc:     "Start here to test your foundational knowledge.",
+    label:      "Basic",
+    icon:       TrendingUp,
+    badgeStyle: { backgroundColor: "rgba(16,185,129,0.12)", color: "#10B981" },
+    borderTop:  "2px solid #10B981",
+    iconBg:     { backgroundColor: "rgba(16,185,129,0.08)" },
+    iconColor:  "text-emerald-400",
+    headerBg:   { backgroundColor: "rgba(16,185,129,0.12)", borderBottom: "1px solid rgba(16,185,129,0.2)" },
+    desc:       "Start here to test your foundational knowledge.",
   },
   moderate: {
-    label:    "Moderate",
-    icon:     Target,
-    badge:    "bg-amber-100 text-amber-700",
-    border:   "border-amber-200",
-    iconBg:   "bg-amber-100 text-amber-600",
-    headerBg: "bg-amber-50",
-    btnClass: "bg-amber-500 hover:bg-amber-600 text-white",
-    desc:     "Challenge yourself with intermediate-level questions.",
+    label:      "Moderate",
+    icon:       Target,
+    badgeStyle: { backgroundColor: "rgba(239,189,95,0.12)", color: "#EFBD5F" },
+    borderTop:  "2px solid #F59E0B",
+    iconBg:     { backgroundColor: "rgba(245,158,11,0.08)" },
+    iconColor:  "text-amber-400",
+    headerBg:   { backgroundColor: "rgba(245,158,11,0.12)", borderBottom: "1px solid rgba(245,158,11,0.2)" },
+    desc:       "Challenge yourself with intermediate-level questions.",
   },
   difficult: {
-    label:    "Difficult",
-    icon:     Zap,
-    badge:    "bg-red-100 text-red-700",
-    border:   "border-red-200",
-    iconBg:   "bg-red-100 text-red-600",
-    headerBg: "bg-red-50",
-    btnClass: "bg-red-600 hover:bg-red-700 text-white",
-    desc:     "Advanced questions to prepare for the real exam.",
+    label:      "Difficult",
+    icon:       Zap,
+    badgeStyle: { backgroundColor: "rgba(244,63,94,0.12)", color: "#F87171" },
+    borderTop:  "2px solid #F43F5E",
+    iconBg:     { backgroundColor: "rgba(244,63,94,0.08)" },
+    iconColor:  "text-rose-400",
+    headerBg:   { backgroundColor: "rgba(244,63,94,0.12)", borderBottom: "1px solid rgba(244,63,94,0.2)" },
+    desc:       "Advanced questions to prepare for the real exam.",
   },
 };
 
@@ -56,7 +57,7 @@ function AssessmentsSkeleton() {
   return (
     <Box className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {[1, 2, 3].map((i) => (
-        <Skeleton key={i} className="h-64 rounded-xl" />
+        <Skeleton key={i} className="h-64 rounded-xl" style={{ backgroundColor: "rgba(0,0,0,0.06)" }} />
       ))}
     </Box>
   );
@@ -67,18 +68,21 @@ function AssessmentCard({ assessment }) {
   const Icon = cfg.icon;
 
   return (
-    <Card className={`overflow-hidden border ${cfg.border} flex flex-col`}>
+    <PremiumCard
+      className="overflow-hidden flex flex-col"
+      style={{ borderTop: cfg.borderTop }}
+    >
       {/* Header */}
-      <Box className={`px-4 py-3 flex items-center gap-3 ${cfg.headerBg}`}>
-        <Box className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${cfg.iconBg}`}>
-          <Icon className="h-4 w-4" />
+      <Box className="px-4 py-3 flex items-center gap-3" style={cfg.headerBg}>
+        <Box className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={cfg.iconBg}>
+          <Icon className={`h-4 w-4 ${cfg.iconColor}`} />
         </Box>
         <Box className="flex-1 min-w-0">
           <Box className="flex items-center gap-2">
             <Text as="p" className="text-sm font-semibold truncate">
               {cfg.label} Assessment
             </Text>
-            <Badge className={`text-[10px] border-0 shrink-0 ${cfg.badge}`}>
+            <Badge className="text-[10px] border-0 shrink-0 font-semibold" style={cfg.badgeStyle}>
               {cfg.label}
             </Badge>
           </Box>
@@ -87,36 +91,36 @@ function AssessmentCard({ assessment }) {
 
       {/* Body */}
       <CardContent className="px-4 py-4 flex flex-col flex-1 gap-3">
-        <Text as="p" className="text-xs text-muted-foreground leading-relaxed">
+        <Text as="p" className="text-xs leading-relaxed" style={{ color: "#555555" }}>
           {assessment.description || cfg.desc}
         </Text>
 
         {/* Stats */}
         <Box className="grid grid-cols-3 gap-2">
-          <Box className="flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/50">
-            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+          <Box className="flex flex-col items-center gap-1 p-2 rounded-lg" style={{ backgroundColor: "rgba(0,0,0,0.05)" }}>
+            <HelpCircle className="h-3.5 w-3.5" style={{ color: "#666666" }} />
             <Text as="span" className="text-base font-bold leading-none">
               {assessment.total_questions}
             </Text>
-            <Text as="span" className="text-[10px] text-muted-foreground text-center">
+            <Text as="span" className="text-[10px] text-center" style={{ color: "#444444" }}>
               Questions
             </Text>
           </Box>
-          <Box className="flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/50">
-            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+          <Box className="flex flex-col items-center gap-1 p-2 rounded-lg" style={{ backgroundColor: "rgba(0,0,0,0.05)" }}>
+            <Clock className="h-3.5 w-3.5" style={{ color: "#666666" }} />
             <Text as="span" className="text-base font-bold leading-none">
               {assessment.duration_minutes}
             </Text>
-            <Text as="span" className="text-[10px] text-muted-foreground text-center">
+            <Text as="span" className="text-[10px] text-center" style={{ color: "#444444" }}>
               Minutes
             </Text>
           </Box>
-          <Box className="flex flex-col items-center gap-1 p-2 rounded-lg bg-muted/50">
-            <Target className="h-3.5 w-3.5 text-muted-foreground" />
+          <Box className="flex flex-col items-center gap-1 p-2 rounded-lg" style={{ backgroundColor: "rgba(0,0,0,0.05)" }}>
+            <Target className="h-3.5 w-3.5" style={{ color: "#666666" }} />
             <Text as="span" className="text-base font-bold leading-none">
               {assessment.passing_score}%
             </Text>
-            <Text as="span" className="text-[10px] text-muted-foreground text-center">
+            <Text as="span" className="text-[10px] text-center" style={{ color: "#444444" }}>
               Pass Score
             </Text>
           </Box>
@@ -125,7 +129,8 @@ function AssessmentCard({ assessment }) {
         {/* CTA */}
         <Box className="mt-auto pt-1">
           <Button
-            className={`w-full h-8 text-xs font-medium ${cfg.btnClass}`}
+            className="w-full h-8 text-xs font-semibold opacity-60 cursor-not-allowed"
+            style={{ backgroundColor: "rgba(0,0,0,0.04)", color: "#444444", border: "1px solid rgba(0,0,0,0.08)" }}
             disabled
           >
             <Lock className="h-3 w-3 mr-1.5" />
@@ -133,7 +138,7 @@ function AssessmentCard({ assessment }) {
           </Button>
         </Box>
       </CardContent>
-    </Card>
+    </PremiumCard>
   );
 }
 
@@ -156,9 +161,9 @@ export function LearnerCourseAssessments({ courseId }) {
 
   if (error) {
     return (
-      <Card className="p-6">
-        <Text as="p" className="text-red-600 text-sm">Failed to load assessments: {error}</Text>
-      </Card>
+      <PremiumCard className="p-6" style={{ borderColor: "rgba(244,63,94,0.3)" }}>
+        <Text as="p" className="text-rose-400 text-sm">Failed to load assessments: {error}</Text>
+      </PremiumCard>
     );
   }
 
@@ -166,21 +171,21 @@ export function LearnerCourseAssessments({ courseId }) {
 
   if (assessments.length === 0) {
     return (
-      <Card className="p-12 text-center">
-        <ClipboardList className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+      <PremiumCard className="p-12 text-center">
+        <ClipboardList className="h-10 w-10 mx-auto mb-3" style={{ color: "rgba(0,0,0,0.2)" }} />
         <Text as="h3" className="text-base">No assessments available</Text>
-        <Text as="p" className="text-sm text-muted-foreground mt-1">
+        <Text as="p" className="text-sm mt-1" style={{ color: "#444444" }}>
           Assessments for this course have not been set up yet.
         </Text>
-      </Card>
+      </PremiumCard>
     );
   }
 
   return (
     <Box className="space-y-4">
       <Box className="flex items-center gap-2">
-        <ClipboardList className="h-4 w-4 text-muted-foreground" />
-        <Text as="p" className="text-sm text-muted-foreground">
+        <ClipboardList className="h-4 w-4" style={{ color: "#666666" }} />
+        <Text as="p" className="text-sm" style={{ color: "#444444" }}>
           {assessments.length} assessment{assessments.length !== 1 ? "s" : ""} · Choose your difficulty level
         </Text>
       </Box>

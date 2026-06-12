@@ -10,7 +10,7 @@ export default async function AdminCourseDetailPage({ params }) {
       <Box>
         <Text as="h1" className="text-2xl">Course Management</Text>
         <Text as="p" className="text-muted-foreground text-xs mt-0.5">
-          Admin &gt; <Text as="span" className="text-indigo-500">Courses</Text> &gt; Manage
+          Admin &gt; <Text as="span" className="text-primary">Courses</Text> &gt; Manage
         </Text>
       </Box>
       <CourseDetailTabs courseId={courseId} />

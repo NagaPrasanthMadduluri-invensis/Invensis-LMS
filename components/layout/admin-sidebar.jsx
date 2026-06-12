@@ -9,12 +9,15 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import Text from "@/components/ui/text";
+import Box from "@/components/ui/box";
+import { LayoutDashboard } from "lucide-react";
 import { adminNav } from "@/lib/nav-config";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -55,6 +58,21 @@ export function AdminSidebar() {
 
   return (
     <Sidebar collapsible="offcanvas">
+      <SidebarHeader className="px-4 py-4 border-b border-sidebar-border">
+        <Box className="flex items-center gap-3">
+          <Box className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-gold to-brand-bronze flex items-center justify-center shrink-0 shadow-sm">
+            <LayoutDashboard className="w-4 h-4 text-white" />
+          </Box>
+          <Box>
+            <Text as="span" className="text-sidebar-foreground font-bold text-sm leading-none block">
+              Invensis LMS
+            </Text>
+            <Text as="span" className="text-sidebar-foreground/50 text-[10px] leading-none mt-0.5 block">
+              Admin Portal
+            </Text>
+          </Box>
+        </Box>
+      </SidebarHeader>
       <SidebarContent>
         <NavGroup label="Overview" items={adminNav.main} pathname={pathname} />
         <NavGroup label="Users & Teams" items={adminNav.users} pathname={pathname} />

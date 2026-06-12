@@ -8,7 +8,7 @@ import { LearnerCourseAssessments } from "@/components/learner/course-assessment
 export function LearnerCourseDetailTabs({ courseId }) {
   return (
     <Tabs defaultValue="content">
-      <TabsList className="h-9">
+      <TabsList className="h-9" style={{ backgroundColor: "#1A1A1A", border: "1px solid #2A2A2A" }}>
         <TabsTrigger value="content" className="gap-1.5 text-xs">
           <BookOpen className="h-3.5 w-3.5" />
           Course Content

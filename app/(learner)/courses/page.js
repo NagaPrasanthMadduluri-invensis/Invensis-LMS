@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,73 +11,86 @@ import {
 import { Star } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
+import { PremiumCard } from "@/components/ui/wave-card";
 
 const courses = [
   {
     name: "PMP Certification Prep",
+    category: "Project Management",
     hours: "35 hrs",
     modules: "8 modules",
     rating: 4.8,
     stars: 4,
     price: "₹49,999",
     tier: "Gold",
-    tierBg: "bg-gradient-to-r from-amber-400 to-amber-600",
-    gradient: "from-indigo-400/60 to-purple-500/60",
+    tierStyle: { background: "linear-gradient(135deg, #EFBD5F, #EC7D50)", color: "#1a0a00" },
+    bannerGradient: "linear-gradient(178.73deg, #4F2183 -26.7%, #090909 126.7%)",
+    initial: "P",
   },
   {
-    name: "ITIL 4 Foundation",
-    hours: "24 hrs",
-    modules: "6 modules",
-    rating: 4.6,
-    stars: 4,
-    price: "₹34,999",
-    tier: "Silver",
-    tierBg: "bg-gradient-to-r from-gray-400 to-gray-600",
-    gradient: "from-emerald-400/60 to-teal-500/60",
-  },
-  {
-    name: "Scrum Master (CSM)",
-    hours: "20 hrs",
+    name: "Project Management Fundamentals",
+    category: "Project Management",
+    hours: "18 hrs",
     modules: "5 modules",
     rating: 4.5,
     stars: 4,
-    price: "₹19,999",
+    price: "₹14,999",
     tier: "Bronze",
-    tierBg: "bg-gradient-to-r from-orange-300 to-orange-500",
-    gradient: "from-orange-400/60 to-red-500/60",
+    tierStyle: { backgroundColor: "rgba(245,158,11,0.15)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.3)" },
+    bannerGradient: "linear-gradient(135deg, #1A0830 0%, #2D0F3A 100%)",
+    initial: "P",
   },
   {
-    name: "Six Sigma Green Belt",
-    hours: "30 hrs",
-    modules: "7 modules",
-    rating: 4.7,
-    stars: 5,
-    price: "₹39,999",
-    tier: "Gold",
-    tierBg: "bg-gradient-to-r from-amber-400 to-amber-600",
-    gradient: "from-cyan-400/60 to-blue-500/60",
-  },
-  {
-    name: "PRINCE2 Foundation",
-    hours: "22 hrs",
+    name: "Design for Six Sigma",
+    category: "Quality Management",
+    hours: "26 hrs",
     modules: "6 modules",
-    rating: 4.4,
-    stars: 4,
-    price: "₹29,999",
-    tier: "Silver",
-    tierBg: "bg-gradient-to-r from-gray-400 to-gray-600",
-    gradient: "from-pink-400/60 to-rose-500/60",
-  },
-  {
-    name: "PMI-ACP Certification",
-    hours: "28 hrs",
-    modules: "7 modules",
     rating: 4.6,
     stars: 4,
-    price: "₹44,999",
+    price: "₹32,999",
+    tier: "Silver",
+    tierStyle: { backgroundColor: "rgba(255,255,255,0.15)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.3)" },
+    bannerGradient: "linear-gradient(135deg, #0E1A14 0%, #142A1E 100%)",
+    initial: "D",
+  },
+  {
+    name: "Certified ScrumMaster (CSM)",
+    category: "Agile Project Management",
+    hours: "20 hrs",
+    modules: "5 modules",
+    rating: 4.7,
+    stars: 4,
+    price: "₹19,999",
     tier: "Gold",
-    tierBg: "bg-gradient-to-r from-amber-400 to-amber-600",
-    gradient: "from-violet-400/60 to-purple-600/60",
+    tierStyle: { background: "linear-gradient(135deg, #EFBD5F, #EC7D50)", color: "#1a0a00" },
+    bannerGradient: "linear-gradient(135deg, #1A0E00 0%, #2D1A00 100%)",
+    initial: "C",
+  },
+  {
+    name: "JIRA Certification Training",
+    category: "Project Management",
+    hours: "14 hrs",
+    modules: "4 modules",
+    rating: 4.4,
+    stars: 4,
+    price: "₹9,999",
+    tier: "Bronze",
+    tierStyle: { backgroundColor: "rgba(245,158,11,0.15)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.3)" },
+    bannerGradient: "linear-gradient(135deg, #0D1B2A 0%, #1B3A4B 100%)",
+    initial: "J",
+  },
+  {
+    name: "Lean Project Management",
+    category: "Project Management",
+    hours: "22 hrs",
+    modules: "6 modules",
+    rating: 4.5,
+    stars: 4,
+    price: "₹24,999",
+    tier: "Silver",
+    tierStyle: { backgroundColor: "rgba(255,255,255,0.15)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.3)" },
+    bannerGradient: "linear-gradient(178.73deg, #4F2183 -26.7%, #1A0830 126.7%)",
+    initial: "L",
   },
 ];
 
@@ -88,7 +100,7 @@ function StarRating({ filled, total = 5 }) {
       {Array.from({ length: total }).map((_, i) => (
         <Star
           key={i}
-          className={`h-3 w-3 ${i < filled ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"}`}
+          className={`h-3 w-3 ${i < filled ? "fill-amber-400 text-amber-400" : "fill-zinc-400/40 text-zinc-400/40"}`}
         />
       ))}
     </Box>
@@ -99,20 +111,28 @@ export default function CourseCatalogPage() {
   return (
     <Box className="space-y-5">
       {/* ── Page Header ── */}
-      <Box>
-        <Text as="h1" className="text-2xl">Course Catalog</Text>
-        <Text as="p" className="text-muted-foreground text-xs mt-0.5">
-          Home &gt; <Text as="span" className="text-indigo-500">Course Catalog</Text>
-        </Text>
+      <Box className="flex items-center justify-between flex-wrap gap-3">
+        <Box>
+          <Text as="h1" className="font-bold tracking-tight" style={{ fontSize: "32px", lineHeight: "1.15", color: "#111111" }}>Course Catalog</Text>
+          <Text as="p" className="text-xs mt-1" style={{ color: "#555555" }}>
+            Home › <Text as="span" className="font-medium" style={{ color: "#555555" }}>Course Catalog</Text>
+          </Text>
+        </Box>
+        <Box className="px-3 py-1.5 rounded-full" style={{ background: "rgba(239,189,95,0.1)", border: "1px solid rgba(239,189,95,0.25)" }}>
+          <Text as="span" className="text-xs font-semibold" style={{ color: "#EFBD5F" }}>{courses.length} Courses</Text>
+        </Box>
       </Box>
 
       {/* ── Filters ── */}
-      <Box className="flex items-center gap-3 flex-wrap">
+      <Box className="flex items-center gap-3 flex-wrap p-3 rounded-xl" style={{ background: "linear-gradient(135deg, #0E0E10 0%, #131316 55%, #1A1921 100%)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "16px" }}>
         <Select defaultValue="all">
-          <SelectTrigger className="w-[180px] h-9 text-xs bg-white">
+          <SelectTrigger
+            className="w-[180px] h-9 text-xs"
+            style={{ border: "1px solid rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)", color: "#A3A3A3" }}
+          >
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-[#1A1921] border-[#383838] text-white">
             <SelectItem value="all">All Categories</SelectItem>
             <SelectItem value="pm">Project Management</SelectItem>
             <SelectItem value="it">IT Service</SelectItem>
@@ -122,10 +142,13 @@ export default function CourseCatalogPage() {
         </Select>
 
         <Select defaultValue="all">
-          <SelectTrigger className="w-[140px] h-9 text-xs bg-white">
+          <SelectTrigger
+            className="w-[140px] h-9 text-xs"
+            style={{ border: "1px solid rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)", color: "#A3A3A3" }}
+          >
             <SelectValue placeholder="All Tiers" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-[#1A1921] border-[#383838] text-white">
             <SelectItem value="all">All Tiers</SelectItem>
             <SelectItem value="gold">Gold</SelectItem>
             <SelectItem value="silver">Silver</SelectItem>
@@ -134,10 +157,13 @@ export default function CourseCatalogPage() {
         </Select>
 
         <Select defaultValue="low">
-          <SelectTrigger className="w-[170px] h-9 text-xs bg-white">
+          <SelectTrigger
+            className="w-[170px] h-9 text-xs"
+            style={{ border: "1px solid rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)", color: "#A3A3A3" }}
+          >
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-[#1A1921] border-[#383838] text-white">
             <SelectItem value="low">Price: Low to High</SelectItem>
             <SelectItem value="high">Price: High to Low</SelectItem>
             <SelectItem value="popular">Popularity</SelectItem>
@@ -147,45 +173,58 @@ export default function CourseCatalogPage() {
 
         <Input
           placeholder="Search courses..."
-          className="w-[200px] h-9 text-xs bg-white"
+          className="w-[200px] h-9 text-xs placeholder:text-[#6B6B6B] text-white"
+          style={{ border: "1px solid rgba(255,255,255,0.1)", backgroundColor: "rgba(255,255,255,0.05)", color: "white" }}
         />
       </Box>
 
       {/* ── Course Grid ── */}
       <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {courses.map((course) => (
-          <Card key={course.name} className="p-0 overflow-hidden">
+          <PremiumCard
+            key={course.name}
+            className="p-0 overflow-hidden border hover:scale-[1.02] transition-all duration-200 group cursor-pointer"
+          >
             {/* Banner */}
-            <Box className={`relative h-28 bg-gradient-to-br ${course.gradient}`}>
-              <Badge className={`absolute top-2 right-2 text-[10px] text-white border-0 ${course.tierBg}`}>
-                {course.tier}
-              </Badge>
-            </Box>
-
-            {/* Info */}
-            <Box className="p-3.5">
-              <Text as="p" className="text-sm font-semibold">{course.name}</Text>
-              <Box className="flex items-center gap-1.5 mt-1">
-                <Text as="span" className="text-[11px] text-muted-foreground">
-                  {course.hours} · {course.modules} ·
-                </Text>
-                <StarRating filled={course.stars} />
-                <Text as="span" className="text-[11px] text-muted-foreground">
-                  {course.rating}
+            <Box className="relative h-32 flex flex-col justify-between p-4 overflow-hidden" style={{ background: course.bannerGradient, color: "white" }}>
+              <Text as="span" className="absolute -bottom-2 -right-1 text-[6rem] font-black leading-none select-none pointer-events-none" style={{ color: "rgba(255,255,255,0.08)" }}>
+                {course.initial}
+              </Text>
+              <Box className="flex items-center justify-between relative z-10">
+                <Badge className="text-[10px] border-0 font-semibold" style={course.tierStyle}>
+                  {course.tier}
+                </Badge>
+              </Box>
+              <Box className="relative z-10">
+                <Text as="p" className="text-white font-bold text-sm leading-snug line-clamp-2">
+                  {course.name}
                 </Text>
               </Box>
             </Box>
 
+            {/* Info */}
+            <Box className="p-4">
+              <Text as="p" className="text-[11px] font-medium mb-1.5" style={{ color: "#555555" }}>{course.category}</Text>
+              <Box className="flex items-center gap-1.5">
+                <StarRating filled={course.stars} />
+                <Text as="span" className="text-[11px] font-semibold" style={{ color: "#EFBD5F" }}>{course.rating}</Text>
+                <Text as="span" className="text-[11px]" style={{ color: "rgba(0,0,0,0.25)" }}>·</Text>
+                <Text as="span" className="text-[11px]" style={{ color: "#555555" }}>{course.hours}</Text>
+                <Text as="span" className="text-[11px]" style={{ color: "rgba(0,0,0,0.25)" }}>·</Text>
+                <Text as="span" className="text-[11px]" style={{ color: "#555555" }}>{course.modules}</Text>
+              </Box>
+            </Box>
+
             {/* Footer */}
-            <Box className="flex items-center justify-between px-3.5 py-2.5 border-t">
-              <Text as="span" className="font-bold text-sm text-indigo-500">
+            <Box className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+              <Text as="span" className="font-bold text-base" style={{ color: "#111111" }}>
                 {course.price}
               </Text>
-              <Button size="sm" className="text-xs h-7 px-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white">
+              <Button size="sm" className="text-xs h-8 px-4 font-semibold border-0 text-[#1a0a00]" style={{ background: "linear-gradient(135deg, #EFBD5F, #EC7D50)" }}>
                 Enroll Now
               </Button>
             </Box>
-          </Card>
+          </PremiumCard>
         ))}
       </Box>
     </Box>

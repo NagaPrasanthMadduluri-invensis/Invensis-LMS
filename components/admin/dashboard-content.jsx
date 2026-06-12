@@ -98,7 +98,7 @@ export function AdminDashboardContent() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
             <CardTitle className="text-sm font-semibold">Recent Users</CardTitle>
-            <Text as="span" className="text-xs text-indigo-500 font-medium cursor-pointer hover:underline">
+            <Text as="span" className="text-xs text-primary font-medium cursor-pointer hover:underline">
               View All →
             </Text>
           </CardHeader>
@@ -132,7 +132,7 @@ export function AdminDashboardContent() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
             <CardTitle className="text-sm font-semibold">Recent Orders</CardTitle>
-            <Text as="span" className="text-xs text-indigo-500 font-medium cursor-pointer hover:underline">
+            <Text as="span" className="text-xs text-primary font-medium cursor-pointer hover:underline">
               View All →
             </Text>
           </CardHeader>
