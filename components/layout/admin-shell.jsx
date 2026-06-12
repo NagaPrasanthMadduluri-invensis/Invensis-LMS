@@ -12,9 +12,9 @@ export function AdminShell({ user, children }) {
       <SidebarProvider>
         <Box className="flex h-full flex-col">
           <TopNav portalLabel="Invensis Admin" />
-          <Box className="flex flex-1 overflow-hidden">
+          <Box className="flex flex-1 overflow-hidden h-full">
             <AdminSidebar />
-            <Box as="main" className="flex-1 overflow-auto p-6 bg-muted/30">
+            <Box as="main" className="flex-1 overflow-auto p-6 bg-slate-50 h-full">
               {children}
             </Box>
           </Box>

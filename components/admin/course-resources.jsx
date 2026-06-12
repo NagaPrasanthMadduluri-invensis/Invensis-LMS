@@ -62,7 +62,7 @@ const TYPE_BADGE = {
   pdf:      "bg-red-100 text-red-700",
   video:    "bg-purple-100 text-purple-700",
   link:     "bg-gray-100 text-gray-600",
-  document: "bg-orange-100 text-orange-700",
+  document: "bg-indigo-100 text-indigo-700",
 };
 
 const EMPTY_FORM = { title: "", type: "brochure", url: "", description: "", is_active: true };
@@ -354,12 +354,12 @@ export function CourseResources({ courseId }) {
     <Box className="space-y-6">
       {/* ── Course Resources ── */}
       <Card>
-        <CardHeader className="py-3 px-4 flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex flex-row items-center justify-between px-4 py-4 space-y-0">
           <CardTitle className="text-sm font-semibold">
             Course Resources
             <Badge variant="secondary" className="ml-2 text-[10px]">{resources.length}</Badge>
           </CardTitle>
-          <Button size="sm" className="h-7 text-xs gap-1"
+          <Button className="h-9 px-5 text-sm gap-2 ml-auto"
             onClick={() => setDialog({ open: true, resource: null })}>
             <Plus className="h-3.5 w-3.5" />
             Add Resource
