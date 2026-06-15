@@ -11,9 +11,7 @@ _nextbuild/
 dist/
  
 _# Env files (any depth)_
-.env
-.env.local
-.env.*.local
+.env*
  
 _# Vercel / misc_
 .vercel
