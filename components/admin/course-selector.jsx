@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   XCircle,
   ChevronRight,
+  X,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -47,7 +48,7 @@ function CardSkeleton() {
 }
 
 function CourseCard({ course, onClick }) {
-  const typeCfg = TYPE_CONFIG[course.course_type] || TYPE_CONFIG.training_only;
+  const typeCfg = TYPE_CONFIG[course.type] || TYPE_CONFIG.training_only;
 
   return (
     <Card
@@ -84,7 +85,7 @@ function CourseCard({ course, onClick }) {
           </Text>
           {course.category && (
             <Text as="p" className="text-[11px] text-slate-400 mt-0.5">
-              {course.category.name}
+              {course.category}
             </Text>
           )}
         </Box>
@@ -173,9 +174,9 @@ export function CourseSelector() {
   const activeCount = courses.filter((c) => c.is_active).length;
 
   const filtered = courses.filter((c) => {
-    const matchesType   = activeFilter === "all" || c.course_type === activeFilter;
+    const matchesType   = activeFilter === "all" || c.type === activeFilter;
     const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
-                          c.category?.name?.toLowerCase().includes(search.toLowerCase());
+                          c.category?.toLowerCase().includes(search.toLowerCase());
     return matchesType && matchesSearch;
   });
 
@@ -237,7 +238,7 @@ export function CourseSelector() {
         >
           {f.key === "all"
             ? courses.length
-            : courses.filter((c) => c.course_type === f.key).length}
+            : courses.filter((c) => c.type === f.key).length}
         </span>
       </button>
     ))}
@@ -251,8 +252,13 @@ export function CourseSelector() {
           placeholder="Search by course name or category..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-indigo-400"
+          className="pl-9 pr-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-indigo-400"
         />
+        {search && (
+          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </Box>
 
       <Text as="p" className="text-xs text-slate-400">

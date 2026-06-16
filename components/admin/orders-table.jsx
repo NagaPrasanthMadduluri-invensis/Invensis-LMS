@@ -30,6 +30,7 @@ import {
   BookOpen,
   CreditCard,
   TrendingUp,
+  X,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -179,8 +180,13 @@ export function OrdersTable() {
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Search name, email, course…"
-                className="h-10 pl-9 text-sm bg-white border-indigo-400 focus-visible:ring-indigo-400"
+                className="h-10 pl-9 pr-9 text-sm bg-white border-indigo-400 focus-visible:ring-indigo-400"
               />
+              {search && (
+                <button onClick={() => handleSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </Box>
 
             <Select value={status} onValueChange={handleStatus}>

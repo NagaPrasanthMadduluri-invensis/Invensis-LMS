@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Users } from "lucide-react";
+import { Search, Users, X } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 
@@ -72,8 +72,13 @@ export function UsersTable() {
           placeholder="Search by name, email or role..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-indigo-400"
+          className="pl-9 pr-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-indigo-400"
         />
+        {search && (
+          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </Box>
 
       {/* Table */}
@@ -110,7 +115,7 @@ export function UsersTable() {
                 </TableHeader>
                 <TableBody>
                   {filtered.map((u, i) => (
-                    <TableRow key={u.id} className="text-xs border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                    <TableRow key={u.id} className={`text-xs border-b border-slate-50 hover:bg-transparent ${i % 2 === 0 ? "bg-slate-50" : "bg-white"}`}>
                       <TableCell className="pl-4">
                         <Box className="flex items-center gap-2.5">
                           <Box className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}>

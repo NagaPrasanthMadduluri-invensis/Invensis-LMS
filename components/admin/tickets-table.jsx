@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { HeadphonesIcon, Search } from "lucide-react";
+import { HeadphonesIcon, Search, X } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 
@@ -71,8 +71,13 @@ export function TicketsTable() {
           placeholder="Search by user, subject or category..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-indigo-400"
+          className="pl-9 pr-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-indigo-400"
         />
+        {search && (
+          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </Box>
 
       <Card className="border border-slate-100 shadow-sm bg-white rounded-xl overflow-hidden">

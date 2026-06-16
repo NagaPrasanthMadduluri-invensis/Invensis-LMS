@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -110,7 +111,7 @@ export function AdminDashboardContent() {
         <Box className="rounded-xl overflow-hidden bg-slate-700">
           <Box className="flex items-center justify-between py-3 px-4 border-b border-white/10">
             <Text as="h3" className="text-sm font-semibold text-white">Recent Users</Text>
-            <Text as="span" className="text-xs text-indigo-300 font-medium cursor-pointer">View All →</Text>
+            <Link href="/admin/users" className="text-xs text-indigo-300 font-medium hover:text-indigo-200">View All →</Link>
           </Box>
           <Box className="px-4 pb-2 pt-0 divide-y divide-white/5">
             {recent_users.length === 0 ? (
@@ -143,7 +144,7 @@ export function AdminDashboardContent() {
         <Box className="rounded-xl overflow-hidden bg-slate-600">
           <Box className="flex items-center justify-between py-3 px-4 border-b border-white/10">
             <Text as="h3" className="text-sm font-semibold text-white">Recent Orders</Text>
-            <Text as="span" className="text-xs text-indigo-300 font-medium cursor-pointer">View All →</Text>
+            <Link href="/admin/orders" className="text-xs text-indigo-300 font-medium hover:text-indigo-200">View All →</Link>
           </Box>
           <Box className="px-4 pb-2 pt-0 divide-y divide-white/5">
             {recent_orders.length === 0 ? (

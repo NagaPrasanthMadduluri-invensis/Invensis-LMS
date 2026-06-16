@@ -36,6 +36,8 @@ import {
   CheckSquare,
   Square,
   AlertCircle,
+  UploadCloud,
+  X,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -65,26 +67,37 @@ const TYPE_BADGE = {
   document: "bg-indigo-100 text-indigo-700",
 };
 
-const EMPTY_FORM = { title: "", type: "brochure", url: "", description: "", is_active: true };
+const EMPTY_FORM = { title: "", type: "pdf", url: "", description: "", is_active: true };
+
+const ACCEPT_MAP = {
+  brochure: ".pdf,.doc,.docx",
+  pdf:      ".pdf",
+  video:    ".mp4,.mov,.avi,.mkv,.webm",
+  document: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx",
+};
 
 function ResourceFormDialog({ open, resource, onClose, onSave }) {
   const [form, setForm]     = useState(EMPTY_FORM);
+  const [file, setFile]     = useState(null);
   const [saving, setSaving] = useState(false);
   const [err, setErr]       = useState("");
 
   useEffect(() => {
     setForm(resource ? { ...resource } : EMPTY_FORM);
+    setFile(null);
     setErr("");
   }, [resource, open]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const isLink = form.type === "link";
 
   async function handleSave() {
     if (!form.title.trim()) { setErr("Title is required"); return; }
-    if (!form.url.trim())   { setErr("URL is required");   return; }
+    if (isLink && !form.url.trim()) { setErr("URL is required"); return; }
+    if (!isLink && !file && !form.url.trim()) { setErr("Please upload a file"); return; }
     setSaving(true);
     try {
-      await onSave(form);
+      await onSave({ ...form, file: isLink ? null : file });
       onClose();
     } catch (e) {
       setErr(e.message);
@@ -95,7 +108,7 @@ function ResourceFormDialog({ open, resource, onClose, onSave }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-base">
             {resource ? "Edit Resource" : "Add Resource"}
@@ -103,38 +116,76 @@ function ResourceFormDialog({ open, resource, onClose, onSave }) {
         </DialogHeader>
 
         <Box className="space-y-4 py-1">
+          {/* Title */}
           <Box className="space-y-1.5">
             <Label className="text-xs">Title *</Label>
             <Input value={form.title} onChange={(e) => set("title", e.target.value)}
               placeholder="e.g. PMP Course Brochure 2025" className="h-8 text-sm" />
           </Box>
 
+          {/* Type */}
           <Box className="space-y-1.5">
             <Label className="text-xs">Type</Label>
-            <Select value={form.type} onValueChange={(v) => set("type", v)}>
+            <Select value={form.type} onValueChange={(v) => { set("type", v); setFile(null); set("url", ""); }}>
               <SelectTrigger className="h-8 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {["brochure", "pdf", "video", "link", "document"].map((t) => (
+                {["pdf", "brochure", "video", "link", "document"].map((t) => (
                   <SelectItem key={t} value={t} className="text-sm capitalize">{t}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Box>
 
-          <Box className="space-y-1.5">
-            <Label className="text-xs">URL *</Label>
-            <Input value={form.url} onChange={(e) => set("url", e.target.value)}
-              placeholder="https://..." className="h-8 text-sm" />
-          </Box>
+          {/* URL (link type) or File Upload (all other types) */}
+          {isLink ? (
+            <Box className="space-y-1.5">
+              <Label className="text-xs">URL *</Label>
+              <Input value={form.url} onChange={(e) => set("url", e.target.value)}
+                placeholder="https://..." className="h-8 text-sm" />
+            </Box>
+          ) : (
+            <Box className="space-y-1.5">
+              <Label className="text-xs">File *</Label>
+              {file ? (
+                <Box className="flex items-center gap-2 px-3 py-2 border rounded-md bg-slate-50">
+                  <FileText className="h-4 w-4 text-slate-400 shrink-0" />
+                  <Text as="span" className="text-xs text-slate-700 flex-1 truncate">{file.name}</Text>
+                  <button onClick={() => { setFile(null); set("url", ""); }} className="text-slate-400 hover:text-slate-600 shrink-0">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </Box>
+              ) : (
+                <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-lg py-5 cursor-pointer hover:bg-slate-50 transition-colors">
+                  <UploadCloud className="h-6 w-6 text-slate-400" />
+                  <Text as="span" className="text-xs text-slate-500">Click to upload or drag & drop</Text>
+                  <Text as="span" className="text-[11px] text-slate-400">{ACCEPT_MAP[form.type] || "Any file"}</Text>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept={ACCEPT_MAP[form.type]}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) { setFile(f); set("url", f.name); }
+                    }}
+                  />
+                </label>
+              )}
+              {form.url && !file && (
+                <Text as="span" className="text-[11px] text-slate-400">Current: {form.url}</Text>
+              )}
+            </Box>
+          )}
 
+          {/* Description */}
           <Box className="space-y-1.5">
             <Label className="text-xs">Description</Label>
             <Input value={form.description || ""} onChange={(e) => set("description", e.target.value)}
               placeholder="Optional note" className="h-8 text-sm" />
           </Box>
 
+          {/* Active */}
           <Box className="flex items-center gap-2">
             <Switch checked={form.is_active} onCheckedChange={(v) => set("is_active", v)} />
             <Label className="text-xs">Active</Label>
