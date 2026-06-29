@@ -3,6 +3,7 @@ import Box from "@/components/ui/box";
 import { CourseDetailTabs } from "@/components/admin/course-detail-tabs";
 import { BookOpen, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { TrainingManagement } from "@/components/admin/training-management";
 
 export default async function AdminCourseDetailPage({ params }) {
   const { courseId } = await params;
@@ -21,7 +22,7 @@ export default async function AdminCourseDetailPage({ params }) {
         </Box>
         <Box>
           <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">
-            Course Management
+            Training Management
           </Text>
           <Text as="p" className="text-slate-400 text-xs mt-0.5">
             Admin &rsaquo;{" "}
@@ -30,7 +31,7 @@ export default async function AdminCourseDetailPage({ params }) {
           </Text>
         </Box>
       </Box>
-      <CourseDetailTabs courseId={courseId} />
+      <TrainingManagement trainingId={courseId} />
     </Box>
   );
 }

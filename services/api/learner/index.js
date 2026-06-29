@@ -1,6 +1,7 @@
 export {
   fetchDashboard,
   fetchMyCourses,
+  fetchTrainingDetail,
   fetchCourseDetail,
   fetchCourseResources,
   fetchCourseAssessments,

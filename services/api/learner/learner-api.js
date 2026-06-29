@@ -16,6 +16,20 @@ export async function fetchMyCourses({ token, userId }) {
 }
 
 /**
+ * GET /learner/training/:trainingRef
+ * `trainingRef` may be the training UUID or its code (e.g. "TRN-2026-0001").
+ * Returns the full training schedule detail:
+ *   { training_id, title, delivery_mode, bucket, status, duration_hours,
+ *     capacity, min_seats, enrolled_count, batch_type, timezone,
+ *     start_date, end_date, start_time, end_time, session_dates, venue,
+ *     trainer, sessions[], days_left, meeting? }
+ * Requires role `learner` with a confirmed enrolment.
+ */
+export async function fetchTrainingDetail({ token, trainingRef }) {
+  return apiClient(`/learner/training/${trainingRef}`, { token });
+}
+
+/**
  * GET /lms/courses/:courseId?user_id=X
  * Returns { course, enrollment, modules[] }
  */

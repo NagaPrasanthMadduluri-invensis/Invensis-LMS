@@ -1,6 +1,6 @@
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
-import { CourseSelector } from "@/components/admin/course-selector";
+import { TrainingsList } from "@/components/admin/trainings-list";
 import { BookOpen } from "lucide-react";
 
 export default function AdminCoursesPage() {
@@ -12,15 +12,15 @@ export default function AdminCoursesPage() {
         </Box>
         <Box>
           <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">
-            Courses
+            Trainings
           </Text>
           <Text as="p" className="text-slate-400 text-xs mt-0.5">
             Admin &rsaquo;{" "}
-            <Text as="span" className="text-slate-500 font-medium">Courses</Text>
+            <Text as="span" className="text-slate-500 font-medium">Trainings</Text>
           </Text>
         </Box>
       </Box>
-      <CourseSelector />
+      <TrainingsList />
     </Box>
   );
 }
