@@ -1,119 +1,83 @@
 "use client";
 
-import { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   loginUser,
-  registerUser,
   logoutUser,
-  getCurrentUser,
-  setAuthCookies,
+  normalizeUser,
+  setTokenCookie,
   getTokenFromCookie,
+  clearTokenCookie,
+  setUserCookie,
   getUserFromCookie,
-  clearAuthCookies,
+  clearUserCookie,
 } from "@/services/api/auth/auth-api";
 
 export const AuthContext = createContext(null);
 
-export function AuthProvider({ children, initialUser }) {
-  const [user, setUser] = useState(initialUser || null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(!initialUser);
+const PORTAL_HOME = {
+  admin:   "/admin/dashboard",
+  trainer: "/trainer/dashboard",
+  sponsor: "/dashboard",
+  learner: "/dashboard",
+};
+
+export function AuthProvider({ children }) {
+  const [user,    setUser]    = useState(null);
+  const [token,   setToken]   = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const hydrated = useRef(false);
 
-  // Hydrate token + user from cookies on mount
+  // On mount: restore session from cookies.
+  // The access token is stored in a 15-min cookie (matches server TTL) so page
+  // refreshes don't require a cross-origin /auth/refresh call that fails due to
+  // SameSite=Lax on the httpOnly refresh cookie.
   useEffect(() => {
+    if (hydrated.current) return;
+    hydrated.current = true;
+
     const storedToken = getTokenFromCookie();
-    if (storedToken) {
+    const storedUser  = getUserFromCookie();
+
+    if (storedToken && storedUser) {
       setToken(storedToken);
+      setUser(storedUser);
     }
 
-    if (!initialUser) {
-      const storedUser = getUserFromCookie();
-      if (storedUser) {
-        setUser(storedUser);
-      }
-      setLoading(false);
-    }
-  }, [initialUser]);
+    setLoading(false);
+  }, []);
 
   /**
-   * Login with email/password → store token + user → redirect by role
+   * Login → store token + user in cookies → redirect by role
    */
   const login = useCallback(
     async ({ email, password }) => {
-      const data = await loginUser({ email, password });
-      const normalizedUser = setAuthCookies(data);
-      setToken(data.token);
-      setUser(normalizedUser);
+      const { user: apiUser, accessToken } = await loginUser({ email, password });
+      const normalized = normalizeUser(apiUser);
 
-      if (normalizedUser.role?.slug === "lms_admin") {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
+      setTokenCookie(accessToken);
+      setUserCookie(apiUser);
+      setToken(accessToken);
+      setUser(normalized);
 
-      return { token: data.token, user: normalizedUser };
+      router.push(PORTAL_HOME[normalized.role] ?? "/dashboard");
+      return { token: accessToken, user: normalized };
     },
     [router]
   );
 
   /**
-   * Register new account → store token + user → redirect to dashboard
-   */
-  const register = useCallback(
-    async ({ firstName, lastName, email, password, passwordConfirmation }) => {
-      const data = await registerUser({
-        firstName,
-        lastName,
-        email,
-        password,
-        passwordConfirmation,
-      });
-      const normalizedUser = setAuthCookies(data);
-      setToken(data.token);
-      setUser(normalizedUser);
-
-      router.push("/dashboard");
-      return { token: data.token, user: normalizedUser };
-    },
-    [router]
-  );
-
-  /**
-   * Logout → revoke token on server → clear cookies → redirect to login
+   * Logout → revoke refresh token on server → clear all local state
    */
   const logout = useCallback(async () => {
-    const currentToken = getTokenFromCookie();
-    if (currentToken) {
-      await logoutUser(currentToken);
-    }
-    clearAuthCookies();
+    await logoutUser();
+    clearTokenCookie();
+    clearUserCookie();
     setToken(null);
     setUser(null);
     router.push("/login");
-  }, [router]);
-
-  /**
-   * Refresh user data from the server (GET /auth/me)
-   */
-  const refreshUser = useCallback(async () => {
-    const currentToken = getTokenFromCookie();
-    if (!currentToken) return null;
-
-    try {
-      const data = await getCurrentUser(currentToken);
-      const normalizedUser = setAuthCookies({ token: currentToken, user: data.user });
-      setUser(normalizedUser);
-      return normalizedUser;
-    } catch {
-      // Token expired or invalid — force logout
-      clearAuthCookies();
-      setToken(null);
-      setUser(null);
-      router.push("/login");
-      return null;
-    }
   }, [router]);
 
   const value = useMemo(
@@ -122,12 +86,10 @@ export function AuthProvider({ children, initialUser }) {
       token,
       loading,
       login,
-      register,
       logout,
-      refreshUser,
       isAuthenticated: !!user && !!token,
     }),
-    [user, token, loading, login, register, logout, refreshUser]
+    [user, token, loading, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -6,9 +6,9 @@ import { LearnerSidebar } from "@/components/layout/learner-sidebar";
 import { AuthProvider } from "@/providers/auth-provider";
 import Box from "@/components/ui/box";
 
-export function LearnerShell({ user, children }) {
+export function LearnerShell({ children }) {
   return (
-    <AuthProvider initialUser={user}>
+    <AuthProvider>
       <SidebarProvider>
         <Box className="flex h-full flex-col">
           <TopNav portalLabel="Invensis LMS" />

@@ -1,6 +1,49 @@
 import { apiClient } from "@/lib/api-client";
 
 /* ──────────────────────────────────────
+   TRAININGS (Training IDs)  — new TMS backend
+   ────────────────────────────────────── */
+
+/** GET /admin/trainings → { trainings: [...] } */
+export async function fetchAdminTrainings({ token }) {
+  return apiClient("/admin/trainings", { token });
+}
+
+/**
+ * GET /admin/trainings/:trainingRef → full detail (schedule, trainer, participants)
+ * `trainingRef` may be the training UUID or its code (e.g. "TRN-2026-0001").
+ */
+export async function fetchAdminTrainingDetail({ token, trainingRef }) {
+  return apiClient(`/admin/trainings/${trainingRef}`, { token });
+}
+
+/** GET /admin/trainers → { trainers: [...] } (active trainers for assignment) */
+export async function fetchTrainers({ token }) {
+  return apiClient("/admin/trainers", { token });
+}
+
+/** PATCH /admin/trainings/:trainingRef { trainer_id } → assigns a trainer */
+export async function assignTrainer({ token, trainingRef, trainerId }) {
+  return apiClient(`/admin/trainings/${trainingRef}`, {
+    method: "PATCH",
+    token,
+    body: { trainer_id: trainerId },
+  });
+}
+
+/**
+ * POST /admin/trainings/:trainingRef/participants
+ * data = { name, email, phone?, job_title? }
+ */
+export async function addParticipant({ token, trainingRef, data }) {
+  return apiClient(`/admin/trainings/${trainingRef}/participants`, {
+    method: "POST",
+    token,
+    body: data,
+  });
+}
+
+/* ──────────────────────────────────────
    COURSES
    ────────────────────────────────────── */
 

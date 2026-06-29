@@ -64,7 +64,7 @@ function ModulesSkeleton() {
   );
 }
 
-const EMPTY_FORM = { title: "", description: "", sort_order: 0, is_active: true };
+const EMPTY_FORM = { title: "", description: "", sort_order: 0, is_active: true, duration_hours: "", objectives: "" };
 
 export function CourseModulesContent({ courseId }) {
   const { token } = useAuth();
@@ -109,6 +109,8 @@ export function CourseModulesContent({ courseId }) {
       description: mod.description || "",
       sort_order: mod.sort_order,
       is_active: mod.is_active,
+      duration_hours: mod.duration_hours || "",
+      objectives: mod.objectives || "",
     });
     setFormErrors({});
     setDialogOpen(true);
@@ -262,7 +264,7 @@ export function CourseModulesContent({ courseId }) {
 
       {/* ── Module Create/Edit Dialog ── */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>{editingModule ? "Edit Module" : "Create Module"}</DialogTitle>
             <DialogDescription>
@@ -270,27 +272,44 @@ export function CourseModulesContent({ courseId }) {
             </DialogDescription>
           </DialogHeader>
           <Box className="space-y-4 py-2">
+            {/* Title */}
             <Box className="space-y-2">
               <Label htmlFor="mod-title">Title *</Label>
               <Input
                 id="mod-title"
-                placeholder="Module title"
+                placeholder="e.g. Introduction to Project Management"
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               />
               {formErrors.title && <Text as="p" className="text-xs text-red-600">{formErrors.title[0]}</Text>}
             </Box>
+
+            {/* Description */}
             <Box className="space-y-2">
               <Label htmlFor="mod-desc">Description</Label>
               <Textarea
                 id="mod-desc"
-                placeholder="Optional description"
+                placeholder="Brief overview of what this module covers"
                 value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                rows={3}
+                rows={2}
               />
             </Box>
+
+            {/* Duration + Sort Order */}
             <Box className="grid grid-cols-2 gap-4">
+              <Box className="space-y-2">
+                <Label htmlFor="mod-duration">Duration (hours)</Label>
+                <Input
+                  id="mod-duration"
+                  type="number"
+                  min={0}
+                  step={0.5}
+                  placeholder="e.g. 2.5"
+                  value={form.duration_hours}
+                  onChange={(e) => setForm((f) => ({ ...f, duration_hours: e.target.value }))}
+                />
+              </Box>
               <Box className="space-y-2">
                 <Label htmlFor="mod-order">Sort Order</Label>
                 <Input
@@ -301,17 +320,30 @@ export function CourseModulesContent({ courseId }) {
                   onChange={(e) => setForm((f) => ({ ...f, sort_order: parseInt(e.target.value) || 0 }))}
                 />
               </Box>
-              <Box className="space-y-2">
-                <Label>Visible to Learners</Label>
-                <Box className="flex items-center gap-2 pt-1.5">
-                  <Switch
-                    checked={form.is_active}
-                    onCheckedChange={(checked) => setForm((f) => ({ ...f, is_active: checked }))}
-                  />
-                  <Text as="span" className="text-sm">{form.is_active ? "Active" : "Inactive"}</Text>
-                </Box>
-              </Box>
             </Box>
+
+            {/* Learning Objectives */}
+            <Box className="space-y-2">
+              <Label htmlFor="mod-objectives">Learning Objectives</Label>
+              <Textarea
+                id="mod-objectives"
+                placeholder="What learners will gain from this module (one per line)"
+                value={form.objectives}
+                onChange={(e) => setForm((f) => ({ ...f, objectives: e.target.value }))}
+                rows={3}
+              />
+            </Box>
+
+            {/* Active toggle */}
+            <Box className="flex items-center gap-2 pt-1">
+              <Switch
+                checked={form.is_active}
+                onCheckedChange={(checked) => setForm((f) => ({ ...f, is_active: checked }))}
+              />
+              <Label>Visible to Learners</Label>
+              <Text as="span" className="text-xs text-muted-foreground">({form.is_active ? "Active" : "Inactive"})</Text>
+            </Box>
+
             {formErrors._general && <Text as="p" className="text-sm text-red-600">{formErrors._general}</Text>}
           </Box>
           <DialogFooter>
