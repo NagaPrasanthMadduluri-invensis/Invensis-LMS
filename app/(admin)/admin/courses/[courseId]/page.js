@@ -1,6 +1,5 @@
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
-import { CourseDetailTabs } from "@/components/admin/course-detail-tabs";
 import { BookOpen, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { TrainingManagement } from "@/components/admin/training-management";
@@ -9,25 +8,22 @@ export default async function AdminCourseDetailPage({ params }) {
   const { courseId } = await params;
 
   return (
-    <Box className="space-y-6">
-      <Box className="flex items-center gap-3 bg-indigo-50 rounded-xl px-5 py-4">
+    <Box className="space-y-7">
+      <Box className="rounded-2xl bg-gradient-to-r from-indigo-50 via-purple-50 to-violet-50 border border-indigo-100 px-7 py-6 flex items-center gap-4">
         <Link
           href="/admin/courses"
-          className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shrink-0 hover:bg-indigo-100 transition-colors"
+          className="w-10 h-10 rounded-xl bg-white border border-indigo-100 hover:bg-indigo-50 flex items-center justify-center shrink-0 transition-colors shadow-sm"
         >
-          <ArrowLeft className="w-5 h-5 text-indigo-500" />
+          <ArrowLeft className="w-4 h-4 text-indigo-600" />
         </Link>
-        <Box className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shrink-0">
-          <BookOpen className="w-5 h-5 text-indigo-500" />
+        <Box className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
+          <BookOpen className="w-6 h-6 text-white" />
         </Box>
         <Box>
-          <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">
-            Training Management
-          </Text>
-          <Text as="p" className="text-slate-400 text-xs mt-0.5">
-            Admin &rsaquo;{" "}
-            <Link href="/admin/courses" className="text-indigo-500 hover:underline font-medium">Courses</Link>{" "}
-            &rsaquo; Manage
+          <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">Training Management</Text>
+          <Text as="p" className="text-slate-500 text-xs mt-0.5">
+            <Link href="/admin/courses" className="text-indigo-500 hover:text-indigo-700 transition-colors">Courses</Link>
+            {" "}&rsaquo; Manage
           </Text>
         </Box>
       </Box>

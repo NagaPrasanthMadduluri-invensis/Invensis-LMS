@@ -5,19 +5,14 @@ import { GraduationCap } from "lucide-react";
 
 export default function AdminTrainersPage() {
   return (
-    <Box className="space-y-6">
-      <Box className="flex items-center gap-3 bg-indigo-50 rounded-xl px-5 py-4">
-        <Box className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shrink-0">
-          <GraduationCap className="w-5 h-5 text-indigo-500" />
+    <Box className="space-y-7">
+      <Box className="rounded-2xl bg-gradient-to-r from-violet-50 via-purple-50 to-indigo-50 border border-violet-100 px-7 py-6 flex items-center gap-4">
+        <Box className="w-12 h-12 rounded-2xl bg-violet-600 flex items-center justify-center shrink-0 shadow-sm">
+          <GraduationCap className="w-6 h-6 text-white" />
         </Box>
         <Box>
-          <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">
-            Trainers
-          </Text>
-          <Text as="p" className="text-slate-400 text-xs mt-0.5">
-            Admin &rsaquo;{" "}
-            <Text as="span" className="text-slate-500 font-medium">Trainers</Text>
-          </Text>
+          <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">Trainers</Text>
+          <Text as="p" className="text-slate-500 text-xs mt-0.5">Manage trainer profiles and assignments</Text>
         </Box>
       </Box>
       <TrainersList />
