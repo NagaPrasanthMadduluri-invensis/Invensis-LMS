@@ -5,6 +5,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import {
   Clock,
   Calendar,
   CalendarDays,
@@ -15,11 +21,19 @@ import {
   MapPin,
   Layers,
   UserRound,
+  ShieldAlert,
+  Mail,
+  LifeBuoy,
+  BookText,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchTrainingDetail } from "@/services/api/learner/learner-api";
+
+// Admin/support inbox a learner can reach out to about enrolment.
+const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@invensis.com";
 
 // Until an enrolled-trainings list endpoint exists, the page shows the seeded
 // training. Swap this for a real id/code source (route param, list endpoint).
@@ -184,6 +198,144 @@ function ScheduleCard({ training }) {
   );
 }
 
+// ISO-8601 UTC timestamp → "15 Sep, 9:00 AM"
+function formatSessionTime(iso) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleString("en-IN", {
+    day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true,
+  });
+}
+
+/**
+ * Day-by-day topics the assigned trainer has set for this training. Reads
+ * `sessions[]` (day_number, planned_topics) straight from the learner training
+ * detail — updates the moment the trainer saves.
+ */
+function SessionTopics({ sessions }) {
+  const list = Array.isArray(sessions) ? sessions : [];
+  if (list.length === 0) return null;
+
+  const anyTopics = list.some((s) => s.planned_topics?.trim());
+
+  return (
+    <Card className="p-5">
+      <Box className="flex items-center gap-2 mb-3">
+        <BookText className="h-4 w-4 text-indigo-500" />
+        <Text as="h3" className="text-sm font-semibold">Day-wise Topics</Text>
+        <Badge className="border-0 bg-indigo-50 text-indigo-600 text-[11px]">
+          {list.length} day{list.length !== 1 ? "s" : ""}
+        </Badge>
+      </Box>
+
+      {!anyTopics ? (
+        <Box className="rounded-lg border border-dashed border-muted py-8 text-center">
+          <Text as="p" className="text-sm text-muted-foreground">
+            Your trainer hasn&apos;t published the topics yet. Check back soon.
+          </Text>
+        </Box>
+      ) : (
+        <Accordion type="multiple" className="space-y-2">
+          {list.map((s) => {
+            const when = formatSessionTime(s.start_time);
+            const hasTopics = !!s.planned_topics?.trim();
+            return (
+              <AccordionItem
+                key={s.day_number}
+                value={`day-${s.day_number}`}
+                className="border rounded-lg px-4 bg-white"
+              >
+                <AccordionTrigger className="hover:no-underline">
+                  <Box className="flex flex-1 items-center justify-between gap-3 pr-2">
+                    <Box className="flex items-center gap-2.5">
+                      <Box className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-100 text-indigo-700 text-xs font-bold shrink-0">
+                        {s.day_number}
+                      </Box>
+                      <Box className="text-left">
+                        <Text as="p" className="text-sm font-semibold leading-tight">Day {s.day_number}</Text>
+                        {when && <Text as="span" className="text-[11px] text-muted-foreground">{when}</Text>}
+                      </Box>
+                    </Box>
+                    {!hasTopics && (
+                      <Badge className="border-0 bg-amber-100 text-amber-700 text-[10px]">Coming soon</Badge>
+                    )}
+                  </Box>
+                </AccordionTrigger>
+                <AccordionContent className="pb-4">
+                  {hasTopics ? (
+                    <Text as="p" className="text-sm text-slate-700 whitespace-pre-wrap">{s.planned_topics}</Text>
+                  ) : (
+                    <Text as="p" className="text-sm italic text-muted-foreground">
+                      Topics for this day haven&apos;t been published yet.
+                    </Text>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+      )}
+    </Card>
+  );
+}
+
+/**
+ * Shown when the training detail API returns 403 — the learner has no confirmed
+ * enrolment in this training, so there is nothing to display yet. Enrolment is
+ * managed by an admin, so the call-to-action is to reach out to them.
+ */
+function NotEnrolledState({ user, message }) {
+  const subject = encodeURIComponent("Enrolment request — My Courses");
+  const body = encodeURIComponent(
+    `Hi,\n\nI don't see any training under My Courses` +
+      (user?.name ? ` for ${user.name}` : "") +
+      (user?.email ? ` (${user.email})` : "") +
+      `. Could you please check my enrolment and add me to my training?\n\nThanks.`
+  );
+
+  return (
+    <Card className="flex flex-col items-center justify-center px-2 py-14 text-center">
+      <Box className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+        <ShieldAlert className="h-7 w-7 text-amber-600" />
+      </Box>
+      <Text as="h2" className="mt-4 text-lg font-semibold">
+        You&apos;re not enrolled in a training yet
+      </Text>
+      <Text as="p" className="mt-1.5 max-w-2xl text-sm text-muted-foreground">
+        We couldn&apos;t find a confirmed enrolment for your account, so there&apos;s
+        nothing to show here yet. Enrolments are set up by our team — please reach
+        out and we&apos;ll get you added.
+      </Text>
+
+      {message && (
+        <Box className="mt-4 rounded-lg bg-muted px-3 py-2">
+          <Text as="span" className="text-xs text-muted-foreground">
+            Details: {message}
+          </Text>
+        </Box>
+      )}
+
+      <Box className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
+        <Button asChild className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700">
+          <a href={`mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`} className="flex items-center justify-center gap-1.5">
+            <Mail className="mr-1.5 h-4 w-4" />
+            Contact Admin
+          </a>
+        </Button>
+        <Button asChild variant="outline">
+          <a href="/dashboard" className="flex items-center justify-center gap-1.5">
+            <LifeBuoy className="mr-1.5 h-4 w-4" />
+            Back to Dashboard
+          </a>
+        </Button>
+      </Box>
+
+      <Text as="p" className="mt-4 text-[11px] text-muted-foreground">
+        Already paid or registered? Enrolment can take a little while to appear after purchase.
+      </Text>
+    </Card>
+  );
+}
+
 export function MyCoursesContent() {
   const { user, token } = useAuth();
   const [training, setTraining] = useState(null);
@@ -192,16 +344,23 @@ export function MyCoursesContent() {
   useEffect(() => {
     if (!token || !user) return;
 
+    setError(null);
     fetchTrainingDetail({ token, trainingRef: SEEDED_TRAINING_REF })
       .then((data) => setTraining(data))
-      .catch((err) => setError(err.message));
+      .catch((err) => setError(err));
   }, [token, user]);
+
+  // 403 → not enrolled (or not a learner). Show the contact-admin state, not a
+  // scary error — there is simply nothing the learner can see yet.
+  if (error?.status === 403) {
+    return <NotEnrolledState user={user} message={error.message} />;
+  }
 
   if (error) {
     return (
       <Card className="p-6">
         <Text as="p" className="text-red-600">
-          Failed to load training schedule: {error}
+          Failed to load training schedule: {error.message || String(error)}
         </Text>
       </Card>
     );
@@ -214,6 +373,7 @@ export function MyCoursesContent() {
   return (
     <Box className="space-y-4">
       <ScheduleCard training={training} />
+      <SessionTopics sessions={training.sessions} />
     </Box>
   );
 }

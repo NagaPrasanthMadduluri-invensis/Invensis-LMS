@@ -11,6 +11,11 @@ export {
   getUserFromCookie,
   clearUserCookie,
   getUserFromCookieServer,
+  deriveCapabilities,
+  setSessionMetaCookie,
+  getSessionMetaFromCookie,
+  clearSessionMetaCookie,
   TOKEN_COOKIE,
   USER_COOKIE,
+  META_COOKIE,
 } from "./auth-api";

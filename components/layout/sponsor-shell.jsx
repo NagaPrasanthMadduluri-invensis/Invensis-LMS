@@ -1,0 +1,25 @@
+"use client";
+
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { TopNav } from "@/components/layout/top-nav";
+import { SponsorSidebar } from "@/components/layout/sponsor-sidebar";
+import { AuthProvider } from "@/providers/auth-provider";
+import Box from "@/components/ui/box";
+
+export function SponsorShell({ children }) {
+  return (
+    <AuthProvider>
+      <SidebarProvider>
+        <Box className="flex h-full flex-col">
+          <TopNav portalLabel="Invensis Sponsor" />
+          <Box className="flex flex-1 overflow-hidden">
+            <SponsorSidebar />
+            <Box as="main" className="flex-1 overflow-auto p-6 bg-muted/30">
+              {children}
+            </Box>
+          </Box>
+        </Box>
+      </SidebarProvider>
+    </AuthProvider>
+  );
+}

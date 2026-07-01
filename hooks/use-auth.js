@@ -7,8 +7,10 @@ import { AuthContext } from "@/providers/auth-provider";
  * Hook to access auth state and actions across the entire app.
  *
  * Returns:
- *   user          — { id, firstName, lastName, name, email, role, roleLabel, initials, isActive }
+ *   user          — { id, name, email, role, isActive, initials }
  *   token         — Bearer token string
+ *   capabilities  — { admin, trainer, sponsor, learner } (API.md §1.5) — drives nav/guards
+ *   sponsor       — { id, name, email } | null — who paid for this learner
  *   loading       — true while hydrating from cookies
  *   isAuthenticated — boolean
  *   login({ email, password })    — authenticate and redirect by role

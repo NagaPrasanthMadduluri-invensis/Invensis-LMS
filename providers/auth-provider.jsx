@@ -5,13 +5,18 @@ import { useRouter } from "next/navigation";
 import {
   loginUser,
   logoutUser,
+  getCurrentUser,
   normalizeUser,
+  deriveCapabilities,
   setTokenCookie,
   getTokenFromCookie,
   clearTokenCookie,
   setUserCookie,
   getUserFromCookie,
   clearUserCookie,
+  setSessionMetaCookie,
+  getSessionMetaFromCookie,
+  clearSessionMetaCookie,
 } from "@/services/api/auth/auth-api";
 
 export const AuthContext = createContext(null);
@@ -19,14 +24,16 @@ export const AuthContext = createContext(null);
 const PORTAL_HOME = {
   admin:   "/admin/dashboard",
   trainer: "/trainer/dashboard",
-  sponsor: "/dashboard",
+  sponsor: "/sponsor/dashboard",
   learner: "/dashboard",
 };
 
 export function AuthProvider({ children }) {
-  const [user,    setUser]    = useState(null);
-  const [token,   setToken]   = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user,         setUser]         = useState(null);
+  const [token,        setToken]        = useState(null);
+  const [capabilities, setCapabilities] = useState(null);
+  const [sponsor,      setSponsor]      = useState(null);
+  const [loading,      setLoading]      = useState(true);
   const router = useRouter();
   const hydrated = useRef(false);
 
@@ -40,30 +47,50 @@ export function AuthProvider({ children }) {
 
     const storedToken = getTokenFromCookie();
     const storedUser  = getUserFromCookie();
+    const storedMeta  = getSessionMetaFromCookie();
 
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(storedUser);
+      setCapabilities(storedMeta.capabilities ?? deriveCapabilities(null, storedUser.role));
+      setSponsor(storedMeta.sponsor ?? null);
+
+      // Best-effort: re-read live capabilities from /auth/me (API.md §1.5).
+      // They are a snapshot, not baked into the JWT, and can change after login.
+      // Swallow errors and ignore older backends that omit `capabilities`.
+      getCurrentUser(storedToken)
+        .then((res) => {
+          const caps = deriveCapabilities(res.capabilities, res.user?.role ?? storedUser.role);
+          setCapabilities(caps);
+          setSponsor(res.sponsor ?? null);
+          setSessionMetaCookie({ capabilities: res.capabilities ?? null, sponsor: res.sponsor ?? null });
+        })
+        .catch(() => {});
     }
 
     setLoading(false);
   }, []);
 
   /**
-   * Login → store token + user in cookies → redirect by role
+   * Login → store token + user + capabilities in cookies → redirect by role
    */
   const login = useCallback(
     async ({ email, password }) => {
-      const { user: apiUser, accessToken } = await loginUser({ email, password });
+      const res = await loginUser({ email, password });
+      const { user: apiUser, accessToken } = res;
       const normalized = normalizeUser(apiUser);
+      const caps = deriveCapabilities(res.capabilities, apiUser.role);
 
       setTokenCookie(accessToken);
       setUserCookie(apiUser);
+      setSessionMetaCookie({ capabilities: res.capabilities ?? null, sponsor: res.sponsor ?? null });
       setToken(accessToken);
       setUser(normalized);
+      setCapabilities(caps);
+      setSponsor(res.sponsor ?? null);
 
       router.push(PORTAL_HOME[normalized.role] ?? "/dashboard");
-      return { token: accessToken, user: normalized };
+      return { token: accessToken, user: normalized, capabilities: caps };
     },
     [router]
   );
@@ -75,8 +102,11 @@ export function AuthProvider({ children }) {
     await logoutUser();
     clearTokenCookie();
     clearUserCookie();
+    clearSessionMetaCookie();
     setToken(null);
     setUser(null);
+    setCapabilities(null);
+    setSponsor(null);
     router.push("/login");
   }, [router]);
 
@@ -84,12 +114,14 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       token,
+      capabilities,
+      sponsor,
       loading,
       login,
       logout,
       isAuthenticated: !!user && !!token,
     }),
-    [user, token, loading, login, logout]
+    [user, token, capabilities, sponsor, loading, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

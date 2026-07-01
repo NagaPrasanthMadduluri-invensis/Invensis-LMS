@@ -11,9 +11,9 @@ export default async function LearnerLayout({ children }) {
     redirect("/login");
   }
 
-  if (user.role === "admin") {
-    redirect("/admin/dashboard");
-  }
+  if (user.role === "admin")   redirect("/admin/dashboard");
+  if (user.role === "trainer") redirect("/trainer/dashboard");
+  if (user.role === "sponsor") redirect("/sponsor/dashboard");
 
   return <LearnerShell user={user}>{children}</LearnerShell>;
 }

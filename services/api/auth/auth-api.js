@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api-client";
 
 const TOKEN_COOKIE = "lms_token";
 const USER_COOKIE  = "lms_user";
+const META_COOKIE  = "lms_meta";        // capabilities + sponsor (client-readable)
 const TOKEN_MAX_AGE = 60 * 15;          // 15 min — matches server ACCESS_TOKEN_TTL
 const USER_MAX_AGE  = 60 * 60 * 24 * 7; // 7 days
 
@@ -78,6 +79,33 @@ export function normalizeUser(apiUser) {
 }
 
 /* ──────────────────────────────────────
+   CAPABILITIES & SPONSOR
+   See API.md §1.5 — login/refresh/me return a `capabilities` object
+   { admin, trainer, sponsor, learner } and a `sponsor` object. Nav/guards
+   are driven by capabilities, routing by role. Capabilities are a snapshot
+   (not in the JWT) — re-read on every refresh/me.
+   ────────────────────────────────────── */
+
+const ROLES = ["admin", "trainer", "sponsor", "learner"];
+
+/**
+ * Normalize a capabilities object. If the backend doesn't return one yet
+ * (older deploys), derive a single-capability set from the user's role so the
+ * frontend keeps working.
+ */
+export function deriveCapabilities(apiCapabilities, role) {
+  if (apiCapabilities && typeof apiCapabilities === "object") {
+    return {
+      admin:   !!apiCapabilities.admin,
+      trainer: !!apiCapabilities.trainer,
+      sponsor: !!apiCapabilities.sponsor,
+      learner: !!apiCapabilities.learner,
+    };
+  }
+  return ROLES.reduce((acc, r) => ({ ...acc, [r]: r === role }), {});
+}
+
+/* ──────────────────────────────────────
    USER COOKIE HELPERS
    Used to persist the user object across page refreshes for SSR layout checks.
    The access token is NOT stored in cookies — it lives in React state only.
@@ -144,6 +172,34 @@ export function clearUserCookie() {
 }
 
 /* ──────────────────────────────────────
+   SESSION META COOKIE (capabilities + sponsor)
+   Client-readable; persisted so capabilities survive a page refresh until
+   the next /auth/me re-reads the live set.
+   ────────────────────────────────────── */
+
+export function setSessionMetaCookie({ capabilities, sponsor }) {
+  const payload = JSON.stringify({ capabilities: capabilities ?? null, sponsor: sponsor ?? null });
+  document.cookie = `${META_COOKIE}=${encodeURIComponent(payload)}; path=/; max-age=${USER_MAX_AGE}; SameSite=Lax`;
+}
+
+export function getSessionMetaFromCookie() {
+  if (typeof document === "undefined") return { capabilities: null, sponsor: null };
+  const match = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${META_COOKIE}=`));
+  if (!match) return { capabilities: null, sponsor: null };
+  try {
+    return JSON.parse(decodeURIComponent(match.split("=").slice(1).join("=")));
+  } catch {
+    return { capabilities: null, sponsor: null };
+  }
+}
+
+export function clearSessionMetaCookie() {
+  document.cookie = `${META_COOKIE}=; path=/; max-age=0`;
+}
+
+/* ──────────────────────────────────────
    SERVER-SIDE COOKIE HELPERS
    For use in Next.js layouts / middleware (server components).
    ────────────────────────────────────── */
@@ -161,4 +217,4 @@ export function getUserFromCookieServer(cookieStore) {
   }
 }
 
-export { TOKEN_COOKIE, USER_COOKIE };
+export { TOKEN_COOKIE, USER_COOKIE, META_COOKIE };

@@ -22,13 +22,34 @@ export async function fetchTrainers({ token }) {
   return apiClient("/admin/trainers", { token });
 }
 
-/** PATCH /admin/trainings/:trainingRef { trainer_id } → assigns a trainer */
-export async function assignTrainer({ token, trainingRef, trainerId }) {
+/**
+ * PATCH /admin/trainings/:trainingRef
+ * Generic training update. Two independent, both-optional operations — pass any
+ * of: trainer_id, meeting_url, meeting_platform ("zoom"|"teams"|"other"),
+ * meeting_released, min_seats_override. At least one field required.
+ * Returns { training } with the updated meeting/trainer state.
+ */
+export async function updateTraining({ token, trainingRef, data }) {
   return apiClient(`/admin/trainings/${trainingRef}`, {
     method: "PATCH",
     token,
-    body: { trainer_id: trainerId },
+    body: data,
   });
+}
+
+/** PATCH /admin/trainings/:trainingRef { trainer_id } → assigns a trainer */
+export async function assignTrainer({ token, trainingRef, trainerId }) {
+  return updateTraining({ token, trainingRef, data: { trainer_id: trainerId } });
+}
+
+/**
+ * PATCH /admin/trainings/:trainingRef — set/release the meeting link.
+ * data = { meeting_url?, meeting_platform?, meeting_released?, min_seats_override? }
+ * Releasing (meeting_released: true) requires enrolled_count ≥ min_seats unless
+ * min_seats_override is set — otherwise the API returns 422.
+ */
+export async function updateMeeting({ token, trainingRef, data }) {
+  return updateTraining({ token, trainingRef, data });
 }
 
 /**
@@ -40,6 +61,71 @@ export async function addParticipant({ token, trainingRef, data }) {
     method: "POST",
     token,
     body: data,
+  });
+}
+
+/* ──────────────────────────────────────
+   TRAINERS (onboard / profile / edit)
+   ────────────────────────────────────── */
+
+/**
+ * POST /admin/trainers — onboard a trainer (creates the users account if new).
+ * data = { name, email, password?, bio?, experience?, rate?, certificates? }
+ * Only name + email are required. Returns { trainer }.
+ */
+export async function createTrainer({ token, data }) {
+  return apiClient("/admin/trainers", { method: "POST", token, body: data });
+}
+
+/** GET /admin/trainers/:trainerId → trainer profile + assignment history */
+export async function fetchTrainerDetail({ token, trainerId }) {
+  return apiClient(`/admin/trainers/${trainerId}`, { token });
+}
+
+/**
+ * PATCH /admin/trainers/:trainerId — edit / deactivate.
+ * data = any subset of { name, bio, experience, rate, certificates, is_active }
+ * Returns { trainer }.
+ */
+export async function updateTrainer({ token, trainerId, data }) {
+  return apiClient(`/admin/trainers/${trainerId}`, { method: "PATCH", token, body: data });
+}
+
+/* ──────────────────────────────────────
+   PARTICIPANTS & ENROLMENTS
+   ────────────────────────────────────── */
+
+/**
+ * PATCH /admin/participants/:participantId — edit a participant.
+ * data = any subset of { name, phone, job_title } (email is not editable).
+ * Returns { participant }.
+ */
+export async function updateParticipant({ token, participantId, data }) {
+  return apiClient(`/admin/participants/${participantId}`, { method: "PATCH", token, body: data });
+}
+
+/**
+ * PATCH /admin/enrolments/:enrolmentId/cancel — cancel an enrolment (frees seat).
+ * Reason is required and audited. Returns { id, status }.
+ */
+export async function cancelEnrolment({ token, enrolmentId, reason }) {
+  return apiClient(`/admin/enrolments/${enrolmentId}/cancel`, {
+    method: "PATCH",
+    token,
+    body: { reason },
+  });
+}
+
+/**
+ * PATCH /admin/enrolments/:enrolmentId/transfer — move a participant to another
+ * training. trainingId accepts a UUID or code. Reason required and audited.
+ * Returns { from_enrolment_id, to_enrolment_id, to_training, status }.
+ */
+export async function transferEnrolment({ token, enrolmentId, trainingId, reason }) {
+  return apiClient(`/admin/enrolments/${enrolmentId}/transfer`, {
+    method: "PATCH",
+    token,
+    body: { training_id: trainingId, reason },
   });
 }
 

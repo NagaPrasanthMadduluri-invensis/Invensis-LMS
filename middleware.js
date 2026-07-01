@@ -5,6 +5,22 @@ const USER_COOKIE  = "lms_user";
 
 const PUBLIC_PATHS = ["/login", "/register"];
 
+// Default landing portal per role (API.md §4.4: route by role).
+const PORTAL_HOME = {
+  admin:   "/admin/dashboard",
+  trainer: "/trainer/dashboard",
+  sponsor: "/sponsor/dashboard",
+  learner: "/dashboard",
+};
+
+// Path prefixes each role is confined to. Roles not listed (learner) own the
+// remaining authenticated routes (dashboard, my-courses, …).
+const ROLE_PREFIX = {
+  admin:   "/admin",
+  trainer: "/trainer",
+  sponsor: "/sponsor",
+};
+
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
@@ -22,16 +38,13 @@ export function middleware(request) {
 
   // Both cookies must be present (token can expire while user cookie is still valid)
   const isAuthenticated = !!tokenCookie?.value && !!user;
-  const isAdmin   = user?.role === "admin";
-  const isTrainer = user?.role === "trainer";
+  const role = user?.role;
+  const home = PORTAL_HOME[role] ?? "/dashboard";
 
   // ── Public paths ──
   if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
     if (isAuthenticated) {
-      let dest = "/dashboard";
-      if (isAdmin)   dest = "/admin/dashboard";
-      if (isTrainer) dest = "/trainer/dashboard";
-      return NextResponse.redirect(new URL(dest, request.url));
+      return NextResponse.redirect(new URL(home, request.url));
     }
     return NextResponse.next();
   }
@@ -45,21 +58,22 @@ export function middleware(request) {
   }
 
   // ── Role-based route protection ──
+  // A role with a dedicated prefix may only browse under that prefix.
+  const myPrefix = ROLE_PREFIX[role];
 
-  if (isAdmin && !pathname.startsWith("/admin")) {
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-  }
-
-  if (isTrainer && !pathname.startsWith("/trainer")) {
-    return NextResponse.redirect(new URL("/trainer/dashboard", request.url));
-  }
-
-  if (!isAdmin && !isTrainer && pathname.startsWith("/admin")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  if (!isAdmin && !isTrainer && pathname.startsWith("/trainer")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  if (myPrefix) {
+    // admin / trainer / sponsor: keep them inside their own portal.
+    if (!pathname.startsWith(myPrefix)) {
+      return NextResponse.redirect(new URL(home, request.url));
+    }
+  } else {
+    // learner: block access to any other role's prefixed portal.
+    const ownsPrefixedPortal = Object.values(ROLE_PREFIX).some((prefix) =>
+      pathname.startsWith(prefix)
+    );
+    if (ownsPrefixedPortal) {
+      return NextResponse.redirect(new URL(home, request.url));
+    }
   }
 
   return NextResponse.next();
