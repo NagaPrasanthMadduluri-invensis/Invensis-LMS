@@ -346,7 +346,7 @@ export function CourseModulesContent({ courseId }) {
 
             {formErrors._general && <Text as="p" className="text-sm text-red-600">{formErrors._general}</Text>}
           </Box>
-          <DialogFooter>
+          <DialogFooter className="px-6 pt-4 pb-6">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? "Saving..." : editingModule ? "Update Module" : "Create Module"}

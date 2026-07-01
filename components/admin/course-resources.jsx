@@ -199,7 +199,7 @@ function ResourceFormDialog({ open, resource, onClose, onSave }) {
           )}
         </Box>
 
-        <DialogFooter>
+        <DialogFooter className="px-6 pt-4 pb-6">
           <Button variant="outline" size="sm" onClick={onClose} disabled={saving}>Cancel</Button>
           <Button size="sm" onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save"}

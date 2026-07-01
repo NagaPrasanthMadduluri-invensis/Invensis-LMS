@@ -8,14 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Search,
-  Calendar,
-  Users,
-  Clock,
-  UserCheck,
-  UserX,
-  ChevronRight,
-  Hash,
+  Search, Calendar, Users, Clock, UserCheck, UserX, UserPlus,
+  ChevronRight, BookOpen, LayoutGrid, Link2, LinkIcon,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -23,18 +17,15 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchAdminTrainings } from "@/services/api/admin/admin-api";
 
 const STATUS_CONFIG = {
-  pending: { label: "Pending", color: "bg-amber-100 text-amber-700" },
-  active: { label: "Active", color: "bg-emerald-100 text-emerald-700" },
-  ongoing: { label: "Ongoing", color: "bg-blue-100 text-blue-700" },
-  completed: { label: "Completed", color: "bg-slate-100 text-slate-600" },
-  cancelled: { label: "Cancelled", color: "bg-red-100 text-red-600" },
+  pending:   { label: "Pending",   badge: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",   accent: "bg-amber-400" },
+  active:    { label: "Active",    badge: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200", accent: "bg-emerald-500" },
+  ongoing:   { label: "Ongoing",   badge: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",       accent: "bg-blue-500" },
+  completed: { label: "Completed", badge: "bg-slate-100 text-slate-600",                          accent: "bg-slate-400" },
+  cancelled: { label: "Cancelled", badge: "bg-red-50 text-red-600 ring-1 ring-red-200",           accent: "bg-red-500" },
 };
 
 const MODE_LABEL = {
-  virtual: "Live Virtual",
-  in_person: "In Person",
-  hybrid: "Hybrid",
-  one_to_one: "1-to-1",
+  virtual: "Live Virtual", in_person: "In Person", hybrid: "Hybrid", one_to_one: "1-to-1",
 };
 
 function formatDate(d) {
@@ -42,90 +33,169 @@ function formatDate(d) {
   return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function CardSkeleton() {
+function StatCard({ label, value, icon: Icon, bg, border, iconBg, iconCls, valueCls, labelCls }) {
   return (
-    <Card className="p-0 overflow-hidden rounded-xl border-0 shadow-sm">
-      <Skeleton className="h-10 w-full" />
-      <Box className="p-4 space-y-3">
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-3 w-1/2" />
-        <Skeleton className="h-8 w-full" />
+    <Card className={`rounded-2xl ${border} shadow-sm ${bg} p-5`}>
+      <Box className="flex items-start justify-between mb-4">
+        <Box className={`w-11 h-11 ${iconBg} rounded-xl flex items-center justify-center`}>
+          <Icon className={`h-5 w-5 ${iconCls}`} />
+        </Box>
+        <Text as="p" className={`text-3xl font-bold ${valueCls} leading-none`}>{value}</Text>
       </Box>
+      <Text as="p" className={`text-sm ${labelCls} font-medium`}>{label}</Text>
     </Card>
   );
 }
 
+function CardSkeleton() {
+  return (
+    <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-5 space-y-4">
+      <Box className="flex justify-between">
+        <Skeleton className="h-5 w-20 rounded-full" />
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </Box>
+      <Skeleton className="h-4 w-4/5" />
+      <Skeleton className="h-4 w-3/5" />
+      <Box className="space-y-2">
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-3/4" />
+      </Box>
+      <Skeleton className="h-9 w-full rounded-xl" />
+    </Card>
+  );
+}
+
+function initialsOf(name = "") {
+  return name.trim().split(/\s+/).slice(0, 2).map((p) => p.charAt(0).toUpperCase()).join("") || "?";
+}
+
 function TrainingCard({ training, onClick }) {
   const statusCfg = STATUS_CONFIG[training.status] || STATUS_CONFIG.active;
+  const hasTrainer = training.trainer_assigned;
 
   return (
     <Card
-      className="p-0 overflow-hidden group hover:shadow-lg transition-all duration-200 cursor-pointer rounded-xl border-0 shadow-sm"
+      className="rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer bg-white overflow-hidden group flex flex-col"
       onClick={onClick}
     >
-      {/* Header — Training ID prominent */}
-      <Box className="flex items-center justify-between bg-gradient-to-r from-slate-700 to-slate-900 px-4 py-2.5">
-        <Box className="flex items-center gap-1.5">
-          <Hash className="h-3.5 w-3.5 text-white/70" />
-          <Text as="span" className="text-xs font-semibold tracking-wide text-white">
+      <Box className="p-5 flex flex-col flex-1 gap-4">
+
+        {/* Row 1: Training ID + Status */}
+        <Box className="flex items-center justify-between">
+          <Text as="span" className="text-[11px] font-mono font-bold text-indigo-600 bg-indigo-50 ring-1 ring-indigo-200 px-2.5 py-1 rounded-lg tracking-wide">
             {training.code}
           </Text>
+          <Badge className={`text-[10px] font-semibold border-0 ${statusCfg.badge}`}>{statusCfg.label}</Badge>
         </Box>
-        <Badge className={`text-[10px] border-0 ${statusCfg.color}`}>{statusCfg.label}</Badge>
-      </Box>
 
-      {/* Body */}
-      <Box className="p-4 space-y-3">
-        <Text as="h3" className="text-sm font-semibold text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
+        {/* Title */}
+        <Text as="h3" className="text-[17px] font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
           {training.title}
         </Text>
 
-        <Box className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-          <Box className="flex items-center gap-1.5">
-            <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
-            <Text as="span" className="text-[11px] text-slate-500">{formatDate(training.start_date)}</Text>
+        {/* Metadata pills */}
+        <Box className="flex flex-wrap gap-2">
+          <Box className="flex items-center gap-2 bg-slate-50 border border-slate-200/70 rounded-xl px-3 py-2">
+            <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+            <Text as="span" className="text-xs font-medium text-slate-600 leading-none">{formatDate(training.start_date)}</Text>
           </Box>
-          <Box className="flex items-center gap-1.5">
-            <Clock className="w-3 h-3 text-slate-400 shrink-0" />
-            <Text as="span" className="text-[11px] text-slate-500">{MODE_LABEL[training.delivery_mode] || training.delivery_mode}</Text>
+          <Box className="flex items-center gap-2 bg-slate-50 border border-slate-200/70 rounded-xl px-3 py-2">
+            <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+            <Text as="span" className="text-xs font-medium text-slate-600 leading-none">
+              {MODE_LABEL[training.delivery_mode] || training.delivery_mode}
+              {training.duration_hours != null && ` · ${training.duration_hours}h`}
+            </Text>
           </Box>
-          <Box className="flex items-center gap-1.5">
-            <Users className="w-3 h-3 text-slate-400 shrink-0" />
-            <Text as="span" className="text-[11px] text-slate-500">{training.enrolled_count} / {training.capacity} enrolled</Text>
-          </Box>
-          <Box className="flex items-center gap-1.5">
-            {training.duration_hours != null && (
-              <>
-                <Clock className="w-3 h-3 text-slate-400 shrink-0" />
-                <Text as="span" className="text-[11px] text-slate-500">{training.duration_hours} hrs</Text>
-              </>
-            )}
+          <Box className="flex items-center gap-2 bg-slate-50 border border-slate-200/70 rounded-xl px-3 py-2">
+            <Users className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+            <Text as="span" className="text-xs font-medium text-slate-600 leading-none">{training.enrolled_count}/{training.capacity} seats</Text>
           </Box>
         </Box>
 
-        {/* Trainer status — highlight when none assigned */}
-        {training.trainer_assigned ? (
-          <Box className="flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1.5">
-            <UserCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-            <Text as="span" className="text-[11px] font-medium text-emerald-700 truncate">
-              {training.trainer_name}
-            </Text>
-          </Box>
-        ) : (
-          <Box className="flex items-center gap-1.5 rounded-lg bg-amber-50 ring-1 ring-amber-200 px-2.5 py-1.5">
-            <UserX className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-            <Text as="span" className="text-[11px] font-semibold text-amber-700">
-              No trainer assigned
-            </Text>
-          </Box>
-        )}
+        {/* Info blocks — trainer + meeting link */}
+        <Box className="flex-1 flex flex-col gap-2.5">
 
-        <Box className="flex items-center justify-end pt-1 border-t border-slate-100">
-          <Button size="sm" className="text-xs h-7 px-3 border-0 text-white bg-gradient-to-r from-slate-700 to-slate-900 hover:opacity-90">
-            Manage
-            <ChevronRight className="h-3 w-3 ml-1" />
+          {/* Trainer block */}
+          {hasTrainer ? (
+            <Box className="flex items-center gap-3 bg-emerald-50 ring-1 ring-emerald-200 rounded-xl px-3.5 py-3">
+              <Box className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
+                <Text as="span" className="text-[11px] font-bold text-white leading-none">{initialsOf(training.trainer_name)}</Text>
+              </Box>
+              <Box className="min-w-0 flex-1">
+                <Text as="p" className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest leading-none mb-0.5">Trainer</Text>
+                <Text as="p" className="text-sm font-semibold text-emerald-900 truncate">{training.trainer_name}</Text>
+              </Box>
+              <UserCheck className="h-4 w-4 text-emerald-500 shrink-0" />
+            </Box>
+          ) : (
+            <Box
+              className="flex items-center justify-between gap-3 bg-amber-50 ring-1 ring-amber-300 rounded-xl px-3.5 py-3 hover:bg-amber-100 transition-colors"
+              onClick={(e) => { e.stopPropagation(); onClick(); }}
+            >
+              <Box className="flex items-center gap-3 min-w-0">
+                <Box className="w-8 h-8 rounded-full bg-amber-200 flex items-center justify-center shrink-0">
+                  <UserX className="h-3.5 w-3.5 text-amber-700" />
+                </Box>
+                <Box className="min-w-0">
+                  <Text as="p" className="text-[10px] font-bold text-amber-700 uppercase tracking-widest leading-none mb-0.5">No Trainer</Text>
+                  <Text as="p" className="text-[11px] text-amber-600">Click to assign</Text>
+                </Box>
+              </Box>
+              <Box className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shrink-0 transition-colors shadow-sm">
+                <UserPlus className="h-3 w-3" />
+                Assign
+              </Box>
+            </Box>
+          )}
+
+          {/* Meeting link block */}
+          {training.meeting_released ? (
+            <Box className="flex items-center gap-3 bg-indigo-50 ring-1 ring-indigo-200 rounded-xl px-3.5 py-3">
+              <Box className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
+                <Link2 className="h-3.5 w-3.5 text-white" />
+              </Box>
+              <Box className="min-w-0 flex-1">
+                <Text as="p" className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
+                <Text as="p" className="text-sm font-semibold text-indigo-900">Released to participants</Text>
+              </Box>
+              <Box className="w-2 h-2 rounded-full bg-indigo-500 shrink-0 shadow-sm" />
+            </Box>
+          ) : training.meeting_url ? (
+            <Box className="flex items-center gap-3 bg-amber-50 ring-1 ring-amber-200 rounded-xl px-3.5 py-3">
+              <Box className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center shrink-0 shadow-sm">
+                <LinkIcon className="h-3.5 w-3.5 text-white" />
+              </Box>
+              <Box className="min-w-0 flex-1">
+                <Text as="p" className="text-[10px] font-bold text-amber-700 uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
+                <Text as="p" className="text-sm font-semibold text-amber-900">Set · Not yet released</Text>
+              </Box>
+              <Box className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+            </Box>
+          ) : (
+            <Box className="flex items-center gap-3 bg-slate-50 ring-1 ring-slate-200 rounded-xl px-3.5 py-3">
+              <Box className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                <LinkIcon className="h-3.5 w-3.5 text-slate-500" />
+              </Box>
+              <Box className="min-w-0 flex-1">
+                <Text as="p" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
+                <Text as="p" className="text-sm font-medium text-slate-500">Not configured</Text>
+              </Box>
+              <Box className="w-2 h-2 rounded-full bg-slate-300 shrink-0" />
+            </Box>
+          )}
+
+        </Box>
+
+        {/* Footer */}
+        <Box className="pt-3 border-t border-slate-100">
+          <Button
+            size="sm"
+            className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold border-0 rounded-xl gap-1.5"
+          >
+            Manage Training <ChevronRight className="h-3.5 w-3.5" />
           </Button>
         </Box>
+
       </Box>
     </Card>
   );
@@ -147,7 +217,7 @@ export function TrainingsList() {
 
   if (error) {
     return (
-      <Card className="p-6 border-red-100 bg-red-50">
+      <Card className="p-6 rounded-2xl border-0 bg-red-50 shadow-sm">
         <Text as="p" className="text-red-600 text-sm">Failed to load trainings: {error}</Text>
       </Card>
     );
@@ -155,58 +225,63 @@ export function TrainingsList() {
 
   if (!trainings) {
     return (
-      <Box className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+      <Box className="space-y-6">
+        <Box className="grid grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+        </Box>
+        <Box className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+        </Box>
       </Box>
     );
   }
 
   const unassigned = trainings.filter((t) => !t.trainer_assigned).length;
-
   const filtered = trainings.filter((t) => {
     const q = search.toLowerCase();
     return t.title.toLowerCase().includes(q) || t.code.toLowerCase().includes(q);
   });
 
   return (
-    <Box className="space-y-4">
+    <Box className="space-y-6">
       {/* Stat cards */}
-      <Box className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Total Trainings", value: trainings.length, bg: "bg-indigo-200", val: "text-indigo-900" },
-          { label: "Trainer Assigned", value: trainings.length - unassigned, bg: "bg-emerald-200", val: "text-emerald-900" },
-          { label: "Awaiting Trainer", value: unassigned, bg: "bg-amber-200", val: "text-amber-900" },
-        ].map((s) => (
-          <Card key={s.label} className={`p-4 border-0 shadow-sm rounded-xl ${s.bg}`}>
-            <Text as="span" className="text-[11px] font-medium text-slate-600 block">{s.label}</Text>
-            <Text as="h3" className={`text-3xl font-bold leading-none mt-1 ${s.val}`}>{s.value}</Text>
-          </Card>
-        ))}
+      <Box className="grid grid-cols-3 gap-4">
+        <StatCard label="Total Trainings"   value={trainings.length}              icon={LayoutGrid}
+          bg="bg-indigo-50"  border="border border-indigo-100"  iconBg="bg-indigo-100"  iconCls="text-indigo-600"  valueCls="text-indigo-900"  labelCls="text-indigo-500" />
+        <StatCard label="Trainer Assigned"  value={trainings.length - unassigned} icon={UserCheck}
+          bg="bg-emerald-50" border="border border-emerald-100" iconBg="bg-emerald-100" iconCls="text-emerald-600" valueCls="text-emerald-900" labelCls="text-emerald-600" />
+        <StatCard label="Awaiting Trainer"  value={unassigned}                    icon={UserX}
+          bg="bg-amber-50"   border="border border-amber-100"   iconBg="bg-amber-100"   iconCls="text-amber-600"   valueCls="text-amber-900"   labelCls="text-amber-600" />
       </Box>
 
       {/* Search */}
       <Box className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <Input
-          placeholder="Search by Training ID or title..."
+          placeholder="Search by training ID or title..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 h-10 text-sm bg-white border-slate-300 focus-visible:ring-indigo-400"
+          className="pl-10 h-11 text-sm bg-slate-200/60 border-slate-300/70 rounded-xl focus-visible:ring-indigo-400/50"
         />
       </Box>
 
-      <Text as="p" className="text-xs text-slate-400">
-        Showing {filtered.length} of {trainings.length} training{trainings.length !== 1 ? "s" : ""}
-      </Text>
+      <Box className="flex items-center justify-between">
+        <Text as="p" className="text-xs text-slate-400">
+          {filtered.length} of {trainings.length} training{trainings.length !== 1 ? "s" : ""}
+        </Text>
+      </Box>
 
       {filtered.length === 0 ? (
-        <Card className="p-10 text-center border-0 shadow-sm bg-white rounded-xl">
-          <Text as="p" className="text-sm font-medium text-slate-600">
+        <Card className="p-14 text-center rounded-2xl border border-slate-200/80 shadow-sm bg-white">
+          <Box className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="h-7 w-7 text-slate-400" />
+          </Box>
+          <Text as="p" className="text-sm font-semibold text-slate-600">
             {search ? "No trainings match your search" : "No trainings yet"}
           </Text>
         </Card>
       ) : (
-        <Box className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <Box className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {filtered.map((t) => (
             <TrainingCard key={t.id} training={t} onClick={() => router.push(`/admin/courses/${t.id}`)} />
           ))}
