@@ -16,9 +16,9 @@ import { apiClient } from "@/lib/api-client";
      GET /trainer/trainings              → trainings where I'm the assigned trainer
      GET /trainer/trainings/:trainingRef → that training + its sessions (with id)
 
-   Until the backend ships those two, they throw `TrainerEndpointPending` and the
-   UI shows a clear "waiting on endpoint" state. Flip ENDPOINTS_READY to true (and
-   confirm the paths/shapes) to light the portal up — no other change needed.
+   Both are live as of API.md §3.3.1 / §3.3.2, so ENDPOINTS_READY is true. The
+   pending machinery below is kept as a safety net (flip to false to fall back to
+   the "waiting on endpoint" placeholder if a deploy ever lags).
    ────────────────────────────────────── */
 
 export class TrainerEndpointPending extends Error {
@@ -30,13 +30,14 @@ export class TrainerEndpointPending extends Error {
   }
 }
 
-// Flip to true once GET /trainer/trainings and GET /trainer/trainings/:ref ship.
-export const ENDPOINTS_READY = false;
+// Live (API.md §3.3.1 / §3.3.2). Set false only to force the placeholder state.
+export const ENDPOINTS_READY = true;
 
 /**
- * GET /trainer/trainings  (derived from assignment history, scoped to me)
- * Expected: { trainings: [{ id, code, title, status, delivery_mode,
- *   start_date, end_date, timezone, enrolled_count, capacity, assigned_at }] }
+ * GET /trainer/trainings  (API.md §3.3.1 — trainings assigned to the caller)
+ * Returns: { trainings: [{ id, code, title, status, delivery_mode, bucket,
+ *   capacity, enrolled_count, start_date, end_date, timezone }] }
+ * Only active assignments; empty list if none.
  */
 export async function fetchMyTrainings({ token }) {
   if (!ENDPOINTS_READY) throw new TrainerEndpointPending("/trainer/trainings");
@@ -44,13 +45,13 @@ export async function fetchMyTrainings({ token }) {
 }
 
 /**
- * GET /trainer/trainings/:trainingRef
- * Expected: {
- *   training: { id, training_id, title, delivery_mode, status, start_date, end_date,
- *               start_time, end_time, timezone, session_dates },
- *   sessions: [{ id, day_number, planned_topics, start_time, end_time, status }]
- * }
- * `sessions[].id` is required so the trainer can PATCH each session's topics.
+ * GET /trainer/trainings/:trainingRef  (API.md §3.3.2 — UUID or code)
+ * Returns a FLAT training object with a `sessions[]` array:
+ *   { id, training_id, title, delivery_mode, bucket, status, start_date, end_date,
+ *     timezone, batch_type, venue,
+ *     sessions: [{ id, day_number, planned_topics, start_time, end_time, status }] }
+ * `sessions[].id` is the sessionId used by PATCH /trainer/sessions/:id/topics.
+ * 403 if the caller isn't the currently-assigned trainer for this training.
  */
 export async function fetchTrainerTrainingSessions({ token, trainingRef }) {
   if (!ENDPOINTS_READY) throw new TrainerEndpointPending(`/trainer/trainings/${trainingRef}`);
