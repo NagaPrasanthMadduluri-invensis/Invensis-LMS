@@ -222,7 +222,7 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
     setError(null); setFieldErrors(null); setCvFile(null);
     if (isEdit && trainer) {
       setForm({ ...EMPTY, name: trainer.name || "", email: trainer.email || "", bio: trainer.bio || "", experience: trainer.experience || "", is_active: trainer.is_active !== false });
-      setCertifications(Array.isArray(trainer.certificates) ? trainer.certificates : []);
+      setCertifications(Array.isArray(trainer.certificates) ? trainer.certificates.map((c) => c?.title ?? c) : []);
     } else {
       setForm(EMPTY);
       setCertifications([]);
@@ -238,14 +238,14 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
     try {
       if (isEdit) {
         const data = { name: form.name.trim(), bio: form.bio.trim(), experience: form.experience.trim(), is_active: form.is_active };
-        if (certifications.length) data.certificates = certifications;
+        if (certifications.length) data.certificates = certifications.map((c) => ({ title: c }));
         await updateTrainer({ token, trainerId: trainer.id, data });
       } else {
         const data = { name: form.name.trim(), email: form.email.trim() };
         if (form.password.trim()) data.password = form.password.trim();
         if (form.bio.trim()) data.bio = form.bio.trim();
         if (form.experience.trim()) data.experience = form.experience.trim();
-        if (certifications.length) data.certificates = certifications;
+        if (certifications.length) data.certificates = certifications.map((c) => ({ title: c }));
         await createTrainer({ token, data });
       }
       onSaved?.(); onOpenChange(false);
