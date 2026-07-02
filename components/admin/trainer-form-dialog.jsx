@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -11,7 +11,7 @@ import Box from "@/components/ui/box";
 import { createTrainer, updateTrainer } from "@/services/api/admin/admin-api";
 import {
   AlertCircle, GraduationCap, Pencil, User, Mail, Lock, Clock,
-  CheckCircle2, Plus, X, Upload, FileText, Award,
+  CheckCircle2, Plus, X, Upload, FileText, Award, Eye, EyeOff,
 } from "lucide-react";
 
 const EMPTY = { name: "", email: "", password: "", bio: "", experience: "", is_active: true };
@@ -21,7 +21,9 @@ const CERT_PRESETS = [
   "AWS Certified", "Azure Fundamentals", "Google Cloud", "CPA", "CFA", "SHRM",
 ];
 
-function FInput({ icon: Icon, accentColor = "indigo", ...props }) {
+function FInput({ icon: Icon, accentColor = "indigo", type, ...props }) {
+  const [showPwd, setShowPwd] = useState(false);
+  const isPassword = type === "password";
   const focusRing = accentColor === "red"
     ? "focus-within:border-red-400 focus-within:shadow-[0_0_0_3px_rgba(252,165,165,0.35)]"
     : "focus-within:border-indigo-400 focus-within:shadow-[0_0_0_3px_rgba(165,180,252,0.35)]";
@@ -30,8 +32,15 @@ function FInput({ icon: Icon, accentColor = "indigo", ...props }) {
       {Icon && <Icon className="h-4 w-4 text-slate-400 shrink-0 group-focus-within:text-indigo-500 transition-colors" />}
       <input
         {...props}
+        type={isPassword ? (showPwd ? "text" : "password") : type}
         className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
       />
+      {isPassword && (
+        <button type="button" onClick={() => setShowPwd((v) => !v)}
+          className="shrink-0 text-slate-400 hover:text-indigo-500 transition-colors">
+          {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      )}
     </Box>
   );
 }

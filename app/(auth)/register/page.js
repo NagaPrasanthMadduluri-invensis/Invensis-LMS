@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthProvider } from "@/providers/auth-provider";
 
@@ -23,6 +24,8 @@ function RegisterForm() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const update = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -103,14 +106,21 @@ function RegisterForm() {
 
           <Box className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Min 8 characters"
-              value={form.password}
-              onChange={update("password")}
-              required
-            />
+            <Box className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Min 8 characters"
+                value={form.password}
+                onChange={update("password")}
+                required
+                className="pr-10"
+              />
+              <button type="button" onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors">
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </Box>
             {fieldErrors.password && (
               <Text as="p" className="text-xs text-red-600">{fieldErrors.password[0]}</Text>
             )}
@@ -118,14 +128,21 @@ function RegisterForm() {
 
           <Box className="space-y-2">
             <Label htmlFor="passwordConfirmation">Confirm Password</Label>
-            <Input
-              id="passwordConfirmation"
-              type="password"
-              placeholder="Repeat password"
-              value={form.passwordConfirmation}
-              onChange={update("passwordConfirmation")}
-              required
-            />
+            <Box className="relative">
+              <Input
+                id="passwordConfirmation"
+                type={showConfirm ? "text" : "password"}
+                placeholder="Repeat password"
+                value={form.passwordConfirmation}
+                onChange={update("passwordConfirmation")}
+                required
+                className="pr-10"
+              />
+              <button type="button" onClick={() => setShowConfirm((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors">
+                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </Box>
           </Box>
 
           {error && !Object.keys(fieldErrors).length && (

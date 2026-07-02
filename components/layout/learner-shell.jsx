@@ -14,7 +14,7 @@ export function LearnerShell({ children }) {
           <TopNav portalLabel="Invensis LMS" />
           <Box className="flex flex-1 overflow-hidden">
             <LearnerSidebar />
-            <Box as="main" className="flex-1 overflow-auto p-6 bg-muted/30">
+            <Box as="main" className="flex-1 overflow-auto p-6 bg-background">
               {children}
             </Box>
           </Box>

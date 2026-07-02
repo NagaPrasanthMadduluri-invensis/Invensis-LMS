@@ -80,15 +80,15 @@ function formatTime(timeStr) {
 
 function Fact({ icon: Icon, label, children }) {
   return (
-    <Box className="flex items-start gap-2.5">
-      <Box className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50">
+    <Box className="flex items-start gap-3">
+      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
         <Icon className="h-4 w-4 text-indigo-500" />
       </Box>
       <Box className="min-w-0">
-        <Text as="p" className="text-[11px] uppercase tracking-wide text-muted-foreground">
+        <Text as="p" className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
           {label}
         </Text>
-        <Text as="p" className="text-sm font-semibold leading-tight mt-0.5">
+        <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5">
           {children}
         </Text>
       </Box>
@@ -122,21 +122,21 @@ function ScheduleCard({ training }) {
   const sessionDates = Array.isArray(training.session_dates) ? training.session_dates : [];
 
   return (
-    <Card className="p-0 overflow-hidden">
+    <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
       {/* Header band */}
-      <Box className="relative bg-gradient-to-br from-indigo-500 to-purple-600 p-6 text-white">
+      <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-indigo-50 border-b border-violet-100 px-6 py-5">
         <Box className="flex flex-wrap items-start justify-between gap-3">
           <Box className="min-w-0">
-            <Text as="span" className="text-[11px] font-medium tracking-wide text-white/70">
+            <Text as="span" className="text-[11px] font-mono font-bold text-violet-500 bg-violet-100 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg tracking-wide">
               {training.training_id}
             </Text>
-            <Text as="h2" className="text-xl font-semibold leading-tight mt-0.5">
+            <Text as="h2" className="text-xl font-bold text-slate-900 leading-tight mt-2.5">
               {training.title}
             </Text>
           </Box>
-          <Box className="flex shrink-0 gap-1.5">
-            <Badge className={`border-0 text-[11px] ${statusCfg.color}`}>{statusCfg.label}</Badge>
-            <Badge className={`border-0 text-[11px] ${mode.color}`}>
+          <Box className="flex shrink-0 gap-1.5 flex-wrap">
+            <Badge className={`border-0 text-[11px] font-semibold ${statusCfg.color}`}>{statusCfg.label}</Badge>
+            <Badge className={`border-0 text-[11px] font-semibold ${mode.color}`}>
               <ModeIcon className="h-3 w-3 mr-1" />
               {mode.label}
             </Badge>
@@ -218,20 +218,27 @@ function SessionTopics({ sessions }) {
   const anyTopics = list.some((s) => s.planned_topics?.trim());
 
   return (
-    <Card className="p-5">
-      <Box className="flex items-center gap-2 mb-3">
-        <BookText className="h-4 w-4 text-indigo-500" />
-        <Text as="h3" className="text-sm font-semibold">Day-wise Topics</Text>
-        <Badge className="border-0 bg-indigo-50 text-indigo-600 text-[11px]">
+    <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
+      <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
+        <Box className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+          <BookText className="h-4 w-4 text-indigo-500" />
+        </Box>
+        <Text as="h3" className="text-sm font-bold text-slate-800">Day-wise Topics</Text>
+        <Badge className="border-0 bg-indigo-50 text-indigo-600 text-[11px] font-semibold">
           {list.length} day{list.length !== 1 ? "s" : ""}
         </Badge>
       </Box>
+      <Box className="p-5">
 
       {!anyTopics ? (
-        <Box className="rounded-lg border border-dashed border-muted py-8 text-center">
-          <Text as="p" className="text-sm text-muted-foreground">
-            Your trainer hasn&apos;t published the topics yet. Check back soon.
+        <Box className="rounded-xl border border-dashed border-slate-200 py-10 text-center">
+          <Box className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
+            <BookText className="h-5 w-5 text-slate-400" />
+          </Box>
+          <Text as="p" className="text-sm font-medium text-slate-500">
+            Your trainer hasn&apos;t published the topics yet.
           </Text>
+          <Text as="p" className="text-xs text-slate-400 mt-1">Check back soon.</Text>
         </Box>
       ) : (
         <Accordion type="multiple" className="space-y-2">
@@ -242,7 +249,7 @@ function SessionTopics({ sessions }) {
               <AccordionItem
                 key={s.day_number}
                 value={`day-${s.day_number}`}
-                className="border rounded-lg px-4 bg-white"
+                className="border border-slate-200 rounded-xl px-4 bg-white"
               >
                 <AccordionTrigger className="hover:no-underline">
                   <Box className="flex flex-1 items-center justify-between gap-3 pr-2">
@@ -274,6 +281,7 @@ function SessionTopics({ sessions }) {
           })}
         </Accordion>
       )}
+      </Box>
     </Card>
   );
 }

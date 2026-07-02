@@ -14,7 +14,7 @@ export function TrainerShell({ children }) {
           <TopNav portalLabel="Trainer Portal" />
           <Box className="flex flex-1 overflow-hidden h-full">
             <TrainerSidebar />
-            <Box as="main" className="flex-1 overflow-auto p-6 bg-muted/30 h-full">
+            <Box as="main" className="flex-1 overflow-auto p-6 bg-background h-full">
               {children}
             </Box>
           </Box>
