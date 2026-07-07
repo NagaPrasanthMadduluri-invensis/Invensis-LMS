@@ -55,12 +55,12 @@ function formatDateTime(d) {
 /* ── Empty / pending states ── */
 function PendingState({ what }) {
   return (
-    <Card className="flex flex-col items-center justify-center px-6 py-14 text-center border-0 shadow-sm">
-      <Box className="flex h-14 w-14 items-center justify-center rounded-full bg-violet-100">
+    <Card className="flex flex-col items-center justify-center px-6 py-14 text-center rounded-2xl border border-slate-200/80 shadow-sm">
+      <Box className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100">
         <Hourglass className="h-7 w-7 text-violet-600" />
       </Box>
-      <Text as="h2" className="mt-4 text-lg font-semibold">Coming online soon</Text>
-      <Text as="p" className="mt-1.5 max-w-md text-sm text-muted-foreground">
+      <Text as="h2" className="mt-4 text-lg font-bold text-slate-800">Coming online soon</Text>
+      <Text as="p" className="mt-1.5 max-w-md text-sm text-slate-500">
         {what} will appear here as soon as the trainer endpoint is live. Once it&apos;s
         ready, your admin-assigned trainings load automatically — no further setup needed.
       </Text>
@@ -100,7 +100,7 @@ function SessionItem({ session, token, onSaved }) {
   }
 
   return (
-    <AccordionItem value={`day-${session.day_number}`} className="border rounded-lg px-4 bg-white">
+    <AccordionItem value={`day-${session.day_number}`} className="border border-slate-200 rounded-xl px-4 bg-white">
       <AccordionTrigger className="hover:no-underline">
         <Box className="flex flex-1 items-center justify-between gap-3 pr-2">
           <Box className="flex items-center gap-2.5">
@@ -133,10 +133,12 @@ function SessionItem({ session, token, onSaved }) {
             />
             {error && <Text as="p" className="text-xs text-red-600">{error}</Text>}
             <Box className="flex items-center gap-2">
-              <Button size="sm" onClick={save} disabled={saving}>
+              <Button size="sm" onClick={save} disabled={saving}
+                className="h-8 px-4 bg-violet-600 hover:bg-violet-700 text-white border-0 rounded-lg text-xs font-semibold">
                 <Check className="h-3.5 w-3.5 mr-1" /> {saving ? "Saving..." : "Save topics"}
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={saving}>
+              <Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={saving}
+                className="h-8 px-3 text-slate-500 hover:text-slate-700 rounded-lg text-xs">
                 <X className="h-3.5 w-3.5 mr-1" /> Cancel
               </Button>
             </Box>
@@ -150,7 +152,8 @@ function SessionItem({ session, token, onSaved }) {
                 No topics set yet for this day.
               </Text>
             )}
-            <Button size="sm" variant="outline" className="shrink-0" onClick={startEdit}>
+            <Button size="sm" variant="outline" onClick={startEdit}
+              className="shrink-0 h-8 px-3 border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600 rounded-lg text-xs">
               <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
             </Button>
           </Box>
@@ -201,23 +204,32 @@ function SessionsPanel({ trainingRef, token }) {
   const sessions = data.sessions || [];
 
   return (
-    <Card className="p-5 border-0 shadow-sm rounded-xl">
-      <Box className="flex items-center gap-2 mb-3">
-        <BookText className="h-4 w-4 text-slate-500" />
-        <Text as="h3" className="text-sm font-semibold text-slate-700">Day-wise Topics</Text>
-        <Badge className="border-0 bg-slate-100 text-slate-600 text-[11px]">{sessions.length} day{sessions.length !== 1 ? "s" : ""}</Badge>
-      </Box>
-      {sessions.length === 0 ? (
-        <Box className="rounded-lg border border-dashed border-slate-200 py-10 text-center">
-          <Text as="p" className="text-sm text-slate-500">This training has no sessions.</Text>
+    <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
+      <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
+        <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+          <BookText className="h-4 w-4 text-violet-500" />
         </Box>
-      ) : (
-        <Accordion type="multiple" className="space-y-2">
-          {sessions.map((s) => (
-            <SessionItem key={s.id ?? s.day_number} session={s} token={token} onSaved={onSaved} />
-          ))}
-        </Accordion>
-      )}
+        <Text as="h3" className="text-sm font-bold text-slate-800">Day-wise Topics</Text>
+        <Badge className="border-0 bg-violet-50 text-violet-600 text-[11px] font-semibold">
+          {sessions.length} day{sessions.length !== 1 ? "s" : ""}
+        </Badge>
+      </Box>
+      <Box className="p-5">
+        {sessions.length === 0 ? (
+          <Box className="rounded-xl border border-dashed border-slate-200 py-10 text-center">
+            <Box className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
+              <BookText className="h-5 w-5 text-slate-400" />
+            </Box>
+            <Text as="p" className="text-sm font-medium text-slate-500">This training has no sessions.</Text>
+          </Box>
+        ) : (
+          <Accordion type="multiple" className="space-y-2">
+            {sessions.map((s) => (
+              <SessionItem key={s.id ?? s.day_number} session={s} token={token} onSaved={onSaved} />
+            ))}
+          </Accordion>
+        )}
+      </Box>
     </Card>
   );
 }
@@ -228,21 +240,27 @@ function TrainingCard({ training, active, onClick }) {
   return (
     <Card
       onClick={onClick}
-      className={`p-0 overflow-hidden cursor-pointer rounded-xl border shadow-sm transition-all ${active ? "ring-2 ring-violet-500" : "hover:shadow-md"}`}
+      className={`p-0 overflow-hidden cursor-pointer rounded-2xl border shadow-sm transition-all ${active ? "border-slate-300 shadow-md" : "border-slate-200/80 hover:shadow-md hover:border-slate-300"}`}
     >
-      <Box className="flex items-center justify-between bg-gradient-to-r from-slate-700 to-slate-900 px-4 py-2.5">
+      <Box className="flex items-center justify-between bg-gradient-to-r from-violet-50 via-purple-50 to-indigo-50 border-b border-violet-100 px-4 py-2.5">
         <Box className="flex items-center gap-1.5">
-          <Hash className="h-3.5 w-3.5 text-white/70" />
-          <Text as="span" className="text-xs font-semibold tracking-wide text-white">{training.code}</Text>
+          <Hash className="h-3.5 w-3.5 text-violet-400" />
+          <Text as="span" className="text-xs font-semibold tracking-wide text-violet-700">{training.code}</Text>
         </Box>
         <Badge className={`text-[10px] border-0 ${statusCfg.color}`}>{statusCfg.label}</Badge>
       </Box>
-      <Box className="p-4 space-y-2">
-        <Text as="h3" className="text-sm font-semibold text-slate-900 leading-snug line-clamp-2">{training.title}</Text>
+      <Box className="p-4 space-y-2.5">
+        <Text as="h3" className="text-sm font-bold text-slate-900 leading-snug line-clamp-2">{training.title}</Text>
         <Box className="flex items-center gap-3 text-[11px] text-slate-500">
-          <Box className="flex items-center gap-1"><CalendarDays className="h-3 w-3" /> {formatDate(training.start_date)}</Box>
+          <Box className="flex items-center gap-1.5">
+            <CalendarDays className="h-3 w-3 text-slate-400" />
+            {formatDate(training.start_date)}
+          </Box>
           {training.enrolled_count != null && (
-            <Box className="flex items-center gap-1"><Clock className="h-3 w-3" /> {training.enrolled_count} enrolled</Box>
+            <Box className="flex items-center gap-1.5">
+              <Clock className="h-3 w-3 text-slate-400" />
+              {training.enrolled_count} enrolled
+            </Box>
           )}
         </Box>
       </Box>
@@ -288,12 +306,12 @@ export function TrainerSessions() {
 
   if (trainings.length === 0) {
     return (
-      <Card className="flex flex-col items-center justify-center px-6 py-14 text-center border-0 shadow-sm">
-        <Box className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+      <Card className="flex flex-col items-center justify-center px-6 py-14 text-center rounded-2xl border border-slate-200/80 shadow-sm">
+        <Box className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
           <Inbox className="h-7 w-7 text-slate-500" />
         </Box>
-        <Text as="h2" className="mt-4 text-lg font-semibold">No assigned trainings</Text>
-        <Text as="p" className="mt-1.5 max-w-md text-sm text-muted-foreground">
+        <Text as="h2" className="mt-4 text-lg font-bold text-slate-800">No assigned trainings</Text>
+        <Text as="p" className="mt-1.5 max-w-md text-sm text-slate-500">
           When an admin assigns you to a training, it will show up here and you can set its day-wise topics.
         </Text>
       </Card>
@@ -303,7 +321,7 @@ export function TrainerSessions() {
   return (
     <Box className="space-y-5">
       <Box>
-        <Text as="h3" className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+        <Text as="h3" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-3">
           Assigned Trainings
         </Text>
         <Box className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

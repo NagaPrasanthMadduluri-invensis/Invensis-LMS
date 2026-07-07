@@ -49,7 +49,7 @@ function TrainerRow({ trainer, onEdit }) {
         <Text as="span" className="text-xs text-slate-400">{trainer.email}</Text>
       </Box>
 
-      <Box className="hidden sm:block min-w-[100px]">
+      <Box className="hidden sm:block min-w-[140px]">
         <Text as="p" className="text-xs text-slate-500">{trainer.experience || "—"}</Text>
       </Box>
 
@@ -57,14 +57,14 @@ function TrainerRow({ trainer, onEdit }) {
         <Text as="p" className="text-xs text-slate-500">{trainer.rate != null ? `₹${trainer.rate}` : "—"}</Text>
       </Box>
 
-      <Box className="flex items-center gap-2 shrink-0">
-        <Button
-          size="icon" variant="ghost"
-          className="h-8 w-8 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+      <Box className="flex items-center gap-2 shrink-0 w-40 justify-end">
+        <button
+          className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs font-semibold rounded-lg shadow-sm transition-colors"
           onClick={() => onEdit(trainer)}
         >
-          <Pencil className="h-3.5 w-3.5" />
-        </Button>
+          <Pencil className="h-3.5 w-3.5 shrink-0" />
+          <span className="leading-none">Edit</span>
+        </button>
         <Link href={`/admin/trainers/${trainer.id}`}
           className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors">
           <Eye className="h-3.5 w-3.5 shrink-0" />
@@ -167,9 +167,9 @@ export function TrainersList() {
           <Box className="flex items-center gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100">
             <Box className="w-10 shrink-0" />
             <Text as="span" className="flex-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Trainer</Text>
-            <Text as="span" className="hidden sm:block min-w-[100px] text-[11px] font-bold text-slate-400 uppercase tracking-wider">Experience</Text>
+            <Text as="span" className="hidden sm:block min-w-[140px] text-[11px] font-bold text-slate-400 uppercase tracking-wider">Experience</Text>
             <Text as="span" className="hidden md:block min-w-[80px] text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rate</Text>
-            <Box className="w-32 shrink-0" />
+            <Box className="w-40 shrink-0" />
           </Box>
           <Box className="divide-y divide-slate-100/80">
             {rows.map((t) => <TrainerRow key={t.id} trainer={t} onEdit={setEditTrainer} />)}

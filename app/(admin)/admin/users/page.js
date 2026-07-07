@@ -6,17 +6,13 @@ import { UsersTable } from "@/components/admin/users-table";
 export default function AdminUsersPage() {
   return (
     <Box className="space-y-6">
-      <Box className="flex items-center gap-3 bg-indigo-50 rounded-xl px-5 py-4">
-        <Box className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shrink-0">
-          <Users className="w-5 h-5 text-indigo-500" />
+      <Box className="rounded-2xl bg-gradient-to-r from-indigo-50 via-blue-50 to-violet-50 border border-indigo-100 px-7 py-6 flex items-center gap-4">
+        <Box className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
+          <Users className="w-6 h-6 text-white" />
         </Box>
         <Box>
-          <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">
-            User Management
-          </Text>
-          <Text as="p" className="text-slate-400 text-xs mt-0.5">
-            Admin &rsaquo; <Text as="span" className="text-slate-500 font-medium">Users</Text>
-          </Text>
+          <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">User Management</Text>
+          <Text as="p" className="text-slate-500 text-xs mt-0.5">View and manage all registered users across the platform.</Text>
         </Box>
       </Box>
       <UsersTable />
