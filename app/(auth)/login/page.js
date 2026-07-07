@@ -66,7 +66,12 @@ function LoginForm() {
             )}
           </Box>
           <Box className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Box className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <Link href="/forgot-password" className="text-xs text-indigo-500 font-medium hover:underline">
+                Forgot password?
+              </Link>
+            </Box>
             <Box className="relative">
               <Input
                 id="password"
