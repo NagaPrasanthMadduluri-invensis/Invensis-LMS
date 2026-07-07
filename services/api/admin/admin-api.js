@@ -23,6 +23,16 @@ export async function fetchTrainers({ token }) {
 }
 
 /**
+ * GET /admin/participants?search=&page=&limit= → { participants: [...], total, page, limit }
+ * Paginated list of all participants (learners), searchable by name/email.
+ */
+export async function fetchParticipants({ token, search = "", page = 1, limit = 20 }) {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (search) params.set("search", search);
+  return apiClient(`/admin/participants?${params.toString()}`, { token });
+}
+
+/**
  * PATCH /admin/trainings/:trainingRef
  * Generic training update. Two independent, both-optional operations — pass any
  * of: trainer_id, meeting_url, meeting_platform ("zoom"|"teams"|"other"),

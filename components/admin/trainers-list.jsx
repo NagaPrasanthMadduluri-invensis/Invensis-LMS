@@ -53,10 +53,6 @@ function TrainerRow({ trainer, onEdit }) {
         <Text as="p" className="text-xs text-slate-500">{trainer.experience || "—"}</Text>
       </Box>
 
-      <Box className="hidden md:block min-w-[80px]">
-        <Text as="p" className="text-xs text-slate-500">{trainer.rate != null ? `₹${trainer.rate}` : "—"}</Text>
-      </Box>
-
       <Box className="flex items-center gap-2 shrink-0 w-40 justify-end">
         <button
           className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs font-semibold rounded-lg shadow-sm transition-colors"
@@ -168,8 +164,7 @@ export function TrainersList() {
             <Box className="w-10 shrink-0" />
             <Text as="span" className="flex-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Trainer</Text>
             <Text as="span" className="hidden sm:block min-w-[140px] text-[11px] font-bold text-slate-400 uppercase tracking-wider">Experience</Text>
-            <Text as="span" className="hidden md:block min-w-[80px] text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rate</Text>
-            <Box className="w-40 shrink-0" />
+            <Text as="span" className="w-40 shrink-0 text-right text-[11px] font-bold text-slate-400 uppercase tracking-wider">Actions</Text>
           </Box>
           <Box className="divide-y divide-slate-100/80">
             {rows.map((t) => <TrainerRow key={t.id} trainer={t} onEdit={setEditTrainer} />)}

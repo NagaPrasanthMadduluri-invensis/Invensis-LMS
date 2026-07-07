@@ -20,9 +20,6 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Accordion, AccordionItem, AccordionTrigger, AccordionContent,
-} from "@/components/ui/accordion";
-import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -165,7 +162,7 @@ function Fact({ icon: Icon, label, value }) {
   );
 }
 
-/* ── Day-wise topics accordion ── */
+/* ── Day-wise topics timeline ── */
 function SessionTopicsCard({ sessions }) {
   const list = Array.isArray(sessions) ? sessions : [];
   const anyTopics = list.some((s) => s.planned_topics?.trim());
@@ -192,36 +189,35 @@ function SessionTopicsCard({ sessions }) {
             <Text as="p" className="text-sm text-slate-400">The trainer hasn&apos;t published any topics yet.</Text>
           </Box>
         ) : (
-          <Accordion type="multiple" className="space-y-2">
+          <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {list.map((s) => {
               const when = formatSessionDateTime(s.start_time);
               const hasTopics = !!s.planned_topics?.trim();
               return (
-                <AccordionItem key={s.day_number} value={`day-${s.day_number}`} className="border border-slate-200/60 rounded-xl px-4 bg-white">
-                  <AccordionTrigger className="hover:no-underline py-3">
-                    <Box className="flex flex-1 items-center justify-between gap-3 pr-2">
-                      <Box className="flex items-center gap-2.5">
-                        <Box className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold shrink-0">
-                          {s.day_number}
-                        </Box>
-                        <Box className="text-left">
-                          <Text as="p" className="text-sm font-semibold leading-tight text-slate-800">Day {s.day_number}</Text>
-                          {when && <Text as="span" className="text-[11px] text-slate-400">{when}</Text>}
-                        </Box>
-                      </Box>
-                      {!hasTopics && <Badge className="border-0 bg-amber-50 text-amber-700 ring-1 ring-amber-200/80 text-[10px]">No topics</Badge>}
+                <Box key={s.day_number} className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
+                  <Box className="flex items-center gap-2.5">
+                    <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50">
+                      <Calendar className="h-4 w-4 text-indigo-600" />
                     </Box>
-                  </AccordionTrigger>
-                  <AccordionContent className="pb-4">
-                    {hasTopics
-                      ? <Text as="p" className="text-sm text-slate-700 whitespace-pre-wrap">{s.planned_topics}</Text>
-                      : <Text as="p" className="text-sm italic text-slate-400">Not set yet.</Text>
-                    }
-                  </AccordionContent>
-                </AccordionItem>
+                    <Box className="min-w-0">
+                      <Text as="p" className="text-sm font-semibold leading-tight text-slate-800">Day {s.day_number}</Text>
+                      {when && <Text as="span" className="text-[11px] text-slate-400">{when}</Text>}
+                    </Box>
+                  </Box>
+                  {hasTopics ? (
+                    <Text as="p" className="mt-3 text-sm whitespace-pre-wrap text-slate-600">
+                      {s.planned_topics}
+                    </Text>
+                  ) : (
+                    <Box className="mt-3 flex items-center gap-1.5 rounded-lg border border-dashed border-slate-200 px-2.5 py-2">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-slate-300" />
+                      <Text as="p" className="text-xs text-slate-400">Topics not added yet</Text>
+                    </Box>
+                  )}
+                </Box>
               );
             })}
-          </Accordion>
+          </Box>
         )}
       </Box>
     </Card>

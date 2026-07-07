@@ -2,6 +2,7 @@ export {
   fetchAdminTrainings,
   fetchAdminTrainingDetail,
   fetchTrainers,
+  fetchParticipants,
   updateTraining,
   assignTrainer,
   updateMeeting,
