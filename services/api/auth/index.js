@@ -3,6 +3,8 @@ export {
   refreshSession,
   logoutUser,
   getCurrentUser,
+  forgotPassword,
+  setPassword,
   normalizeUser,
   setTokenCookie,
   getTokenFromCookie,

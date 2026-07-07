@@ -3,7 +3,11 @@ import { NextResponse } from "next/server";
 const TOKEN_COOKIE = "lms_token";
 const USER_COOKIE  = "lms_user";
 
-const PUBLIC_PATHS = ["/login", "/register"];
+// Reachable without auth.
+const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/reset-password", "/set-password"];
+// Of those, only these bounce an already-authenticated user to their portal.
+// Password-flow pages stay reachable even with a stale session (email-link clicks).
+const AUTH_REDIRECT_PATHS = ["/login", "/register"];
 
 // Default landing portal per role (API.md §4.4: route by role).
 const PORTAL_HOME = {
@@ -43,7 +47,9 @@ export function middleware(request) {
 
   // ── Public paths ──
   if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
-    if (isAuthenticated) {
+    // Only send authenticated users away from login/register — never from the
+    // password-setup/reset pages (they may be following an email link).
+    if (isAuthenticated && AUTH_REDIRECT_PATHS.some((path) => pathname.startsWith(path))) {
       return NextResponse.redirect(new URL(home, request.url));
     }
     return NextResponse.next();

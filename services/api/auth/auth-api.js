@@ -52,6 +52,25 @@ export async function getCurrentUser(token) {
   return apiClient("/auth/me", { token });
 }
 
+/**
+ * POST /auth/forgot-password
+ * Always resolves 200 with the same message (no account enumeration).
+ * Returns { message }.
+ */
+export async function forgotPassword({ email }) {
+  return apiClient("/auth/forgot-password", { method: "POST", body: { email } });
+}
+
+/**
+ * POST /auth/set-password
+ * Serves BOTH the account-setup and password-reset email links.
+ * `token` comes from the email link's ?token= query param.
+ * Returns { message }. Errors: 422 validation, 400 invalid/expired/used token.
+ */
+export async function setPassword({ token, password }) {
+  return apiClient("/auth/set-password", { method: "POST", body: { token, password } });
+}
+
 /* ──────────────────────────────────────
    USER NORMALIZATION
    ────────────────────────────────────── */
