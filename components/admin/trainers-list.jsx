@@ -49,7 +49,7 @@ function TrainerRow({ trainer, onEdit }) {
         <Text as="span" className="text-xs text-slate-400">{trainer.email}</Text>
       </Box>
 
-      <Box className="hidden sm:block min-w-[100px]">
+      <Box className="hidden sm:block min-w-[140px]">
         <Text as="p" className="text-xs text-slate-500">{trainer.experience || "—"}</Text>
       </Box>
 
@@ -167,7 +167,7 @@ export function TrainersList() {
           <Box className="flex items-center gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100">
             <Box className="w-10 shrink-0" />
             <Text as="span" className="flex-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Trainer</Text>
-            <Text as="span" className="hidden sm:block min-w-[100px] text-[11px] font-bold text-slate-400 uppercase tracking-wider">Experience</Text>
+            <Text as="span" className="hidden sm:block min-w-[140px] text-[11px] font-bold text-slate-400 uppercase tracking-wider">Experience</Text>
             <Text as="span" className="hidden md:block min-w-[80px] text-[11px] font-bold text-slate-400 uppercase tracking-wider">Rate</Text>
             <Box className="w-40 shrink-0" />
           </Box>
