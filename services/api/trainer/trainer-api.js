@@ -46,11 +46,14 @@ export async function fetchMyTrainings({ token }) {
 
 /**
  * GET /trainer/trainings/:trainingRef  (API.md §3.3.2 — UUID or code)
- * Returns a FLAT training object with a `sessions[]` array:
+ * Returns a FLAT training object with `sessions[]` and `participants[]`:
  *   { id, training_id, title, delivery_mode, bucket, status, start_date, end_date,
  *     timezone, batch_type, venue,
- *     sessions: [{ id, day_number, planned_topics, start_time, end_time, status }] }
+ *     sessions: [{ id, day_number, planned_topics, start_time, end_time, status }],
+ *     participants: [{ enrolment_id, participant_id, name, job_title, status, enrolled_at }] }
  * `sessions[].id` is the sessionId used by PATCH /trainer/sessions/:id/topics.
+ * Roster privacy: `participants[]` intentionally omits email/phone/account state —
+ * that's admin-only (API.md §3.2.11).
  * 403 if the caller isn't the currently-assigned trainer for this training.
  */
 export async function fetchTrainerTrainingSessions({ token, trainingRef }) {
