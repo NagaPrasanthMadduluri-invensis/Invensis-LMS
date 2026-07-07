@@ -236,7 +236,7 @@ function SessionTopics({ sessions }) {
           <Text as="p" className="text-xs text-slate-400 mt-1">Check back soon.</Text>
         </Box>
       ) : (
-        <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 items-start">
+        <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {list.map((s) => {
             const when = formatSessionTime(s.start_time);
             const hasTopics = !!s.planned_topics?.trim();

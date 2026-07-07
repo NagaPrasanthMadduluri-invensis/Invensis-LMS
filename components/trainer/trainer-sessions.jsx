@@ -106,7 +106,7 @@ function SessionItem({ session, token, onSaved }) {
   }
 
   return (
-    <Box className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
+    <Box className="flex h-full flex-col rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
       <Box className="flex items-center gap-2.5">
         <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50">
           <CalendarDays className="h-4 w-4 text-violet-600" />
@@ -142,7 +142,7 @@ function SessionItem({ session, token, onSaved }) {
           </Box>
         </Box>
       ) : (
-        <Box className="mt-3">
+        <Box className="mt-3 flex flex-1 flex-col justify-between gap-2">
           {hasTopics ? (
             <Text as="p" className="text-sm whitespace-pre-wrap text-slate-600">{session.planned_topics}</Text>
           ) : (
@@ -152,7 +152,7 @@ function SessionItem({ session, token, onSaved }) {
             </Box>
           )}
           <Button size="sm" variant="outline" onClick={startEdit}
-            className="mt-2 h-8 px-3 border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600 rounded-lg text-xs">
+            className="self-start h-8 px-3 border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600 rounded-lg text-xs">
             <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
           </Button>
         </Box>
@@ -223,7 +223,7 @@ function SessionsPanel({ trainingRef, token }) {
               <Text as="p" className="text-sm font-medium text-slate-500">This training has no sessions.</Text>
             </Box>
           ) : (
-            <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 items-start">
+            <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {sessions.map((s) => (
                 <SessionItem key={s.id ?? s.day_number} session={s} token={token} onSaved={onSaved} />
               ))}
