@@ -53,16 +53,16 @@ function TrainerRow({ trainer, onEdit }) {
         <Text as="p" className="text-xs text-slate-500">{trainer.experience || "—"}</Text>
       </Box>
 
-      <Box className="flex items-center gap-2 shrink-0 w-40 justify-end">
+      <Box className="flex items-center gap-2 shrink-0 justify-end">
         <button
-          className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs font-semibold rounded-lg shadow-sm transition-colors"
+          className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs font-semibold rounded-lg shadow-sm transition-colors shrink-0 whitespace-nowrap"
           onClick={() => onEdit(trainer)}
         >
           <Pencil className="h-3.5 w-3.5 shrink-0" />
           <span className="leading-none">Edit</span>
         </button>
         <Link href={`/admin/trainers/${trainer.id}`}
-          className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors">
+          className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors shrink-0 whitespace-nowrap">
           <Eye className="h-3.5 w-3.5 shrink-0" />
           <Text as="span" className="leading-none text-white">View</Text>
         </Link>
