@@ -16,6 +16,7 @@ import { AuthContext } from "@/providers/auth-provider";
  *   login({ email, password })    — authenticate and redirect by role
  *   register({ firstName, lastName, email, password, passwordConfirmation }) — create account
  *   logout()      — revoke token on server, clear cookies, redirect to /login
+ *   updateUser(patch) — merge a partial update (e.g. a new name) into user + its cookie
  */
 export function useAuth() {
   const context = useContext(AuthContext);

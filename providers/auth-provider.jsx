@@ -110,6 +110,19 @@ export function AuthProvider({ children }) {
     router.push("/login");
   }, [router]);
 
+  /**
+   * Merge a partial update (e.g. a new display name after a profile edit)
+   * into the in-memory user and its persisted cookie, without a full refetch.
+   */
+  const updateUser = useCallback((patch) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      setUserCookie(next);
+      return next;
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -119,9 +132,10 @@ export function AuthProvider({ children }) {
       loading,
       login,
       logout,
+      updateUser,
       isAuthenticated: !!user && !!token,
     }),
-    [user, token, capabilities, sponsor, loading, login, logout]
+    [user, token, capabilities, sponsor, loading, login, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

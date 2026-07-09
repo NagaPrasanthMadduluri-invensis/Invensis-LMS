@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -19,10 +20,27 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { fetchMyProfile, updateMyProfile, getAvatarUploadUrl, uploadAvatarFile } from "@/services/api/me";
 
 const COUNTRIES = ["India", "United States", "United Kingdom", "Australia", "UAE", "Singapore", "Canada", "Other"];
-const TIMEZONES = ["Asia/Kolkata (IST)", "America/New_York (ET)", "Europe/London (GMT)", "Asia/Dubai (GST)", "Asia/Singapore (SGT)", "Australia/Sydney (AEST)"];
-const LANGUAGES = ["English", "Hindi", "Spanish", "French", "German", "Arabic"];
+const TIMEZONES = [
+  { value: "Asia/Kolkata", label: "Asia/Kolkata (IST)" },
+  { value: "America/New_York", label: "America/New_York (ET)" },
+  { value: "Europe/London", label: "Europe/London (GMT)" },
+  { value: "Asia/Dubai", label: "Asia/Dubai (GST)" },
+  { value: "Asia/Singapore", label: "Asia/Singapore (SGT)" },
+  { value: "Australia/Sydney", label: "Australia/Sydney (AEST)" },
+];
+const LANGUAGES = [
+  { value: "en", label: "English" },
+  { value: "hi", label: "Hindi" },
+  { value: "es", label: "Spanish" },
+  { value: "fr", label: "French" },
+  { value: "de", label: "German" },
+  { value: "ar", label: "Arabic" },
+];
+const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 
 function splitName(name = "") {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -69,6 +87,16 @@ function clearErrorIfValid(setErrors, field, validate, value) {
   });
 }
 
+// Maps the API's snake_case field-error keys (API.md §1.2/§3.5.2) onto our
+// camelCase form-state keys, so a 422 response highlights the right field.
+function mapFieldErrors(apiErrors, keyMap) {
+  const mapped = {};
+  for (const [apiKey, formKey] of Object.entries(keyMap)) {
+    if (apiErrors?.[apiKey]) mapped[formKey] = apiErrors[apiKey][0];
+  }
+  return mapped;
+}
+
 const inputCls = "h-10 text-sm border-slate-200 focus-visible:ring-indigo-400";
 
 function SectionCard({ icon: Icon, title, description, children }) {
@@ -103,19 +131,46 @@ function FieldRow({ label, htmlFor, optional, error, children }) {
   );
 }
 
+function ProfileSkeleton() {
+  return (
+    <Box className="space-y-5">
+      <Skeleton className="h-10 w-72 rounded-full" />
+      <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <Box className="px-6 py-4 border-b border-slate-100">
+          <Skeleton className="h-5 w-40" />
+        </Box>
+        <Box className="p-6 space-y-5">
+          <Skeleton className="h-16 w-16 rounded-full" />
+          <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 rounded-lg" />)}
+          </Box>
+        </Box>
+      </Card>
+    </Box>
+  );
+}
+
 export function LearnerProfileSettings() {
-  const { user, sponsor } = useAuth();
+  const { user, sponsor, token, updateUser } = useAuth();
   const { first, last } = splitName(user?.name);
 
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState(null);
+
   /* ── 1. Personal information ── */
+  const [avatarUrl, setAvatarUrl] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
   const [firstName, setFirstName] = useState(first);
   const [lastName, setLastName] = useState(last);
   const [mobile, setMobile] = useState("");
   const [country, setCountry] = useState("India");
-  const [timezone, setTimezone] = useState("Asia/Kolkata (IST)");
-  const [language, setLanguage] = useState("English");
+  const [timezone, setTimezone] = useState("Asia/Kolkata");
+  const [language, setLanguage] = useState("en");
+  const [personalSaving, setPersonalSaving] = useState(false);
   const [personalSaved, setPersonalSaved] = useState(false);
+  const [personalError, setPersonalError] = useState("");
   const [personalErrors, setPersonalErrors] = useState({});
 
   /* ── 2. Professional information ── */
@@ -124,10 +179,12 @@ export function LearnerProfileSettings() {
   const [department, setDepartment] = useState("");
   const [experience, setExperience] = useState("");
   const [linkedin, setLinkedin] = useState("");
+  const [professionalSaving, setProfessionalSaving] = useState(false);
   const [professionalSaved, setProfessionalSaved] = useState(false);
+  const [professionalError, setProfessionalError] = useState("");
   const [professionalErrors, setProfessionalErrors] = useState({});
 
-  /* ── 4. Account settings ── */
+  /* ── 4. Account settings — no API yet; local-only ── */
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -138,20 +195,67 @@ export function LearnerProfileSettings() {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [preferencesSaved, setPreferencesSaved] = useState(false);
 
+  useEffect(() => {
+    if (!token) return;
+    fetchMyProfile({ token })
+      .then(({ profile }) => {
+        setFirstName(profile.first_name || first);
+        setLastName(profile.last_name || last);
+        setMobile(profile.phone || "");
+        setCountry(profile.country || "India");
+        setTimezone(profile.time_zone || "Asia/Kolkata");
+        setLanguage(profile.preferred_language || "en");
+        setCompany(profile.company_name || "");
+        setJobTitle(profile.job_title || "");
+        setDepartment(profile.department || "");
+        setExperience(profile.years_experience != null ? String(profile.years_experience) : "");
+        setLinkedin(profile.linkedin_url || "");
+        setAvatarUrl(profile.avatar_url || null);
+      })
+      .catch((e) => setProfileError(e.message))
+      .finally(() => setProfileLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
   function flashSaved(setter) {
     setter(true);
     setTimeout(() => setter(false), 2000);
   }
 
-  function handlePhotoChange(e) {
+  async function handlePhotoChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setAvatarError("");
+
+    if (!AVATAR_TYPES.includes(file.type)) {
+      setAvatarError("Please choose a JPG, PNG, or WEBP image.");
+      return;
+    }
+    if (file.size > AVATAR_MAX_BYTES) {
+      setAvatarError("Image must be 2MB or smaller.");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => setPhotoPreview(reader.result);
     reader.readAsDataURL(file);
+
+    setAvatarUploading(true);
+    try {
+      const { upload_url, avatar_key, headers } = await getAvatarUploadUrl({ token, contentType: file.type });
+      await uploadAvatarFile({ uploadUrl: upload_url, headers, file });
+      const { profile } = await updateMyProfile({ token, data: { avatar_key } });
+      setAvatarUrl(profile.avatar_url);
+      setPhotoPreview(null);
+    } catch (err) {
+      setAvatarError(err.message || "Failed to upload photo. Please try again.");
+      setPhotoPreview(null);
+    } finally {
+      setAvatarUploading(false);
+    }
   }
 
-  function savePersonalInfo() {
+  async function savePersonalInfo() {
     const errors = {};
     const firstNameError = validateFirstName(firstName);
     const lastNameError = validateLastName(lastName);
@@ -160,16 +264,33 @@ export function LearnerProfileSettings() {
     if (lastNameError) errors.lastName = lastNameError;
     if (mobileError) errors.mobile = mobileError;
     setPersonalErrors(errors);
+    setPersonalError("");
     if (Object.keys(errors).length) return;
 
-    console.log("Personal Information updated:", {
-      photo: photoPreview ? "New photo selected" : "Unchanged",
-      firstName, lastName, email: user?.email, mobile, country, timezone, language,
-    });
-    flashSaved(setPersonalSaved);
+    setPersonalSaving(true);
+    try {
+      await updateMyProfile({
+        token,
+        data: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          phone: mobile.trim(),
+          country,
+          time_zone: timezone,
+          preferred_language: language,
+        },
+      });
+      updateUser({ name: `${firstName.trim()} ${lastName.trim()}`.trim() });
+      flashSaved(setPersonalSaved);
+    } catch (e) {
+      setPersonalErrors(mapFieldErrors(e.errors, { first_name: "firstName", last_name: "lastName", phone: "mobile" }));
+      setPersonalError(e.message || "Failed to save. Please try again.");
+    } finally {
+      setPersonalSaving(false);
+    }
   }
 
-  function saveProfessionalInfo() {
+  async function saveProfessionalInfo() {
     const errors = {};
     const companyError = validateCompany(company);
     const jobTitleError = validateJobTitle(jobTitle);
@@ -180,10 +301,30 @@ export function LearnerProfileSettings() {
     if (experienceError) errors.experience = experienceError;
     if (linkedinError) errors.linkedin = linkedinError;
     setProfessionalErrors(errors);
+    setProfessionalError("");
     if (Object.keys(errors).length) return;
 
-    console.log("Professional Information updated:", { company, jobTitle, department, experience, linkedin });
-    flashSaved(setProfessionalSaved);
+    setProfessionalSaving(true);
+    try {
+      await updateMyProfile({
+        token,
+        data: {
+          company_name: company.trim(),
+          job_title: jobTitle.trim(),
+          department: department.trim() || null,
+          years_experience: experience.trim() ? Number(experience) : null,
+          linkedin_url: linkedin.trim() || null,
+        },
+      });
+      flashSaved(setProfessionalSaved);
+    } catch (e) {
+      setProfessionalErrors(mapFieldErrors(e.errors, {
+        company_name: "company", job_title: "jobTitle", years_experience: "experience", linkedin_url: "linkedin",
+      }));
+      setProfessionalError(e.message || "Failed to save. Please try again.");
+    } finally {
+      setProfessionalSaving(false);
+    }
   }
 
   function savePassword() {
@@ -210,6 +351,16 @@ export function LearnerProfileSettings() {
     flashSaved(setPreferencesSaved);
   }
 
+  if (profileLoading) return <ProfileSkeleton />;
+
+  if (profileError) {
+    return (
+      <Card className="p-6 rounded-2xl border-0 bg-red-50 shadow-sm">
+        <Text as="p" className="text-red-600 text-sm">Failed to load your profile: {profileError}</Text>
+      </Card>
+    );
+  }
+
   return (
     <Tabs defaultValue="personal">
       <TabsList className="h-auto w-full sm:w-fit flex-wrap gap-1 rounded-full bg-slate-200 p-1.5">
@@ -232,7 +383,7 @@ export function LearnerProfileSettings() {
         <SectionCard icon={User} title="Personal Information" description="Your basic profile details.">
           <Box className="flex items-center gap-4">
             <Avatar size="lg">
-              {photoPreview && <AvatarImage src={photoPreview} alt={user?.name} />}
+              {(photoPreview || avatarUrl) && <AvatarImage src={photoPreview || avatarUrl} alt={user?.name} />}
               <AvatarFallback className="bg-indigo-100 text-indigo-700 text-sm font-bold">
                 {user?.initials || "U"}
               </AvatarFallback>
@@ -242,13 +393,18 @@ export function LearnerProfileSettings() {
                 variant="outline"
                 size="sm"
                 nativeButton={false}
+                disabled={avatarUploading}
                 className="h-8 px-3 text-xs border-slate-200"
                 render={<label htmlFor="profile-photo" className="cursor-pointer flex items-center gap-1.5" />}
               >
-                <Camera className="h-3.5 w-3.5" /> Change Photo
+                <Camera className="h-3.5 w-3.5" /> {avatarUploading ? "Uploading..." : "Change Photo"}
               </Button>
-              <input id="profile-photo" type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
-              <Text as="p" className="text-[11px] text-slate-400 mt-1.5">JPG or PNG, up to 2MB.</Text>
+              <input
+                id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp"
+                className="hidden" disabled={avatarUploading} onChange={handlePhotoChange}
+              />
+              <Text as="p" className="text-[11px] text-slate-400 mt-1.5">JPG, PNG, or WEBP, up to 2MB.</Text>
+              {avatarError && <Text as="p" className="text-xs text-red-600 mt-1">{avatarError}</Text>}
             </Box>
           </Box>
 
@@ -304,7 +460,7 @@ export function LearnerProfileSettings() {
               <Select value={timezone} onValueChange={setTimezone}>
                 <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {TIMEZONES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  {TIMEZONES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </FieldRow>
@@ -312,14 +468,15 @@ export function LearnerProfileSettings() {
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                  {LANGUAGES.map((l) => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </FieldRow>
           </Box>
 
-          <Button onClick={savePersonalInfo} className="h-10 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
-            {personalSaved ? "Saved ✓" : "Save Changes"}
+          {personalError && <Text as="p" className="text-xs text-red-600">{personalError}</Text>}
+          <Button onClick={savePersonalInfo} disabled={personalSaving} className="h-10 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+            {personalSaving ? "Saving..." : personalSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>
       </TabsContent>
@@ -378,8 +535,9 @@ export function LearnerProfileSettings() {
               </Box>
             </FieldRow>
           </Box>
-          <Button onClick={saveProfessionalInfo} className="h-10 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
-            {professionalSaved ? "Saved ✓" : "Save Changes"}
+          {professionalError && <Text as="p" className="text-xs text-red-600">{professionalError}</Text>}
+          <Button onClick={saveProfessionalInfo} disabled={professionalSaving} className="h-10 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+            {professionalSaving ? "Saving..." : professionalSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>
       </TabsContent>
