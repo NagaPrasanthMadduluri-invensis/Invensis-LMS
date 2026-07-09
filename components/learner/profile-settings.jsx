@@ -148,16 +148,16 @@ export function LearnerProfileSettings() {
   return (
     <Tabs defaultValue="personal">
       <TabsList className="h-auto w-full sm:w-fit flex-wrap gap-1 rounded-xl bg-slate-100 p-1.5">
-        <TabsTrigger value="personal" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold">
+        <TabsTrigger value="personal" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-emerald-100 data-active:text-emerald-700 data-active:ring-1 data-active:ring-emerald-200 data-active:shadow-sm">
           <User className="h-4 w-4" /> Personal
         </TabsTrigger>
-        <TabsTrigger value="professional" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold">
+        <TabsTrigger value="professional" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-emerald-100 data-active:text-emerald-700 data-active:ring-1 data-active:ring-emerald-200 data-active:shadow-sm">
           <Briefcase className="h-4 w-4" /> Professional
         </TabsTrigger>
-        <TabsTrigger value="training" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold">
+        <TabsTrigger value="training" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-emerald-100 data-active:text-emerald-700 data-active:ring-1 data-active:ring-emerald-200 data-active:shadow-sm">
           <GraduationCap className="h-4 w-4" /> Training
         </TabsTrigger>
-        <TabsTrigger value="account" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold">
+        <TabsTrigger value="account" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-emerald-100 data-active:text-emerald-700 data-active:ring-1 data-active:ring-emerald-200 data-active:shadow-sm">
           <Shield className="h-4 w-4" /> Account
         </TabsTrigger>
       </TabsList>
