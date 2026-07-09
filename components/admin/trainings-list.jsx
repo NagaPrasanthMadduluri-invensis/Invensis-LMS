@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -208,12 +208,19 @@ export function TrainingsList() {
   const [search, setSearch] = useState("");
   const [error, setError] = useState(null);
 
+  const pathname = usePathname();
+
+  // Keying on `pathname` (not just `token`) forces a refetch every time the
+  // admin navigates back to this list — e.g. via the "Courses" <Link> from a
+  // training's detail page after reassigning a trainer. Without it, Next.js's
+  // client-side route cache can restore this component without remounting it,
+  // so a mount-only fetch would never see the update.
   useEffect(() => {
     if (!token) return;
     fetchAdminTrainings({ token })
       .then((data) => setTrainings(data.trainings || []))
       .catch((err) => setError(err.message));
-  }, [token]);
+  }, [token, pathname]);
 
   if (error) {
     return (

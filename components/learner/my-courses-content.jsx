@@ -55,6 +55,8 @@ const BATCH_LABEL = {
   combined: "Combined batch",
 };
 
+const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Meeting" };
+
 function formatDate(dateStr) {
   if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("en-IN", {
@@ -137,6 +139,30 @@ function ScheduleCard({ training }) {
             </Badge>
           </Box>
         </Box>
+
+        {training.meeting?.url ? (
+          <Box className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white/70 ring-1 ring-violet-200 px-4 py-3">
+            <Box className="flex items-center gap-2.5 min-w-0">
+              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+                <Video className="h-4 w-4 text-emerald-600" />
+              </Box>
+              <Box className="min-w-0">
+                <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight">Meeting link is live</Text>
+                <Text as="span" className="text-[11px] text-slate-500">{PLATFORM_LABEL[training.meeting.platform] || "Meeting"}</Text>
+              </Box>
+            </Box>
+            <Button asChild size="sm" className="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white border-0 rounded-lg text-sm font-semibold shrink-0">
+              <a href={training.meeting.url} target="_blank" rel="noopener noreferrer">Join Meeting</a>
+            </Button>
+          </Box>
+        ) : training.delivery_mode !== "in_person" && (
+          <Box className="mt-4 flex items-center gap-2.5 rounded-xl border border-dashed border-violet-200 bg-white/50 px-4 py-3">
+            <AlertCircle className="h-4 w-4 shrink-0 text-violet-300" />
+            <Text as="p" className="text-xs text-slate-500">
+              Meeting link hasn&apos;t been released yet — check back closer to the training date.
+            </Text>
+          </Box>
+        )}
       </Box>
 
       {/* Facts grid */}
