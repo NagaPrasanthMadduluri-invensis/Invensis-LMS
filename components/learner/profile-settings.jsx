@@ -29,6 +29,46 @@ function splitName(name = "") {
   return { first: parts[0] || "", last: parts.slice(1).join(" ") };
 }
 
+const MOBILE_PATTERN = /^\+?[0-9\s-]{7,15}$/;
+
+function isValidUrl(value) {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const validateFirstName = (v) => (v.trim() ? null : "First name is required.");
+const validateLastName = (v) => (v.trim() ? null : "Last name is required.");
+function validateMobile(v) {
+  if (!v.trim()) return "Mobile number is required.";
+  if (!MOBILE_PATTERN.test(v.trim())) return "Enter a valid mobile number.";
+  return null;
+}
+const validateCompany = (v) => (v.trim() ? null : "Company name is required.");
+const validateJobTitle = (v) => (v.trim() ? null : "Job title is required.");
+function validateExperience(v) {
+  if (!v.trim()) return null;
+  if (Number.isNaN(Number(v)) || Number(v) < 0) return "Enter a valid number of years.";
+  return null;
+}
+function validateLinkedin(v) {
+  if (!v.trim()) return null;
+  return isValidUrl(v.trim()) ? null : "Enter a valid URL (e.g. https://linkedin.com/in/...).";
+}
+
+// Only clears an existing error once the field becomes valid — never adds a
+// new one while typing, so red marks don't flash up mid-edit.
+function clearErrorIfValid(setErrors, field, validate, value) {
+  setErrors((prev) => {
+    if (!prev[field] || validate(value)) return prev;
+    const { [field]: _omit, ...rest } = prev;
+    return rest;
+  });
+}
+
 const inputCls = "h-10 text-sm border-slate-200 focus-visible:ring-indigo-400";
 
 function SectionCard({ icon: Icon, title, description, children }) {
@@ -50,7 +90,7 @@ function SectionCard({ icon: Icon, title, description, children }) {
   );
 }
 
-function FieldRow({ label, htmlFor, optional, children }) {
+function FieldRow({ label, htmlFor, optional, error, children }) {
   return (
     <Box className="space-y-1.5">
       <Label htmlFor={htmlFor} className="text-xs font-semibold text-slate-600">
@@ -58,6 +98,7 @@ function FieldRow({ label, htmlFor, optional, children }) {
         {optional && <Text as="span" className="text-slate-400 font-normal ml-1">(Optional)</Text>}
       </Label>
       {children}
+      {error && <Text as="p" className="text-xs text-red-600">{error}</Text>}
     </Box>
   );
 }
@@ -75,6 +116,7 @@ export function LearnerProfileSettings() {
   const [timezone, setTimezone] = useState("Asia/Kolkata (IST)");
   const [language, setLanguage] = useState("English");
   const [personalSaved, setPersonalSaved] = useState(false);
+  const [personalErrors, setPersonalErrors] = useState({});
 
   /* ── 2. Professional information ── */
   const [company, setCompany] = useState("");
@@ -83,6 +125,7 @@ export function LearnerProfileSettings() {
   const [experience, setExperience] = useState("");
   const [linkedin, setLinkedin] = useState("");
   const [professionalSaved, setProfessionalSaved] = useState(false);
+  const [professionalErrors, setProfessionalErrors] = useState({});
 
   /* ── 4. Account settings ── */
   const [currentPassword, setCurrentPassword] = useState("");
@@ -109,6 +152,16 @@ export function LearnerProfileSettings() {
   }
 
   function savePersonalInfo() {
+    const errors = {};
+    const firstNameError = validateFirstName(firstName);
+    const lastNameError = validateLastName(lastName);
+    const mobileError = validateMobile(mobile);
+    if (firstNameError) errors.firstName = firstNameError;
+    if (lastNameError) errors.lastName = lastNameError;
+    if (mobileError) errors.mobile = mobileError;
+    setPersonalErrors(errors);
+    if (Object.keys(errors).length) return;
+
     console.log("Personal Information updated:", {
       photo: photoPreview ? "New photo selected" : "Unchanged",
       firstName, lastName, email: user?.email, mobile, country, timezone, language,
@@ -117,6 +170,18 @@ export function LearnerProfileSettings() {
   }
 
   function saveProfessionalInfo() {
+    const errors = {};
+    const companyError = validateCompany(company);
+    const jobTitleError = validateJobTitle(jobTitle);
+    const experienceError = validateExperience(experience);
+    const linkedinError = validateLinkedin(linkedin);
+    if (companyError) errors.company = companyError;
+    if (jobTitleError) errors.jobTitle = jobTitleError;
+    if (experienceError) errors.experience = experienceError;
+    if (linkedinError) errors.linkedin = linkedinError;
+    setProfessionalErrors(errors);
+    if (Object.keys(errors).length) return;
+
     console.log("Professional Information updated:", { company, jobTitle, department, experience, linkedin });
     flashSaved(setProfessionalSaved);
   }
@@ -147,17 +212,17 @@ export function LearnerProfileSettings() {
 
   return (
     <Tabs defaultValue="personal">
-      <TabsList className="h-auto w-full sm:w-fit flex-wrap gap-1 rounded-xl bg-slate-100 p-1.5">
-        <TabsTrigger value="personal" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-emerald-100 data-active:text-emerald-700 data-active:ring-1 data-active:ring-emerald-200 data-active:shadow-sm">
+      <TabsList className="h-auto w-full sm:w-fit flex-wrap gap-1 rounded-full bg-slate-200 p-1.5">
+        <TabsTrigger value="personal" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-blue-200 data-active:text-blue-800 data-active:ring-1 data-active:ring-blue-300 data-active:shadow-sm">
           <User className="h-4 w-4" /> Personal
         </TabsTrigger>
-        <TabsTrigger value="professional" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-emerald-100 data-active:text-emerald-700 data-active:ring-1 data-active:ring-emerald-200 data-active:shadow-sm">
+        <TabsTrigger value="professional" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-blue-200 data-active:text-blue-800 data-active:ring-1 data-active:ring-blue-300 data-active:shadow-sm">
           <Briefcase className="h-4 w-4" /> Professional
         </TabsTrigger>
-        <TabsTrigger value="training" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-emerald-100 data-active:text-emerald-700 data-active:ring-1 data-active:ring-emerald-200 data-active:shadow-sm">
+        <TabsTrigger value="training" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-blue-200 data-active:text-blue-800 data-active:ring-1 data-active:ring-blue-300 data-active:shadow-sm">
           <GraduationCap className="h-4 w-4" /> Training
         </TabsTrigger>
-        <TabsTrigger value="account" className="gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-emerald-100 data-active:text-emerald-700 data-active:ring-1 data-active:ring-emerald-200 data-active:shadow-sm">
+        <TabsTrigger value="account" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-blue-200 data-active:text-blue-800 data-active:ring-1 data-active:ring-blue-300 data-active:shadow-sm">
           <Shield className="h-4 w-4" /> Account
         </TabsTrigger>
       </TabsList>
@@ -188,11 +253,25 @@ export function LearnerProfileSettings() {
           </Box>
 
           <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <FieldRow label="First Name" htmlFor="firstName">
-              <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={inputCls} />
+            <FieldRow label="First Name" htmlFor="firstName" error={personalErrors.firstName}>
+              <Input
+                id="firstName" value={firstName}
+                onChange={(e) => {
+                  setFirstName(e.target.value);
+                  clearErrorIfValid(setPersonalErrors, "firstName", validateFirstName, e.target.value);
+                }}
+                aria-invalid={!!personalErrors.firstName} className={inputCls}
+              />
             </FieldRow>
-            <FieldRow label="Last Name" htmlFor="lastName">
-              <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputCls} />
+            <FieldRow label="Last Name" htmlFor="lastName" error={personalErrors.lastName}>
+              <Input
+                id="lastName" value={lastName}
+                onChange={(e) => {
+                  setLastName(e.target.value);
+                  clearErrorIfValid(setPersonalErrors, "lastName", validateLastName, e.target.value);
+                }}
+                aria-invalid={!!personalErrors.lastName} className={inputCls}
+              />
             </FieldRow>
             <FieldRow label="Email" htmlFor="email">
               <Box className="relative">
@@ -200,10 +279,17 @@ export function LearnerProfileSettings() {
                 <Input id="email" value={user?.email || ""} disabled className={`${inputCls} pl-9 bg-slate-50 text-slate-500`} />
               </Box>
             </FieldRow>
-            <FieldRow label="Mobile Number" htmlFor="mobile">
+            <FieldRow label="Mobile Number" htmlFor="mobile" error={personalErrors.mobile}>
               <Box className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="mobile" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="+91 90000 00000" className={`${inputCls} pl-9`} />
+                <Input
+                  id="mobile" value={mobile}
+                  onChange={(e) => {
+                    setMobile(e.target.value);
+                    clearErrorIfValid(setPersonalErrors, "mobile", validateMobile, e.target.value);
+                  }}
+                  placeholder="+91 90000 00000" aria-invalid={!!personalErrors.mobile} className={`${inputCls} pl-9`}
+                />
               </Box>
             </FieldRow>
             <FieldRow label="Country">
@@ -242,25 +328,53 @@ export function LearnerProfileSettings() {
       <TabsContent value="professional" className="mt-5">
         <SectionCard icon={Briefcase} title="Professional Information" description="Helps tailor recommendations and certificates.">
           <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <FieldRow label="Company Name" htmlFor="company">
+            <FieldRow label="Company Name" htmlFor="company" error={professionalErrors.company}>
               <Box className="relative">
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} className={`${inputCls} pl-9`} />
+                <Input
+                  id="company" value={company}
+                  onChange={(e) => {
+                    setCompany(e.target.value);
+                    clearErrorIfValid(setProfessionalErrors, "company", validateCompany, e.target.value);
+                  }}
+                  aria-invalid={!!professionalErrors.company} className={`${inputCls} pl-9`}
+                />
               </Box>
             </FieldRow>
-            <FieldRow label="Job Title" htmlFor="jobTitle">
-              <Input id="jobTitle" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} className={inputCls} />
+            <FieldRow label="Job Title" htmlFor="jobTitle" error={professionalErrors.jobTitle}>
+              <Input
+                id="jobTitle" value={jobTitle}
+                onChange={(e) => {
+                  setJobTitle(e.target.value);
+                  clearErrorIfValid(setProfessionalErrors, "jobTitle", validateJobTitle, e.target.value);
+                }}
+                aria-invalid={!!professionalErrors.jobTitle} className={inputCls}
+              />
             </FieldRow>
             <FieldRow label="Department" htmlFor="department" optional>
               <Input id="department" value={department} onChange={(e) => setDepartment(e.target.value)} className={inputCls} />
             </FieldRow>
-            <FieldRow label="Years of Experience" htmlFor="experience" optional>
-              <Input id="experience" type="number" min="0" value={experience} onChange={(e) => setExperience(e.target.value)} className={inputCls} />
+            <FieldRow label="Years of Experience" htmlFor="experience" optional error={professionalErrors.experience}>
+              <Input
+                id="experience" type="number" min="0" value={experience}
+                onChange={(e) => {
+                  setExperience(e.target.value);
+                  clearErrorIfValid(setProfessionalErrors, "experience", validateExperience, e.target.value);
+                }}
+                aria-invalid={!!professionalErrors.experience} className={inputCls}
+              />
             </FieldRow>
-            <FieldRow label="LinkedIn Profile" htmlFor="linkedin" optional>
+            <FieldRow label="LinkedIn Profile" htmlFor="linkedin" optional error={professionalErrors.linkedin}>
               <Box className="relative">
                 <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="linkedin" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} placeholder="https://linkedin.com/in/..." className={`${inputCls} pl-9`} />
+                <Input
+                  id="linkedin" value={linkedin}
+                  onChange={(e) => {
+                    setLinkedin(e.target.value);
+                    clearErrorIfValid(setProfessionalErrors, "linkedin", validateLinkedin, e.target.value);
+                  }}
+                  placeholder="https://linkedin.com/in/..." aria-invalid={!!professionalErrors.linkedin} className={`${inputCls} pl-9`}
+                />
               </Box>
             </FieldRow>
           </Box>
