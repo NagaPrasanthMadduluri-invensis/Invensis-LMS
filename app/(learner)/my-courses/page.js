@@ -2,6 +2,7 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { BookOpen } from "lucide-react";
 import { MyCoursesContent } from "@/components/learner/my-courses-content";
+import { TrainingGuidelines } from "@/components/learner/training-guidelines";
 
 export default function MyCoursesPage() {
   return (
@@ -16,6 +17,7 @@ export default function MyCoursesPage() {
         </Box>
       </Box>
       <MyCoursesContent />
+      <TrainingGuidelines />
     </Box>
   );
 }
