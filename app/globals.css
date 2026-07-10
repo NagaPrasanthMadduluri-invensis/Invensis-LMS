@@ -136,3 +136,41 @@
     @apply font-sans;
   }
 }
+/* ── Certificate print-to-PDF ──────────────────────────────
+   When printing (learner clicks "Download certificate"), the app adds the
+   `printing-certificate` class to <body>. We hide everything on the page and
+   reveal only the off-screen certificate print root, sized to a full landscape
+   page. Screen: the print root is parked off-canvas so it never shows. */
+.certificate-print-root {
+  position: fixed;
+  left: -20000px;
+  top: 0;
+  z-index: -1;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+  body.printing-certificate * {
+    visibility: hidden !important;
+  }
+  body.printing-certificate .certificate-print-root,
+  body.printing-certificate .certificate-print-root * {
+    visibility: visible !important;
+  }
+  body.printing-certificate .certificate-print-root {
+    left: 0 !important;
+    top: 0 !important;
+    z-index: 9999 !important;
+    width: 100%;
+  }
+  body.printing-certificate .certificate-print-root .certificate-canvas {
+    /* Fit the fixed-size certificate to the printable page width. */
+    transform: none !important;
+    width: 100% !important;
+    height: auto !important;
+    box-shadow: none !important;
+  }
+}

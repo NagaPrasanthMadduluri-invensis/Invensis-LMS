@@ -20,6 +20,40 @@ export async function fetchMyCourses({ token, userId }) {
 }
 
 /**
+ * GET /learner/certificates
+ * The caller's training certificates (one per completed enrolment). Each item:
+ *   { training_id, training_code, title, delivery_mode, start_date, end_date,
+ *     participant_name, activity_id, certificate_id, issued, issued_at,
+ *     completed_at }
+ * `issued` is true once the learner has submitted the feedback survey.
+ */
+export async function fetchCertificates({ token }) {
+  return apiClient(`/learner/certificates`, { token });
+}
+
+/**
+ * GET /learner/certificates/:trainingRef
+ * Printable certificate data. 403 until the survey has been submitted.
+ */
+export async function fetchCertificate({ token, trainingRef }) {
+  return apiClient(`/learner/certificates/${trainingRef}`, { token });
+}
+
+/**
+ * POST /learner/certificates/:trainingRef/survey
+ * Submit the post-training feedback survey → issues (unlocks) the certificate.
+ * responses = { overall_rating, trainer_rating, content_rating (1–5),
+ *   would_recommend (bool), comments? }. Returns { certificate }.
+ */
+export async function submitCertificateSurvey({ token, trainingRef, responses }) {
+  return apiClient(`/learner/certificates/${trainingRef}/survey`, {
+    method: "POST",
+    token,
+    body: responses,
+  });
+}
+
+/**
  * GET /learner/training/:trainingRef
  * `trainingRef` may be the training UUID or its code (e.g. "TRN-2026-0001").
  * Returns the full training schedule detail:
