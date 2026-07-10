@@ -140,7 +140,7 @@ function ScheduleCard({ training }) {
           </Box>
         </Box>
 
-        {training.meeting?.url ? (
+        {training.meeting?.url && (
           <Box className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white/70 ring-1 ring-violet-200 px-4 py-3">
             <Box className="flex items-center gap-2.5 min-w-0">
               <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
@@ -154,13 +154,6 @@ function ScheduleCard({ training }) {
             <Button asChild size="sm" className="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white border-0 rounded-lg text-sm font-semibold shrink-0">
               <a href={training.meeting.url} target="_blank" rel="noopener noreferrer">Join Meeting</a>
             </Button>
-          </Box>
-        ) : training.delivery_mode !== "in_person" && (
-          <Box className="mt-4 flex items-center gap-2.5 rounded-xl border border-dashed border-violet-200 bg-white/50 px-4 py-3">
-            <AlertCircle className="h-4 w-4 shrink-0 text-violet-300" />
-            <Text as="p" className="text-xs text-slate-500">
-              Meeting link hasn&apos;t been released yet — check back closer to the training date.
-            </Text>
           </Box>
         )}
       </Box>
@@ -215,6 +208,18 @@ function ScheduleCard({ training }) {
           </Box>
         </Box>
       )}
+
+      {/* Meeting-link status — shown under the sessions, not at the top */}
+      {!training.meeting?.url && training.delivery_mode !== "in_person" && (
+        <Box className="border-t px-6 py-4">
+          <Box className="flex items-center gap-2.5 rounded-xl border border-dashed border-violet-200 bg-white/50 px-4 py-3">
+            <AlertCircle className="h-4 w-4 shrink-0 text-violet-300" />
+            <Text as="p" className="text-xs text-slate-500">
+              Meeting link hasn&apos;t been released yet — check back closer to the training date.
+            </Text>
+          </Box>
+        </Box>
+      )}
     </Card>
   );
 }
@@ -234,9 +239,9 @@ function formatSessionTime(iso) {
  */
 function SessionTopics({ sessions }) {
   const list = Array.isArray(sessions) ? sessions : [];
-  if (list.length === 0) return null;
-
+  // Only show this section once the trainer has published at least one topic.
   const anyTopics = list.some((s) => s.planned_topics?.trim());
+  if (list.length === 0 || !anyTopics) return null;
 
   return (
     <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
@@ -244,24 +249,12 @@ function SessionTopics({ sessions }) {
         <Box className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
           <BookText className="h-4 w-4 text-indigo-500" />
         </Box>
-        <Text as="h3" className="text-sm font-bold text-slate-800">Day-wise Topics</Text>
+        <Text as="h3" className="text-sm font-bold text-slate-800">Day-wise Topics Covered</Text>
         <Badge className="border-0 bg-indigo-50 text-indigo-600 text-[11px] font-semibold">
           {list.length} day{list.length !== 1 ? "s" : ""}
         </Badge>
       </Box>
       <Box className="p-5">
-
-      {!anyTopics ? (
-        <Box className="rounded-xl border border-dashed border-slate-200 py-10 text-center">
-          <Box className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-            <BookText className="h-5 w-5 text-slate-400" />
-          </Box>
-          <Text as="p" className="text-sm font-medium text-slate-500">
-            Your trainer hasn&apos;t published the topics yet.
-          </Text>
-          <Text as="p" className="text-xs text-slate-400 mt-1">Check back soon.</Text>
-        </Box>
-      ) : (
         <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {list.map((s) => {
             const when = formatSessionTime(s.start_time);
@@ -289,7 +282,6 @@ function SessionTopics({ sessions }) {
             );
           })}
         </Box>
-      )}
       </Box>
     </Card>
   );

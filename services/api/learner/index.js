@@ -1,5 +1,5 @@
 export {
-  fetchDashboard,
+  fetchLearnerDashboard,
   fetchMyCourses,
   fetchTrainingDetail,
   fetchCourseDetail,

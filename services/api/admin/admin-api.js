@@ -156,6 +156,17 @@ export async function fetchAdminCourses({ token }) {
    ────────────────────────────────────── */
 
 /**
+ * GET /admin/dashboard  (§3.2.0)
+ * Single overview snapshot for the admin dashboard landing page.
+ * Returns { generated_at, users, trainers, courses, enrolments, certificates,
+ *           tickets, upcoming_trainings, completed_trainings,
+ *           recent_enrolments, recent_trainers }
+ */
+export async function fetchAdminOverview({ token }) {
+  return apiClient("/admin/dashboard", { token });
+}
+
+/**
  * GET /lms/admin/dashboard
  * Returns { stats, recent_users, recent_orders }
  */

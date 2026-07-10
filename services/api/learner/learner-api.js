@@ -1,10 +1,14 @@
 import { apiClient } from "@/lib/api-client";
 
 /**
- * GET /lms/dashboard?user_id=X
+ * GET /learner/dashboard  (API.md §3.1.0)
+ * Single overview snapshot for the learner landing page. Scoped to the caller's
+ * own enrolments (not role-gated). Returns:
+ *   { generated_at, learner, stats, my_courses{in_progress[],upcoming[],completed[]},
+ *     certificates[], journey[], upcoming_cohorts[] }
  */
-export async function fetchDashboard({ token, userId }) {
-  return apiClient(`/lms/dashboard?user_id=${userId}`, { token });
+export async function fetchLearnerDashboard({ token }) {
+  return apiClient(`/learner/dashboard`, { token });
 }
 
 /**
