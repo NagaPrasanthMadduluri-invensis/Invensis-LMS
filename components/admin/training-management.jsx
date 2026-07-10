@@ -26,6 +26,7 @@ import {
   Hash, Calendar, Clock, Globe, Hourglass, Users, UserCheck, UserX, UserPlus,
   Mail, Phone, Briefcase, Video, MoreHorizontal, Pencil, ArrowLeftRight, XCircle,
   ExternalLink, Plus, BookText, AlertCircle, User, Link2, MessageSquare, CheckSquare2, ChevronDown,
+  CheckCircle2, GraduationCap, Loader2,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -33,6 +34,7 @@ import { useAuth } from "@/hooks/use-auth";
 import {
   fetchAdminTrainingDetail, fetchAdminTrainings, fetchTrainers, assignTrainer,
   addParticipant, updateMeeting, updateParticipant, cancelEnrolment, transferEnrolment,
+  completeEnrolment, completeAllEnrolments,
 } from "@/services/api/admin/admin-api";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 
@@ -42,6 +44,15 @@ const STATUS_CONFIG = {
   ongoing:   { label: "Ongoing",   dark: "bg-blue-400/90 text-blue-950",      light: "bg-blue-50 text-blue-700 ring-1 ring-blue-200/80" },
   completed: { label: "Completed", dark: "bg-white/20 text-white/90",          light: "bg-slate-100 text-slate-600" },
   cancelled: { label: "Cancelled", dark: "bg-red-400/90 text-red-950",         light: "bg-red-50 text-red-600 ring-1 ring-red-200/80" },
+};
+
+// Per-participant enrolment status → badge style + label.
+const ENROLMENT_STATUS = {
+  confirmed:   { label: "Confirmed",   className: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80" },
+  completed:   { label: "Completed",   className: "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/80" },
+  cancelled:   { label: "Cancelled",   className: "bg-red-50 text-red-600 ring-1 ring-red-200/80" },
+  transferred: { label: "Transferred", className: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80" },
+  failed:      { label: "Failed",      className: "bg-slate-100 text-slate-500 ring-1 ring-slate-200/80" },
 };
 
 const MODE_LABEL = { virtual: "Live Virtual", in_person: "In Person", hybrid: "Hybrid", one_to_one: "1-to-1 Coaching" };
@@ -658,6 +669,89 @@ function MeetingDialog({ open, onOpenChange, token, trainingRef, meeting, canRel
   );
 }
 
+/* ── Mark completed confirm dialog (single participant or bulk) ── */
+function CompleteConfirmDialog({ open, onOpenChange, token, mode, participant, trainingRef, confirmedCount, onDone }) {
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const isBulk = mode === "bulk";
+
+  useEffect(() => { if (open) setError(null); }, [open]);
+
+  async function submit() {
+    setSubmitting(true); setError(null);
+    try {
+      if (isBulk) {
+        await completeAllEnrolments({ token, trainingRef });
+      } else {
+        await completeEnrolment({ token, enrolmentId: participant.enrolment_id });
+      }
+      onDone(); onOpenChange(false);
+    } catch (e) { setError(e.message); } finally { setSubmitting(false); }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !submitting && onOpenChange(v)}>
+      <DialogContent className="sm:max-w-[560px] overflow-hidden" style={{padding:0,gap:0}}>
+        <Box className="bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border-b border-emerald-100 px-6 py-5">
+          <Box className="flex items-center gap-3">
+            <Box className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0">
+              <GraduationCap className="w-4 h-4 text-white" />
+            </Box>
+            <Box>
+              <DialogTitle className="text-base font-semibold text-slate-800">
+                {isBulk ? "Mark All Completed" : "Mark as Completed"}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                Confirming completion makes {isBulk ? "these learners" : "this learner"} eligible for the certificate. This can&apos;t be undone.
+              </DialogDescription>
+            </Box>
+          </Box>
+        </Box>
+        <Box className="px-6 py-5 space-y-4">
+          {isBulk ? (
+            <Box className="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3.5">
+              <Box className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                <Users className="h-4 w-4 text-emerald-600" />
+              </Box>
+              <Box>
+                <Text as="p" className="text-sm font-semibold text-slate-800">
+                  {confirmedCount} confirmed participant{confirmedCount !== 1 ? "s" : ""}
+                </Text>
+                <Text as="p" className="text-xs text-slate-500">
+                  Only confirmed enrolments are affected — already-completed, cancelled or transferred ones are skipped.
+                </Text>
+              </Box>
+            </Box>
+          ) : (
+            participant && (
+              <Box className="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3">
+                <Box className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                  <User className="h-4 w-4 text-emerald-600" />
+                </Box>
+                <Box>
+                  <Text as="p" className="text-sm font-semibold text-slate-800">{participant.name}</Text>
+                  <Text as="p" className="text-xs text-slate-500">{participant.email}</Text>
+                </Box>
+              </Box>
+            )
+          )}
+          <FormError error={error} />
+        </Box>
+        <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
+          <Button onClick={submit} disabled={submitting || (isBulk && confirmedCount === 0)} className="bg-emerald-600 hover:bg-emerald-700 text-white border-0 shadow-sm">
+            {submitting ? (
+              <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> {isBulk ? "Completing..." : "Marking..."}</>
+            ) : (
+              <><CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> {isBulk ? `Complete ${confirmedCount}` : "Mark Completed"}</>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ══════════════════════════════════════════════════════ Main component ══ */
 export function TrainingManagement({ trainingId }) {
   const { token } = useAuth();
@@ -670,6 +764,8 @@ export function TrainingManagement({ trainingId }) {
   const [editParticipant, setEditParticipant] = useState(null);
   const [cancelParticipant, setCancelParticipant] = useState(null);
   const [transferParticipant, setTransferParticipant] = useState(null);
+  const [completeParticipant, setCompleteParticipant] = useState(null);
+  const [completeAllOpen, setCompleteAllOpen] = useState(false);
 
   const load = useCallback(() => {
     if (!token) return;
@@ -706,6 +802,7 @@ export function TrainingManagement({ trainingId }) {
   const statusCfg = STATUS_CONFIG[detail.status] || STATUS_CONFIG.active;
   const isVirtual = detail.delivery_mode !== "in_person";
   const canRelease = detail.enrolled_count >= (detail.min_seats ?? 1);
+  const confirmedCount = detail.participants.filter((p) => p.status === "confirmed").length;
 
   function onMeetingSaved(training) {
     setMeeting({ url: training?.meeting_url ?? null, platform: training?.meeting_platform ?? null, released: !!training?.meeting_released });
@@ -845,9 +942,18 @@ export function TrainingManagement({ trainingId }) {
             <Text as="h3" className="text-sm font-semibold text-slate-700">Participants</Text>
             <Badge className="border-0 bg-slate-100 text-slate-600 text-[11px]">{detail.participants.length}</Badge>
           </Box>
-          <Button size="sm" onClick={() => setAddOpen(true)} className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white border-0">
-            <UserPlus className="h-3.5 w-3.5 mr-1.5" /> Add Participant
-          </Button>
+          <Box className="flex items-center gap-2">
+            {confirmedCount > 0 && (
+              <Button size="sm" variant="outline"
+                onClick={() => setCompleteAllOpen(true)}
+                className="h-8 px-3 border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                <GraduationCap className="h-3.5 w-3.5 mr-1.5" /> Mark all completed
+              </Button>
+            )}
+            <Button size="sm" onClick={() => setAddOpen(true)} className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white border-0">
+              <UserPlus className="h-3.5 w-3.5 mr-1.5" /> Add Participant
+            </Button>
+          </Box>
         </Box>
 
         {detail.participants.length === 0 ? (
@@ -885,7 +991,10 @@ export function TrainingManagement({ trainingId }) {
                     <TableCell className="py-3.5 text-slate-500 text-sm">{p.phone || "—"}</TableCell>
                     <TableCell className="py-3.5 text-slate-500 text-sm">{p.job_title || "—"}</TableCell>
                     <TableCell className="py-3.5">
-                      <Badge className="border-0 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80 text-[10px] font-medium capitalize">{p.status}</Badge>
+                      {(() => {
+                        const cfg = ENROLMENT_STATUS[p.status] || { label: p.status, className: "bg-slate-100 text-slate-600" };
+                        return <Badge className={`border-0 text-[10px] font-medium ${cfg.className}`}>{cfg.label}</Badge>;
+                      })()}
                     </TableCell>
                     <TableCell className="py-3.5">
                       <Badge className={`border-0 text-[10px] font-medium ${p.added_manually ? "bg-violet-50 text-violet-700 ring-1 ring-violet-200/80" : "bg-blue-50 text-blue-700 ring-1 ring-blue-200/80"}`}>
@@ -899,17 +1008,31 @@ export function TrainingManagement({ trainingId }) {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuContent align="end" className="w-48">
+                          {p.status === "confirmed" && (
+                            <>
+                              <DropdownMenuItem className="text-emerald-700 focus:text-emerald-700 focus:bg-emerald-50" onClick={() => setCompleteParticipant(p)}>
+                                <GraduationCap className="mr-2 h-3.5 w-3.5" /> Mark completed
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                            </>
+                          )}
                           <DropdownMenuItem onClick={() => setEditParticipant(p)}>
                             <Pencil className="mr-2 h-3.5 w-3.5" /> Edit details
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setTransferParticipant(p)}>
-                            <ArrowLeftRight className="mr-2 h-3.5 w-3.5" /> Transfer
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50" onClick={() => setCancelParticipant(p)}>
-                            <XCircle className="mr-2 h-3.5 w-3.5" /> Cancel enrolment
-                          </DropdownMenuItem>
+                          {p.status === "confirmed" && (
+                            <DropdownMenuItem onClick={() => setTransferParticipant(p)}>
+                              <ArrowLeftRight className="mr-2 h-3.5 w-3.5" /> Transfer
+                            </DropdownMenuItem>
+                          )}
+                          {p.status !== "cancelled" && p.status !== "completed" && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50" onClick={() => setCancelParticipant(p)}>
+                                <XCircle className="mr-2 h-3.5 w-3.5" /> Cancel enrolment
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -930,6 +1053,8 @@ export function TrainingManagement({ trainingId }) {
       <EditParticipantDialog participant={editParticipant} onOpenChange={() => setEditParticipant(null)} token={token} onSaved={load} />
       <CancelEnrolmentDialog participant={cancelParticipant} onOpenChange={() => setCancelParticipant(null)} token={token} onDone={load} />
       <TransferDialog participant={transferParticipant} onOpenChange={() => setTransferParticipant(null)} token={token} currentTrainingId={detail.id} onDone={load} />
+      <CompleteConfirmDialog mode="single" participant={completeParticipant} open={!!completeParticipant} onOpenChange={(v) => !v && setCompleteParticipant(null)} token={token} onDone={load} />
+      <CompleteConfirmDialog mode="bulk" open={completeAllOpen} onOpenChange={setCompleteAllOpen} token={token} trainingRef={trainingId} confirmedCount={confirmedCount} onDone={load} />
     </Box>
   );
 }

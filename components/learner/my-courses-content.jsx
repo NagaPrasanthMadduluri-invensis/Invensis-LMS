@@ -9,7 +9,6 @@ import {
   Calendar,
   CalendarDays,
   Globe,
-  Users,
   Hourglass,
   Video,
   MapPin,
@@ -171,9 +170,6 @@ function ScheduleCard({ training }) {
         </Fact>
         <Fact icon={Hourglass} label="Duration">
           {training.duration_hours != null ? `${training.duration_hours} hours` : "—"}
-        </Fact>
-        <Fact icon={Users} label="Capacity">
-          {training.enrolled_count ?? 0} / {training.capacity ?? "—"} seats
         </Fact>
         <Fact icon={Video} label="Delivery Mode">
           {mode.label}

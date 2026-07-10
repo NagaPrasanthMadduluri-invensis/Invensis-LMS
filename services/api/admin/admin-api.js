@@ -139,6 +139,32 @@ export async function transferEnrolment({ token, enrolmentId, trainingId, reason
   });
 }
 
+/**
+ * PATCH /admin/enrolments/:enrolmentId/complete — mark one enrolment
+ * 'completed' (learner successfully finished the training). One-way; only a
+ * confirmed enrolment can be completed. Drives certificate eligibility in the
+ * learner portal. Returns { id, status }.
+ */
+export async function completeEnrolment({ token, enrolmentId }) {
+  return apiClient(`/admin/enrolments/${enrolmentId}/complete`, {
+    method: "PATCH",
+    token,
+  });
+}
+
+/**
+ * PATCH /admin/trainings/:trainingRef/enrolments/complete-all — mark every
+ * currently-confirmed participant in the training 'completed' in one go.
+ * Already-completed / cancelled / transferred enrolments are skipped.
+ * Returns { training_id, completed } (count actually completed).
+ */
+export async function completeAllEnrolments({ token, trainingRef }) {
+  return apiClient(`/admin/trainings/${trainingRef}/enrolments/complete-all`, {
+    method: "PATCH",
+    token,
+  });
+}
+
 /* ──────────────────────────────────────
    COURSES
    ────────────────────────────────────── */
