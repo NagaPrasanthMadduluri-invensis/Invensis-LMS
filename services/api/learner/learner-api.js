@@ -20,6 +20,20 @@ export async function fetchMyCourses({ token, userId }) {
 }
 
 /**
+ * GET /learner/trainings
+ * Every training the caller is enrolled in (their "My Enrolments" list),
+ * newest first. Each item:
+ *   { id, code, title, delivery_mode, status, start_date, end_date, timezone,
+ *     enrolment_status, meeting_released, enrolled_at, trainer_name,
+ *     sponsorship, sponsor_email, certificate_id, certificate_issued,
+ *     certificate_issued_at }
+ * `trainer_name`/`sponsor_email`/`certificate_id` are null when absent.
+ */
+export async function fetchMyTrainings({ token }) {
+  return apiClient(`/learner/trainings`, { token });
+}
+
+/**
  * GET /learner/certificates
  * The caller's training certificates (one per completed enrolment). Each item:
  *   { training_id, training_code, title, delivery_mode, start_date, end_date,

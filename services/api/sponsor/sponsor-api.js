@@ -1,23 +1,27 @@
 import { apiClient } from "@/lib/api-client";
 
 /* ──────────────────────────────────────
-   SPONSOR PORTAL
+   SPONSOR PORTAL  (API.md §3.6)
    ──────────────────────────────────────
    A sponsor is the buyer of ≥1 order (API.md §1.5). They see:
      • the learners they sponsored
      • invoices & payment receipts
 
-   ⚠️ NOTE: As of the current API.md, the backend exposes the `sponsor`
-   relationship only from the *learner's* side (the `sponsor` object on
-   login/refresh/me = "who paid for me"). There is no documented endpoint yet
-   to (a) list the learners a sponsor paid for, or (b) list a sponsor's
-   invoices/receipts.
+   These endpoints are capability-based: any authenticated user may call them
+   and everything is scoped to the caller's own sponsored orders. A user who
+   has sponsored nothing gets zeros / empty lists.
 
-   These functions are written against the expected shapes so wiring is a
-   one-line change once the endpoints ship. Until then they throw
-   `SponsorEndpointPending` and the UI renders a "coming soon" placeholder.
+   ⚠️ Pricing note (API.md §3.6): invoice `amount` / `currency_code`,
+   `outstanding_amount`, and `receipt_url` are currently `null`/`0` — the CRM
+   order payload doesn't yet carry pricing and no receipt PDFs are generated.
+   The UI already renders these gracefully ("—" / disabled download) so they
+   light up automatically once pricing is populated.
    ────────────────────────────────────── */
 
+/**
+ * Retained for backwards compatibility with callers that branch on `err.pending`.
+ * No longer thrown now that the endpoints are live (API.md §3.6).
+ */
 export class SponsorEndpointPending extends Error {
   constructor(endpoint) {
     super(`Sponsor endpoint not implemented yet: ${endpoint}`);
@@ -27,36 +31,30 @@ export class SponsorEndpointPending extends Error {
   }
 }
 
-// Flip to false (and confirm the paths) once the backend ships these.
-const ENDPOINTS_READY = false;
-
 /**
- * GET /sponsor/learners  (proposed)
- * Learners this sponsor paid for.
- * Expected: { learners: [{ id, name, email, training_code, training_title, status, enrolled_at }] }
+ * GET /sponsor/learners  (API.md §3.6.2)
+ * Learners this sponsor paid for (one row per enrolment; excludes transferred).
+ * Returns: { learners: [{ id, name, email, training_code, training_title, status, enrolled_at }] }
  */
 export async function fetchSponsoredLearners({ token }) {
-  if (!ENDPOINTS_READY) throw new SponsorEndpointPending("/sponsor/learners");
   return apiClient("/sponsor/learners", { token });
 }
 
 /**
- * GET /sponsor/invoices  (proposed)
- * Invoices & payment receipts for this sponsor's orders.
- * Expected: { invoices: [{ id, order_number, course_name, amount, currency_code,
- *                          status, issued_at, receipt_url }] }
+ * GET /sponsor/invoices  (API.md §3.6.3)
+ * One invoice per order the sponsor placed, newest first.
+ * Returns: { invoices: [{ id, order_number, course_name, amount, currency_code,
+ *                         status, issued_at, receipt_url }] }
  */
 export async function fetchSponsorInvoices({ token }) {
-  if (!ENDPOINTS_READY) throw new SponsorEndpointPending("/sponsor/invoices");
   return apiClient("/sponsor/invoices", { token });
 }
 
 /**
- * GET /sponsor/dashboard  (proposed)
+ * GET /sponsor/dashboard  (API.md §3.6.1)
  * Summary counts for the sponsor landing page.
- * Expected: { learners_count, active_count, invoices_count, outstanding_amount, currency_code }
+ * Returns: { learners_count, active_count, invoices_count, outstanding_amount, currency_code }
  */
 export async function fetchSponsorDashboard({ token }) {
-  if (!ENDPOINTS_READY) throw new SponsorEndpointPending("/sponsor/dashboard");
   return apiClient("/sponsor/dashboard", { token });
 }

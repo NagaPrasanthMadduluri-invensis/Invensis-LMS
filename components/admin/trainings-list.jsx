@@ -206,6 +206,7 @@ export function TrainingsList() {
   const router = useRouter();
   const [trainings, setTrainings] = useState(null);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [error, setError] = useState(null);
 
   const pathname = usePathname();
@@ -244,10 +245,25 @@ export function TrainingsList() {
   }
 
   const unassigned = trainings.filter((t) => !t.trainer_assigned).length;
+  const statusCounts = trainings.reduce((acc, t) => {
+    acc[t.status] = (acc[t.status] || 0) + 1;
+    return acc;
+  }, {});
   const filtered = trainings.filter((t) => {
     const q = search.toLowerCase();
-    return t.title.toLowerCase().includes(q) || t.code.toLowerCase().includes(q);
+    const matchesSearch = t.title.toLowerCase().includes(q) || t.code.toLowerCase().includes(q);
+    const matchesStatus = statusFilter === "all" || t.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
+
+  const STATUS_TABS = [
+    { key: "all", label: "All" },
+    { key: "pending", label: "Pending" },
+    { key: "active", label: "Active" },
+    { key: "ongoing", label: "Ongoing" },
+    { key: "completed", label: "Completed" },
+    { key: "cancelled", label: "Cancelled" },
+  ];
 
   return (
     <Box className="space-y-6">
@@ -272,9 +288,40 @@ export function TrainingsList() {
         />
       </Box>
 
+      {/* Status filter pills */}
+      <Box className="flex flex-wrap items-center gap-2">
+        {STATUS_TABS.map((tab) => {
+          const count = tab.key === "all" ? trainings.length : (statusCounts[tab.key] || 0);
+          const activeTab = statusFilter === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setStatusFilter(tab.key)}
+              className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                activeTab
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              {tab.label}
+              <Text
+                as="span"
+                className={`rounded-full px-1.5 text-[10px] font-bold ${
+                  activeTab ? "bg-white/25 text-white" : "bg-white text-slate-500"
+                }`}
+              >
+                {count}
+              </Text>
+            </button>
+          );
+        })}
+      </Box>
+
       <Box className="flex items-center justify-between">
         <Text as="p" className="text-xs text-slate-400">
           {filtered.length} of {trainings.length} training{trainings.length !== 1 ? "s" : ""}
+          {statusFilter !== "all" ? ` · ${STATUS_TABS.find((t) => t.key === statusFilter)?.label}` : ""}
         </Text>
       </Box>
 
@@ -284,7 +331,7 @@ export function TrainingsList() {
             <BookOpen className="h-7 w-7 text-slate-400" />
           </Box>
           <Text as="p" className="text-sm font-semibold text-slate-600">
-            {search ? "No trainings match your search" : "No trainings yet"}
+            {search || statusFilter !== "all" ? "No trainings match your filters" : "No trainings yet"}
           </Text>
         </Card>
       ) : (

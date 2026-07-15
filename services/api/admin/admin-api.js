@@ -193,6 +193,26 @@ export async function fetchAdminOverview({ token }) {
 }
 
 /**
+ * GET /admin/analytics
+ * Filterable analytics snapshot powering the dynamic dashboard charts.
+ * `filters` = { from?, to?, delivery_mode?, bucket?, status?, trainer_id? }
+ * (any subset; empty/blank values are dropped). Returns { generated_at,
+ * filters, summary, enrolments_over_time, participant_growth,
+ * trainings_over_time, sessions_over_time, trainings_by_status,
+ * trainings_by_delivery_mode, trainings_by_bucket, enrolments_by_status,
+ * sessions_by_status, capacity_by_bucket, top_trainers, upcoming_trainings,
+ * trainer_options }.
+ */
+export async function fetchAdminAnalytics({ token, filters = {} }) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value != null && value !== "") params.set(key, value);
+  }
+  const qs = params.toString();
+  return apiClient(`/admin/analytics${qs ? `?${qs}` : ""}`, { token });
+}
+
+/**
  * GET /lms/admin/dashboard
  * Returns { stats, recent_users, recent_orders }
  */

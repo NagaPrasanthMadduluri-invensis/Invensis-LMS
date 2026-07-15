@@ -77,7 +77,6 @@ export function LearnerSidebar() {
         <NavGroup label="Main" items={learnerNav.main} pathname={pathname} />
         <NavGroup label="Learning" items={learnerNav.learning} pathname={pathname} />
         <NavGroup label="Payments" items={learnerNav.payments} pathname={pathname} />
-        <NavGroup label="Engage" items={learnerNav.engage} pathname={pathname} />
       </SidebarContent>
       <SidebarSeparator />
       <SidebarFooter>

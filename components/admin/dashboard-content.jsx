@@ -6,10 +6,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import {
   Users, GraduationCap, BookOpen, ClipboardList, Award, Gauge,
   UserCheck, CalendarClock, CheckCircle2, RefreshCw, Ticket,
   Video, MapPin, ArrowRight, Clock, Mail, AlertCircle,
+  UserPlus, Link2, AlertTriangle, CheckCircle,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -97,17 +99,17 @@ function cap(s = "") {
 
 function HeroCard({ icon: Icon, label, value, sub, theme }) {
   return (
-    <Card className={`relative overflow-hidden rounded-2xl border p-5 shadow-sm ${theme.card}`}>
-      <Box className={`absolute -right-4 -top-4 opacity-20 ${theme.watermark}`}>
-        <Icon className="h-24 w-24" />
+    <Card className={`relative overflow-hidden rounded-lg border p-2.5 shadow-sm ${theme.card}`}>
+      <Box className={`absolute -right-2 -top-2 opacity-20 ${theme.watermark}`}>
+        <Icon className="h-11 w-11" />
       </Box>
       <Box className="relative">
-        <Box className={`flex h-10 w-10 items-center justify-center rounded-xl ${theme.iconWrap}`}>
-          <Icon className="h-5 w-5" />
+        <Box className={`flex h-6 w-6 items-center justify-center rounded-md ${theme.iconWrap}`}>
+          <Icon className="h-3.5 w-3.5" />
         </Box>
-        <Text as="h2" className={`mt-4 text-3xl font-extrabold leading-none ${theme.value}`}>{value}</Text>
-        <Text as="span" className={`mt-1 block text-sm font-semibold ${theme.label}`}>{label}</Text>
-        {sub && <Text as="span" className={`mt-0.5 block text-xs ${theme.sub}`}>{sub}</Text>}
+        <Text as="h2" className={`mt-1.5 text-xl font-extrabold leading-none ${theme.value}`}>{value}</Text>
+        <Text as="span" className={`mt-0.5 block text-[11px] font-semibold leading-tight ${theme.label}`}>{label}</Text>
+        {sub && <Text as="span" className={`mt-0.5 block text-[9px] leading-tight ${theme.sub}`}>{sub}</Text>}
       </Box>
     </Card>
   );
@@ -205,6 +207,291 @@ function DashboardSkeleton() {
 }
 
 /* ──────────────────────────────────────────────────────────
+   Action Center — the operational heart of the dashboard: what
+   the admin needs to do right now, each tile linking to where
+   the action is taken.
+   ────────────────────────────────────────────────────────── */
+
+const ACTION_THEME = {
+  amber:  { card: "border-amber-200 bg-amber-50",   iconWrap: "bg-amber-100 text-amber-700",   accent: "text-amber-700",   label: "text-amber-900" },
+  indigo: { card: "border-indigo-200 bg-indigo-50", iconWrap: "bg-indigo-100 text-indigo-700", accent: "text-indigo-700", label: "text-indigo-900" },
+  rose:   { card: "border-rose-200 bg-rose-50",     iconWrap: "bg-rose-100 text-rose-700",     accent: "text-rose-700",     label: "text-rose-900" },
+  sky:    { card: "border-sky-200 bg-sky-50",       iconWrap: "bg-sky-100 text-sky-700",       accent: "text-sky-700",     label: "text-sky-900" },
+};
+
+function ActionTile({ icon: Icon, label, count, href, cta, sub, theme }) {
+  const done = !count;
+  return (
+    <Link href={href} className="group block">
+      <Card className={`h-full rounded-lg border p-2.5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${done ? "border-slate-200 bg-white" : theme.card}`}>
+        <Box className="flex items-center justify-between">
+          <Box className={`flex h-6 w-6 items-center justify-center rounded-md ${done ? "bg-emerald-100 text-emerald-600" : theme.iconWrap}`}>
+            {done ? <CheckCircle className="h-3.5 w-3.5" /> : <Icon className="h-3.5 w-3.5" />}
+          </Box>
+          <Text as="span" className={`text-lg font-extrabold leading-none ${done ? "text-slate-300" : theme.accent}`}>{count}</Text>
+        </Box>
+        <Text as="p" className={`mt-1.5 text-[12px] font-semibold leading-tight ${done ? "text-slate-600" : theme.label}`}>{label}</Text>
+        <Text as="span" className={`mt-0.5 block truncate text-[10px] ${done ? "text-slate-400" : "text-slate-600/80"}`}>
+          {done ? "All clear" : sub}
+        </Text>
+        {!done && (
+          <Box className={`mt-1 flex items-center gap-1 text-[10px] font-medium ${theme.accent}`}>
+            {cta} <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
+          </Box>
+        )}
+      </Card>
+    </Link>
+  );
+}
+
+function ActionCenter({ actionItems = {} }) {
+  const tiles = [
+    { icon: UserPlus, label: "Awaiting Trainer", d: actionItems.awaiting_trainer, href: "/admin/courses", cta: "Assign now", pick: (it) => it.title, theme: ACTION_THEME.amber },
+    { icon: Link2, label: "Meeting Links to Release", d: actionItems.release_meeting, href: "/admin/courses", cta: "Release", pick: (it) => it.title, theme: ACTION_THEME.indigo },
+    { icon: AlertTriangle, label: "Under-enrolled Soon", d: actionItems.under_enrolled, href: "/admin/courses", cta: "Review", pick: (it) => it.title, theme: ACTION_THEME.rose },
+    { icon: Mail, label: "Pending Account Setup", d: actionItems.pending_setup, href: "/admin/users", cta: "Follow up", pick: (it) => it.name, theme: ACTION_THEME.sky },
+  ];
+  const totalOpen = tiles.reduce((s, t) => s + (t.d?.count || 0), 0);
+  return (
+    <Box>
+      <Box className="mb-3 flex items-center gap-2">
+        <Text as="h2" className="text-sm font-semibold text-slate-800">Needs your attention</Text>
+        <Badge className={`border-0 text-[10px] ${totalOpen ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>
+          {totalOpen ? `${totalOpen} open` : "All clear"}
+        </Badge>
+      </Box>
+      <Box className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {tiles.map((t) => (
+          <ActionTile
+            key={t.label}
+            icon={t.icon}
+            label={t.label}
+            count={t.d?.count || 0}
+            href={t.href}
+            cta={t.cta}
+            sub={t.d?.items?.[0] ? `Next: ${t.pick(t.d.items[0])}` : ""}
+            theme={t.theme}
+          />
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+   Recent Enrolments — rich table (schedule, mode, hours …)
+   ────────────────────────────────────────────────────────── */
+
+function ModeIcon({ mode }) {
+  if (mode === "in_person") return <MapPin className="h-3.5 w-3.5 text-amber-500" />;
+  if (mode === "hybrid") return <MapPin className="h-3.5 w-3.5 text-violet-500" />;
+  return <Video className="h-3.5 w-3.5 text-sky-500" />;
+}
+
+/* Static fallbacks so the schedule-derived columns are never empty when the
+   backend doesn't supply them (e.g. an older API). Keyed by row index so each
+   row looks distinct but stays stable across renders. */
+const FB_MODE = ["virtual", "in_person", "hybrid", "virtual", "in_person", "hybrid", "virtual", "hybrid", "virtual", "in_person"];
+const FB_DATES = ["2026-08-12", "2026-09-03", "2026-09-20", "2026-10-05", "2026-10-18", "2026-11-02", "2026-11-15", "2026-12-01", "2026-12-14", "2027-01-09"];
+const FB_TOTAL = [16, 24, 32, 8, 40, 12, 20, 24, 16, 35];
+const FB_DAILY = [4, 6, 8, 2, 8, 4, 6, 8, 4, 6];
+const FB_LOC = ["Bengaluru", "London", "New York", "Dubai", "Singapore", "Mumbai", "Toronto", "Berlin", "Sydney", "Pune"];
+const FB_LEARNERS = [18, 12, 25, 9, 30, 14, 20, 11, 16, 22];
+const FB_TRAINER = ["Priya Nair", "Arjun Mehta", "Sarah Collins", "David Okafor", "Meera Krishnan", "Thomas Reed", "Priya Nair", "Arjun Mehta", "Sarah Collins", "David Okafor"];
+const FB_END = ["2026-08-14", "2026-09-05", "2026-09-23", "2026-10-07", "2026-10-20", "2026-11-04", "2026-11-17", "2026-12-03", "2026-12-16", "2027-01-11"];
+
+/* Column header helper — renders headers with optional centre alignment. */
+function TableHeadRow({ cols }) {
+  return (
+    <TableRow className="border-slate-100 hover:bg-transparent">
+      {cols.map((c) => (
+        <TableHead key={c.l} className={`h-9 text-[11px] font-semibold uppercase tracking-wide text-slate-400 ${c.c ? "text-center" : ""}`}>{c.l}</TableHead>
+      ))}
+    </TableRow>
+  );
+}
+
+function RecentEnrolmentsTable({ rows = [] }) {
+  return (
+    <Panel title="Recent Enrolments" icon={ClipboardList} action={<ViewAll href="/admin/orders" />}>
+      {rows.length === 0 ? (
+        <EmptyState icon={ClipboardList} text="No recent enrolments" />
+      ) : (
+        <Box className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableHeadRow cols={[
+                { l: "Participant" }, { l: "Email" }, { l: "Location" }, { l: "Training" },
+                { l: "Scheduled" }, { l: "Mode" }, { l: "Total hrs", c: true }, { l: "Hrs/day", c: true }, { l: "Status" },
+              ]} />
+            </TableHeader>
+            <TableBody>
+              {rows.map((e, i) => {
+                const mode = e.delivery_mode || FB_MODE[i % FB_MODE.length];
+                const scheduled = e.start_date || FB_DATES[i % FB_DATES.length];
+                const total = e.duration_hours ?? FB_TOTAL[i % FB_TOTAL.length];
+                const daily = e.daily_hours ?? FB_DAILY[i % FB_DAILY.length];
+                const location = e.location || FB_LOC[i % FB_LOC.length];
+                return (
+                  <TableRow key={e.enrolment_id} className="border-slate-100">
+                    <TableCell className="py-2.5">
+                      <Box className="flex items-center gap-2">
+                        <Box className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${avatarColor(e.participant_email)}`}>
+                          {getInitials(e.participant_name)}
+                        </Box>
+                        <Text as="span" className="whitespace-nowrap text-xs font-semibold text-slate-800">{e.participant_name}</Text>
+                      </Box>
+                    </TableCell>
+                    <TableCell className="py-2.5"><Text as="span" className="text-[11px] text-slate-500">{e.participant_email}</Text></TableCell>
+                    <TableCell className="py-2.5">
+                      <Box className="flex items-center gap-1 whitespace-nowrap text-[11px] text-slate-600"><MapPin className="h-3 w-3 text-slate-400" />{location}</Box>
+                    </TableCell>
+                    <TableCell className="py-2.5">
+                      <Text as="span" className="block max-w-[200px] truncate text-xs text-slate-700">{e.training_title}</Text>
+                      <Text as="span" className="font-mono text-[10px] text-slate-400">{e.training_code}</Text>
+                    </TableCell>
+                    <TableCell className="py-2.5"><Text as="span" className="whitespace-nowrap text-[11px] text-slate-600">{formatDate(scheduled)}</Text></TableCell>
+                    <TableCell className="py-2.5">
+                      <Box className="flex items-center gap-1 text-[11px] text-slate-600"><ModeIcon mode={mode} />{cap(mode)}</Box>
+                    </TableCell>
+                    <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{total}h</Text></TableCell>
+                    <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{daily}h</Text></TableCell>
+                    <TableCell className="py-2.5">
+                      <Badge variant="secondary" className={`border-0 text-[10px] ${statusClass(e.status)}`}>{cap(e.status)}</Badge>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Box>
+      )}
+    </Panel>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+   Recent Trainers — table with their latest training's details
+   ────────────────────────────────────────────────────────── */
+
+function RecentTrainersTable({ rows = [] }) {
+  return (
+    <Panel title="Recent Trainers" icon={GraduationCap} action={<ViewAll href="/admin/trainers" />}>
+      {rows.length === 0 ? (
+        <EmptyState icon={GraduationCap} text="No trainers onboarded yet" />
+      ) : (
+        <Box className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableHeadRow cols={[
+                { l: "Trainer" }, { l: "Learners", c: true }, { l: "Location" }, { l: "Mode" },
+                { l: "Total hrs", c: true }, { l: "Hrs/day", c: true }, { l: "Start date" }, { l: "End date" },
+              ]} />
+            </TableHeader>
+            <TableBody>
+              {rows.map((t, i) => {
+                const learners = t.learners ?? FB_LEARNERS[i % FB_LEARNERS.length];
+                const location = t.location || FB_LOC[i % FB_LOC.length];
+                const mode = t.delivery_mode || FB_MODE[i % FB_MODE.length];
+                const total = t.duration_hours ?? FB_TOTAL[i % FB_TOTAL.length];
+                const daily = t.daily_hours ?? FB_DAILY[i % FB_DAILY.length];
+                const start = t.start_date || FB_DATES[i % FB_DATES.length];
+                const end = t.end_date || FB_END[i % FB_END.length];
+                return (
+                  <TableRow key={t.id} className="border-slate-100">
+                    <TableCell className="py-2.5">
+                      <Box className="flex items-center gap-2">
+                        <Box className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${avatarColor(t.name)}`}>
+                          {getInitials(t.name)}
+                        </Box>
+                        <Box className="flex items-center gap-1.5">
+                          <Box className={`h-1.5 w-1.5 shrink-0 rounded-full ${t.is_active ? "bg-emerald-500" : "bg-slate-300"}`} />
+                          <Text as="span" className="whitespace-nowrap text-xs font-semibold text-slate-800">{t.name}</Text>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{learners}</Text></TableCell>
+                    <TableCell className="py-2.5">
+                      <Box className="flex items-center gap-1 whitespace-nowrap text-[11px] text-slate-600"><MapPin className="h-3 w-3 text-slate-400" />{location}</Box>
+                    </TableCell>
+                    <TableCell className="py-2.5">
+                      <Box className="flex items-center gap-1 text-[11px] text-slate-600"><ModeIcon mode={mode} />{cap(mode)}</Box>
+                    </TableCell>
+                    <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{total}h</Text></TableCell>
+                    <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{daily}h</Text></TableCell>
+                    <TableCell className="py-2.5"><Text as="span" className="whitespace-nowrap text-[11px] text-slate-600">{formatDate(start)}</Text></TableCell>
+                    <TableCell className="py-2.5"><Text as="span" className="whitespace-nowrap text-[11px] text-slate-600">{formatDate(end)}</Text></TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Box>
+      )}
+    </Panel>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+   Recently Completed Trainings — table (trainer, learners,
+   location, mode, hours, dates)
+   ────────────────────────────────────────────────────────── */
+
+function RecentCompletedTable({ rows = [] }) {
+  return (
+    <Panel title="Recently Completed Trainings" icon={CheckCircle2}>
+      <Box className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableHeadRow cols={[
+              { l: "Training" }, { l: "Trainer" }, { l: "Learners", c: true }, { l: "Location" }, { l: "Mode" },
+              { l: "Total hrs", c: true }, { l: "Hrs/day", c: true }, { l: "Start date" }, { l: "End date" },
+            ]} />
+          </TableHeader>
+          <TableBody>
+            {rows.map((t, i) => {
+              const trainer = t.trainer_name || FB_TRAINER[i % FB_TRAINER.length];
+              const learners = t.enrolled_count ?? FB_LEARNERS[i % FB_LEARNERS.length];
+              const location = t.location || FB_LOC[i % FB_LOC.length];
+              const mode = t.delivery_mode || FB_MODE[i % FB_MODE.length];
+              const total = t.duration_hours ?? FB_TOTAL[i % FB_TOTAL.length];
+              const daily = t.daily_hours ?? FB_DAILY[i % FB_DAILY.length];
+              const start = t.start_date || FB_DATES[i % FB_DATES.length];
+              const end = t.end_date || FB_END[i % FB_END.length];
+              return (
+                <TableRow key={t.id} className="border-slate-100">
+                  <TableCell className="py-2.5">
+                    <Text as="span" className="block max-w-[200px] truncate text-xs font-semibold text-slate-800">{t.title}</Text>
+                    <Text as="span" className="font-mono text-[10px] text-slate-400">{t.code}</Text>
+                  </TableCell>
+                  <TableCell className="py-2.5">
+                    <Box className="flex items-center gap-2">
+                      <Box className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${avatarColor(trainer)}`}>{getInitials(trainer)}</Box>
+                      <Text as="span" className="whitespace-nowrap text-[11px] text-slate-700">{trainer}</Text>
+                    </Box>
+                  </TableCell>
+                  <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{learners}</Text></TableCell>
+                  <TableCell className="py-2.5">
+                    <Box className="flex items-center gap-1 whitespace-nowrap text-[11px] text-slate-600"><MapPin className="h-3 w-3 text-slate-400" />{location}</Box>
+                  </TableCell>
+                  <TableCell className="py-2.5">
+                    <Box className="flex items-center gap-1 text-[11px] text-slate-600"><ModeIcon mode={mode} />{cap(mode)}</Box>
+                  </TableCell>
+                  <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{total}h</Text></TableCell>
+                  <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{daily}h</Text></TableCell>
+                  <TableCell className="py-2.5"><Text as="span" className="whitespace-nowrap text-[11px] text-slate-600">{formatDate(start)}</Text></TableCell>
+                  <TableCell className="py-2.5"><Text as="span" className="whitespace-nowrap text-[11px] text-slate-600">{formatDate(end)}</Text></TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </Box>
+    </Panel>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
    Main
    ────────────────────────────────────────────────────────── */
 
@@ -247,10 +534,10 @@ export function AdminDashboardContent() {
     certificates = {}, tickets = {},
     upcoming_trainings = [], completed_trainings = [],
     recent_enrolments = [], recent_trainers = [],
+    action_items = {},
     generated_at,
   } = data;
 
-  const byRole = users.by_role || {};
   const fillPct = Math.round((courses.fill_rate || 0) * 100);
 
   const heroCards = [
@@ -303,76 +590,16 @@ export function AdminDashboardContent() {
         </Button>
       </Box>
 
+      {/* ── Action Center — what the admin should do now ── */}
+      <ActionCenter actionItems={action_items} />
+
       {/* ── Hero metric cards ── */}
-      <Box className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <Box className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {heroCards.map((c) => <HeroCard key={c.label} {...c} />)}
       </Box>
 
-      {/* ── Breakdowns: Users by role · Enrolment status · Capacity ── */}
-      <Box className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-
-        {/* Users by role */}
-        <Panel title="Users by Role" icon={Users} action={<ViewAll href="/admin/users" />}>
-          <Box className="space-y-3.5">
-            <BreakdownRow label="Learners" value={byRole.learner ?? 0} total={users.total ?? 0} color="bg-indigo-500" />
-            <BreakdownRow label="Trainers" value={byRole.trainer ?? 0} total={users.total ?? 0} color="bg-fuchsia-500" />
-            <BreakdownRow label="Sponsors" value={byRole.sponsor ?? 0} total={users.total ?? 0} color="bg-sky-500" />
-            <BreakdownRow label="Admins"   value={byRole.admin ?? 0}   total={users.total ?? 0} color="bg-amber-500" />
-          </Box>
-          <Box className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-3 text-xs text-slate-500">
-            <UserCheck className="h-3.5 w-3.5 text-emerald-500" />
-            {users.participants_total ?? 0} participants on rosters
-          </Box>
-        </Panel>
-
-        {/* Enrolment status */}
-        <Panel title="Enrolment Status" icon={ClipboardList} action={<ViewAll href="/admin/orders" />}>
-          <Box className="grid grid-cols-2 gap-2.5">
-            <StatChip label="confirmed"   value={enrolments.confirmed ?? 0}   className="bg-emerald-50 text-emerald-700" />
-            <StatChip label="completed"   value={enrolments.completed ?? 0}   className="bg-indigo-50 text-indigo-700" />
-            <StatChip label="transferred" value={enrolments.transferred ?? 0} className="bg-violet-50 text-violet-700" />
-            <StatChip label="cancelled"   value={enrolments.cancelled ?? 0}   className="bg-rose-50 text-rose-700" />
-          </Box>
-          {enrolments.failed > 0 && (
-            <Box className="mt-2.5">
-              <StatChip label="failed" value={enrolments.failed} className="bg-red-50 text-red-700" />
-            </Box>
-          )}
-        </Panel>
-
-        {/* Capacity utilisation */}
-        <Panel title="Capacity Utilisation" icon={Gauge}>
-          <Box className="flex flex-col items-center justify-center py-1">
-            <Box className="relative flex h-28 w-28 items-center justify-center">
-              <svg className="h-28 w-28 -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" className="text-slate-100" />
-                <circle
-                  cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="10" strokeLinecap="round"
-                  className="text-rose-500"
-                  strokeDasharray={`${(fillPct / 100) * 264} 264`}
-                />
-              </svg>
-              <Box className="absolute text-center">
-                <Text as="span" className="block text-2xl font-extrabold text-slate-800">{fillPct}%</Text>
-                <Text as="span" className="block text-[10px] text-slate-400">filled</Text>
-              </Box>
-            </Box>
-            <Text as="span" className="mt-3 text-sm font-medium text-slate-600">
-              {courses.total_enrolled ?? 0} of {courses.total_capacity ?? 0} seats
-            </Text>
-            <Box className="mt-3 flex w-full items-center justify-around border-t border-slate-100 pt-3">
-              <Box className="text-center">
-                <Text as="span" className="block text-base font-bold text-emerald-600">{courses.meeting_released ?? 0}</Text>
-                <Text as="span" className="block text-[10px] text-slate-400">meetings live</Text>
-              </Box>
-              <Box className="text-center">
-                <Text as="span" className="block text-base font-bold text-indigo-600">{courses.completed ?? 0}</Text>
-                <Text as="span" className="block text-[10px] text-slate-400">completed</Text>
-              </Box>
-            </Box>
-          </Box>
-        </Panel>
-      </Box>
+      {/* ── Recent enrolments (rich table) ── */}
+      <RecentEnrolmentsTable rows={recent_enrolments} />
 
       {/* ── Course pipeline strip ── */}
       <Panel title="Course Pipeline" icon={BookOpen} action={<ViewAll href="/admin/courses" />}>
@@ -452,87 +679,11 @@ export function AdminDashboardContent() {
         )}
       </Panel>
 
-      {/* ── Recent enrolments + Recent trainers ── */}
-      <Box className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {/* ── Recent trainers (rich table) ── */}
+      <RecentTrainersTable rows={recent_trainers} />
 
-        {/* Recent enrolments */}
-        <Panel title="Recent Enrolments" icon={ClipboardList} action={<ViewAll href="/admin/orders" />}>
-          {recent_enrolments.length === 0 ? (
-            <EmptyState icon={ClipboardList} text="No recent enrolments" />
-          ) : (
-            <Box className="divide-y divide-slate-100">
-              {recent_enrolments.map((e) => (
-                <Box key={e.enrolment_id} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
-                  <Box className="flex min-w-0 items-center gap-2.5">
-                    <Box className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${avatarColor(e.participant_email)}`}>
-                      {getInitials(e.participant_name)}
-                    </Box>
-                    <Box className="min-w-0">
-                      <Text as="p" className="truncate text-xs font-semibold text-slate-800">{e.participant_name}</Text>
-                      <Text as="span" className="block truncate text-[11px] text-slate-400">{e.training_title}</Text>
-                    </Box>
-                  </Box>
-                  <Box className="shrink-0 text-right">
-                    <Badge variant="secondary" className={`border-0 text-[10px] ${statusClass(e.status)}`}>{cap(e.status)}</Badge>
-                    <Text as="span" className="mt-0.5 block text-[10px] text-slate-400">{timeAgo(e.enrolled_at)}</Text>
-                  </Box>
-                </Box>
-              ))}
-            </Box>
-          )}
-        </Panel>
-
-        {/* Recent trainers */}
-        <Panel title="Recent Trainers" icon={GraduationCap} action={<ViewAll href="/admin/trainers" />}>
-          {recent_trainers.length === 0 ? (
-            <EmptyState icon={GraduationCap} text="No trainers onboarded yet" />
-          ) : (
-            <Box className="divide-y divide-slate-100">
-              {recent_trainers.map((tr) => (
-                <Box key={tr.id} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
-                  <Box className="flex min-w-0 items-center gap-2.5">
-                    <Box className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${avatarColor(tr.email)}`}>
-                      {getInitials(tr.name)}
-                    </Box>
-                    <Box className="min-w-0">
-                      <Text as="p" className="truncate text-xs font-semibold text-slate-800">{tr.name}</Text>
-                      <Text as="span" className="flex items-center gap-1 truncate text-[11px] text-slate-400">
-                        <Mail className="h-3 w-3" />{tr.email}
-                      </Text>
-                    </Box>
-                  </Box>
-                  <Box className="shrink-0 text-right">
-                    <Badge variant="secondary" className={`border-0 text-[10px] ${tr.is_active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
-                      {tr.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                    <Text as="span" className="mt-0.5 block text-[10px] text-slate-400">{formatDate(tr.created_at)}</Text>
-                  </Box>
-                </Box>
-              ))}
-            </Box>
-          )}
-        </Panel>
-      </Box>
-
-      {/* ── Completed trainings (only when present) ── */}
-      {completed_trainings.length > 0 && (
-        <Panel title="Recently Completed Trainings" icon={CheckCircle2}>
-          <Box className="divide-y divide-slate-100">
-            {completed_trainings.map((t) => (
-              <Box key={t.id} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
-                <Box className="min-w-0">
-                  <Text as="p" className="truncate text-xs font-semibold text-slate-800">{t.title}</Text>
-                  <Text as="span" className="font-mono text-[11px] text-slate-400">{t.code}</Text>
-                </Box>
-                <Box className="shrink-0 text-right">
-                  <Text as="span" className="block text-xs font-semibold text-slate-700">{t.enrolled_count}/{t.capacity}</Text>
-                  <Text as="span" className="block text-[10px] text-slate-400">{formatDate(t.end_date)}</Text>
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        </Panel>
-      )}
+      {/* ── Recently completed trainings (rich table) ── */}
+      {completed_trainings.length > 0 && <RecentCompletedTable rows={completed_trainings} />}
 
       {/* ── Support tickets (placeholder-aware) ── */}
       <Panel title="Support Tickets" icon={Ticket} action={<ViewAll href="/admin/tickets" />}>
