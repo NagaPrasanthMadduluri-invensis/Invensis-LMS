@@ -54,16 +54,27 @@ export async function fetchCertificate({ token, trainingRef }) {
 }
 
 /**
- * POST /learner/certificates/:trainingRef/survey
- * Submit the post-training feedback survey → issues (unlocks) the certificate.
- * responses = { overall_rating, trainer_rating, content_rating (1–5),
- *   would_recommend (bool), comments? }. Returns { certificate }.
+ * GET /learner/surveys  (API §3.7.4)
+ * Post/pre-training surveys attached to the caller's enrolled trainings
+ * (excludes cancelled/transferred enrolments). Capability-based (no role gate).
+ * Each item: { id, type, title, questions[], training_code, training_title,
+ *   assigned_at, answered }. `answered` flips to true once the caller submits.
  */
-export async function submitCertificateSurvey({ token, trainingRef, responses }) {
-  return apiClient(`/learner/certificates/${trainingRef}/survey`, {
+export async function fetchLearnerSurveys({ token }) {
+  return apiClient(`/learner/surveys`, { token });
+}
+
+/**
+ * POST /learner/surveys/:surveyId/responses  (API §3.7.5)
+ * Submit a survey response. `answers` is a non-empty { questionId: answer } map.
+ * The backend stores it against the training + participant; one response per
+ * participant per survey. Returns { id, survey_id, submitted_at }.
+ */
+export async function submitSurveyResponse({ token, surveyId, answers }) {
+  return apiClient(`/learner/surveys/${surveyId}/responses`, {
     method: "POST",
     token,
-    body: responses,
+    body: { answers },
   });
 }
 

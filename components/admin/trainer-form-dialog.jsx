@@ -12,13 +12,24 @@ import { createTrainer, updateTrainer } from "@/services/api/admin/admin-api";
 import {
   AlertCircle, GraduationCap, Pencil, User, Mail, Lock, Clock,
   CheckCircle2, Plus, X, Upload, FileText, Award, Eye, EyeOff,
+  MapPin, Globe2, IndianRupee, Target, Wifi,
 } from "lucide-react";
 
-const EMPTY = { name: "", email: "", password: "", bio: "", experience: "", is_active: true };
+const EMPTY = {
+  name: "", email: "", password: "", bio: "", experience: "",
+  rate: "", city: "", country: "", is_remote: false, is_active: true,
+};
 
 const CERT_PRESETS = [
   "PMP", "PMI-ACP", "PRINCE2", "CSM", "CSPO", "SAFe", "ITIL", "Six Sigma",
   "AWS Certified", "Azure Fundamentals", "Google Cloud", "CPA", "CFA", "SHRM",
+];
+
+// Fixed list of subject-excellence areas the admin picks from.
+const SPECIALIZATION_PRESETS = [
+  "PMP", "PRINCE2", "PMI-ACP", "Scrum (CSM)", "Product Owner (CSPO)", "SAFe Agile",
+  "ITIL", "Six Sigma", "Business Analysis", "Agile Coaching", "DevOps",
+  "AWS", "Azure", "Leadership & Management",
 ];
 
 function FInput({ icon: Icon, accentColor = "indigo", type, ...props }) {
@@ -155,6 +166,44 @@ function CertInput({ value, onChange }) {
   );
 }
 
+function SpecializationInput({ value, onChange }) {
+  function toggle(item) {
+    onChange(value.includes(item) ? value.filter((s) => s !== item) : [...value, item]);
+  }
+  return (
+    <Box className="space-y-3">
+      {value.length > 0 && (
+        <Box className="flex flex-wrap gap-1.5">
+          {value.map((s) => (
+            <Box key={s} className="inline-flex items-center gap-1 bg-violet-50 ring-1 ring-violet-200 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-lg">
+              <Target className="h-3 w-3 shrink-0" />
+              {s}
+              <button type="button" onClick={() => toggle(s)} className="ml-0.5 text-violet-400 hover:text-violet-700 transition-colors">
+                <X className="h-3 w-3" />
+              </button>
+            </Box>
+          ))}
+        </Box>
+      )}
+      <Box className="flex flex-wrap gap-1.5">
+        {SPECIALIZATION_PRESETS.map((s) => {
+          const active = value.includes(s);
+          return (
+            <button key={s} type="button" onClick={() => toggle(s)}
+              className={`text-[11px] font-medium px-2.5 py-1 rounded-lg transition-all ${
+                active
+                  ? "bg-violet-600 text-white shadow-sm"
+                  : "text-slate-500 hover:text-violet-600 bg-slate-100 hover:bg-violet-50 hover:ring-1 hover:ring-violet-200"
+              }`}>
+              {active ? "✓ " : "+ "}{s}
+            </button>
+          );
+        })}
+      </Box>
+    </Box>
+  );
+}
+
 function CVUpload({ value, onChange }) {
   const inputRef = useRef(null);
 
@@ -211,6 +260,7 @@ function CVUpload({ value, onChange }) {
 export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", trainer = null, onSaved }) {
   const [form, setForm] = useState(EMPTY);
   const [certifications, setCertifications] = useState([]);
+  const [specializations, setSpecializations] = useState([]);
   const [cvFile, setCvFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -221,30 +271,62 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
     if (!open) return;
     setError(null); setFieldErrors(null); setCvFile(null);
     if (isEdit && trainer) {
-      setForm({ ...EMPTY, name: trainer.name || "", email: trainer.email || "", bio: trainer.bio || "", experience: trainer.experience || "", is_active: trainer.is_active !== false });
+      setForm({
+        ...EMPTY,
+        name: trainer.name || "",
+        email: trainer.email || "",
+        bio: trainer.bio || "",
+        experience: trainer.experience || "",
+        rate: trainer.rate != null ? String(trainer.rate) : "",
+        city: trainer.city || "",
+        country: trainer.country || "",
+        is_remote: !!trainer.is_remote,
+        is_active: trainer.is_active !== false,
+      });
       setCertifications(Array.isArray(trainer.certificates) ? trainer.certificates.map((c) => c?.title ?? c) : []);
+      setSpecializations(Array.isArray(trainer.specializations) ? trainer.specializations : []);
     } else {
       setForm(EMPTY);
       setCertifications([]);
+      setSpecializations([]);
     }
   }, [open, isEdit, trainer]);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   async function submit() {
-    if (!isEdit && (!form.name.trim() || !form.email.trim())) { setError("Name and email are required."); return; }
-    if (isEdit && !form.name.trim()) { setError("Name is required."); return; }
+    if (!form.name.trim() || !form.email.trim()) { setError("Name and email are required."); return; }
     setSubmitting(true); setError(null); setFieldErrors(null);
     try {
+      const rateNum = form.rate.trim() === "" ? null : Number(form.rate);
+      if (rateNum != null && (Number.isNaN(rateNum) || rateNum < 0)) {
+        setError("Rate must be a valid non-negative number."); setSubmitting(false); return;
+      }
       if (isEdit) {
-        const data = { name: form.name.trim(), bio: form.bio.trim(), experience: form.experience.trim(), is_active: form.is_active };
-        if (certifications.length) data.certificates = certifications.map((c) => ({ title: c }));
+        const data = {
+          name: form.name.trim(),
+          email: form.email.trim(),
+          bio: form.bio.trim(),
+          experience: form.experience.trim(),
+          city: form.city.trim(),
+          country: form.country.trim(),
+          is_remote: form.is_remote,
+          is_active: form.is_active,
+          rate: rateNum,
+          specializations,
+          certificates: certifications.map((c) => ({ title: c })),
+        };
         await updateTrainer({ token, trainerId: trainer.id, data });
       } else {
         const data = { name: form.name.trim(), email: form.email.trim() };
         if (form.password.trim()) data.password = form.password.trim();
         if (form.bio.trim()) data.bio = form.bio.trim();
         if (form.experience.trim()) data.experience = form.experience.trim();
+        if (form.city.trim()) data.city = form.city.trim();
+        if (form.country.trim()) data.country = form.country.trim();
+        if (form.is_remote) data.is_remote = true;
+        if (rateNum != null) data.rate = rateNum;
+        if (specializations.length) data.specializations = specializations;
         if (certifications.length) data.certificates = certifications.map((c) => ({ title: c }));
         await createTrainer({ token, data });
       }
@@ -267,7 +349,7 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
                 {isEdit ? "Edit Trainer" : "Onboard Trainer"}
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500 mt-0.5">
-                {isEdit ? "Update profile. Email cannot be changed." : "Create a trainer profile and account."}
+                {isEdit ? "Update any detail of this trainer's profile." : "Create a trainer profile and account."}
               </DialogDescription>
             </Box>
           </Box>
@@ -278,8 +360,8 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
             <Field label="Full name" required>
               <FInput icon={User} value={form.name} onChange={set("name")} placeholder="Jane Trainer" />
             </Field>
-            <Field label="Email" required={!isEdit}>
-              <FInput icon={Mail} type="email" value={form.email} onChange={set("email")} placeholder="trainer@example.com" disabled={isEdit} />
+            <Field label="Email" required hint={isEdit ? "Changing this changes their login" : undefined}>
+              <FInput icon={Mail} type="email" value={form.email} onChange={set("email")} placeholder="trainer@example.com" />
             </Field>
             {!isEdit && (
               <Field label="Password">
@@ -289,12 +371,46 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
           </Section>
 
           <Section label="Profile">
-            <Field label="Experience">
-              <FInput icon={Clock} value={form.experience} onChange={set("experience")} placeholder="10 years" />
-            </Field>
+            <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Experience">
+                <FInput icon={Clock} value={form.experience} onChange={set("experience")} placeholder="10 years" />
+              </Field>
+              <Field label="Rate" hint="per hour (₹)">
+                <FInput icon={IndianRupee} type="number" min="0" value={form.rate} onChange={set("rate")} placeholder="150" />
+              </Field>
+            </Box>
             <Field label="Bio">
               <FTextarea value={form.bio} onChange={set("bio")} placeholder="PMP-certified trainer with expertise in..." rows={3} />
             </Field>
+          </Section>
+
+          <Section label="Subject Excellence">
+            <Field label="Specializations" hint="What they're qualified to train">
+              <SpecializationInput value={specializations} onChange={setSpecializations} />
+            </Field>
+          </Section>
+
+          <Section label="Location">
+            <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="City">
+                <FInput icon={MapPin} value={form.city} onChange={set("city")} placeholder="Bengaluru" />
+              </Field>
+              <Field label="Country">
+                <FInput icon={Globe2} value={form.country} onChange={set("country")} placeholder="India" />
+              </Field>
+            </Box>
+            <Box className="flex items-center justify-between rounded-xl border border-slate-200 bg-white shadow-sm px-4 py-3">
+              <Box className="flex items-center gap-3">
+                <Box className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.is_remote ? "bg-blue-100" : "bg-slate-100"}`}>
+                  <Wifi className={`h-4 w-4 ${form.is_remote ? "text-blue-600" : "text-slate-400"}`} />
+                </Box>
+                <Box>
+                  <Text as="p" className="text-sm font-semibold text-slate-800">Delivers remotely</Text>
+                  <Text as="p" className="text-xs text-slate-500 mt-0.5">Trainer can run sessions online.</Text>
+                </Box>
+              </Box>
+              <Switch checked={form.is_remote} onCheckedChange={(v) => setForm((f) => ({ ...f, is_remote: v }))} />
+            </Box>
           </Section>
 
           <Section label="Certifications">

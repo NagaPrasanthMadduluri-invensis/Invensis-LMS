@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Mail, Briefcase, BadgeDollarSign, Pencil, History, GraduationCap } from "lucide-react";
+import { Mail, Briefcase, BadgeDollarSign, MapPin, Target, Pencil, History, GraduationCap } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
@@ -103,8 +103,28 @@ export function TrainerDetail({ trainerId }) {
           <Box className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <Fact icon={Briefcase} label="Experience" value={trainer.experience || "—"} />
             <Fact icon={BadgeDollarSign} label="Rate" value={trainer.rate != null ? `₹${trainer.rate}` : "—"} />
-            <Fact icon={Mail} label="Email" value={trainer.email} />
+            <Fact icon={MapPin} label="Location" value={trainer.location || "—"} />
           </Box>
+
+          <Separator className="my-5" />
+          <Box>
+            <Box className="flex items-center gap-1.5 mb-2.5">
+              <Target className="h-3.5 w-3.5 text-violet-500" />
+              <Text as="p" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Subject Excellence</Text>
+            </Box>
+            {Array.isArray(trainer.specializations) && trainer.specializations.length > 0 ? (
+              <Box className="flex flex-wrap gap-1.5">
+                {trainer.specializations.map((s) => (
+                  <Badge key={s} className="border-0 bg-violet-50 text-violet-700 ring-1 ring-violet-200 text-xs font-semibold px-2.5 py-1">
+                    {s}
+                  </Badge>
+                ))}
+              </Box>
+            ) : (
+              <Text as="p" className="text-sm text-slate-400">No specializations set.</Text>
+            )}
+          </Box>
+
           {trainer.bio && (
             <>
               <Separator className="my-5" />

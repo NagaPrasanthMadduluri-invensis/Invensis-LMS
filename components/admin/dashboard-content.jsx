@@ -11,7 +11,7 @@ import {
   Users, GraduationCap, BookOpen, ClipboardList, Award, Gauge,
   UserCheck, CalendarClock, CheckCircle2, RefreshCw, Ticket,
   Video, MapPin, ArrowRight, Clock, Mail, AlertCircle,
-  UserPlus, Link2, AlertTriangle, CheckCircle,
+  UserPlus, Link2, AlertTriangle, CheckCircle, ExternalLink,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -371,68 +371,6 @@ function RecentEnrolmentsTable({ rows = [] }) {
 }
 
 /* ──────────────────────────────────────────────────────────
-   Recent Trainers — table with their latest training's details
-   ────────────────────────────────────────────────────────── */
-
-function RecentTrainersTable({ rows = [] }) {
-  return (
-    <Panel title="Recent Trainers" icon={GraduationCap} action={<ViewAll href="/admin/trainers" />}>
-      {rows.length === 0 ? (
-        <EmptyState icon={GraduationCap} text="No trainers onboarded yet" />
-      ) : (
-        <Box className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableHeadRow cols={[
-                { l: "Trainer" }, { l: "Learners", c: true }, { l: "Location" }, { l: "Mode" },
-                { l: "Total hrs", c: true }, { l: "Hrs/day", c: true }, { l: "Start date" }, { l: "End date" },
-              ]} />
-            </TableHeader>
-            <TableBody>
-              {rows.map((t, i) => {
-                const learners = t.learners ?? FB_LEARNERS[i % FB_LEARNERS.length];
-                const location = t.location || FB_LOC[i % FB_LOC.length];
-                const mode = t.delivery_mode || FB_MODE[i % FB_MODE.length];
-                const total = t.duration_hours ?? FB_TOTAL[i % FB_TOTAL.length];
-                const daily = t.daily_hours ?? FB_DAILY[i % FB_DAILY.length];
-                const start = t.start_date || FB_DATES[i % FB_DATES.length];
-                const end = t.end_date || FB_END[i % FB_END.length];
-                return (
-                  <TableRow key={t.id} className="border-slate-100">
-                    <TableCell className="py-2.5">
-                      <Box className="flex items-center gap-2">
-                        <Box className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${avatarColor(t.name)}`}>
-                          {getInitials(t.name)}
-                        </Box>
-                        <Box className="flex items-center gap-1.5">
-                          <Box className={`h-1.5 w-1.5 shrink-0 rounded-full ${t.is_active ? "bg-emerald-500" : "bg-slate-300"}`} />
-                          <Text as="span" className="whitespace-nowrap text-xs font-semibold text-slate-800">{t.name}</Text>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{learners}</Text></TableCell>
-                    <TableCell className="py-2.5">
-                      <Box className="flex items-center gap-1 whitespace-nowrap text-[11px] text-slate-600"><MapPin className="h-3 w-3 text-slate-400" />{location}</Box>
-                    </TableCell>
-                    <TableCell className="py-2.5">
-                      <Box className="flex items-center gap-1 text-[11px] text-slate-600"><ModeIcon mode={mode} />{cap(mode)}</Box>
-                    </TableCell>
-                    <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{total}h</Text></TableCell>
-                    <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{daily}h</Text></TableCell>
-                    <TableCell className="py-2.5"><Text as="span" className="whitespace-nowrap text-[11px] text-slate-600">{formatDate(start)}</Text></TableCell>
-                    <TableCell className="py-2.5"><Text as="span" className="whitespace-nowrap text-[11px] text-slate-600">{formatDate(end)}</Text></TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </Box>
-      )}
-    </Panel>
-  );
-}
-
-/* ──────────────────────────────────────────────────────────
    Recently Completed Trainings — table (trainer, learners,
    location, mode, hours, dates)
    ────────────────────────────────────────────────────────── */
@@ -533,7 +471,7 @@ export function AdminDashboardContent() {
     users = {}, trainers = {}, courses = {}, enrolments = {},
     certificates = {}, tickets = {},
     upcoming_trainings = [], completed_trainings = [],
-    recent_enrolments = [], recent_trainers = [],
+    recent_enrolments = [],
     action_items = {},
     generated_at,
   } = data;
@@ -631,9 +569,19 @@ export function AdminDashboardContent() {
                       <Text as="p" className="truncate text-sm font-semibold text-slate-800">{t.title}</Text>
                       <Text as="span" className="font-mono text-[11px] text-slate-400">{t.code}</Text>
                     </Box>
-                    <Badge variant="secondary" className={`shrink-0 border-0 text-[10px] ${statusClass(t.status)}`}>
-                      {cap(t.status)}
-                    </Badge>
+                    <Box className="flex shrink-0 items-center gap-2">
+                      <Badge variant="secondary" className={`border-0 text-[10px] ${statusClass(t.status)}`}>
+                        {cap(t.status)}
+                      </Badge>
+                      <Link
+                        href={`/admin/courses/${t.id}`}
+                        aria-label="Open training"
+                        title="Open training"
+                        className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-600"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Link>
+                    </Box>
                   </Box>
 
                   <Box className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
@@ -678,9 +626,6 @@ export function AdminDashboardContent() {
           </Box>
         )}
       </Panel>
-
-      {/* ── Recent trainers (rich table) ── */}
-      <RecentTrainersTable rows={recent_trainers} />
 
       {/* ── Recently completed trainings (rich table) ── */}
       {completed_trainings.length > 0 && <RecentCompletedTable rows={completed_trainings} />}

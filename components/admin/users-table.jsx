@@ -9,7 +9,10 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Search, Users, X, BookOpen, UserCheck, UserX, Mail, Calendar, Briefcase, ChevronLeft, ChevronRight,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Search, Users, X, BookOpen, UserCheck, UserX, Mail, Calendar, Briefcase, MapPin, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -61,8 +64,13 @@ const PAGE_LIMIT = 100;
 export function UsersTable() {
   const { token } = useAuth();
   const [search, setSearch] = useState("");
+  const [location, setLocation] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
   const [page, setPage] = useState(1);
   const [data, setData] = useState(null);
+  // Filter dropdown options persist across reloads (backend returns the full
+  // distinct lists regardless of the active filters).
+  const [filterOptions, setFilterOptions] = useState({ locations: [], job_titles: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -71,14 +79,18 @@ export function UsersTable() {
     setLoading(true);
     setError(null);
     const handle = setTimeout(() => {
-      fetchParticipants({ token, search, page, limit: PAGE_LIMIT })
-        .then(setData)
+      fetchParticipants({ token, search, location, jobTitle, page, limit: PAGE_LIMIT })
+        .then((res) => {
+          setData(res);
+          if (res?.filters) setFilterOptions(res.filters);
+        })
         .catch((e) => setError(e.message))
         .finally(() => setLoading(false));
     }, 300);
     return () => clearTimeout(handle);
-  }, [token, search, page]);
+  }, [token, search, location, jobTitle, page]);
 
+  const hasFilters = !!(search || location || jobTitle);
   const users = data?.participants || [];
   const total = data?.total || 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
@@ -124,7 +136,55 @@ export function UsersTable() {
             </button>
           )}
         </Box>
-        {search && !loading && (
+
+        {/* Location filter */}
+        <Select
+          value={location || "__all__"}
+          onValueChange={(v) => { setLocation(v === "__all__" ? "" : v); setPage(1); }}
+        >
+          <SelectTrigger className="h-11 w-[190px] bg-slate-100/60 border-slate-300/70 rounded-xl text-sm text-slate-700">
+            <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
+            <SelectValue placeholder="All locations" className="truncate">
+              {(v) => (!v || v === "__all__" ? "All locations" : v)}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All locations</SelectItem>
+            {filterOptions.locations.map((loc) => (
+              <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Job role filter */}
+        <Select
+          value={jobTitle || "__all__"}
+          onValueChange={(v) => { setJobTitle(v === "__all__" ? "" : v); setPage(1); }}
+        >
+          <SelectTrigger className="h-11 w-[190px] bg-slate-100/60 border-slate-300/70 rounded-xl text-sm text-slate-700">
+            <Briefcase className="h-4 w-4 text-slate-400 shrink-0" />
+            <SelectValue placeholder="All job titles" className="truncate">
+              {(v) => (!v || v === "__all__" ? "All job titles" : v)}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All job titles</SelectItem>
+            {filterOptions.job_titles.map((jt) => (
+              <SelectItem key={jt} value={jt}>{jt}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {hasFilters && (
+          <Button
+            variant="ghost" size="sm"
+            onClick={() => { setSearch(""); setLocation(""); setJobTitle(""); setPage(1); }}
+            className="h-11 px-3 text-xs text-slate-500 hover:text-slate-700 shrink-0"
+          >
+            <X className="h-3.5 w-3.5 mr-1" /> Clear
+          </Button>
+        )}
+        {hasFilters && !loading && (
           <Text as="span" className="text-xs text-slate-400 shrink-0">
             {total} match{total !== 1 ? "es" : ""}
           </Text>
@@ -157,13 +217,14 @@ export function UsersTable() {
               <Users className="h-6 w-6 text-slate-400" />
             </Box>
             <Text as="p" className="text-sm font-medium text-slate-500">
-              {search ? "No users match your search" : "No users yet"}
+              {hasFilters ? "No users match your filters" : "No users yet"}
             </Text>
-            {search && <Text as="p" className="text-xs text-slate-400 mt-1">Try a different name or email</Text>}
-            {search && (
-              <Button variant="ghost" size="sm" onClick={() => setSearch("")}
+            {hasFilters && <Text as="p" className="text-xs text-slate-400 mt-1">Try adjusting your search or filters</Text>}
+            {hasFilters && (
+              <Button variant="ghost" size="sm"
+                onClick={() => { setSearch(""); setLocation(""); setJobTitle(""); setPage(1); }}
                 className="mt-3 text-indigo-600 hover:text-indigo-700 text-xs">
-                Clear search
+                Clear filters
               </Button>
             )}
           </Box>
@@ -176,6 +237,7 @@ export function UsersTable() {
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 pl-5">User</TableHead>
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Email</TableHead>
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Job Title</TableHead>
+                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Location</TableHead>
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 text-center">Enrolments</TableHead>
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Joined</TableHead>
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 pr-5">Status</TableHead>
@@ -210,6 +272,14 @@ export function UsersTable() {
                           <Box className="flex items-center gap-1.5">
                             <Briefcase className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                             <Text as="span" className="text-sm text-slate-600">{u.job_title || "—"}</Text>
+                          </Box>
+                        </TableCell>
+
+                        {/* Location */}
+                        <TableCell className="py-4">
+                          <Box className="flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                            <Text as="span" className="text-sm text-slate-600">{u.location || "—"}</Text>
                           </Box>
                         </TableCell>
 

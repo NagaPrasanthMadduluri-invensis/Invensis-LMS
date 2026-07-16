@@ -17,18 +17,30 @@ export async function fetchAdminTrainingDetail({ token, trainingRef }) {
   return apiClient(`/admin/trainings/${trainingRef}`, { token });
 }
 
-/** GET /admin/trainers → { trainers: [...] } (active trainers for assignment) */
-export async function fetchTrainers({ token }) {
-  return apiClient("/admin/trainers", { token });
+/**
+ * GET /admin/trainers → { trainers: [...] }
+ * Each trainer: { id, name, email, bio, experience, rate, certificates,
+ *   specializations, city, country, is_remote, location, is_active }.
+ * Defaults to active trainers only (for the assignment picker). Pass
+ * includeInactive=true for the admin management table so deactivated trainers
+ * remain visible/editable.
+ */
+export async function fetchTrainers({ token, includeInactive = false } = {}) {
+  const qs = includeInactive ? "?include_inactive=true" : "";
+  return apiClient(`/admin/trainers${qs}`, { token });
 }
 
 /**
- * GET /admin/participants?search=&page=&limit= → { participants: [...], total, page, limit }
- * Paginated list of all participants (learners), searchable by name/email.
+ * GET /admin/participants?search=&location=&job_title=&page=&limit=
+ *   → { participants: [...], total, page, limit, filters: { job_titles, locations } }
+ * Paginated list of all participants (learners), searchable by name/email and
+ * filterable by location and job title.
  */
-export async function fetchParticipants({ token, search = "", page = 1, limit = 20 }) {
+export async function fetchParticipants({ token, search = "", location = "", jobTitle = "", page = 1, limit = 20 }) {
   const params = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (search) params.set("search", search);
+  if (location) params.set("location", location);
+  if (jobTitle) params.set("job_title", jobTitle);
   return apiClient(`/admin/participants?${params.toString()}`, { token });
 }
 
@@ -75,12 +87,50 @@ export async function addParticipant({ token, trainingRef, data }) {
 }
 
 /* ──────────────────────────────────────
+   SURVEYS (post/pre-training feedback)  — API §3.7
+   ────────────────────────────────────── */
+
+/**
+ * POST /admin/trainings/:trainingRef/surveys  (API §3.7.1)
+ * Create (assign) a survey for a training. `trainingRef` may be the UUID or code.
+ * body = { type: "pre_training"|"post_training", title, questions[] } — `questions`
+ * is a non-empty array of question objects (frontend-owned shape). Returns
+ * { survey: { id, training_id, type, title, questions, assigned_at } }.
+ */
+export async function createTrainingSurvey({ token, trainingRef, type = "post_training", title, questions }) {
+  return apiClient(`/admin/trainings/${trainingRef}/surveys`, {
+    method: "POST",
+    token,
+    body: { type, title, questions },
+  });
+}
+
+/**
+ * GET /admin/trainings/:trainingRef/surveys  (API §3.7.2)
+ * List a training's surveys, each with a `response_count`.
+ * Returns { surveys: [{ id, training_id, type, title, questions, assigned_at, response_count }] }.
+ */
+export async function fetchTrainingSurveys({ token, trainingRef }) {
+  return apiClient(`/admin/trainings/${trainingRef}/surveys`, { token });
+}
+
+/**
+ * GET /admin/surveys/:surveyId/responses  (API §3.7.3)
+ * All responses for a survey (analytics). Returns
+ * { survey: {...}, responses: [{ id, participant_id, name, email, answers, submitted_at }] }.
+ */
+export async function fetchSurveyResponses({ token, surveyId }) {
+  return apiClient(`/admin/surveys/${surveyId}/responses`, { token });
+}
+
+/* ──────────────────────────────────────
    TRAINERS (onboard / profile / edit)
    ────────────────────────────────────── */
 
 /**
  * POST /admin/trainers — onboard a trainer (creates the users account if new).
- * data = { name, email, password?, bio?, experience?, rate?, certificates? }
+ * data = { name, email, password?, bio?, experience?, rate?, certificates?,
+ *   specializations?, city?, country?, is_remote? }
  * Only name + email are required. Returns { trainer }.
  */
 export async function createTrainer({ token, data }) {
@@ -94,7 +144,9 @@ export async function fetchTrainerDetail({ token, trainerId }) {
 
 /**
  * PATCH /admin/trainers/:trainerId — edit / deactivate.
- * data = any subset of { name, bio, experience, rate, certificates, is_active }
+ * data = any subset of { name, email, bio, experience, rate, certificates,
+ *   specializations, city, country, is_remote, is_active }
+ * Changing email re-points the login identity (guarded against duplicates).
  * Returns { trainer }.
  */
 export async function updateTrainer({ token, trainerId, data }) {
@@ -210,6 +262,17 @@ export async function fetchAdminAnalytics({ token, filters = {} }) {
   }
   const qs = params.toString();
   return apiClient(`/admin/analytics${qs ? `?${qs}` : ""}`, { token });
+}
+
+/**
+ * GET /admin/certificates
+ * Completed trainings + their certificate-issuance status. Returns
+ * { generated_at, summary: { completed_trainings, certificates_issued, eligible,
+ * issuance_rate }, trainings: [{ id, code, title, delivery_mode, bucket,
+ * start_date, end_date, trainer_name, participants, eligible, issued, status }] }.
+ */
+export async function fetchAdminCertificates({ token }) {
+  return apiClient("/admin/certificates", { token });
 }
 
 /**

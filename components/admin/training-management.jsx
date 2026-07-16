@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Hash, Calendar, Clock, Globe, Hourglass, Users, UserCheck, UserX, UserPlus,
-  Mail, Phone, Briefcase, Video, MoreHorizontal, Pencil, ArrowLeftRight, XCircle,
+  Mail, Phone, Briefcase, MapPin, Video, MoreHorizontal, Pencil, ArrowLeftRight, XCircle,
   ExternalLink, Plus, BookText, AlertCircle, User, Link2, MessageSquare, CheckSquare2, ChevronDown,
   CheckCircle2, GraduationCap, Loader2,
 } from "lucide-react";
@@ -37,6 +37,7 @@ import {
   completeEnrolment, completeAllEnrolments,
 } from "@/services/api/admin/admin-api";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
+import { TrainingSurveys } from "@/components/admin/training-surveys";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pending",   dark: "bg-amber-400/90 text-amber-950",    light: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80" },
@@ -978,6 +979,9 @@ export function TrainingManagement({ trainingId }) {
                   <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
                     <Box className="flex items-center gap-1"><Briefcase className="h-3 w-3" /> Job Title</Box>
                   </TableHead>
+                  <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                    <Box className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Location</Box>
+                  </TableHead>
                   <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Status</TableHead>
                   <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Source</TableHead>
                   <TableHead className="text-right text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Actions</TableHead>
@@ -990,6 +994,7 @@ export function TrainingManagement({ trainingId }) {
                     <TableCell className="py-3.5 text-slate-500 text-sm">{p.email}</TableCell>
                     <TableCell className="py-3.5 text-slate-500 text-sm">{p.phone || "—"}</TableCell>
                     <TableCell className="py-3.5 text-slate-500 text-sm">{p.job_title || "—"}</TableCell>
+                    <TableCell className="py-3.5 text-slate-500 text-sm">{p.location || "—"}</TableCell>
                     <TableCell className="py-3.5">
                       {(() => {
                         const cfg = ENROLMENT_STATUS[p.status] || { label: p.status, className: "bg-slate-100 text-slate-600" };
@@ -1046,6 +1051,9 @@ export function TrainingManagement({ trainingId }) {
 
       {/* ── Day-wise topics ── */}
       <SessionTopicsCard sessions={detail.sessions} />
+
+      {/* ── Post-training feedback survey ── */}
+      <TrainingSurveys trainingRef={trainingId} token={token} />
 
       <AssignTrainerDialog open={assignOpen} onOpenChange={setAssignOpen} token={token} trainingRef={trainingId} currentTrainerId={detail.trainer?.id} onAssigned={load} />
       <AddParticipantDialog open={addOpen} onOpenChange={setAddOpen} token={token} trainingRef={trainingId} onAdded={load} />

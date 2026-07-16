@@ -13,7 +13,7 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
-import { fetchCertificates, submitCertificateSurvey } from "@/services/api/learner/learner-api";
+import { fetchCertificates, fetchLearnerSurveys, submitSurveyResponse } from "@/services/api/learner/learner-api";
 
 /* ── date / delivery formatting for the certificate line ── */
 function ordinal(n) {
@@ -226,37 +226,44 @@ function SurveyRow({ label, hint, children }) {
   );
 }
 
-/* ── Feedback survey dialog (gates the download) ── */
-function SurveyDialog({ cert, onOpenChange, token, onIssued }) {
-  const open = !!cert;
+/* ── Feedback survey dialog (gates the download) ──
+   Submits the training's post-training survey (API §3.7.5). The answers map is
+   keyed by the fixed question ids the survey was authored with; on success the
+   backend stores the response against the training + participant and issues the
+   certificate, which the caller picks up by refetching. */
+function SurveyDialog({ target, onOpenChange, token, onSubmitted }) {
+  const open = !!target;
+  const cert = target?.cert;
+  const survey = target?.survey;
   const [form, setForm] = useState({ overall_rating: 0, trainer_rating: 0, content_rating: 0, would_recommend: null, comments: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (cert) {
+    if (target) {
       setForm({ overall_rating: 0, trainer_rating: 0, content_rating: 0, would_recommend: null, comments: "" });
       setError(null);
     }
-  }, [cert]);
+  }, [target]);
 
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v }));
   const complete = form.overall_rating > 0 && form.trainer_rating > 0 && form.content_rating > 0 && form.would_recommend !== null;
 
   async function submit() {
     if (!complete) { setError("Please rate all three areas and tell us if you'd recommend it."); return; }
+    if (!survey?.id) { setError("This training's feedback survey isn't available yet."); return; }
     setSubmitting(true); setError(null);
     try {
-      const responses = {
+      const answers = {
         overall_rating: form.overall_rating,
         trainer_rating: form.trainer_rating,
         content_rating: form.content_rating,
         would_recommend: form.would_recommend,
       };
-      if (form.comments.trim()) responses.comments = form.comments.trim();
-      const res = await submitCertificateSurvey({ token, trainingRef: cert.training_code, responses });
-      onIssued(res.certificate);
+      if (form.comments.trim()) answers.comments = form.comments.trim();
+      await submitSurveyResponse({ token, surveyId: survey.id, answers });
       onOpenChange(false);
+      onSubmitted(cert);
     } catch (e) { setError(e.message); } finally { setSubmitting(false); }
   }
 
@@ -332,7 +339,8 @@ function SurveyDialog({ cert, onOpenChange, token, onIssued }) {
 }
 
 /* ── One certificate card ── */
-function CertificateCard({ cert, onDownload, onGiveFeedback }) {
+function CertificateCard({ cert, survey, onDownload, onGiveFeedback }) {
+  const canGiveFeedback = survey && !survey.answered;
   return (
     <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-2xl bg-white flex flex-col">
       <Box className="relative bg-slate-50/70 border-b border-slate-100 p-4">
@@ -383,10 +391,20 @@ function CertificateCard({ cert, onDownload, onGiveFeedback }) {
             <Button onClick={() => onDownload(cert)} className="w-full bg-amber-500 hover:bg-amber-600 text-white border-0 shadow-sm">
               <Download className="h-4 w-4 mr-2" /> Download certificate
             </Button>
-          ) : (
-            <Button onClick={() => onGiveFeedback(cert)} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">
+          ) : canGiveFeedback ? (
+            <Button onClick={() => onGiveFeedback(cert, survey)} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">
               <MessageSquare className="h-4 w-4 mr-2" /> Give feedback &amp; download
             </Button>
+          ) : survey?.answered ? (
+            <Box className="flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5">
+              <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+              <Text as="p" className="text-xs font-medium text-emerald-700">Feedback submitted — your certificate will be ready shortly.</Text>
+            </Box>
+          ) : (
+            <Box className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5">
+              <AlertCircle className="h-4 w-4 text-slate-400 shrink-0" />
+              <Text as="p" className="text-xs font-medium text-slate-500">Feedback survey isn&apos;t available yet.</Text>
+            </Box>
           )}
         </Box>
       </Box>
@@ -398,18 +416,40 @@ function CertificateCard({ cert, onDownload, onGiveFeedback }) {
 export function CertificatesContent() {
   const { token } = useAuth();
   const [certs, setCerts] = useState(null);
+  const [surveys, setSurveys] = useState([]);
   const [error, setError] = useState(null);
-  const [surveyCert, setSurveyCert] = useState(null);
+  const [feedbackTarget, setFeedbackTarget] = useState(null);
   const [printCert, setPrintCert] = useState(null);
 
-  const load = useCallback(() => {
-    if (!token) return;
-    fetchCertificates({ token })
-      .then((d) => setCerts(d.certificates || []))
-      .catch((e) => setError(e.message));
+  // Load certificates + the caller's surveys together. The post-training survey
+  // (API §3.7.4) is what now gates the download, so we match it to each
+  // certificate by training code. Returns the fresh data so callers can act on
+  // it immediately after a submit.
+  const load = useCallback(async () => {
+    if (!token) return null;
+    try {
+      const [certData, surveyData] = await Promise.all([
+        fetchCertificates({ token }),
+        fetchLearnerSurveys({ token }).catch(() => ({ surveys: [] })),
+      ]);
+      const nextCerts = certData.certificates || [];
+      const nextSurveys = surveyData.surveys || [];
+      setCerts(nextCerts);
+      setSurveys(nextSurveys);
+      return { certificates: nextCerts, surveys: nextSurveys };
+    } catch (e) {
+      setError(e.message);
+      return null;
+    }
   }, [token]);
 
   useEffect(() => { load(); }, [load]);
+
+  // The post-training survey for a certificate's training (if one is assigned).
+  const surveyForCert = useCallback(
+    (cert) => surveys.find((s) => s.type === "post_training" && s.training_code === cert.training_code),
+    [surveys]
+  );
 
   // Print-to-PDF: reveal the off-screen certificate print root and open the
   // browser print dialog; clean up when printing finishes.
@@ -431,10 +471,12 @@ export function CertificatesContent() {
     };
   }, [printCert]);
 
-  function handleIssued(updated) {
-    // Merge the newly-issued certificate into the list, then auto-download it.
-    setCerts((list) => (list || []).map((c) => (c.training_id === updated.training_id ? { ...c, ...updated } : c)));
-    setPrintCert(updated);
+  async function handleFeedbackSubmitted(cert) {
+    // Refetch certificates + surveys; once the backend has issued the
+    // certificate off the submitted survey, auto-download it.
+    const fresh = await load();
+    const updated = fresh?.certificates.find((c) => c.training_id === cert.training_id);
+    if (updated?.issued) setPrintCert(updated);
   }
 
   if (error) {
@@ -471,11 +513,17 @@ export function CertificatesContent() {
     <>
       <Box className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {certs.map((c) => (
-          <CertificateCard key={c.training_id} cert={c} onDownload={setPrintCert} onGiveFeedback={setSurveyCert} />
+          <CertificateCard
+            key={c.training_id}
+            cert={c}
+            survey={surveyForCert(c)}
+            onDownload={setPrintCert}
+            onGiveFeedback={(cert, survey) => setFeedbackTarget({ cert, survey })}
+          />
         ))}
       </Box>
 
-      <SurveyDialog cert={surveyCert} onOpenChange={(v) => !v && setSurveyCert(null)} token={token} onIssued={handleIssued} />
+      <SurveyDialog target={feedbackTarget} onOpenChange={(v) => !v && setFeedbackTarget(null)} token={token} onSubmitted={handleFeedbackSubmitted} />
 
       {/* Hidden print root — only visible to the printer (see globals.css). */}
       <Box className="certificate-print-root">
