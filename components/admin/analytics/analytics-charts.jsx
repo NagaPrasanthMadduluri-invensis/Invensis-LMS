@@ -23,9 +23,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useState } from "react";
+import { Maximize2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import Box from "@/components/ui/box";
 import Text from "@/components/ui/text";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import {
   ChartContainer,
   ChartTooltip,
@@ -108,25 +113,75 @@ export const TIER_COLOR = {
 /* ──────────────────────────────────────────────────────────
    Card shell for a chart (title + optional subtitle + body)
    ────────────────────────────────────────────────────────── */
-export function ChartCard({ title, subtitle, icon: Icon, action, children, className = "" }) {
+export function ChartCard({ title, subtitle, icon: Icon, action, children, className = "", fitInFullscreen = false }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const Head = (
+    <Box className="flex items-center gap-2">
+      {Icon && (
+        <Box className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+          <Icon className="h-4 w-4" />
+        </Box>
+      )}
+      <Box>
+        <Text as="h3" className="text-sm font-semibold text-slate-800">{title}</Text>
+        {subtitle && <Text as="span" className="text-[11px] text-slate-400">{subtitle}</Text>}
+      </Box>
+    </Box>
+  );
+
   return (
-    <Card className={`flex flex-col overflow-hidden rounded-2xl border border-slate-200 shadow-sm ${className}`}>
-      <Box className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-3.5">
-        <Box className="flex items-center gap-2">
-          {Icon && (
-            <Box className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-              <Icon className="h-4 w-4" />
-            </Box>
-          )}
-          <Box>
-            <Text as="h3" className="text-sm font-semibold text-slate-800">{title}</Text>
-            {subtitle && <Text as="span" className="text-[11px] text-slate-400">{subtitle}</Text>}
+    <>
+      <Card className={`flex flex-col overflow-hidden rounded-2xl border border-slate-200 shadow-sm ${className}`}>
+        <Box className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-3.5">
+          {Head}
+          <Box className="flex items-center gap-1 shrink-0">
+            {action}
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              aria-label="Expand chart to full screen"
+              title="Expand to full screen"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </button>
           </Box>
         </Box>
-        {action}
-      </Box>
-      <Box className="flex-1 p-4">{children}</Box>
-    </Card>
+        <Box className="flex-1 p-4">{children}</Box>
+      </Card>
+
+      <Dialog open={expanded} onOpenChange={setExpanded}>
+        <DialogContent className="!max-w-[96vw] w-[96vw] p-0 gap-0 overflow-hidden">
+          <DialogHeader className="flex flex-row items-center gap-2 border-b border-slate-100 px-6 py-4">
+            {Icon && (
+              <Box className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 shrink-0">
+                <Icon className="h-4 w-4" />
+              </Box>
+            )}
+            <Box className="min-w-0">
+              <DialogTitle className="text-base font-semibold text-slate-800">{title}</DialogTitle>
+              {subtitle
+                ? <DialogDescription className="text-xs text-slate-400">{subtitle}</DialogDescription>
+                : <DialogDescription className="sr-only">Full screen view of {title}</DialogDescription>}
+            </Box>
+          </DialogHeader>
+          {/* Cartesian charts fill the tall viewport; circular (donut) charts are
+              centered and height-capped so the chart + its legend fit without scroll. */}
+          {fitInFullscreen ? (
+            <Box className="flex h-[82vh] w-full items-center justify-center overflow-auto p-6">
+              <Box className="w-full max-w-2xl [&_[data-slot=chart]]:!h-[58vh] [&_[data-slot=chart]]:!w-auto">
+                {expanded && children}
+              </Box>
+            </Box>
+          ) : (
+            <Box className="h-[82vh] w-full overflow-auto p-6 [&_[data-slot=chart]]:!h-full">
+              {expanded && children}
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -252,7 +307,7 @@ function DonutChart({ data, colorFor, labelFor, centerLabel, centerValue, emptyL
         <ChartContainer config={config} className="mx-auto aspect-square h-[190px]">
           <PieChart>
             <ChartTooltip content={<ChartTooltipContent nameKey="key" hideLabel />} />
-            <Pie data={rows} dataKey="value" nameKey="key" innerRadius={58} outerRadius={82} paddingAngle={2} strokeWidth={2} stroke="#ffffff" isAnimationActive={false}>
+            <Pie data={rows} dataKey="value" nameKey="key" innerRadius="61%" outerRadius="86%" paddingAngle={2} strokeWidth={2} stroke="#ffffff" isAnimationActive={false}>
               {rows.map((r) => (
                 <Cell key={r.key} fill={colorFor(r.key)} />
               ))}

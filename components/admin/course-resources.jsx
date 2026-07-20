@@ -64,7 +64,7 @@ const TYPE_BADGE = {
   pdf:      "bg-red-100 text-red-700",
   video:    "bg-purple-100 text-purple-700",
   link:     "bg-gray-100 text-gray-600",
-  document: "bg-indigo-100 text-indigo-700",
+  document: "bg-violet-100 text-violet-700",
 };
 
 const EMPTY_FORM = { title: "", type: "pdf", url: "", description: "", is_active: true };
@@ -302,8 +302,8 @@ function EnrollmentAssignments({ courseId, resources, token }) {
           <Box key={enrollment.id} className="border rounded-lg overflow-hidden">
             {/* User header */}
             <Box className="flex items-center gap-3 px-4 py-2.5 bg-muted/40">
-              <Box className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-                <Text as="span" className="text-xs font-semibold text-indigo-600">
+              <Box className="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
+                <Text as="span" className="text-xs font-semibold text-violet-600">
                   {enrollment.user.name[0]}
                 </Text>
               </Box>
@@ -333,12 +333,12 @@ function EnrollmentAssignments({ courseId, resources, token }) {
                       className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 cursor-pointer transition-colors"
                       onClick={() => !busy && toggle(enrollment.id, r.id, assigned)}>
                       {assigned
-                        ? <CheckSquare className={`h-4 w-4 shrink-0 text-indigo-500 ${busy ? "opacity-40" : ""}`} />
+                        ? <CheckSquare className={`h-4 w-4 shrink-0 text-violet-500 ${busy ? "opacity-40" : ""}`} />
                         : <Square     className={`h-4 w-4 shrink-0 text-muted-foreground/40 ${busy ? "opacity-40" : ""}`} />
                       }
                       <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                       <Text as="p" className="text-xs flex-1 truncate">{r.title}</Text>
-                      <Badge className={`text-[9px] border-0 shrink-0 ${assigned ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-400"}`}>
+                      <Badge className={`text-[9px] border-0 shrink-0 ${assigned ? "bg-violet-100 text-violet-700" : "bg-gray-100 text-gray-400"}`}>
                         {assigned ? "Assigned" : "Unassigned"}
                       </Badge>
                     </Box>

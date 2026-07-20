@@ -12,9 +12,9 @@ export function SponsorShell({ children }) {
       <SidebarProvider>
         <Box className="flex h-full flex-col">
           <TopNav portalLabel="Invensis Sponsor" />
-          <Box className="flex flex-1 overflow-hidden">
+          <Box className="flex flex-1 overflow-hidden bg-sidebar">
             <SponsorSidebar />
-            <Box as="main" className="flex-1 overflow-auto p-6 bg-muted/30">
+            <Box as="main" className="flex-1 overflow-auto p-6 bg-background rounded-t-2xl">
               {children}
             </Box>
           </Box>

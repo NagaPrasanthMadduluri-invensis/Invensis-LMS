@@ -1,4 +1,4 @@
-# Invensis LMS
+# Invensis Learning
 
 A Learning Management System built with Next.js 15, React 19, and shadcn/ui. The platform serves two distinct portals — **Learner** and **Admin** — within a single application using Next.js Route Groups.
 

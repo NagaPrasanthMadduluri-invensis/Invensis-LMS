@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Search, Calendar, Users, Clock, UserCheck, UserX, UserPlus,
-  ChevronRight, BookOpen, LayoutGrid, Link2, LinkIcon,
+  ChevronRight, BookOpen, LayoutGrid, Link2, LinkIcon, X, SlidersHorizontal,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -35,14 +35,16 @@ function formatDate(d) {
 
 function StatCard({ label, value, icon: Icon, bg, border, iconBg, iconCls, valueCls, labelCls }) {
   return (
-    <Card className={`rounded-2xl ${border} shadow-sm ${bg} p-5`}>
-      <Box className="flex items-start justify-between mb-4">
-        <Box className={`w-11 h-11 ${iconBg} rounded-xl flex items-center justify-center`}>
+    <Card className={`rounded-2xl ${border} shadow-sm ${bg} px-5 py-4`}>
+      <Box className="flex items-center gap-3">
+        <Box className={`w-11 h-11 ${iconBg} rounded-xl flex items-center justify-center shrink-0`}>
           <Icon className={`h-5 w-5 ${iconCls}`} />
         </Box>
-        <Text as="p" className={`text-3xl font-bold ${valueCls} leading-none`}>{value}</Text>
+        <Box className="min-w-0">
+          <Text as="p" className={`text-2xl font-bold ${valueCls} leading-none`}>{value}</Text>
+          <Text as="p" className={`text-xs ${labelCls} font-medium mt-1`}>{label}</Text>
+        </Box>
       </Box>
-      <Text as="p" className={`text-sm ${labelCls} font-medium`}>{label}</Text>
     </Card>
   );
 }
@@ -82,14 +84,14 @@ function TrainingCard({ training, onClick }) {
 
         {/* Row 1: Training ID + Status */}
         <Box className="flex items-center justify-between">
-          <Text as="span" className="text-[11px] font-mono font-bold text-indigo-600 bg-indigo-50 ring-1 ring-indigo-200 px-2.5 py-1 rounded-lg tracking-wide">
+          <Text as="span" className="text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg tracking-wide">
             {training.code}
           </Text>
           <Badge className={`text-[10px] font-semibold border-0 ${statusCfg.badge}`}>{statusCfg.label}</Badge>
         </Box>
 
         {/* Title */}
-        <Text as="h3" className="text-[17px] font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
+        <Text as="h3" className="text-base font-bold text-slate-900 leading-snug line-clamp-2 min-h-[2.75rem] break-words hyphens-none group-hover:text-violet-600 transition-colors">
           {training.title}
         </Text>
 
@@ -150,15 +152,15 @@ function TrainingCard({ training, onClick }) {
 
           {/* Meeting link block */}
           {training.meeting_released ? (
-            <Box className="flex items-center gap-3 bg-indigo-50 ring-1 ring-indigo-200 rounded-xl px-3.5 py-3">
-              <Box className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
+            <Box className="flex items-center gap-3 bg-violet-50 ring-1 ring-violet-200 rounded-xl px-3.5 py-3">
+              <Box className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center shrink-0 shadow-sm">
                 <Link2 className="h-3.5 w-3.5 text-white" />
               </Box>
               <Box className="min-w-0 flex-1">
-                <Text as="p" className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
-                <Text as="p" className="text-sm font-semibold text-indigo-900">Released to participants</Text>
+                <Text as="p" className="text-[10px] font-bold text-violet-600 uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
+                <Text as="p" className="text-sm font-semibold text-violet-900">Released to participants</Text>
               </Box>
-              <Box className="w-2 h-2 rounded-full bg-indigo-500 shrink-0 shadow-sm" />
+              <Box className="w-2 h-2 rounded-full bg-violet-500 shrink-0 shadow-sm" />
             </Box>
           ) : training.meeting_url ? (
             <Box className="flex items-center gap-3 bg-amber-50 ring-1 ring-amber-200 rounded-xl px-3.5 py-3">
@@ -190,7 +192,7 @@ function TrainingCard({ training, onClick }) {
         <Box className="pt-3 border-t border-slate-100">
           <Button
             size="sm"
-            className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold border-0 rounded-xl gap-1.5"
+            className="w-full h-9 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold border-0 rounded-xl gap-1.5"
           >
             Manage Training <ChevronRight className="h-3.5 w-3.5" />
           </Button>
@@ -234,8 +236,8 @@ export function TrainingsList() {
   if (!trainings) {
     return (
       <Box className="space-y-6">
-        <Box className="grid grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+        <Box className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
         </Box>
         <Box className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
@@ -268,62 +270,77 @@ export function TrainingsList() {
   return (
     <Box className="space-y-6">
       {/* Stat cards */}
-      <Box className="grid grid-cols-3 gap-4">
+      <Box className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="Total Trainings"   value={trainings.length}              icon={LayoutGrid}
-          bg="bg-indigo-50"  border="border border-indigo-100"  iconBg="bg-indigo-100"  iconCls="text-indigo-600"  valueCls="text-indigo-900"  labelCls="text-indigo-500" />
+          bg="bg-violet-50"  border="border border-violet-100"  iconBg="bg-violet-100"  iconCls="text-violet-600"  valueCls="text-violet-900"  labelCls="text-violet-500" />
         <StatCard label="Trainer Assigned"  value={trainings.length - unassigned} icon={UserCheck}
           bg="bg-emerald-50" border="border border-emerald-100" iconBg="bg-emerald-100" iconCls="text-emerald-600" valueCls="text-emerald-900" labelCls="text-emerald-600" />
         <StatCard label="Awaiting Trainer"  value={unassigned}                    icon={UserX}
           bg="bg-amber-50"   border="border border-amber-100"   iconBg="bg-amber-100"   iconCls="text-amber-600"   valueCls="text-amber-900"   labelCls="text-amber-600" />
       </Box>
 
-      {/* Search */}
-      <Box className="relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-        <Input
-          placeholder="Search by training ID or title..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 h-11 text-sm bg-slate-200/60 border-slate-300/70 rounded-xl focus-visible:ring-indigo-400/50"
-        />
-      </Box>
-
-      {/* Status filter pills */}
-      <Box className="flex flex-wrap items-center gap-2">
-        {STATUS_TABS.map((tab) => {
-          const count = tab.key === "all" ? trainings.length : (statusCounts[tab.key] || 0);
-          const activeTab = statusFilter === tab.key;
-          return (
+      {/* Toolbar: search + status filters */}
+      <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-3.5 space-y-3.5">
+        {/* Search */}
+        <Box className="relative">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input
+            placeholder="Search by training ID or title..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoComplete="off"
+            className="pl-10 pr-9 h-10 text-sm bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-2 focus-visible:ring-violet-400/40 focus-visible:border-violet-300"
+          />
+          {search && (
             <button
-              key={tab.key}
               type="button"
-              onClick={() => setStatusFilter(tab.key)}
-              className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                activeTab
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+              onClick={() => setSearch("")}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
             >
-              {tab.label}
-              <Text
-                as="span"
-                className={`rounded-full px-1.5 text-[10px] font-bold ${
-                  activeTab ? "bg-white/25 text-white" : "bg-white text-slate-500"
-                }`}
-              >
-                {count}
-              </Text>
+              <X className="h-4 w-4" />
             </button>
-          );
-        })}
-      </Box>
+          )}
+        </Box>
 
-      <Box className="flex items-center justify-between">
-        <Text as="p" className="text-xs text-slate-400">
-          {filtered.length} of {trainings.length} training{trainings.length !== 1 ? "s" : ""}
-          {statusFilter !== "all" ? ` · ${STATUS_TABS.find((t) => t.key === statusFilter)?.label}` : ""}
-        </Text>
-      </Box>
+        <Box className="h-px bg-slate-100" />
+
+        {/* Status filters + result count */}
+        <Box className="flex items-center gap-3 flex-wrap">
+          <SlidersHorizontal className="h-4 w-4 text-slate-400 shrink-0" />
+          <Box className="flex items-center gap-1.5 flex-wrap">
+            {STATUS_TABS.map((tab) => {
+              const count = tab.key === "all" ? trainings.length : (statusCounts[tab.key] || 0);
+              const activeTab = statusFilter === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setStatusFilter(tab.key)}
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
+                    activeTab
+                      ? "bg-violet-600 border-violet-600 text-white shadow-sm"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  {tab.label}
+                  <Text
+                    as="span"
+                    className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
+                      activeTab ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {count}
+                  </Text>
+                </button>
+              );
+            })}
+          </Box>
+          <Text as="p" className="ml-auto text-xs text-slate-400 shrink-0 tabular-nums">
+            Showing {filtered.length} of {trainings.length}
+          </Text>
+        </Box>
+      </Card>
 
       {filtered.length === 0 ? (
         <Card className="p-14 text-center rounded-2xl border border-slate-200/80 shadow-sm bg-white">

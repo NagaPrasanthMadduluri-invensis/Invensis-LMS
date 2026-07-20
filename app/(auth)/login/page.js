@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,9 +43,17 @@ function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle>
-          <Text as="h1" className="text-2xl">Invensis LMS</Text>
-        </CardTitle>
+        <Box className="flex justify-center mb-1">
+          <Image
+            src="/invensis-learning-logo.svg"
+            alt="Invensis Learning"
+            width={180}
+            height={44}
+            priority
+            unoptimized
+            className="h-11 w-auto"
+          />
+        </Box>
         <Text as="p" className="text-muted-foreground text-sm">
           Sign in to your account
         </Text>
@@ -68,7 +77,7 @@ function LoginForm() {
           <Box className="space-y-2">
             <Box className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <Link href="/forgot-password" className="text-xs text-indigo-500 font-medium hover:underline">
+              <Link href="/forgot-password" className="text-xs text-violet-500 font-medium hover:underline">
                 Forgot password?
               </Link>
             </Box>
@@ -98,18 +107,11 @@ function LoginForm() {
 
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+            className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
             disabled={loading}
           >
             {loading ? "Signing in..." : "Sign In"}
           </Button>
-
-          <Text as="p" className="text-sm text-center text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-indigo-500 font-medium hover:underline">
-              Register
-            </Link>
-          </Text>
         </form>
       </CardContent>
     </Card>

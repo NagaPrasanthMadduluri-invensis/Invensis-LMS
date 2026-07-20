@@ -34,7 +34,7 @@ function NavGroup({ label, items, pathname }) {
                 render={<Link href={item.href} />}
               >
                 <item.icon />
-                <Text as="span" className="flex-1 text-sidebar-foreground">
+                <Text as="span" className="flex-1 text-sidebar-foreground font-medium">
                   {item.title}
                 </Text>
               </SidebarMenuButton>
@@ -60,12 +60,12 @@ export function AdminSidebar() {
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-3">
         <Box className="flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-indigo-500">
-            <ShieldCheck className="w-4 h-4 text-white" />
+          <Box className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white">
+            <ShieldCheck className="w-6 h-5 text-violet-500"  />
           </Box>
           <Box>
             <Text as="span" className="text-sidebar-foreground text-sm font-bold leading-none block">
-              Invensis LMS
+              Invensis Learning
             </Text>
             <Text as="span" className="text-sidebar-foreground/50 text-[10px] leading-none block mt-0.5">
               Admin Portal
@@ -76,7 +76,7 @@ export function AdminSidebar() {
       <SidebarContent>
         <NavGroup label="Overview" items={adminNav.main} pathname={pathname} />
         <NavGroup label="Users & Teams" items={adminNav.users} pathname={pathname} />
-        <NavGroup label="Content" items={adminNav.content} pathname={pathname} />
+        <NavGroup label="Trainings & Certificates" items={adminNav.content} pathname={pathname} />
         <NavGroup label="Operations" items={adminNav.operations} pathname={pathname} />
         <NavGroup label="Communication" items={adminNav.communication} pathname={pathname} />
       </SidebarContent>
@@ -96,7 +96,7 @@ export function AdminSidebar() {
                 }
               >
                 <item.icon />
-                <Text as="span" className="text-sidebar-foreground">
+                <Text as="span" className="text-sidebar-foreground font-medium">
                   {item.title}
                 </Text>
               </SidebarMenuButton>

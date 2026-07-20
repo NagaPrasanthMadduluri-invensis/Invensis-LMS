@@ -50,7 +50,7 @@ const STATUS_CONFIG = {
 // Per-participant enrolment status → badge style + label.
 const ENROLMENT_STATUS = {
   confirmed:   { label: "Confirmed",   className: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80" },
-  completed:   { label: "Completed",   className: "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/80" },
+  completed:   { label: "Completed",   className: "bg-violet-50 text-violet-700 ring-1 ring-violet-200/80" },
   cancelled:   { label: "Cancelled",   className: "bg-red-50 text-red-600 ring-1 ring-red-200/80" },
   transferred: { label: "Transferred", className: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80" },
   failed:      { label: "Failed",      className: "bg-slate-100 text-slate-500 ring-1 ring-slate-200/80" },
@@ -81,7 +81,7 @@ function FInput({ icon: Icon, accentColor = "indigo", textarea, rows, ...props }
     ? "focus-within:border-red-400 focus-within:shadow-[0_0_0_3px_rgba(252,165,165,0.35)]"
     : accentColor === "blue"
     ? "focus-within:border-blue-400 focus-within:shadow-[0_0_0_3px_rgba(147,197,253,0.35)]"
-    : "focus-within:border-indigo-400 focus-within:shadow-[0_0_0_3px_rgba(165,180,252,0.35)]";
+    : "focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)]";
 
   if (textarea) {
     return (
@@ -93,7 +93,7 @@ function FInput({ icon: Icon, accentColor = "indigo", textarea, rows, ...props }
   }
   return (
     <Box className={`group flex items-center gap-3 h-12 rounded-xl border border-slate-200 bg-white px-3.5 shadow-sm hover:border-slate-300 ${focusRing} transition-all duration-150`}>
-      {Icon && <Icon className="h-4 w-4 text-slate-400 shrink-0 group-focus-within:text-indigo-500 transition-colors" />}
+      {Icon && <Icon className="h-4 w-4 text-slate-400 shrink-0 group-focus-within:text-violet-500 transition-colors" />}
       <input {...props}
         className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed" />
     </Box>
@@ -104,7 +104,7 @@ function Section({ label, children }) {
   return (
     <Box className="rounded-xl border border-slate-200 overflow-hidden">
       <Box className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
-        <Box className="w-1 h-4 rounded-full bg-indigo-500" />
+        <Box className="w-1 h-4 rounded-full bg-violet-500" />
         <Text as="p" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</Text>
       </Box>
       <Box className="p-5 bg-white space-y-4">{children}</Box>
@@ -142,7 +142,7 @@ function FormError({ error, fieldErrors }) {
 
 function FSelect({ value, onChange, disabled, placeholder, children }) {
   return (
-    <Box className="relative rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 focus-within:border-indigo-400 focus-within:shadow-[0_0_0_3px_rgba(165,180,252,0.35)] transition-all duration-150">
+    <Box className="relative rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all duration-150">
       <select
         value={value}
         onChange={onChange}
@@ -208,8 +208,8 @@ function SessionTopicsCard({ sessions }) {
               return (
                 <Box key={s.day_number} className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
                   <Box className="flex items-center gap-2.5">
-                    <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50">
-                      <Calendar className="h-4 w-4 text-indigo-600" />
+                    <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50">
+                      <Calendar className="h-4 w-4 text-violet-600" />
                     </Box>
                     <Box className="min-w-0">
                       <Text as="p" className="text-sm font-semibold leading-tight text-slate-800">Day {s.day_number}</Text>
@@ -265,9 +265,9 @@ function AssignTrainerDialog({ open, onOpenChange, token, trainingRef, currentTr
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px] overflow-hidden" style={{padding:0,gap:0}}>
-          <Box className="bg-gradient-to-r from-indigo-50 via-purple-50 to-violet-50 border-b border-indigo-100 px-6 py-5">
+          <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
             <Box className="flex items-center gap-3">
-              <Box className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
+              <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
                 <UserCheck className="w-4 h-4 text-white" />
               </Box>
               <Box>
@@ -292,7 +292,7 @@ function AssignTrainerDialog({ open, onOpenChange, token, trainingRef, currentTr
                 </FSelect>
               </Field>
               <Button variant="ghost" size="sm"
-                className="h-9 px-3 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl border border-indigo-100 w-full justify-center text-xs font-semibold"
+                className="h-9 px-3 text-violet-600 hover:text-violet-700 hover:bg-violet-50 rounded-xl border border-violet-100 w-full justify-center text-xs font-semibold"
                 onClick={() => setCreateOpen(true)}>
                 <Plus className="h-3.5 w-3.5 mr-1.5" /> Onboard a new trainer
               </Button>
@@ -301,7 +301,7 @@ function AssignTrainerDialog({ open, onOpenChange, token, trainingRef, currentTr
           </Box>
           <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-            <Button onClick={submit} disabled={submitting} className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">
+            <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
               {submitting ? "Assigning..." : "Assign"}
             </Button>
           </DialogFooter>
@@ -335,9 +335,9 @@ function AddParticipantDialog({ open, onOpenChange, token, trainingRef, onAdded 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[620px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-indigo-50 via-purple-50 to-violet-50 border-b border-indigo-100 px-6 py-5">
+        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
+            <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
               <UserPlus className="w-4 h-4 text-white" />
             </Box>
             <Box>
@@ -367,7 +367,7 @@ function AddParticipantDialog({ open, onOpenChange, token, trainingRef, onAdded 
         </Box>
         <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting} className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">
+          <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
             {submitting ? "Adding..." : "Add Participant"}
           </Button>
         </DialogFooter>
@@ -403,9 +403,9 @@ function EditParticipantDialog({ participant, onOpenChange, token, onSaved }) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onOpenChange(false)}>
       <DialogContent className="sm:max-w-[620px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-indigo-50 via-purple-50 to-violet-50 border-b border-indigo-100 px-6 py-5">
+        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
+            <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
               <Pencil className="w-4 h-4 text-white" />
             </Box>
             <Box>
@@ -432,7 +432,7 @@ function EditParticipantDialog({ participant, onOpenChange, token, onSaved }) {
         </Box>
         <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting} className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">
+          <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
             {submitting ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>
@@ -535,7 +535,7 @@ function TransferDialog({ participant, onOpenChange, token, currentTrainingId, o
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onOpenChange(false)}>
       <DialogContent className="sm:max-w-[620px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-indigo-50 border-b border-violet-100 px-6 py-5">
+        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
           <Box className="flex items-center gap-3">
             <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
               <ArrowLeftRight className="w-4 h-4 text-white" />
@@ -571,7 +571,7 @@ function TransferDialog({ participant, onOpenChange, token, currentTrainingId, o
         </Box>
         <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting} className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">
+          <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
             {submitting ? "Transferring..." : "Transfer"}
           </Button>
         </DialogFooter>
@@ -612,7 +612,7 @@ function MeetingDialog({ open, onOpenChange, token, trainingRef, meeting, canRel
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[620px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-blue-50 via-indigo-50 to-violet-50 border-b border-blue-100 px-6 py-5">
+        <Box className="bg-gradient-to-r from-blue-50 via-violet-50 to-violet-50 border-b border-blue-100 px-6 py-5">
           <Box className="flex items-center gap-3">
             <Box className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
               <Video className="w-4 h-4 text-white" />
@@ -661,7 +661,7 @@ function MeetingDialog({ open, onOpenChange, token, trainingRef, meeting, canRel
         </Box>
         <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting} className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">
+          <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
             {submitting ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
@@ -814,14 +814,14 @@ export function TrainingManagement({ trainingId }) {
     <Box className="space-y-5">
       {/* ── Training info ── */}
       <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-white">
-        <Box className="bg-gradient-to-r from-indigo-50 via-purple-50 to-violet-50 border-b border-indigo-100 px-6 py-5">
+        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
           <Box className="flex flex-wrap items-center justify-between gap-3 mb-2">
             <Box className="flex items-center gap-2 flex-wrap">
-              <Hash className="h-4 w-4 text-indigo-400" />
-              <Text as="span" className="text-sm font-mono font-semibold tracking-wide text-indigo-700">{detail.training_id}</Text>
+              <Hash className="h-4 w-4 text-violet-400" />
+              <Text as="span" className="text-sm font-mono font-semibold tracking-wide text-violet-700">{detail.training_id}</Text>
               <Badge className={`border-0 text-[10px] font-semibold ${statusCfg.light}`}>{statusCfg.label}</Badge>
             </Box>
-            <Badge className="border-0 bg-indigo-100 text-indigo-700 text-[11px] font-medium">
+            <Badge className="border-0 bg-violet-100 text-violet-700 text-[11px] font-medium">
               {MODE_LABEL[detail.delivery_mode] || detail.delivery_mode}
             </Badge>
           </Box>
@@ -847,7 +847,7 @@ export function TrainingManagement({ trainingId }) {
               <Text as="h3" className="text-sm font-semibold text-slate-700">Trainer</Text>
             </Box>
             <Button size="sm" variant={detail.trainer ? "outline" : "default"}
-              className={detail.trainer ? "h-8 px-3 border-slate-200 text-slate-700 hover:bg-slate-50" : "h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white border-0"}
+              className={detail.trainer ? "h-8 px-3 border-slate-200 text-slate-700 hover:bg-slate-50" : "h-8 px-3 bg-violet-600 hover:bg-violet-700 text-white border-0"}
               onClick={() => setAssignOpen(true)}>
               {detail.trainer ? "Reassign" : "Assign Trainer"}
             </Button>
@@ -891,7 +891,7 @@ export function TrainingManagement({ trainingId }) {
                 <Text as="h3" className="text-sm font-semibold text-slate-700">Meeting Link</Text>
               </Box>
               <Button size="sm"
-                className={meeting?.url ? "h-8 px-3 border-slate-200 text-slate-700 hover:bg-slate-50 border" : "h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white border-0"}
+                className={meeting?.url ? "h-8 px-3 border-slate-200 text-slate-700 hover:bg-slate-50 border" : "h-8 px-3 bg-violet-600 hover:bg-violet-700 text-white border-0"}
                 variant={meeting?.url ? "outline" : "default"}
                 onClick={() => setMeetingOpen(true)}>
                 {meeting?.url ? "Manage" : "Set Link"}
@@ -899,17 +899,17 @@ export function TrainingManagement({ trainingId }) {
             </Box>
             <Box className="p-5 flex-1 flex flex-col justify-center">
               {meeting?.url ? (
-                <Box className="rounded-xl bg-indigo-50 border border-indigo-200/60 px-4 py-4 space-y-3">
+                <Box className="rounded-xl bg-violet-50 border border-violet-200/60 px-4 py-4 space-y-3">
                   <Box className="flex items-center gap-2 flex-wrap">
                     <Badge className={`border-0 text-[10px] font-semibold ${meeting.released ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200" : "bg-amber-100 text-amber-700 ring-1 ring-amber-200"}`}>
                       {meeting.released ? "● Released" : "● Not released"}
                     </Badge>
                     {meeting.platform && (
-                      <Badge className="border-0 bg-indigo-100 text-indigo-700 text-[10px]">{PLATFORM_LABEL[meeting.platform] || meeting.platform}</Badge>
+                      <Badge className="border-0 bg-violet-100 text-violet-700 text-[10px]">{PLATFORM_LABEL[meeting.platform] || meeting.platform}</Badge>
                     )}
                   </Box>
                   <a href={meeting.url} target="_blank" rel="noopener noreferrer"
-                    className="text-xs text-indigo-600 hover:underline inline-flex items-center gap-1.5 break-all">
+                    className="text-xs text-violet-600 hover:underline inline-flex items-center gap-1.5 break-all">
                     <ExternalLink className="h-3.5 w-3.5 shrink-0" />
                     {meeting.url}
                   </a>
@@ -951,7 +951,7 @@ export function TrainingManagement({ trainingId }) {
                 <GraduationCap className="h-3.5 w-3.5 mr-1.5" /> Mark all completed
               </Button>
             )}
-            <Button size="sm" onClick={() => setAddOpen(true)} className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white border-0">
+            <Button size="sm" onClick={() => setAddOpen(true)} className="h-8 px-3 bg-violet-600 hover:bg-violet-700 text-white border-0">
               <UserPlus className="h-3.5 w-3.5 mr-1.5" /> Add Participant
             </Button>
           </Box>

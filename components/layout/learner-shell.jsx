@@ -11,10 +11,10 @@ export function LearnerShell({ children }) {
     <AuthProvider>
       <SidebarProvider>
         <Box className="flex h-full flex-col">
-          <TopNav portalLabel="Invensis LMS" />
-          <Box className="flex flex-1 overflow-hidden">
+          <TopNav portalLabel="Invensis Learning" />
+          <Box className="flex flex-1 overflow-hidden bg-sidebar">
             <LearnerSidebar />
-            <Box as="main" className="flex-1 overflow-auto p-6 bg-background">
+            <Box as="main" className="flex-1 overflow-auto p-6 bg-background rounded-t-2xl">
               {children}
             </Box>
           </Box>

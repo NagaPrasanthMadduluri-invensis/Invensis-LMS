@@ -59,7 +59,7 @@ import {
 
 const CONTENT_TYPE_CONFIG = {
   video: { label: "Video", icon: PlayCircle, color: "bg-blue-100 text-blue-600" },
-  pdf: { label: "PDF", icon: FileText, color: "bg-indigo-100 text-indigo-600" },
+  pdf: { label: "PDF", icon: FileText, color: "bg-violet-100 text-violet-600" },
   external: { label: "External", icon: ExternalLink, color: "bg-violet-100 text-violet-600" },
   quiz: { label: "Quiz", icon: HelpCircle, color: "bg-emerald-100 text-emerald-600" },
 };

@@ -37,10 +37,10 @@ function FInput({ icon: Icon, accentColor = "indigo", type, ...props }) {
   const isPassword = type === "password";
   const focusRing = accentColor === "red"
     ? "focus-within:border-red-400 focus-within:shadow-[0_0_0_3px_rgba(252,165,165,0.35)]"
-    : "focus-within:border-indigo-400 focus-within:shadow-[0_0_0_3px_rgba(165,180,252,0.35)]";
+    : "focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)]";
   return (
     <Box className={`group flex items-center gap-3 h-12 rounded-xl border border-slate-200 bg-white px-3.5 shadow-sm hover:border-slate-300 ${focusRing} transition-all duration-150`}>
-      {Icon && <Icon className="h-4 w-4 text-slate-400 shrink-0 group-focus-within:text-indigo-500 transition-colors" />}
+      {Icon && <Icon className="h-4 w-4 text-slate-400 shrink-0 group-focus-within:text-violet-500 transition-colors" />}
       <input
         {...props}
         type={isPassword ? (showPwd ? "text" : "password") : type}
@@ -48,7 +48,7 @@ function FInput({ icon: Icon, accentColor = "indigo", type, ...props }) {
       />
       {isPassword && (
         <button type="button" onClick={() => setShowPwd((v) => !v)}
-          className="shrink-0 text-slate-400 hover:text-indigo-500 transition-colors">
+          className="shrink-0 text-slate-400 hover:text-violet-500 transition-colors">
           {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       )}
@@ -58,7 +58,7 @@ function FInput({ icon: Icon, accentColor = "indigo", type, ...props }) {
 
 function FTextarea({ rows = 3, ...props }) {
   return (
-    <Box className="rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 focus-within:border-indigo-400 focus-within:shadow-[0_0_0_3px_rgba(165,180,252,0.35)] transition-all duration-150">
+    <Box className="rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all duration-150">
       <textarea
         rows={rows}
         {...props}
@@ -72,7 +72,7 @@ function Section({ label, children }) {
   return (
     <Box className="rounded-xl border border-slate-200 overflow-hidden">
       <Box className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
-        <Box className="w-1 h-4 rounded-full bg-indigo-500" />
+        <Box className="w-1 h-4 rounded-full bg-violet-500" />
         <Text as="p" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</Text>
       </Box>
       <Box className="p-5 bg-white space-y-4">{children}</Box>
@@ -124,10 +124,10 @@ function CertInput({ value, onChange }) {
       {value.length > 0 && (
         <Box className="flex flex-wrap gap-1.5">
           {value.map((cert) => (
-            <Box key={cert} className="inline-flex items-center gap-1 bg-indigo-50 ring-1 ring-indigo-200 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-lg">
+            <Box key={cert} className="inline-flex items-center gap-1 bg-violet-50 ring-1 ring-violet-200 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-lg">
               <Award className="h-3 w-3 shrink-0" />
               {cert}
-              <button type="button" onClick={() => remove(cert)} className="ml-0.5 text-indigo-400 hover:text-indigo-700 transition-colors">
+              <button type="button" onClick={() => remove(cert)} className="ml-0.5 text-violet-400 hover:text-violet-700 transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </Box>
@@ -136,8 +136,8 @@ function CertInput({ value, onChange }) {
       )}
 
       {/* Custom input */}
-      <Box className="group flex items-center gap-2 h-11 rounded-xl border border-slate-200 bg-white px-3 shadow-sm hover:border-slate-300 focus-within:border-indigo-400 focus-within:shadow-[0_0_0_3px_rgba(165,180,252,0.35)] transition-all duration-150">
-        <Award className="h-4 w-4 text-slate-400 shrink-0 group-focus-within:text-indigo-500 transition-colors" />
+      <Box className="group flex items-center gap-2 h-11 rounded-xl border border-slate-200 bg-white px-3 shadow-sm hover:border-slate-300 focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all duration-150">
+        <Award className="h-4 w-4 text-slate-400 shrink-0 group-focus-within:text-violet-500 transition-colors" />
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -147,7 +147,7 @@ function CertInput({ value, onChange }) {
         />
         {input.trim() && (
           <button type="button" onClick={() => add(input)}
-            className="flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-md transition-colors shrink-0">
+            className="flex items-center gap-1 text-[11px] font-semibold text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 px-2 py-1 rounded-md transition-colors shrink-0">
             <Plus className="h-3 w-3" /> Add
           </button>
         )}
@@ -157,7 +157,7 @@ function CertInput({ value, onChange }) {
       <Box className="flex flex-wrap gap-1.5">
         {CERT_PRESETS.filter((c) => !value.includes(c)).map((cert) => (
           <button key={cert} type="button" onClick={() => add(cert)}
-            className="text-[11px] font-medium text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-indigo-50 hover:ring-1 hover:ring-indigo-200 px-2.5 py-1 rounded-lg transition-all">
+            className="text-[11px] font-medium text-slate-500 hover:text-violet-600 bg-slate-100 hover:bg-violet-50 hover:ring-1 hover:ring-violet-200 px-2.5 py-1 rounded-lg transition-all">
             + {cert}
           </button>
         ))}
@@ -228,27 +228,27 @@ function CVUpload({ value, onChange }) {
         onChange={onFileChange}
       />
       {value ? (
-        <Box className="flex items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3">
-          <Box className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
-            <FileText className="h-4 w-4 text-indigo-600" />
+        <Box className="flex items-center gap-3 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3">
+          <Box className="w-9 h-9 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
+            <FileText className="h-4 w-4 text-violet-600" />
           </Box>
           <Box className="flex-1 min-w-0">
-            <Text as="p" className="text-sm font-semibold text-indigo-800 truncate">{value.name}</Text>
-            <Text as="p" className="text-[11px] text-indigo-500 mt-0.5">{(value.size / 1024).toFixed(0)} KB</Text>
+            <Text as="p" className="text-sm font-semibold text-violet-800 truncate">{value.name}</Text>
+            <Text as="p" className="text-[11px] text-violet-500 mt-0.5">{(value.size / 1024).toFixed(0)} KB</Text>
           </Box>
           <button type="button" onClick={clear}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-indigo-400 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0">
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-violet-400 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0">
             <X className="h-3.5 w-3.5" />
           </button>
         </Box>
       ) : (
         <button type="button" onClick={() => inputRef.current?.click()}
-          className="w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 bg-slate-50 py-5 transition-all group">
-          <Box className="w-9 h-9 rounded-xl bg-white border border-slate-200 group-hover:border-indigo-200 flex items-center justify-center shadow-sm transition-colors">
-            <Upload className="h-4 w-4 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+          className="w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 hover:border-violet-300 hover:bg-violet-50/40 bg-slate-50 py-5 transition-all group">
+          <Box className="w-9 h-9 rounded-xl bg-white border border-slate-200 group-hover:border-violet-200 flex items-center justify-center shadow-sm transition-colors">
+            <Upload className="h-4 w-4 text-slate-400 group-hover:text-violet-500 transition-colors" />
           </Box>
           <Box className="text-center">
-            <Text as="p" className="text-xs font-semibold text-slate-600 group-hover:text-indigo-600 transition-colors">Click to upload CV</Text>
+            <Text as="p" className="text-xs font-semibold text-slate-600 group-hover:text-violet-600 transition-colors">Click to upload CV</Text>
             <Text as="p" className="text-[10px] text-slate-400 mt-0.5">PDF, DOC, DOCX</Text>
           </Box>
         </button>
@@ -339,9 +339,9 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[640px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-indigo-50 via-purple-50 to-violet-50 border-b border-indigo-100 px-6 py-5">
+        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
+            <Box className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shrink-0 shadow-sm">
               {isEdit ? <Pencil className="w-4 h-4 text-white" /> : <GraduationCap className="w-5 h-5 text-white" />}
             </Box>
             <Box>
@@ -428,7 +428,7 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
           )}
 
           {isEdit && (
-            <Box className="flex items-center justify-between rounded-xl border border-indigo-100 bg-indigo-50/60 px-4 py-3.5">
+            <Box className="flex items-center justify-between rounded-xl border border-violet-100 bg-violet-50/60 px-4 py-3.5">
               <Box className="flex items-center gap-3">
                 <Box className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.is_active ? "bg-emerald-100" : "bg-slate-100"}`}>
                   <CheckCircle2 className={`h-4 w-4 ${form.is_active ? "text-emerald-600" : "text-slate-400"}`} />
@@ -459,7 +459,7 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
 
         <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting} className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm px-6">
+          <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm px-6">
             {submitting ? "Saving..." : isEdit ? "Save Changes" : "Create Trainer"}
           </Button>
         </DialogFooter>

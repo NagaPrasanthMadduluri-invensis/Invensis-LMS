@@ -12,9 +12,9 @@ export function TrainerShell({ children }) {
       <SidebarProvider>
         <Box className="flex h-full flex-col">
           <TopNav portalLabel="Trainer Portal" />
-          <Box className="flex flex-1 overflow-hidden h-full">
+          <Box className="flex flex-1 overflow-hidden h-full bg-sidebar">
             <TrainerSidebar />
-            <Box as="main" className="flex-1 overflow-auto p-6 bg-background h-full">
+            <Box as="main" className="flex-1 overflow-auto p-6 bg-background h-full rounded-t-2xl">
               {children}
             </Box>
           </Box>

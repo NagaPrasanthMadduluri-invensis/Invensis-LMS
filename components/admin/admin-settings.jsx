@@ -11,7 +11,7 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 
 const SECTIONS = [
-  { key: "general",       label: "General",       icon: Building2, color: "bg-indigo-500"  },
+  { key: "general",       label: "General",       icon: Building2, color: "bg-violet-500"  },
   { key: "notifications", label: "Notifications", icon: Bell,      color: "bg-amber-500"   },
   { key: "security",      label: "Security",      icon: Shield,    color: "bg-rose-500"    },
   { key: "platform",      label: "Platform",      icon: Globe,     color: "bg-teal-500"    },
@@ -38,7 +38,7 @@ export function AdminSettings() {
               onClick={() => setActive(s.key)}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-colors text-sm ${
                 active === s.key
-                  ? "bg-indigo-50 text-indigo-700 font-semibold"
+                  ? "bg-violet-50 text-violet-700 font-semibold"
                   : "text-slate-600 hover:bg-slate-50"
               }`}
             >
@@ -57,7 +57,7 @@ export function AdminSettings() {
           <Card className="border border-slate-100 shadow-sm bg-white rounded-xl overflow-hidden">
             <CardHeader className="py-3 px-4 border-b border-slate-100">
               <Box className="flex items-center gap-2">
-                <Box className="w-1 h-4 rounded-full bg-indigo-500" />
+                <Box className="w-1 h-4 rounded-full bg-violet-500" />
                 <CardTitle className="text-sm font-semibold text-slate-800">General Settings</CardTitle>
               </Box>
             </CardHeader>
@@ -71,10 +71,10 @@ export function AdminSettings() {
               ].map((f) => (
                 <Box key={f.id} className="space-y-1.5">
                   <Label htmlFor={f.id} className="text-xs font-medium text-slate-700">{f.label}</Label>
-                  <Input id={f.id} defaultValue={f.value} className="h-9 text-sm border-slate-200 focus-visible:ring-indigo-400" />
+                  <Input id={f.id} defaultValue={f.value} className="h-9 text-sm border-slate-200 focus-visible:ring-violet-400" />
                 </Box>
               ))}
-              <Button onClick={handleSave} className="h-9 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+              <Button onClick={handleSave} className="h-9 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
                 {saved ? "Saved ✓" : "Save Changes"}
               </Button>
             </CardContent>
@@ -103,7 +103,7 @@ export function AdminSettings() {
                   <Switch id={n.id} defaultChecked={n.defaultChecked} />
                 </Box>
               ))}
-              <Button onClick={handleSave} className="h-9 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+              <Button onClick={handleSave} className="h-9 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
                 {saved ? "Saved ✓" : "Save Changes"}
               </Button>
             </CardContent>
@@ -132,9 +132,9 @@ export function AdminSettings() {
               ))}
               <Box className="space-y-1.5 pt-2">
                 <Label className="text-xs font-medium text-slate-700">Password Policy (min length)</Label>
-                <Input defaultValue="8" type="number" className="h-9 text-sm w-28 border-slate-200 focus-visible:ring-indigo-400" />
+                <Input defaultValue="8" type="number" className="h-9 text-sm w-28 border-slate-200 focus-visible:ring-violet-400" />
               </Box>
-              <Button onClick={handleSave} className="h-9 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+              <Button onClick={handleSave} className="h-9 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
                 {saved ? "Saved ✓" : "Save Changes"}
               </Button>
             </CardContent>
@@ -163,7 +163,7 @@ export function AdminSettings() {
                   <Switch id={p.id} defaultChecked={p.defaultChecked} />
                 </Box>
               ))}
-              <Button onClick={handleSave} className="h-9 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+              <Button onClick={handleSave} className="h-9 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
                 {saved ? "Saved ✓" : "Save Changes"}
               </Button>
             </CardContent>

@@ -110,7 +110,7 @@ function SectionTitle({ children, hint }) {
 function SectionHead({ icon: Icon, title, subtitle, danger, count }) {
   return (
     <Box className="mb-3 flex items-center gap-2">
-      <Box className={`flex h-7 w-7 items-center justify-center rounded-lg ${danger ? "bg-rose-50 text-rose-500" : "bg-indigo-50 text-indigo-500"}`}>
+      <Box className={`flex h-7 w-7 items-center justify-center rounded-lg ${danger ? "bg-rose-50 text-rose-500" : "bg-violet-50 text-violet-500"}`}>
         <Icon className="h-4 w-4" />
       </Box>
       <Text as="h3" className="text-sm font-bold text-slate-800">{title}</Text>
@@ -137,7 +137,7 @@ function Delta({ pct }) {
 /* ── KPI card ── */
 const KPI_THEMES = {
   emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  indigo: "border-indigo-200 bg-indigo-50 text-indigo-700",
+  indigo: "border-violet-200 bg-violet-50 text-violet-700",
   sky: "border-sky-200 bg-sky-50 text-sky-700",
   violet: "border-violet-200 bg-violet-50 text-violet-700",
   amber: "border-amber-200 bg-amber-50 text-amber-700",
@@ -208,7 +208,7 @@ function SalesTable({ icon: Icon, title, subtitle, rows = [], nameKey, nameLabel
                     <Box as="td" className="py-2 pl-2">
                       <Box className="flex items-center justify-end gap-2">
                         <Box className="h-1.5 w-12 overflow-hidden rounded-full bg-slate-100">
-                          <Box className={`h-full rounded-full ${danger ? "bg-rose-400" : "bg-indigo-400"}`} style={{ width: `${Math.round(share)}%` }} />
+                          <Box className={`h-full rounded-full ${danger ? "bg-rose-400" : "bg-violet-400"}`} style={{ width: `${Math.round(share)}%` }} />
                         </Box>
                         <Text as="span" className="w-8 text-right tabular-nums text-[11px] text-slate-400">{share.toFixed(0)}%</Text>
                       </Box>
@@ -258,7 +258,7 @@ function MomentumCard({ comparison, summary, currency }) {
             <Text as="span" className="block text-xs font-semibold text-slate-500">{it.label}</Text>
             <Box className="mt-1 flex items-baseline gap-2">
               <Text as="span" className="text-xl font-extrabold tabular-nums text-slate-800">{it.value}</Text>
-              {noPrior ? <Text as="span" className="text-[11px] font-semibold text-indigo-500">new</Text> : <Delta pct={it.pct} />}
+              {noPrior ? <Text as="span" className="text-[11px] font-semibold text-violet-500">new</Text> : <Delta pct={it.pct} />}
             </Box>
             <Text as="span" className="mt-0.5 block text-[11px] text-slate-400">{noPrior ? "no prior-period data" : `was ${it.prev}`}</Text>
           </Box>

@@ -27,7 +27,7 @@ function getInitials(name = "") {
 }
 
 const AVATAR_COLORS = [
-  "bg-indigo-100 text-indigo-700",
+  "bg-violet-100 text-violet-700",
   "bg-violet-100 text-violet-700",
   "bg-teal-100 text-teal-700",
   "bg-emerald-100 text-emerald-700",
@@ -78,7 +78,7 @@ const STATUS_BADGE = {
   active:      "bg-emerald-100 text-emerald-700",
   ongoing:     "bg-sky-100 text-sky-700",
   pending:     "bg-amber-100 text-amber-700",
-  completed:   "bg-indigo-100 text-indigo-700",
+  completed:   "bg-violet-100 text-violet-700",
   cancelled:   "bg-rose-100 text-rose-700",
   confirmed:   "bg-emerald-100 text-emerald-700",
   transferred: "bg-violet-100 text-violet-700",
@@ -117,7 +117,7 @@ function HeroCard({ icon: Icon, label, value, sub, theme }) {
 
 /* Mid-light card themes — soft tinted backgrounds, deep-tone text, colored icon chips. */
 const HERO_THEMES = {
-  indigo:  { card: "border-indigo-200 bg-indigo-100",   watermark: "text-indigo-400",  iconWrap: "bg-indigo-200 text-indigo-700",   value: "text-indigo-900",  label: "text-indigo-800",  sub: "text-indigo-600/80" },
+  indigo:  { card: "border-violet-200 bg-violet-100",   watermark: "text-violet-400",  iconWrap: "bg-violet-200 text-violet-700",   value: "text-violet-900",  label: "text-violet-800",  sub: "text-violet-600/80" },
   fuchsia: { card: "border-fuchsia-200 bg-fuchsia-100", watermark: "text-fuchsia-400", iconWrap: "bg-fuchsia-200 text-fuchsia-700", value: "text-fuchsia-900", label: "text-fuchsia-800", sub: "text-fuchsia-600/80" },
   sky:     { card: "border-sky-200 bg-sky-100",         watermark: "text-sky-400",     iconWrap: "bg-sky-200 text-sky-700",         value: "text-sky-900",     label: "text-sky-800",     sub: "text-sky-600/80" },
   emerald: { card: "border-emerald-200 bg-emerald-100", watermark: "text-emerald-400", iconWrap: "bg-emerald-200 text-emerald-700", value: "text-emerald-900", label: "text-emerald-800", sub: "text-emerald-600/80" },
@@ -146,7 +146,7 @@ function Panel({ title, icon: Icon, action, children, className = "" }) {
 
 function ViewAll({ href }) {
   return (
-    <Link href={href} className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800">
+    <Link href={href} className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-800">
       View all <ArrowRight className="h-3 w-3" />
     </Link>
   );
@@ -214,7 +214,7 @@ function DashboardSkeleton() {
 
 const ACTION_THEME = {
   amber:  { card: "border-amber-200 bg-amber-50",   iconWrap: "bg-amber-100 text-amber-700",   accent: "text-amber-700",   label: "text-amber-900" },
-  indigo: { card: "border-indigo-200 bg-indigo-50", iconWrap: "bg-indigo-100 text-indigo-700", accent: "text-indigo-700", label: "text-indigo-900" },
+  indigo: { card: "border-violet-200 bg-violet-50", iconWrap: "bg-violet-100 text-violet-700", accent: "text-violet-700", label: "text-violet-900" },
   rose:   { card: "border-rose-200 bg-rose-50",     iconWrap: "bg-rose-100 text-rose-700",     accent: "text-rose-700",     label: "text-rose-900" },
   sky:    { card: "border-sky-200 bg-sky-50",       iconWrap: "bg-sky-100 text-sky-700",       accent: "text-sky-700",     label: "text-sky-900" },
 };
@@ -546,7 +546,7 @@ export function AdminDashboardContent() {
             { key: "pending",   color: "bg-amber-50 text-amber-700" },
             { key: "active",    color: "bg-emerald-50 text-emerald-700" },
             { key: "ongoing",   color: "bg-sky-50 text-sky-700" },
-            { key: "completed", color: "bg-indigo-50 text-indigo-700" },
+            { key: "completed", color: "bg-violet-50 text-violet-700" },
             { key: "cancelled", color: "bg-rose-50 text-rose-700" },
           ].map(({ key, color }) => (
             <StatChip key={key} label={key} value={(courses.by_status || {})[key] ?? 0} className={`text-center ${color}`} />
@@ -563,7 +563,7 @@ export function AdminDashboardContent() {
             {upcoming_trainings.map((t) => {
               const pct = t.capacity > 0 ? Math.round((t.enrolled_count / t.capacity) * 100) : 0;
               return (
-                <Box key={t.id} className="rounded-xl border border-slate-200 p-4 transition-colors hover:border-indigo-300 hover:bg-slate-50/60">
+                <Box key={t.id} className="rounded-xl border border-slate-200 p-4 transition-colors hover:border-violet-300 hover:bg-slate-50/60">
                   <Box className="flex items-start justify-between gap-3">
                     <Box className="min-w-0">
                       <Text as="p" className="truncate text-sm font-semibold text-slate-800">{t.title}</Text>
@@ -577,7 +577,7 @@ export function AdminDashboardContent() {
                         href={`/admin/courses/${t.id}`}
                         aria-label="Open training"
                         title="Open training"
-                        className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-600"
+                        className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-violet-50 hover:text-violet-600"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
                       </Link>
@@ -603,7 +603,7 @@ export function AdminDashboardContent() {
                       <Text as="span" className="font-semibold text-slate-700">{pct}%</Text>
                     </Box>
                     <Box className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                      <Box className={`h-full rounded-full ${pct >= 100 ? "bg-emerald-500" : pct >= 50 ? "bg-indigo-500" : "bg-amber-500"}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                      <Box className={`h-full rounded-full ${pct >= 100 ? "bg-emerald-500" : pct >= 50 ? "bg-violet-500" : "bg-amber-500"}`} style={{ width: `${Math.min(pct, 100)}%` }} />
                     </Box>
                   </Box>
 

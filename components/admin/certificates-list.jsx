@@ -62,7 +62,7 @@ function ListSkeleton() {
 }
 
 const ICON_COLORS = [
-  "bg-amber-500", "bg-indigo-500", "bg-emerald-500",
+  "bg-amber-500", "bg-violet-500", "bg-emerald-500",
   "bg-violet-500", "bg-teal-500", "bg-blue-500", "bg-rose-500", "bg-slate-500",
 ];
 
@@ -151,7 +151,7 @@ export function CertificatesList() {
   const rate = Math.round((summary.issuance_rate ?? 0) * 100);
   const tiles = [
     { label: "Completed trainings", value: summary.completed_trainings, bg: "bg-orange-200", val: "text-orange-900" },
-    { label: "Certificates issued", value: summary.certificates_issued, bg: "bg-indigo-200", val: "text-indigo-900" },
+    { label: "Certificates issued", value: summary.certificates_issued, bg: "bg-violet-200", val: "text-violet-900" },
     { label: "Eligible learners", value: summary.eligible, bg: "bg-sky-200", val: "text-sky-900" },
     { label: "Issuance rate", value: `${rate}%`, bg: "bg-emerald-200", val: "text-emerald-900" },
   ];

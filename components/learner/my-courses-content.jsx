@@ -24,14 +24,10 @@ import { Button } from "@/components/ui/button";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
-import { fetchTrainingDetail } from "@/services/api/learner/learner-api";
+import { fetchMyTrainings, fetchTrainingDetail } from "@/services/api/learner/learner-api";
 
 // Admin/support inbox a learner can reach out to about enrolment.
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@invensis.com";
-
-// Until an enrolled-trainings list endpoint exists, the page shows the seeded
-// training. Swap this for a real id/code source (route param, list endpoint).
-const SEEDED_TRAINING_REF = "TRN-2026-0001";
 
 const MODE_CONFIG = {
   virtual: { label: "Live Virtual", icon: Video, color: "bg-blue-100 text-blue-600" },
@@ -77,8 +73,8 @@ function formatTime(timeStr) {
 function Fact({ icon: Icon, label, children }) {
   return (
     <Box className="flex items-start gap-3">
-      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
-        <Icon className="h-4 w-4 text-indigo-500" />
+      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50">
+        <Icon className="h-4 w-4 text-violet-500" />
       </Box>
       <Box className="min-w-0">
         <Text as="p" className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
@@ -120,7 +116,7 @@ function ScheduleCard({ training }) {
   return (
     <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
       {/* Header band */}
-      <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-indigo-50 border-b border-violet-100 px-6 py-5">
+      <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
         <Box className="flex flex-wrap items-start justify-between gap-3">
           <Box className="min-w-0">
             <Text as="span" className="text-[11px] font-mono font-bold text-violet-500 bg-violet-100 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg tracking-wide">
@@ -138,23 +134,6 @@ function ScheduleCard({ training }) {
             </Badge>
           </Box>
         </Box>
-
-        {training.meeting?.url && (
-          <Box className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white/70 ring-1 ring-violet-200 px-4 py-3">
-            <Box className="flex items-center gap-2.5 min-w-0">
-              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-                <Video className="h-4 w-4 text-emerald-600" />
-              </Box>
-              <Box className="min-w-0">
-                <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight">Meeting link is live</Text>
-                <Text as="span" className="text-[11px] text-slate-500">{PLATFORM_LABEL[training.meeting.platform] || "Meeting"}</Text>
-              </Box>
-            </Box>
-            <Button asChild size="sm" className="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white border-0 rounded-lg text-sm font-semibold shrink-0">
-              <a href={training.meeting.url} target="_blank" rel="noopener noreferrer">Join Meeting</a>
-            </Button>
-          </Box>
-        )}
       </Box>
 
       {/* Facts grid */}
@@ -197,10 +176,34 @@ function ScheduleCard({ training }) {
           </Box>
           <Box className="flex flex-wrap gap-2">
             {sessionDates.map((d, i) => (
-              <Badge key={d} className="border border-indigo-100 bg-indigo-50 text-indigo-600">
+              <Badge key={d} className="border border-violet-100 bg-violet-50 text-violet-600">
                 Day {i + 1} · {formatDate(d)}
               </Badge>
             ))}
+          </Box>
+        </Box>
+      )}
+
+      {/* Live meeting link — shown under the sessions, not in the heading */}
+      {training.meeting?.url && (
+        <Box className="border-t px-6 py-4">
+          <Box className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white/70 ring-1 ring-violet-200 px-4 py-3">
+            <Box className="flex items-center gap-2.5 min-w-0">
+              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+                <Video className="h-4 w-4 text-emerald-600" />
+              </Box>
+              <Box className="min-w-0">
+                <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight">Meeting link is live</Text>
+                <Text as="span" className="text-[11px] text-slate-500">{PLATFORM_LABEL[training.meeting.platform] || "Meeting"}</Text>
+              </Box>
+            </Box>
+            <Button
+              render={<a href={training.meeting.url} target="_blank" rel="noopener noreferrer" />}
+              size="sm"
+              className="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white border-0 rounded-lg text-sm font-semibold shrink-0"
+            >
+              Join Meeting
+            </Button>
           </Box>
         </Box>
       )}
@@ -242,11 +245,11 @@ function SessionTopics({ sessions }) {
   return (
     <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
       <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
-        <Box className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-          <BookText className="h-4 w-4 text-indigo-500" />
+        <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+          <BookText className="h-4 w-4 text-violet-500" />
         </Box>
         <Text as="h3" className="text-sm font-bold text-slate-800">Day-wise Topics Covered</Text>
-        <Badge className="border-0 bg-indigo-50 text-indigo-600 text-[11px] font-semibold">
+        <Badge className="border-0 bg-violet-50 text-violet-600 text-[11px] font-semibold">
           {list.length} day{list.length !== 1 ? "s" : ""}
         </Badge>
       </Box>
@@ -258,8 +261,8 @@ function SessionTopics({ sessions }) {
             return (
               <Box key={s.day_number} className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
                 <Box className="flex items-center gap-2.5">
-                  <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50">
-                    <Calendar className="h-4 w-4 text-indigo-600" />
+                  <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50">
+                    <Calendar className="h-4 w-4 text-violet-600" />
                   </Box>
                   <Box className="min-w-0">
                     <Text as="p" className="text-sm font-semibold leading-tight text-slate-800">Day {s.day_number}</Text>
@@ -320,7 +323,7 @@ function NotEnrolledState({ user, message }) {
       )}
 
       <Box className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
-        <Button asChild className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700">
+        <Button asChild className="bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700">
           <a href={`mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`} className="flex items-center justify-center gap-1.5">
             <Mail className="mr-1.5 h-4 w-4" />
             Contact Admin
@@ -350,7 +353,20 @@ export function MyCoursesContent() {
     if (!token || !user) return;
 
     setError(null);
-    fetchTrainingDetail({ token, trainingRef: SEEDED_TRAINING_REF })
+    // Resolve the learner's own enrolled training first, then open its detail by
+    // UUID. Using the real training id (not a hardcoded code) means the detail
+    // request always targets a training this learner is actually enrolled in.
+    fetchMyTrainings({ token })
+      .then((res) => {
+        const list = res?.trainings || res || [];
+        const first = list[0];
+        if (!first) {
+          const e = new Error("You are not enrolled in any training yet");
+          e.status = 403;
+          throw e;
+        }
+        return fetchTrainingDetail({ token, trainingRef: first.id });
+      })
       .then((data) => setTraining(data))
       .catch((err) => setError(err));
   }, [token, user]);

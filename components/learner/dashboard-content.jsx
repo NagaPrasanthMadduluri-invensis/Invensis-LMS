@@ -43,7 +43,7 @@ function modeOf(m) { return MODE[m] || { icon: Video, label: m || "—", chip: "
 
 const ENROL_BADGE = {
   confirmed:   "bg-emerald-100 text-emerald-700",
-  completed:   "bg-indigo-100 text-indigo-700",
+  completed:   "bg-violet-100 text-violet-700",
   cancelled:   "bg-rose-100 text-rose-700",
   transferred: "bg-violet-100 text-violet-700",
 };
@@ -54,7 +54,7 @@ function cap(s = "") { return s.charAt(0).toUpperCase() + s.slice(1); }
    ────────────────────────────────────────────────────────── */
 
 const STAT_THEMES = {
-  indigo:  { card: "border-indigo-200 bg-indigo-100",   iconWrap: "bg-indigo-200 text-indigo-700",   value: "text-indigo-900",  label: "text-indigo-700/80" },
+  indigo:  { card: "border-violet-200 bg-violet-100",   iconWrap: "bg-violet-200 text-violet-700",   value: "text-violet-900",  label: "text-violet-700/80" },
   sky:     { card: "border-sky-200 bg-sky-100",         iconWrap: "bg-sky-200 text-sky-700",         value: "text-sky-900",     label: "text-sky-700/80" },
   amber:   { card: "border-amber-200 bg-amber-100",     iconWrap: "bg-amber-200 text-amber-700",     value: "text-amber-900",   label: "text-amber-700/80" },
   emerald: { card: "border-emerald-200 bg-emerald-100", iconWrap: "bg-emerald-200 text-emerald-700", value: "text-emerald-900", label: "text-emerald-700/80" },
@@ -112,7 +112,7 @@ function CourseCard({ course }) {
   return (
     <Link
       href="/my-courses"
-      className="block rounded-xl border border-slate-200 p-4 transition-colors hover:border-indigo-300 hover:bg-slate-50/60"
+      className="block rounded-xl border border-slate-200 p-4 transition-colors hover:border-violet-300 hover:bg-slate-50/60"
     >
       <Box className="flex items-start justify-between gap-3">
         <Box className="min-w-0">
@@ -147,7 +147,7 @@ function CourseCard({ course }) {
           <Text as="span" className="font-semibold text-slate-700">{pct}%</Text>
         </Box>
         <Box className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-          <Box className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500" style={{ width: `${Math.min(pct, 100)}%` }} />
+          <Box className="h-full rounded-full bg-gradient-to-r from-violet-500 to-violet-500" style={{ width: `${Math.min(pct, 100)}%` }} />
         </Box>
       </Box>
 
@@ -155,7 +155,7 @@ function CourseCard({ course }) {
         {course.days_until_start > 0 ? (
           <Text as="span" className="text-[11px] font-medium text-amber-600">Starts in {course.days_until_start} day{course.days_until_start !== 1 ? "s" : ""}</Text>
         ) : course.status === "completed" ? (
-          <Text as="span" className="text-[11px] font-medium text-indigo-600">Completed</Text>
+          <Text as="span" className="text-[11px] font-medium text-violet-600">Completed</Text>
         ) : (
           <Text as="span" className="text-[11px] font-medium text-emerald-600">In progress</Text>
         )}
@@ -253,11 +253,11 @@ export function DashboardContent() {
     <Box className="space-y-6">
 
       {/* ── Welcome banner ── */}
-      <Card className="overflow-hidden rounded-2xl border border-indigo-100 shadow-sm">
-        <Box className="flex flex-wrap items-center gap-5 bg-gradient-to-r from-indigo-50 via-purple-50 to-violet-50 px-6 py-5">
-          <Avatar className="h-14 w-14 shrink-0 shadow-sm ring-2 ring-indigo-200">
+      <Card className="overflow-hidden rounded-2xl border border-violet-100 shadow-sm p-0" >
+        <Box className="flex flex-wrap items-center gap-5 bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 px-6 py-5">
+          <Avatar className="h-14 w-14 shrink-0 shadow-sm ring-2 ring-violet-200">
             {learner.avatar_url && <AvatarImage src={learner.avatar_url} alt={learner.name} />}
-            <AvatarFallback className="bg-indigo-600 text-xl font-bold text-white">
+            <AvatarFallback className="bg-violet-600 text-xl font-bold text-white">
               {user?.initials || firstNameOf(learner.name)[0] || "L"}
             </AvatarFallback>
           </Avatar>
@@ -269,7 +269,7 @@ export function DashboardContent() {
               {(learner.job_title || learner.company_name)
                 ? [learner.job_title, learner.company_name].filter(Boolean).join(" · ")
                 : `Member since ${formatDate(learner.member_since)}`}
-              {sponsor?.name && <> · Sponsored by <span className="font-semibold text-indigo-600">{sponsor.name}</span></>}
+              {sponsor?.name && <> · Sponsored by <span className="font-semibold text-violet-600">{sponsor.name}</span></>}
             </Text>
           </Box>
 
@@ -279,7 +279,7 @@ export function DashboardContent() {
               <svg className="h-12 w-12 -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="12" className="text-slate-100" />
                 <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="12" strokeLinecap="round"
-                  className="text-indigo-500" strokeDasharray={`${(completionPct / 100) * 264} 264`} />
+                  className="text-violet-500" strokeDasharray={`${(completionPct / 100) * 264} 264`} />
               </svg>
               <Text as="span" className="absolute text-[11px] font-bold text-slate-700">{completionPct}%</Text>
             </Box>
@@ -289,8 +289,11 @@ export function DashboardContent() {
             </Box>
           </Box>
 
-          <Button asChild className="h-9 shrink-0 rounded-xl border-0 bg-indigo-600 px-5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">
-            <Link href="/courses">Browse Courses <ChevronRight className="ml-1 h-4 w-4" /></Link>
+          <Button
+            render={<Link href="/courses" />}
+            className="h-9 shrink-0 gap-1 rounded-xl border-0 bg-violet-600 px-5 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
+          >
+            Browse Courses <ChevronRight className="h-4 w-4" />
           </Button>
         </Box>
       </Card>
@@ -302,7 +305,7 @@ export function DashboardContent() {
 
       {/* ── My Courses ── */}
       <Panel title="My Courses" icon={GraduationCap} action={
-        <Link href="/my-courses" className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800">
+        <Link href="/my-courses" className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-800">
           View all <ArrowRight className="h-3 w-3" />
         </Link>
       }>
@@ -337,8 +340,8 @@ export function DashboardContent() {
                 return (
                   <Box key={`${j.training_code}-${j.type}-${i}`} className="relative flex gap-3 pb-4 last:pb-0">
                     {i < arr.length - 1 && <Box className="absolute left-[11px] top-6 h-full w-px bg-slate-200" />}
-                    <Box className={`z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${done ? "bg-emerald-100" : "bg-indigo-100"}`}>
-                      {done ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <GraduationCap className="h-3.5 w-3.5 text-indigo-600" />}
+                    <Box className={`z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${done ? "bg-emerald-100" : "bg-violet-100"}`}>
+                      {done ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> : <GraduationCap className="h-3.5 w-3.5 text-violet-600" />}
                     </Box>
                     <Box className="min-w-0 pt-0.5">
                       <Text as="p" className="text-xs font-semibold text-slate-800">
@@ -380,7 +383,7 @@ export function DashboardContent() {
       {/* ── Upcoming cohorts (register CTA) ── */}
       {upcoming_cohorts.length > 0 && (
         <Panel title="Open Cohorts — Register Now" icon={Sparkles} action={
-          <Link href="/courses" className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800">
+          <Link href="/courses" className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-800">
             Browse all <ArrowRight className="h-3 w-3" />
           </Link>
         }>
@@ -409,11 +412,15 @@ export function DashboardContent() {
                     <Box className="flex items-center gap-1 text-[11px] text-slate-500">
                       <Users className="h-3 w-3" />{c.seats_left} of {c.capacity} left
                     </Box>
-                    <Text as="span" className="text-[11px] font-medium text-indigo-600">Starts in {c.starts_in_days}d</Text>
+                    <Text as="span" className="text-[11px] font-medium text-violet-600">Starts in {c.starts_in_days}d</Text>
                   </Box>
-                  <Button asChild size="sm" disabled={c.is_full}
-                    className="mt-3 h-8 w-full rounded-lg border-0 bg-indigo-600 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50">
-                    <Link href="/courses">{c.is_full ? "Cohort full" : "Register now"}</Link>
+                  <Button
+                    render={<Link href="/courses" />}
+                    size="sm"
+                    disabled={c.is_full}
+                    className="mt-3 h-8 w-full rounded-lg border-0 bg-violet-600 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+                  >
+                    {c.is_full ? "Cohort full" : "Register now"}
                   </Button>
                 </Box>
               );

@@ -97,7 +97,7 @@ export function SponsorDashboardContent() {
   const stats = [
     { label: "My Learners", value: fmt(learners_count), icon: Users, color: "bg-amber-100 text-amber-600" },
     { label: "Active", value: fmt(active_count), icon: UserCheck, color: "bg-emerald-100 text-emerald-600" },
-    { label: "Invoices", value: fmt(invoices_count), icon: Receipt, color: "bg-indigo-100 text-indigo-600" },
+    { label: "Invoices", value: fmt(invoices_count), icon: Receipt, color: "bg-violet-100 text-violet-600" },
     { label: "Outstanding", value: fmtMoney(outstanding_amount), icon: CircleDollarSign, color: "bg-red-100 text-red-600" },
   ];
 
@@ -219,7 +219,7 @@ export function SponsorDashboardContent() {
               <Box className="divide-y">
                 {invoicePreview.map((inv) => (
                   <Box key={inv.id} className="flex items-center gap-3 py-2.5">
-                    <Box className="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                    <Box className="w-9 h-9 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center shrink-0">
                       <Receipt className="h-4 w-4" />
                     </Box>
                     <Box className="min-w-0 flex-1">

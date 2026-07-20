@@ -136,7 +136,7 @@ function table(items, cols) {
 }
 
 function documentShell(title, bodyHtml) {
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${STYLE}</style></head><body>${bodyHtml}<div class="footer">Invensis LMS · Confidential · Generated ${esc(
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${STYLE}</style></head><body>${bodyHtml}<div class="footer">Invensis Learning · Confidential · Generated ${esc(
     fmtDate(new Date().toISOString())
   )}</div></body></html>`;
 }

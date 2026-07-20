@@ -34,7 +34,7 @@ function NavGroup({ label, items, pathname }) {
                 render={<Link href={item.href} />}
               >
                 <item.icon />
-                <Text as="span" className="flex-1 text-sidebar-foreground">
+                <Text as="span" className="flex-1 text-sidebar-foreground font-medium">
                   {item.title}
                 </Text>
               </SidebarMenuButton>
@@ -54,12 +54,12 @@ export function SponsorSidebar() {
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-3">
         <Box className="flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-amber-500">
-            <Wallet className="w-4 h-4 text-white" />
+          <Box className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white">
+            <Wallet className="w-6 h-5 text-violet-500" />
           </Box>
           <Box>
             <Text as="span" className="text-sidebar-foreground text-sm font-bold leading-none block">
-              Invensis LMS
+              Invensis Learning
             </Text>
             <Text as="span" className="text-sidebar-foreground/50 text-[10px] leading-none block mt-0.5">
               Sponsor Portal
@@ -88,7 +88,7 @@ export function SponsorSidebar() {
                 }
               >
                 <item.icon />
-                <Text as="span" className="text-sidebar-foreground">
+                <Text as="span" className="text-sidebar-foreground font-medium">
                   {item.title}
                 </Text>
               </SidebarMenuButton>

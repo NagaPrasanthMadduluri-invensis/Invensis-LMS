@@ -55,7 +55,7 @@ function RegisterForm() {
           <Text as="h1" className="text-2xl">Create Account</Text>
         </CardTitle>
         <Text as="p" className="text-muted-foreground text-sm">
-          Register for Invensis LMS
+          Register for Invensis Learning Portal
         </Text>
       </CardHeader>
       <CardContent>
@@ -151,7 +151,7 @@ function RegisterForm() {
 
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+            className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
             disabled={loading}
           >
             {loading ? "Creating account..." : "Register"}
@@ -159,7 +159,7 @@ function RegisterForm() {
 
           <Text as="p" className="text-sm text-center text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-indigo-500 font-medium hover:underline">
+            <Link href="/login" className="text-violet-500 font-medium hover:underline">
               Sign In
             </Link>
           </Text>

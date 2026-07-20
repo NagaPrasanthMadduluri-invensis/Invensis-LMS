@@ -1,7 +1,6 @@
 "use client";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,30 +11,37 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Bell, User, Settings, LogOut } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 
-export function TopNav({ portalLabel = "Invensis LMS" }) {
+export function TopNav({ portalLabel = "Invensis Learning" }) {
   const { user, logout } = useAuth();
 
   return (
     <Box
       as="header"
-      className="sticky top-0 z-50 flex h-14 w-full shrink-0 items-center justify-between bg-sidebar px-4 shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.06)]"
+      className="sticky top-0 z-50 flex h-16 w-full shrink-0 items-center justify-between bg-sidebar px-4 shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.06)]"
     >
-      <Box className="flex items-center gap-3">
-        <SidebarTrigger className="bg-transparent hover:bg-transparent" />
-        <Separator orientation="vertical" className="h-6 text-white" />
-        <Text
-          as="h2"
-          className="text-sm font-medium tracking-wide select-none text-slate-300 uppercase"
-        >
-          {portalLabel}
-        </Text>
+      <Box  className="flex items-center gap-3">
+      <Box className="flex justify-start w-[227px]">
+      
+        <Image
+          src="/logo-white.svg"
+          alt={portalLabel}
+          width={155}
+          height={45}
+          priority
+          unoptimized
+          className="select-none drop-shadow-sm"
+        />
+       
       </Box>
-
+        <SidebarTrigger className="bg-transparent hover:bg-transparent" />
+       
+</Box>
       <Box className="flex items-center gap-2">
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5 text-white" />
@@ -51,7 +57,7 @@ export function TopNav({ portalLabel = "Invensis LMS" }) {
           <DropdownMenuTrigger className="flex items-center gap-2 rounded-full p-1 pr-3 bg-background hover:bg-muted transition-colors cursor-pointer border-0 outline-none">
             <Avatar className="h-8 w-8">
               <AvatarImage src={user?.avatar || ""} alt={user?.name || "User"} />
-              <AvatarFallback className="bg-indigo-500 text-white text-xs">
+              <AvatarFallback className="bg-violet-500 text-white text-xs">
                 {user?.initials || "U"}
               </AvatarFallback>
             </Avatar>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Search, Users, X, BookOpen, UserCheck, UserX, Mail, Calendar, Briefcase, MapPin, ChevronLeft, ChevronRight,
+  Search, Users, X, BookOpen, UserCheck, UserX, Mail, Calendar, Briefcase, MapPin, ChevronLeft, ChevronRight, ChevronRight as RowChevron,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -20,7 +21,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchParticipants } from "@/services/api/admin/admin-api";
 
 const AVATAR_COLORS = [
-  "bg-indigo-100 text-indigo-700",
+  "bg-violet-100 text-violet-700",
   "bg-violet-100 text-violet-700",
   "bg-teal-100 text-teal-700",
   "bg-emerald-100 text-emerald-700",
@@ -63,6 +64,7 @@ const PAGE_LIMIT = 100;
 
 export function UsersTable() {
   const { token } = useAuth();
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [jobTitle, setJobTitle] = useState("");
@@ -112,7 +114,7 @@ export function UsersTable() {
 
       {/* Stat cards */}
       <Box className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total Users"      value={total}           icon={Users}     bg="bg-indigo-50"  border="border border-indigo-100"  iconBg="bg-indigo-100"  iconCls="text-indigo-600"  valueCls="text-indigo-900"  labelCls="text-indigo-500" />
+        <StatCard label="Total Users"      value={total}           icon={Users}     bg="bg-violet-50"  border="border border-violet-100"  iconBg="bg-violet-100"  iconCls="text-violet-600"  valueCls="text-violet-900"  labelCls="text-violet-500" />
         <StatCard label="Active"           value={activeCount}     icon={UserCheck} bg="bg-emerald-50" border="border border-emerald-100" iconBg="bg-emerald-100" iconCls="text-emerald-600" valueCls="text-emerald-900" labelCls="text-emerald-600" />
         <StatCard label="Inactive"         value={inactiveCount}   icon={UserX}     bg="bg-slate-50"   border="border border-slate-200"   iconBg="bg-slate-100"   iconCls="text-slate-500"   valueCls="text-slate-700"   labelCls="text-slate-500" />
         <StatCard label="Total Enrolments" value={totalEnrolments} icon={BookOpen}  bg="bg-violet-50"  border="border border-violet-100"  iconBg="bg-violet-100"  iconCls="text-violet-600"  valueCls="text-violet-900"  labelCls="text-violet-500" />
@@ -127,7 +129,7 @@ export function UsersTable() {
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             autoComplete="off"
-            className="pl-10 pr-9 h-11 text-sm bg-slate-100/60 border-slate-300/70 rounded-xl focus-visible:ring-indigo-400/50"
+            className="pl-10 pr-9 h-11 text-sm bg-slate-100/60 border-slate-300/70 rounded-xl focus-visible:ring-violet-400/50"
           />
           {search && (
             <button onClick={() => setSearch("")}
@@ -197,11 +199,11 @@ export function UsersTable() {
         {/* Card header */}
         <Box className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
           <Box className="flex items-center gap-2.5">
-            <Box className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-              <Users className="h-4 w-4 text-indigo-500" />
+            <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+              <Users className="h-4 w-4 text-violet-500" />
             </Box>
             <Text as="h3" className="text-sm font-bold text-slate-800">All Users</Text>
-            <Badge className="border-0 bg-indigo-50 text-indigo-600 text-[11px] font-semibold ml-0.5">
+            <Badge className="border-0 bg-violet-50 text-violet-600 text-[11px] font-semibold ml-0.5">
               {total} total
             </Badge>
           </Box>
@@ -223,7 +225,7 @@ export function UsersTable() {
             {hasFilters && (
               <Button variant="ghost" size="sm"
                 onClick={() => { setSearch(""); setLocation(""); setJobTitle(""); setPage(1); }}
-                className="mt-3 text-indigo-600 hover:text-indigo-700 text-xs">
+                className="mt-3 text-violet-600 hover:text-violet-700 text-xs">
                 Clear filters
               </Button>
             )}
@@ -240,14 +242,19 @@ export function UsersTable() {
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Location</TableHead>
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 text-center">Enrolments</TableHead>
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Joined</TableHead>
-                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 pr-5">Status</TableHead>
+                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Status</TableHead>
+                    <TableHead className="py-3 pr-5" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {users.map((u) => {
                     const setupPending = u.account_active && !u.has_password;
                     return (
-                      <TableRow key={u.id} className="hover:bg-slate-50/70 border-b border-slate-100 last:border-0 transition-colors">
+                      <TableRow
+                        key={u.id}
+                        onClick={() => router.push(`/admin/users/${u.id}`)}
+                        className="group cursor-pointer hover:bg-violet-50/40 border-b border-slate-100 last:border-0 transition-colors"
+                      >
 
                         {/* User */}
                         <TableCell className="py-4 pl-5">
@@ -300,7 +307,7 @@ export function UsersTable() {
                         </TableCell>
 
                         {/* Status */}
-                        <TableCell className="py-4 pr-5">
+                        <TableCell className="py-4">
                           <Badge className={`border-0 text-xs font-semibold px-2.5 py-0.5 ${
                             !u.account_active
                               ? "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
@@ -310,6 +317,11 @@ export function UsersTable() {
                           }`}>
                             {!u.account_active ? "● Inactive" : setupPending ? "● Setup pending" : "● Active"}
                           </Badge>
+                        </TableCell>
+
+                        {/* Row affordance */}
+                        <TableCell className="py-4 pr-5 text-right">
+                          <RowChevron className="h-4 w-4 text-slate-300 inline-block group-hover:text-violet-500 transition-colors" />
                         </TableCell>
 
                       </TableRow>

@@ -31,7 +31,7 @@ function initialsOf(name = "") {
 }
 
 const AVATAR_COLORS = [
-  "bg-indigo-500", "bg-violet-500", "bg-blue-500", "bg-cyan-500",
+  "bg-violet-500", "bg-violet-500", "bg-blue-500", "bg-cyan-500",
   "bg-emerald-500", "bg-teal-500", "bg-rose-500", "bg-pink-500",
 ];
 
@@ -190,7 +190,7 @@ function TrainerRow({ trainer, onEdit }) {
             <Pencil className="h-3.5 w-3.5 shrink-0" /> Edit
           </button>
           <Link href={`/admin/trainers/${trainer.id}`}
-            className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors shrink-0 whitespace-nowrap">
+            className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors shrink-0 whitespace-nowrap">
             <Eye className="h-3.5 w-3.5 shrink-0" /> <Text as="span" className="text-white leading-none">View</Text>
           </Link>
         </Box>
@@ -279,7 +279,7 @@ export function TrainersList() {
     <Box className="space-y-5">
       {/* Stat cards */}
       <Box className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total Trainers" value={trainers ? all.length : "—"} icon={Users}    bg="bg-indigo-50"  border="border border-indigo-100"  iconBg="bg-indigo-100"  iconCls="text-indigo-600"  valueCls="text-indigo-900"  labelCls="text-indigo-500" />
+        <StatCard label="Total Trainers" value={trainers ? all.length : "—"} icon={Users}    bg="bg-violet-50"  border="border border-violet-100"  iconBg="bg-violet-100"  iconCls="text-violet-600"  valueCls="text-violet-900"  labelCls="text-violet-500" />
         <StatCard label="Active"          value={trainers ? activeCount : "—"} icon={UserCheck} bg="bg-emerald-50" border="border border-emerald-100" iconBg="bg-emerald-100" iconCls="text-emerald-600" valueCls="text-emerald-900" labelCls="text-emerald-600" />
         <StatCard label="Remote-enabled"  value={trainers ? remoteCount : "—"} icon={Wifi}     bg="bg-blue-50"    border="border border-blue-100"    iconBg="bg-blue-100"    iconCls="text-blue-600"    valueCls="text-blue-900"    labelCls="text-blue-500" />
         <StatCard label="Specializations" value={trainers ? specOptions.length : "—"} icon={Target} bg="bg-violet-50" border="border border-violet-100" iconBg="bg-violet-100" iconCls="text-violet-600" valueCls="text-violet-900" labelCls="text-violet-500" />
@@ -294,7 +294,7 @@ export function TrainersList() {
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-9 h-11 text-sm bg-slate-100/60 border-slate-300/70 rounded-xl focus-visible:ring-indigo-400/50"
+              className="pl-10 pr-9 h-11 text-sm bg-slate-100/60 border-slate-300/70 rounded-xl focus-visible:ring-violet-400/50"
             />
             {search && (
               <button onClick={() => setSearch("")}
@@ -305,7 +305,7 @@ export function TrainersList() {
           </Box>
           <Button
             onClick={() => setCreateOpen(true)}
-            className="h-11 px-5 bg-indigo-600 hover:bg-indigo-700 text-white border-0 rounded-xl shadow-sm shrink-0"
+            className="h-11 px-5 bg-violet-600 hover:bg-violet-700 text-white border-0 rounded-xl shadow-sm shrink-0"
           >
             <UserPlus className="h-4 w-4 mr-2" /> New Trainer
           </Button>
@@ -362,8 +362,8 @@ export function TrainersList() {
         </Card>
       ) : rows.length === 0 ? (
         <Card className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-slate-200/80 shadow-sm bg-white">
-          <Box className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
-            <GraduationCap className="h-7 w-7 text-indigo-400" />
+          <Box className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center mb-4">
+            <GraduationCap className="h-7 w-7 text-violet-400" />
           </Box>
           <Text as="h3" className="text-sm font-bold text-slate-700">
             {all.length === 0 ? "No trainers yet" : "No trainers match your filters"}
@@ -372,11 +372,11 @@ export function TrainersList() {
             {all.length === 0 ? "Onboard a trainer to make them assignable to trainings." : "Try adjusting or clearing your filters."}
           </Text>
           {all.length === 0 ? (
-            <Button onClick={() => setCreateOpen(true)} className="mt-4 h-9 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm border-0 rounded-xl">
+            <Button onClick={() => setCreateOpen(true)} className="mt-4 h-9 px-4 bg-violet-600 hover:bg-violet-700 text-white text-sm border-0 rounded-xl">
               Add First Trainer
             </Button>
           ) : hasFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="mt-3 text-indigo-600 hover:text-indigo-700 text-xs">
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="mt-3 text-violet-600 hover:text-violet-700 text-xs">
               Clear filters
             </Button>
           )}

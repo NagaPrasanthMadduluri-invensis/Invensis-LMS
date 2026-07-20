@@ -1,6 +1,6 @@
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
-import { InvoicesList } from "@/components/sponsor/invoices-list";
+import { InvoicesList } from "@/components/shared/invoices-list";
 
 export default function SponsorInvoicesPage() {
   return (

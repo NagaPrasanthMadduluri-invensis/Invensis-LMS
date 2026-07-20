@@ -26,7 +26,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchAdminCourses } from "@/services/api/admin/admin-api";
 
 const TYPE_CONFIG = {
-  certification: { label: "Certification", color: "bg-indigo-100 text-indigo-700" },
+  certification: { label: "Certification", color: "bg-violet-100 text-violet-700" },
   training_only:  { label: "Training",      color: "bg-amber-100 text-amber-700"  },
 };
 
@@ -79,7 +79,7 @@ function CourseCard({ course, onClick }) {
         <Box>
           <Text
             as="h3"
-            className="text-sm font-semibold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2"
+            className="text-sm font-semibold text-slate-900 leading-snug group-hover:text-violet-600 transition-colors line-clamp-2"
           >
             {course.name}
           </Text>
@@ -186,7 +186,7 @@ export function CourseSelector() {
       {/* ── Stat Cards ── */}
       <Box className="grid grid-cols-3 gap-3">
         {[
-          { label: "Total Courses", value: courses.length,              bg: "bg-indigo-200",  icon: "bg-indigo-300 text-indigo-700",  val: "text-indigo-900",  Icon: BookOpen     },
+          { label: "Total Courses", value: courses.length,              bg: "bg-violet-200",  icon: "bg-violet-300 text-violet-700",  val: "text-violet-900",  Icon: BookOpen     },
           { label: "Active",        value: activeCount,                  bg: "bg-emerald-200", icon: "bg-emerald-300 text-emerald-700", val: "text-emerald-900", Icon: CheckCircle2 },
           { label: "Inactive",      value: courses.length - activeCount, bg: "bg-rose-200",    icon: "bg-rose-300 text-rose-700",       val: "text-rose-900",    Icon: XCircle      },
         ].map((s) => (
@@ -252,7 +252,7 @@ export function CourseSelector() {
           placeholder="Search by course name or category..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 pr-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-indigo-400"
+          className="pl-9 pr-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-violet-400"
         />
         {search && (
           <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">

@@ -137,6 +137,47 @@ export async function markLessonComplete({ token, courseId, lessonId, userId }) 
   });
 }
 
+/* ──────────────────────────────────────
+   SUPPORT TICKETS
+   ────────────────────────────────────── */
+
+/**
+ * GET /learner/tickets
+ * The caller's own support tickets, newest first.
+ * Returns { tickets: [{ id, code, category, priority, status, subject,
+ *   description, training: { id, code, title } | null, created_at, updated_at,
+ *   resolved_at }], summary: { total, open, in_progress, resolved, closed } }.
+ */
+export async function fetchMyTickets({ token }) {
+  return apiClient(`/learner/tickets`, { token });
+}
+
+/**
+ * POST /learner/tickets — raise a ticket.
+ * data = { category, subject, description, training_id? }
+ * `training_id` is required for the training-related categories.
+ * Returns { ticket }.
+ */
+export async function createTicket({ token, data }) {
+  return apiClient(`/learner/tickets`, { method: "POST", token, body: data });
+}
+
+/**
+ * GET /learner/tickets/:ticketId — one ticket with its full conversation thread.
+ * Returns { ticket: { ...fields, messages: [{ id, author_role, author_name, body, created_at }] } }.
+ */
+export async function fetchMyTicket({ token, ticketId }) {
+  return apiClient(`/learner/tickets/${ticketId}`, { token });
+}
+
+/**
+ * POST /learner/tickets/:ticketId/messages { body } — learner reply on the
+ * ticket thread. Returns the updated { ticket } including messages[].
+ */
+export async function replyToMyTicket({ token, ticketId, body }) {
+  return apiClient(`/learner/tickets/${ticketId}/messages`, { method: "POST", token, body: { body } });
+}
+
 /**
  * Placeholder — course catalog (public / ISR)
  */

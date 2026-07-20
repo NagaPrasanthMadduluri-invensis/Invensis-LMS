@@ -65,12 +65,12 @@ function ExternalContent({ url }) {
   if (!url) return null;
   return (
     <Card className="p-8 text-center">
-      <ExternalLink className="h-10 w-10 mx-auto text-indigo-500 mb-3" />
+      <ExternalLink className="h-10 w-10 mx-auto text-violet-500 mb-3" />
       <Text as="h3" className="text-base">External Content</Text>
       <Text as="p" className="text-sm text-muted-foreground mt-1 mb-4">
         This lesson opens in an external portal.
       </Text>
-      <Button asChild className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white">
+      <Button asChild className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white">
         <a href={url} target="_blank" rel="noopener noreferrer">
           Open External Portal
         </a>
@@ -82,7 +82,7 @@ function ExternalContent({ url }) {
 function QuizPlaceholder() {
   return (
     <Card className="p-8 text-center">
-      <HelpCircle className="h-10 w-10 mx-auto text-indigo-500 mb-3" />
+      <HelpCircle className="h-10 w-10 mx-auto text-violet-500 mb-3" />
       <Text as="h3" className="text-base">Quiz</Text>
       <Text as="p" className="text-sm text-muted-foreground mt-1">
         This lesson is a quiz. Head to the Assessments section to attempt it.
@@ -161,14 +161,14 @@ export function LessonContent({ courseId, lessonId }) {
           <Box className="flex items-start justify-between gap-4 flex-wrap">
             <Box className="flex-1 min-w-0">
               <Box className="flex items-center gap-2 mb-1">
-                <ContentIcon className="h-4 w-4 text-indigo-500 shrink-0" />
+                <ContentIcon className="h-4 w-4 text-violet-500 shrink-0" />
                 <Badge
                   variant="secondary"
                   className={`text-[10px] ${
                     status === "completed"
                       ? "bg-emerald-100 text-emerald-700"
                       : status === "in_progress"
-                      ? "bg-indigo-100 text-indigo-700"
+                      ? "bg-violet-100 text-violet-700"
                       : "bg-gray-100 text-gray-500"
                   }`}
                 >

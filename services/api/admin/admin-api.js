@@ -158,6 +158,19 @@ export async function updateTrainer({ token, trainerId, data }) {
    ────────────────────────────────────── */
 
 /**
+ * GET /admin/participants/:participantId — full participant profile plus every
+ * training they enrolled in. Returns { participant, enrolments: [{ enrolment_id,
+ * training_id, training_code, title, bucket, delivery_mode, training_status,
+ * status, attendance_status, start_date, end_date, enrolled_at, added_manually,
+ * certificate_issued, certificate_code, category }], summary: { total, completed,
+ * ongoing, upcoming, inactive, certificates } }. `category` is one of
+ * completed | ongoing | upcoming | cancelled | transferred | failed.
+ */
+export async function fetchParticipantDetail({ token, participantId }) {
+  return apiClient(`/admin/participants/${participantId}`, { token });
+}
+
+/**
  * PATCH /admin/participants/:participantId — edit a participant.
  * data = any subset of { name, phone, job_title } (email is not editable).
  * Returns { participant }.
@@ -296,6 +309,48 @@ export async function fetchRecentUsers({ token }) {
 export async function fetchRecentOrders({ token }) {
   const data = await fetchAdminDashboard({ token });
   return data.recent_orders;
+}
+
+/* ──────────────────────────────────────
+   SUPPORT TICKETS
+   ────────────────────────────────────── */
+
+/**
+ * GET /admin/tickets?status=&category=&search=
+ * All learner-raised tickets, newest first, each with the raiser + related
+ * training joined. Returns { tickets: [{ id, code, category, priority, status,
+ * subject, description, training: { id, code, title } | null, learner: { id,
+ * name, email }, created_at, updated_at, resolved_at }],
+ * summary: { total, open, in_progress, resolved, closed } }.
+ */
+export async function fetchAdminTickets({ token, status = "", category = "", search = "" } = {}) {
+  const qs = new URLSearchParams();
+  if (status) qs.set("status", status);
+  if (category) qs.set("category", category);
+  if (search) qs.set("search", search);
+  const q = qs.toString();
+  return apiClient(`/admin/tickets${q ? `?${q}` : ""}`, { token });
+}
+
+/** GET /admin/tickets/:ticketId → { ticket } (full detail). */
+export async function fetchAdminTicket({ token, ticketId }) {
+  return apiClient(`/admin/tickets/${ticketId}`, { token });
+}
+
+/**
+ * PATCH /admin/tickets/:ticketId { status } — move a ticket through its
+ * lifecycle (open → in_progress → resolved → closed). Returns { ticket }.
+ */
+export async function updateTicketStatus({ token, ticketId, status }) {
+  return apiClient(`/admin/tickets/${ticketId}`, { method: "PATCH", token, body: { status } });
+}
+
+/**
+ * POST /admin/tickets/:ticketId/messages { body } — admin reply on the ticket's
+ * conversation thread. Returns the full { ticket } including its messages[].
+ */
+export async function replyToAdminTicket({ token, ticketId, body }) {
+  return apiClient(`/admin/tickets/${ticketId}/messages`, { method: "POST", token, body: { body } });
 }
 
 /* ──────────────────────────────────────

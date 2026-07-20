@@ -295,7 +295,7 @@ function TrainingCard({ training, active, onClick }) {
       onClick={onClick}
       className={`p-0 overflow-hidden cursor-pointer rounded-2xl border shadow-sm transition-all ${active ? "border-slate-300 shadow-md" : "border-slate-200/80 hover:shadow-md hover:border-slate-300"}`}
     >
-      <Box className="flex items-center justify-between bg-gradient-to-r from-violet-50 via-purple-50 to-indigo-50 border-b border-violet-100 px-4 py-2.5">
+      <Box className="flex items-center justify-between bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-4 py-2.5">
         <Box className="flex items-center gap-1.5">
           <Hash className="h-3.5 w-3.5 text-violet-400" />
           <Text as="span" className="text-xs font-semibold tracking-wide text-violet-700">{training.code}</Text>

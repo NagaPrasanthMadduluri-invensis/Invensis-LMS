@@ -110,7 +110,7 @@ export function SetPasswordForm({ mode = "reset" }) {
           </Text>
           <Button
             asChild
-            className="mt-6 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+            className="mt-6 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
           >
             <Link href="/login">Go to sign in</Link>
           </Button>
@@ -162,7 +162,7 @@ export function SetPasswordForm({ mode = "reset" }) {
             <Box className="rounded-lg bg-red-50 px-3 py-2">
               <Text as="p" className="text-sm text-red-600">{error}</Text>
               {/expired|invalid|used/i.test(error) && (
-                <Link href="/forgot-password" className="text-xs text-indigo-600 hover:underline">
+                <Link href="/forgot-password" className="text-xs text-violet-600 hover:underline">
                   Request a new link →
                 </Link>
               )}
@@ -171,14 +171,14 @@ export function SetPasswordForm({ mode = "reset" }) {
 
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+            className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
             disabled={loading}
           >
             {loading ? copy.busy : copy.cta}
           </Button>
 
           <Text as="p" className="text-sm text-center text-muted-foreground">
-            <Link href="/login" className="text-indigo-500 font-medium hover:underline">
+            <Link href="/login" className="text-violet-500 font-medium hover:underline">
               Back to sign in
             </Link>
           </Text>

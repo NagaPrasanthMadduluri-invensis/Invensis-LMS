@@ -23,7 +23,7 @@ const courses = [
     price: "₹49,999",
     tier: "Gold",
     tierBg: "bg-gradient-to-r from-amber-400 to-amber-600",
-    gradient: "from-indigo-400/60 to-purple-500/60",
+    gradient: "from-violet-400/60 to-purple-500/60",
   },
   {
     name: "ITIL 4 Foundation",
@@ -102,7 +102,7 @@ export default function CourseCatalogPage() {
       <Box>
         <Text as="h1" className="text-2xl">Course Catalog</Text>
         <Text as="p" className="text-muted-foreground text-xs mt-0.5">
-          Home &gt; <Text as="span" className="text-indigo-500">Course Catalog</Text>
+          Home &gt; <Text as="span" className="text-violet-500">Course Catalog</Text>
         </Text>
       </Box>
 
@@ -178,10 +178,10 @@ export default function CourseCatalogPage() {
 
             {/* Footer */}
             <Box className="flex items-center justify-between px-3.5 py-2.5 border-t">
-              <Text as="span" className="font-bold text-sm text-indigo-500">
+              <Text as="span" className="font-bold text-sm text-violet-500">
                 {course.price}
               </Text>
-              <Button size="sm" className="text-xs h-7 px-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white">
+              <Button size="sm" className="text-xs h-7 px-3 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white">
                 Enroll Now
               </Button>
             </Box>

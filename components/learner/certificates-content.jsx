@@ -270,9 +270,9 @@ function SurveyDialog({ target, onOpenChange, token, onSubmitted }) {
   return (
     <Dialog open={open} onOpenChange={(v) => !submitting && onOpenChange(v)}>
       <DialogContent className="sm:max-w-[560px] overflow-hidden" style={{ padding: 0, gap: 0 }}>
-        <Box className="bg-gradient-to-r from-indigo-50 via-purple-50 to-violet-50 border-b border-indigo-100 px-6 py-5">
+        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
+            <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
               <MessageSquare className="w-4 h-4 text-white" />
             </Box>
             <Box>
@@ -300,7 +300,7 @@ function SurveyDialog({ target, onOpenChange, token, onSubmitted }) {
                   className={cn(
                     "h-9 px-4 rounded-xl text-sm font-semibold border transition-colors",
                     form.would_recommend === o.v
-                      ? "bg-indigo-600 text-white border-indigo-600"
+                      ? "bg-violet-600 text-white border-violet-600"
                       : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                   )}>
                   {o.l}
@@ -315,7 +315,7 @@ function SurveyDialog({ target, onOpenChange, token, onSubmitted }) {
               value={form.comments}
               onChange={(e) => set("comments")(e.target.value)}
               placeholder="Anything you'd like to add about the sessions…"
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none resize-none focus:border-indigo-400 focus:shadow-[0_0_0_3px_rgba(165,180,252,0.35)] transition-all"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none resize-none focus:border-violet-400 focus:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all"
             />
           </Box>
           {error && (
@@ -327,7 +327,7 @@ function SurveyDialog({ target, onOpenChange, token, onSubmitted }) {
         </Box>
         <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting || !complete} className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">
+          <Button onClick={submit} disabled={submitting || !complete} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
             {submitting
               ? (<><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Submitting…</>)
               : (<><CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Submit &amp; download</>)}
@@ -392,7 +392,7 @@ function CertificateCard({ cert, survey, onDownload, onGiveFeedback }) {
               <Download className="h-4 w-4 mr-2" /> Download certificate
             </Button>
           ) : canGiveFeedback ? (
-            <Button onClick={() => onGiveFeedback(cert, survey)} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-sm">
+            <Button onClick={() => onGiveFeedback(cert, survey)} className="w-full bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
               <MessageSquare className="h-4 w-4 mr-2" /> Give feedback &amp; download
             </Button>
           ) : survey?.answered ? (

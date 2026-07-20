@@ -97,15 +97,15 @@ function mapFieldErrors(apiErrors, keyMap) {
   return mapped;
 }
 
-const inputCls = "h-10 text-sm border-slate-200 focus-visible:ring-indigo-400";
+const inputCls = "h-10 text-sm bg-background border-slate-200 focus-visible:ring-violet-400";
 
 function SectionCard({ icon: Icon, title, description, children }) {
   return (
     <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
       <CardHeader className="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
         <Box className="flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
-            <Icon className="h-4 w-4 text-indigo-500" />
+          <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
+            <Icon className="h-4 w-4 text-violet-500" />
           </Box>
           <Box>
             <CardTitle className="text-sm font-bold text-slate-800">{title}</CardTitle>
@@ -364,16 +364,16 @@ export function LearnerProfileSettings() {
   return (
     <Tabs defaultValue="personal">
       <TabsList className="h-auto w-full sm:w-fit flex-wrap gap-1 rounded-full bg-slate-200 p-1.5">
-        <TabsTrigger value="personal" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-blue-200 data-active:text-blue-800 data-active:ring-1 data-active:ring-blue-300 data-active:shadow-sm">
+        <TabsTrigger value="personal" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-violet-200 data-active:text-violet-800 data-active:ring-1 data-active:ring-violet-300 data-active:shadow-sm">
           <User className="h-4 w-4" /> Personal
         </TabsTrigger>
-        <TabsTrigger value="professional" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-blue-200 data-active:text-blue-800 data-active:ring-1 data-active:ring-blue-300 data-active:shadow-sm">
+        <TabsTrigger value="professional" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-violet-200 data-active:text-violet-800 data-active:ring-1 data-active:ring-violet-300 data-active:shadow-sm">
           <Briefcase className="h-4 w-4" /> Professional
         </TabsTrigger>
-        <TabsTrigger value="training" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-blue-200 data-active:text-blue-800 data-active:ring-1 data-active:ring-blue-300 data-active:shadow-sm">
+        <TabsTrigger value="training" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-violet-200 data-active:text-violet-800 data-active:ring-1 data-active:ring-violet-300 data-active:shadow-sm">
           <GraduationCap className="h-4 w-4" /> Training
         </TabsTrigger>
-        <TabsTrigger value="account" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-blue-200 data-active:text-blue-800 data-active:ring-1 data-active:ring-blue-300 data-active:shadow-sm">
+        <TabsTrigger value="account" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-violet-200 data-active:text-violet-800 data-active:ring-1 data-active:ring-violet-300 data-active:shadow-sm">
           <Shield className="h-4 w-4" /> Account
         </TabsTrigger>
       </TabsList>
@@ -384,7 +384,7 @@ export function LearnerProfileSettings() {
           <Box className="flex items-center gap-4">
             <Avatar size="lg">
               {(photoPreview || avatarUrl) && <AvatarImage src={photoPreview || avatarUrl} alt={user?.name} />}
-              <AvatarFallback className="bg-indigo-100 text-indigo-700 text-sm font-bold">
+              <AvatarFallback className="bg-violet-100 text-violet-700 text-sm font-bold">
                 {user?.initials || "U"}
               </AvatarFallback>
             </Avatar>
@@ -432,7 +432,7 @@ export function LearnerProfileSettings() {
             <FieldRow label="Email" htmlFor="email">
               <Box className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="email" value={user?.email || ""} disabled className={`${inputCls} pl-9 bg-slate-50 text-slate-500`} />
+                <Input id="email" value={user?.email || ""} disabled className={`${inputCls} pl-9 text-slate-500`} />
               </Box>
             </FieldRow>
             <FieldRow label="Mobile Number" htmlFor="mobile" error={personalErrors.mobile}>
@@ -475,7 +475,7 @@ export function LearnerProfileSettings() {
           </Box>
 
           {personalError && <Text as="p" className="text-xs text-red-600">{personalError}</Text>}
-          <Button onClick={savePersonalInfo} disabled={personalSaving} className="h-10 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+          <Button onClick={savePersonalInfo} disabled={personalSaving} className="h-10 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
             {personalSaving ? "Saving..." : personalSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>
@@ -536,7 +536,7 @@ export function LearnerProfileSettings() {
             </FieldRow>
           </Box>
           {professionalError && <Text as="p" className="text-xs text-red-600">{professionalError}</Text>}
-          <Button onClick={saveProfessionalInfo} disabled={professionalSaving} className="h-10 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+          <Button onClick={saveProfessionalInfo} disabled={professionalSaving} className="h-10 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
             {professionalSaving ? "Saving..." : professionalSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>
@@ -547,7 +547,7 @@ export function LearnerProfileSettings() {
         <SectionCard icon={GraduationCap} title="Training Information" description="Read-only — managed by your enrolments and organisation.">
           <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <FieldRow label="Purchase Type">
-              <Badge className="border-0 bg-indigo-50 text-indigo-700 text-xs font-semibold w-fit">
+              <Badge className="border-0 bg-violet-50 text-violet-700 text-xs font-semibold w-fit">
                 {sponsor ? "Corporate" : "Self"}
               </Badge>
             </FieldRow>
@@ -602,7 +602,7 @@ export function LearnerProfileSettings() {
             </FieldRow>
           </Box>
           {passwordError && <Text as="p" className="text-xs text-red-600">{passwordError}</Text>}
-          <Button onClick={savePassword} className="h-10 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+          <Button onClick={savePassword} className="h-10 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
             {passwordSaved ? "Password Updated ✓" : "Update Password"}
           </Button>
         </SectionCard>
@@ -631,7 +631,7 @@ export function LearnerProfileSettings() {
             </Box>
             <Switch checked={twoFactorEnabled} onCheckedChange={setTwoFactorEnabled} />
           </Box>
-          <Button onClick={savePreferences} className="h-10 px-5 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+          <Button onClick={savePreferences} className="h-10 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
             {preferencesSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>

@@ -150,7 +150,7 @@ export function OrdersTable() {
       {/* ── Stat Cards ── */}
       {data && (
         <Box className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard icon={CreditCard}  label="Total Orders"     value={total}         color="bg-indigo-300 text-indigo-700"   borderColor="bg-indigo-200"  />
+          <StatCard icon={CreditCard}  label="Total Orders"     value={total}         color="bg-violet-300 text-violet-700"   borderColor="bg-violet-200"  />
           <StatCard icon={TrendingUp}  label="Paid (this page)" value={paidCount}     color="bg-emerald-300 text-emerald-700" borderColor="bg-emerald-200" />
           <StatCard icon={RefreshCw}   label="Pending"          value={pendingCount}  color="bg-orange-300 text-orange-700"         borderColor="bg-orange-200"   />
           <StatCard icon={BookOpen}    label="Unique Courses"   value={uniqueCourses} color="bg-teal-300 text-teal-700"       borderColor="bg-teal-200"    />
@@ -161,11 +161,11 @@ export function OrdersTable() {
       <Card className="border border-slate-100 shadow-sm bg-white rounded-xl overflow-hidden">
         <CardHeader className="py-3 px-4 flex-row items-center justify-between space-y-0 flex-wrap gap-2 border-b border-slate-100">
           <Box className="flex items-center gap-2">
-            <Box className="w-1 h-4 rounded-full bg-indigo-500" />
+            <Box className="w-1 h-4 rounded-full bg-violet-500" />
             <CardTitle className="text-sm font-semibold text-slate-800">
               Orders
               {data && (
-                <Badge variant="secondary" className="ml-2 text-[10px] bg-indigo-100 text-indigo-700 border-0">
+                <Badge variant="secondary" className="ml-2 text-[10px] bg-violet-100 text-violet-700 border-0">
                   {total} total
                 </Badge>
               )}
@@ -180,7 +180,7 @@ export function OrdersTable() {
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Search name, email, course…"
-                className="h-10 pl-9 pr-9 text-sm bg-white border-indigo-400 focus-visible:ring-indigo-400"
+                className="h-10 pl-9 pr-9 text-sm bg-white border-violet-400 focus-visible:ring-violet-400"
               />
               {search && (
                 <button onClick={() => handleSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -205,7 +205,7 @@ export function OrdersTable() {
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"
+              className="h-8 w-8 border-slate-200 hover:border-violet-300 hover:text-violet-600"
               onClick={() => load()}
               disabled={loading}
             >
@@ -218,7 +218,7 @@ export function OrdersTable() {
           {error ? (
             <Box className="px-4 py-10 text-center">
               <Text as="p" className="text-red-500 text-sm">{error}</Text>
-              <Button variant="outline" size="sm" className="mt-3 border-indigo-200 text-indigo-600 hover:bg-indigo-50" onClick={() => load()}>
+              <Button variant="outline" size="sm" className="mt-3 border-violet-200 text-violet-600 hover:bg-violet-50" onClick={() => load()}>
                 Retry
               </Button>
             </Box>
@@ -252,7 +252,7 @@ export function OrdersTable() {
                       key={order.order_id}
                       className="text-xs border-b border-slate-50 hover:bg-slate-50 transition-colors"
                     >
-                      <TableCell className="pl-4 font-mono font-semibold text-indigo-600 whitespace-nowrap">
+                      <TableCell className="pl-4 font-mono font-semibold text-violet-600 whitespace-nowrap">
                         {order.order_id}
                       </TableCell>
                       <TableCell>
@@ -303,7 +303,7 @@ export function OrdersTable() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-7 w-7 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"
+                  className="h-7 w-7 border-slate-200 hover:border-violet-300 hover:text-violet-600"
                   disabled={page <= 1 || loading}
                   onClick={() => goPage(page - 1)}
                 >
@@ -312,7 +312,7 @@ export function OrdersTable() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-7 w-7 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"
+                  className="h-7 w-7 border-slate-200 hover:border-violet-300 hover:text-violet-600"
                   disabled={page >= totalPages || loading}
                   onClick={() => goPage(page + 1)}
                 >

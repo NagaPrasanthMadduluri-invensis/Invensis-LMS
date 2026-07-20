@@ -18,7 +18,7 @@ const SAMPLE_ACCOUNTS = [
 ];
 
 const COMPANY_COLORS = [
-  "bg-indigo-100 text-indigo-700",
+  "bg-violet-100 text-violet-700",
   "bg-teal-100 text-teal-700",
   "bg-violet-100 text-violet-700",
   "bg-emerald-100 text-emerald-700",
@@ -39,7 +39,7 @@ export function CorporateAccounts() {
       {/* Stats */}
       <Box className="grid grid-cols-3 gap-3">
         {[
-          { label: "Total Accounts", value: SAMPLE_ACCOUNTS.length,                                      bg: "bg-indigo-200",  val: "text-indigo-900"  },
+          { label: "Total Accounts", value: SAMPLE_ACCOUNTS.length,                                      bg: "bg-violet-200",  val: "text-violet-900"  },
           { label: "Active",         value: SAMPLE_ACCOUNTS.filter((a) => a.status === "Active").length, bg: "bg-emerald-200", val: "text-emerald-900" },
           { label: "Total Seats",    value: SAMPLE_ACCOUNTS.reduce((s, a) => s + a.seats, 0),            bg: "bg-violet-200",  val: "text-violet-900"  },
         ].map((s) => (
@@ -57,7 +57,7 @@ export function CorporateAccounts() {
           placeholder="Search by company or contact name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 pr-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-indigo-400"
+          className="pl-9 pr-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-violet-400"
         />
         {search && (
           <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -78,7 +78,7 @@ export function CorporateAccounts() {
             {filtered.map((a, i) => {
               const pct = Math.round((a.used / a.seats) * 100);
               return (
-                <Box key={a.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-indigo-200 hover:shadow-sm transition-all">
+                <Box key={a.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-violet-200 hover:shadow-sm transition-all">
                   <Box className="flex items-center gap-3">
                     <Box className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${COMPANY_COLORS[i % COMPANY_COLORS.length]}`}>
                       {a.company[0]}
@@ -95,7 +95,7 @@ export function CorporateAccounts() {
                         <Text as="span" className="text-xs text-slate-600 font-medium">{a.used}/{a.seats}</Text>
                       </Box>
                       <Box className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <Box className={`h-full rounded-full ${pct > 80 ? "bg-rose-500" : "bg-indigo-400"}`} style={{ width: `${pct}%` }} />
+                        <Box className={`h-full rounded-full ${pct > 80 ? "bg-rose-500" : "bg-violet-400"}`} style={{ width: `${pct}%` }} />
                       </Box>
                     </Box>
                     <Box className="hidden md:flex items-center gap-1">

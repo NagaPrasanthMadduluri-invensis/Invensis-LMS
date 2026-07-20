@@ -83,8 +83,8 @@ function CompletedCard({ t }) {
         <Box className="mt-1 space-y-2 border-t border-slate-100 pt-3">
           {/* Trainer */}
           <Box className="flex items-center gap-2">
-            <Box className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50">
-              <GraduationCap className="h-3.5 w-3.5 text-indigo-600" />
+            <Box className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-50">
+              <GraduationCap className="h-3.5 w-3.5 text-violet-600" />
             </Box>
             <Box className="min-w-0">
               <Text as="p" className="text-[10px] uppercase tracking-wide text-slate-400 leading-none">Trainer</Text>
@@ -126,11 +126,13 @@ function CompletedCard({ t }) {
         </Box>
 
         <Box className="mt-auto pt-1">
-          <Button asChild variant="outline" className="w-full border-slate-200 text-slate-700 hover:bg-slate-50">
-            <Link href="/certificates">
-              <Award className="h-4 w-4 mr-2" />
-              {t.certificate_issued ? "View certificate" : "Give feedback & download"}
-            </Link>
+          <Button
+            render={<Link href="/certificates" />}
+            variant="outline"
+            className="w-full gap-2 border-slate-200 text-slate-700 hover:bg-slate-50"
+          >
+            <Award className="h-4 w-4" />
+            {t.certificate_issued ? "View certificate" : "Give feedback & download"}
           </Button>
         </Box>
       </Box>
@@ -147,12 +149,12 @@ function NextTrainingCard({ t, highlight }) {
   return (
     <Box className={cn(
       "rounded-2xl border p-5",
-      highlight ? "border-indigo-200 bg-gradient-to-br from-indigo-50/70 to-violet-50/50" : "border-slate-200 bg-white"
+      highlight ? "border-violet-200 bg-gradient-to-br from-violet-50/70 to-violet-50/50" : "border-slate-200 bg-white"
     )}>
       <Box className="flex items-start justify-between gap-3">
         <Box className="min-w-0">
           {highlight && (
-            <Text as="span" className="text-[10px] font-bold uppercase tracking-wide text-indigo-600">Next up</Text>
+            <Text as="span" className="text-[10px] font-bold uppercase tracking-wide text-violet-600">Next up</Text>
           )}
           <Text as="h3" className="text-sm font-bold text-slate-800 leading-tight">{t.title}</Text>
           <Text as="span" className="font-mono text-[11px] text-slate-400">{t.code}</Text>
@@ -182,8 +184,12 @@ function NextTrainingCard({ t, highlight }) {
       </Box>
 
       <Box className="mt-4">
-        <Button asChild size="sm" className="h-8 rounded-lg border-0 bg-indigo-600 text-xs font-semibold text-white hover:bg-indigo-700">
-          <Link href="/my-courses">View training <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
+        <Button
+          render={<Link href="/my-courses" />}
+          size="sm"
+          className="h-8 gap-1 rounded-lg border-0 bg-violet-600 text-xs font-semibold text-white hover:bg-violet-700"
+        >
+          View training <ArrowRight className="h-3.5 w-3.5" />
         </Button>
       </Box>
     </Box>

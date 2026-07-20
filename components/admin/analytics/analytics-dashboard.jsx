@@ -107,13 +107,13 @@ const STATUS_BADGE = {
   active: "bg-emerald-100 text-emerald-700",
   ongoing: "bg-violet-100 text-violet-700",
   pending: "bg-amber-100 text-amber-700",
-  completed: "bg-indigo-100 text-indigo-700",
+  completed: "bg-violet-100 text-violet-700",
   cancelled: "bg-rose-100 text-rose-700",
 };
 
 /* ── KPI card ── */
 const KPI_THEMES = {
-  indigo: "border-indigo-200 bg-indigo-50 text-indigo-700",
+  indigo: "border-violet-200 bg-violet-50 text-violet-700",
   violet: "border-violet-200 bg-violet-50 text-violet-700",
   sky: "border-sky-200 bg-sky-50 text-sky-700",
   emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
@@ -326,7 +326,7 @@ export function AnalyticsDashboard() {
         <ChartCard title="Enrolments Over Time" subtitle="Monthly, by status" icon={TrendingUp} className="lg:col-span-2">
           <EnrolmentsOverTimeChart data={data.enrolments_over_time} />
         </ChartCard>
-        <ChartCard title="Enrolment Status" subtitle="Distribution" icon={PieIcon}>
+        <ChartCard title="Enrolment Status" subtitle="Distribution" icon={PieIcon} fitInFullscreen>
           <EnrolmentStatusChart data={data.enrolments_by_status} />
         </ChartCard>
       </Box>
@@ -336,14 +336,14 @@ export function AnalyticsDashboard() {
         <ChartCard title="Participant Growth" subtitle="New & cumulative" icon={Activity} className="lg:col-span-2">
           <ParticipantGrowthChart data={data.participant_growth} />
         </ChartCard>
-        <ChartCard title="Trainings by Status" subtitle="Lifecycle mix" icon={PieIcon}>
+        <ChartCard title="Trainings by Status" subtitle="Lifecycle mix" icon={PieIcon} fitInFullscreen>
           <TrainingStatusChart data={data.trainings_by_status} />
         </ChartCard>
       </Box>
 
       {/* ── Mode / bucket / capacity ── */}
       <Box className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <ChartCard title="Delivery Mode" subtitle="How trainings run" icon={PieIcon}>
+        <ChartCard title="Delivery Mode" subtitle="How trainings run" icon={PieIcon} fitInFullscreen>
           <DeliveryModeChart data={data.trainings_by_delivery_mode} />
         </ChartCard>
         <ChartCard title="Trainings by Bucket" subtitle="Offering type" icon={Layers}>
@@ -369,7 +369,7 @@ export function AnalyticsDashboard() {
         <ChartCard title="Most Requested Courses" subtitle="By enrolment requests" icon={Flame} className="lg:col-span-2">
           <CourseDemandChart data={data.course_demand} />
         </ChartCard>
-        <ChartCard title="Attendance" subtitle="Completed trainings" icon={ClipboardCheck}>
+        <ChartCard title="Attendance" subtitle="Completed trainings" icon={ClipboardCheck} fitInFullscreen>
           <AttendanceChart data={data.attendance} />
         </ChartCard>
       </Box>
@@ -393,7 +393,7 @@ export function AnalyticsDashboard() {
 
       {/* ── Sponsorship + job title ── */}
       <Box className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <ChartCard title="Sponsorship" subtitle="Self vs corporate" icon={Wallet}>
+        <ChartCard title="Sponsorship" subtitle="Self vs corporate" icon={Wallet} fitInFullscreen>
           <SponsorshipChart data={data.enrolments_by_sponsorship} />
         </ChartCard>
         <ChartCard title="Enrolments by Job Title" subtitle="Who's training" icon={Briefcase} className="lg:col-span-2">
