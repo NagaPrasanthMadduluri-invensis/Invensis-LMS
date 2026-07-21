@@ -21,6 +21,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { markTicketSeen } from "@/lib/ticket-unread";
 import { fetchAdminTickets, fetchAdminTicket, updateTicketStatus, replyToAdminTicket } from "@/services/api/admin/admin-api";
 import { STATUS_META, PRIORITY_META, categoryLabel, TICKET_CATEGORIES } from "@/lib/ticket-meta";
 import { TicketThread } from "@/components/shared/ticket-thread";
@@ -61,6 +62,7 @@ function StatCard({ icon: Icon, value, label, cls }) {
 }
 
 function TicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }) {
+  const { user } = useAuth();
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -71,10 +73,14 @@ function TicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }) {
     setDetail(null);
     setLoading(true);
     fetchAdminTicket({ token, ticketId: ticketRow.id })
-      .then((res) => setDetail(res.ticket))
+      .then((res) => {
+        setDetail(res.ticket);
+        // Mark seen up to the replies in the thread → clears the sidebar badge.
+        markTicketSeen(user?.id, ticketRow.id, res.ticket?.messages?.length ?? 0);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [open, ticketRow?.id, token]);
+  }, [open, ticketRow?.id, token, user?.id]);
 
   const t = detail || ticketRow;
   if (!t) return null;

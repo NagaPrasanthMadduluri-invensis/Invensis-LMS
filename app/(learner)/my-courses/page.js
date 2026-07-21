@@ -2,7 +2,6 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { BookOpen } from "lucide-react";
 import { MyCoursesContent } from "@/components/learner/my-courses-content";
-import { TrainingGuidelines } from "@/components/learner/training-guidelines";
 
 export default function MyCoursesPage() {
   return (
@@ -12,12 +11,11 @@ export default function MyCoursesPage() {
           <BookOpen className="w-6 h-6 text-white" />
         </Box>
         <Box>
-          <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">My Courses</Text>
+          <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">My Trainings</Text>
           <Text as="p" className="text-slate-500 text-xs mt-0.5">Your enrolled trainings and learning schedule.</Text>
         </Box>
       </Box>
       <MyCoursesContent />
-      <TrainingGuidelines />
     </Box>
   );
 }

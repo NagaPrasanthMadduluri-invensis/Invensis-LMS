@@ -14,6 +14,8 @@ import Box from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchCertificates, fetchLearnerSurveys, submitSurveyResponse } from "@/services/api/learner/learner-api";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas-pro";
 
 /* ── date / delivery formatting for the certificate line ── */
 function ordinal(n) {
@@ -47,6 +49,66 @@ const DELIVERY_TEXT = {
   one_to_one: "one-to-one coaching session",
 };
 
+/* ── Certificate → PDF ──────────────────────────────────────────
+   Rasterize the rendered certificate node with html2canvas-pro (which
+   understands the oklch() colors Tailwind 4 emits, unlike classic
+   html2canvas) and lay the image onto a single landscape page with jsPDF.
+   Returns a PDF Blob the caller can preview and/or download. */
+function waitForImages(node) {
+  const imgs = Array.from(node.querySelectorAll("img"));
+  return Promise.all(
+    imgs.map((img) =>
+      img.complete && img.naturalWidth > 0
+        ? Promise.resolve()
+        : new Promise((resolve) => {
+            img.addEventListener("load", resolve, { once: true });
+            img.addEventListener("error", resolve, { once: true });
+          })
+    )
+  );
+}
+
+async function generateCertificatePdf(node, { width, height, scale = 2 } = {}) {
+  const w = width || node.offsetWidth;
+  const h = height || node.offsetHeight;
+
+  // Ensure webfonts + artwork are ready before snapshotting the node.
+  if (typeof document !== "undefined" && document.fonts?.ready) {
+    try { await document.fonts.ready; } catch { /* non-fatal */ }
+  }
+  await waitForImages(node);
+
+  const canvas = await html2canvas(node, {
+    scale,
+    backgroundColor: "#ffffff",
+    useCORS: true,
+    logging: false,
+    width: w,
+    height: h,
+    windowWidth: w,
+    windowHeight: h,
+  });
+
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF({
+    orientation: w >= h ? "landscape" : "portrait",
+    unit: "px",
+    format: [w, h],
+  });
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  pdf.addImage(imgData, "PNG", 0, 0, pageW, pageH);
+  return pdf.output("blob");
+}
+
+function certificatePdfName(cert) {
+  const base = (cert?.title || "certificate")
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+  return `${base || "certificate"}.pdf`;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    The certificate itself — a fixed 1000×707 "canvas" recreated with
    SVG/CSS (no external assets). Rendered scaled-to-fit for the on-page
@@ -54,34 +116,6 @@ const DELIVERY_TEXT = {
    ═══════════════════════════════════════════════════════════════ */
 const CERT_W = 1000;
 const CERT_H = 707;
-
-function Seal() {
-  return (
-    <svg width="112" height="112" viewBox="0 0 120 120" aria-hidden="true">
-      <defs>
-        <linearGradient id="certGold" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#efd691" />
-          <stop offset="0.5" stopColor="#cba044" />
-          <stop offset="1" stopColor="#a2762a" />
-        </linearGradient>
-        <path id="certSealTop" d="M18,60 a42,42 0 0 1 84,0" fill="none" />
-        <path id="certSealBot" d="M22,60 a38,38 0 0 0 76,0" fill="none" />
-      </defs>
-      <circle cx="60" cy="60" r="58" fill="url(#certGold)" />
-      <circle cx="60" cy="60" r="50" fill="#ffffff" />
-      <circle cx="60" cy="60" r="46" fill="url(#certGold)" />
-      <circle cx="60" cy="60" r="35" fill="#ffffff" />
-      <text fontSize="9.5" fontWeight="700" letterSpacing="2.5" fill="#16224e">
-        <textPath href="#certSealTop" startOffset="50%" textAnchor="middle">INVENSIS</textPath>
-      </text>
-      <text fontSize="9.5" fontWeight="700" letterSpacing="2.5" fill="#16224e">
-        <textPath href="#certSealBot" startOffset="50%" textAnchor="middle">LEARNING</textPath>
-      </text>
-      <text x="60" y="56" textAnchor="middle" fontSize="12.5" fontWeight="800" fill="#16224e" fontFamily="Georgia, serif">CERTIFIED</text>
-      <text x="60" y="70" textAnchor="middle" fontSize="8" fill="#cba044">★ ★ ★</text>
-    </svg>
-  );
-}
 
 function CertificateCanvas({ cert }) {
   const delivery = DELIVERY_TEXT[cert.delivery_mode] || "classroom";
@@ -93,37 +127,72 @@ function CertificateCanvas({ cert }) {
     >
       {/* Decorative ribbons + faint guilloche arcs */}
       <svg className="absolute inset-0" width={CERT_W} height={CERT_H} viewBox={`0 0 ${CERT_W} ${CERT_H}`} aria-hidden="true">
+        <defs>
+          <linearGradient id="cornerFadeTL" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="48" y2="155">
+            <stop offset="0" stopColor="#f4d9d9" />
+            <stop offset="1" stopColor="#ffffff" />
+          </linearGradient>
+          <linearGradient id="cornerFadeBR" gradientUnits="userSpaceOnUse" x1="1000" y1="707" x2="952" y2="552">
+            <stop offset="0" stopColor="#f4d9d9" />
+            <stop offset="1" stopColor="#ffffff" />
+          </linearGradient>
+
+          {/* Solid for the first half of each stripe's length, then fading to transparent */}
+          <linearGradient id="cornerMaskGradTL" gradientUnits="userSpaceOnUse" x1="0" y1="394" x2="128" y2="0">
+            <stop offset="0" stopColor="#fff" stopOpacity="1" />
+            <stop offset="0.5" stopColor="#fff" stopOpacity="1" />
+            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          </linearGradient>
+          <mask id="cornerMaskTL" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="420">
+            <rect x="0" y="0" width="200" height="420" fill="url(#cornerMaskGradTL)" />
+          </mask>
+          <linearGradient id="cornerMaskGradBR" gradientUnits="userSpaceOnUse" x1="1000" y1="313" x2="872" y2="707">
+            <stop offset="0" stopColor="#fff" stopOpacity="1" />
+            <stop offset="0.5" stopColor="#fff" stopOpacity="1" />
+            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          </linearGradient>
+          <mask id="cornerMaskBR" maskUnits="userSpaceOnUse" x="800" y="290" width="200" height="420">
+            <rect x="800" y="290" width="200" height="420" fill="url(#cornerMaskGradBR)" />
+          </mask>
+        </defs>
+
         <g opacity="0.05" stroke="#16224e" fill="none">
           <circle cx="720" cy="360" r="140" />
           <circle cx="720" cy="360" r="185" />
           <circle cx="720" cy="360" r="230" />
           <circle cx="720" cy="360" r="275" />
         </g>
-        {/* top-left */}
-        <polygon points="0,0 255,0 0,255" fill="#16224e" />
-        <polygon points="0,0 150,0 0,150" fill="#2f6fd0" />
-        <polygon points="0,0 70,0 0,70" fill="#e23b3b" />
-        <polyline points="262,0 0,262" stroke="#cba044" strokeWidth="3" fill="none" />
-        {/* bottom-right */}
-        <polygon points="1000,707 745,707 1000,452" fill="#16224e" />
-        <polygon points="1000,707 855,707 1000,557" fill="#2f6fd0" />
-        <polyline points="738,707 1000,445" stroke="#cba044" strokeWidth="3" fill="none" />
+
+        {/* top-left — steeply-slanted stripes: navy · blue · gold · fade · red.
+            Solid along the base half, dissolving over the outer half via the mask. */}
+        <g opacity="0.5" mask="url(#cornerMaskTL)">
+          <polygon points="0,394 0,293 96,0 128,0" fill="#16224e" />
+          <polygon points="0,293 0,205 64,0 96,0" fill="#2f6fd0" />
+          <polygon points="0,205 0,126 32,0 64,0" fill="url(#cornerFadeTL)" />
+          <polygon points="0,126 0,0 32,0" fill="#e23b3b" />
+          <line x1="0" y1="205" x2="64" y2="0" stroke="#cba044" strokeWidth="2.5" />
+        </g>
+
+        {/* bottom-right — mirror */}
+        <g opacity="0.5" mask="url(#cornerMaskBR)">
+          <polygon points="1000,313 1000,414 904,707 872,707" fill="#16224e" />
+          <polygon points="1000,414 1000,502 936,707 904,707" fill="#2f6fd0" />
+          <polygon points="1000,502 1000,581 968,707 936,707" fill="url(#cornerFadeBR)" />
+          <polygon points="1000,581 1000,707 968,707" fill="#e23b3b" />
+          <line x1="1000" y1="502" x2="936" y2="707" stroke="#cba044" strokeWidth="2.5" />
+        </g>
       </svg>
 
       {/* Logo (top center) */}
-      <Box className="absolute top-[42px] left-1/2 -translate-x-1/2 text-center">
-        <Box as="span" className="text-[30px] font-extrabold tracking-tight text-[#16224e] lowercase" style={{ fontFamily: "Arial, sans-serif" }}>
-          inv<Box as="span" className="text-[#e23b3b]">e</Box>nsis
-          <Box as="span" className="align-super text-[11px] text-[#16224e]">®</Box>
-        </Box>
-        <Box as="p" className="text-[9px] tracking-[0.35em] uppercase text-slate-400 mt-0.5" style={{ fontFamily: "Arial, sans-serif" }}>
-          Global Learning Services
-        </Box>
+      <Box className="absolute top-[44px] left-1/2 -translate-x-1/2">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/invensis-learning-logo.svg" alt="Invensis Learning" width={210} height={51} className="block" />
       </Box>
 
-      {/* Seal (top right) */}
-      <Box className="absolute top-[40px] right-[64px]">
-        <Seal />
+      {/* Certified badge (top right) */}
+      <Box className="absolute top-[36px] right-[60px]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/certified-badge.png" alt="Invensis Learning Certified" width={118} height={118} className="block" />
       </Box>
 
       {/* Center content */}
@@ -419,7 +488,12 @@ export function CertificatesContent() {
   const [surveys, setSurveys] = useState([]);
   const [error, setError] = useState(null);
   const [feedbackTarget, setFeedbackTarget] = useState(null);
-  const [printCert, setPrintCert] = useState(null);
+  // Certificate currently being turned into a PDF (rendered off-screen for capture).
+  const [captureCert, setCaptureCert] = useState(null);
+  // Generated PDF ready to preview/download: { url, name }.
+  const [pdf, setPdf] = useState(null);
+  const [pdfError, setPdfError] = useState(null);
+  const captureRef = useRef(null);
 
   // Load certificates + the caller's surveys together. The post-training survey
   // (API §3.7.4) is what now gates the download, so we match it to each
@@ -451,32 +525,50 @@ export function CertificatesContent() {
     [surveys]
   );
 
-  // Print-to-PDF: reveal the off-screen certificate print root and open the
-  // browser print dialog; clean up when printing finishes.
+  // Generate the PDF: once the off-screen certificate for `captureCert` has
+  // rendered, rasterize it and build a downloadable PDF blob. The viewer
+  // dialog opens immediately (showing a spinner) and swaps to the PDF here.
   useEffect(() => {
-    if (!printCert) return;
-    const body = document.body;
-    body.classList.add("printing-certificate");
-    const done = () => {
-      body.classList.remove("printing-certificate");
-      window.removeEventListener("afterprint", done);
-      setPrintCert(null);
-    };
-    window.addEventListener("afterprint", done);
-    const t = setTimeout(() => window.print(), 120);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("afterprint", done);
-      body.classList.remove("printing-certificate");
-    };
-  }, [printCert]);
+    if (!captureCert) return;
+    let cancelled = false;
+    setPdf(null);
+    setPdfError(null);
+    (async () => {
+      // Let the off-screen canvas paint before we snapshot it.
+      await new Promise((r) => requestAnimationFrame(() => r()));
+      const node = captureRef.current?.querySelector(".certificate-canvas");
+      if (!node) {
+        if (!cancelled) setPdfError("Certificate could not be rendered.");
+        return;
+      }
+      try {
+        const blob = await generateCertificatePdf(node, { width: CERT_W, height: CERT_H });
+        if (cancelled) return;
+        const url = URL.createObjectURL(blob);
+        setPdf({ url, name: certificatePdfName(captureCert) });
+      } catch (e) {
+        if (!cancelled) setPdfError(e?.message || "Could not generate the certificate PDF.");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [captureCert]);
+
+  // Close the viewer and release the blob URL.
+  const closeViewer = useCallback(() => {
+    setPdf((prev) => {
+      if (prev?.url) URL.revokeObjectURL(prev.url);
+      return null;
+    });
+    setPdfError(null);
+    setCaptureCert(null);
+  }, []);
 
   async function handleFeedbackSubmitted(cert) {
     // Refetch certificates + surveys; once the backend has issued the
     // certificate off the submitted survey, auto-download it.
     const fresh = await load();
     const updated = fresh?.certificates.find((c) => c.training_id === cert.training_id);
-    if (updated?.issued) setPrintCert(updated);
+    if (updated?.issued) setCaptureCert(updated);
   }
 
   if (error) {
@@ -517,7 +609,7 @@ export function CertificatesContent() {
             key={c.training_id}
             cert={c}
             survey={surveyForCert(c)}
-            onDownload={setPrintCert}
+            onDownload={setCaptureCert}
             onGiveFeedback={(cert, survey) => setFeedbackTarget({ cert, survey })}
           />
         ))}
@@ -525,10 +617,72 @@ export function CertificatesContent() {
 
       <SurveyDialog target={feedbackTarget} onOpenChange={(v) => !v && setFeedbackTarget(null)} token={token} onSubmitted={handleFeedbackSubmitted} />
 
-      {/* Hidden print root — only visible to the printer (see globals.css). */}
-      <Box className="certificate-print-root">
-        {printCert && <CertificateCanvas cert={printCert} />}
+      {/* PDF viewer + download dialog. */}
+      <CertificatePdfDialog
+        open={!!captureCert}
+        pdf={pdf}
+        error={pdfError}
+        title={captureCert?.title}
+        onClose={closeViewer}
+      />
+
+      {/* Off-screen capture root — parked off-canvas (see globals.css) so the
+          certificate is laid out for html2canvas but never visible on screen. */}
+      <Box ref={captureRef} className="certificate-print-root" aria-hidden="true">
+        {captureCert && <CertificateCanvas cert={captureCert} />}
       </Box>
     </>
+  );
+}
+
+/* ── PDF viewer dialog ──
+   Shows a spinner while the PDF is generated, then embeds it in the browser's
+   native PDF viewer and offers a direct download. */
+function CertificatePdfDialog({ open, pdf, error, title, onClose }) {
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-4xl w-[92vw]">
+        <DialogHeader>
+          <DialogTitle>Your certificate{title ? ` — ${title}` : ""}</DialogTitle>
+          <DialogDescription>
+            {error
+              ? "We couldn't prepare your certificate."
+              : pdf
+                ? "Preview your certificate below, then download it as a PDF."
+                : "Preparing your certificate…"}
+          </DialogDescription>
+        </DialogHeader>
+
+        <Box className="mt-2">
+          {error ? (
+            <Box className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              <AlertCircle className="h-4 w-4 shrink-0" /> {error}
+            </Box>
+          ) : pdf ? (
+            <iframe
+              src={pdf.url}
+              title="Certificate PDF"
+              className="w-full h-[62vh] rounded-lg border border-slate-200 bg-slate-50"
+            />
+          ) : (
+            <Box className="flex h-[62vh] flex-col items-center justify-center gap-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-500">
+              <Loader2 className="h-7 w-7 animate-spin text-amber-500" />
+              <Text as="p" className="text-sm">Generating your certificate PDF…</Text>
+            </Box>
+          )}
+        </Box>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+          {pdf && (
+            <Button asChild className="bg-amber-500 hover:bg-amber-600 text-white border-0">
+              <a href={pdf.url} download={pdf.name}>
+                <Download className="h-4 w-4 mr-2" /> Download PDF
+              </a>
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

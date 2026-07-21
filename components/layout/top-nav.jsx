@@ -2,15 +2,7 @@
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Bell, User, Settings, LogOut } from "lucide-react";
+import { Bell } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Text from "@/components/ui/text";
@@ -18,7 +10,7 @@ import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 
 export function TopNav({ portalLabel = "Invensis Learning" }) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <Box
@@ -43,7 +35,7 @@ export function TopNav({ portalLabel = "Invensis Learning" }) {
        
 </Box>
       <Box className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="relative">
+        {/* <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5 text-white" />
           <Text
             as="span"
@@ -51,38 +43,20 @@ export function TopNav({ portalLabel = "Invensis Learning" }) {
           >
             3
           </Text>
-        </Button>
+        </Button> */}
 
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 rounded-full p-1 pr-3 bg-background hover:bg-muted transition-colors cursor-pointer border-0 outline-none">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user?.avatar || ""} alt={user?.name || "User"} />
-              <AvatarFallback className="bg-violet-500 text-white text-xs">
-                {user?.initials || "U"}
-              </AvatarFallback>
-            </Avatar>
-            <Text as="span" className="hidden text-sm font-medium sm:inline-block">
-              {user?.name || "User"}
-            </Text>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Static user display (no dropdown). */}
+        <Box className="flex items-center gap-2 rounded-full p-1 pr-3 bg-background">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user?.avatar || ""} alt={user?.name || "User"} />
+            <AvatarFallback className="bg-violet-500 text-white text-xs">
+              {user?.initials || "U"}
+            </AvatarFallback>
+          </Avatar>
+          <Text as="span" className="hidden text-sm font-medium sm:inline-block">
+            {user?.name || "User"}
+          </Text>
+        </Box>
       </Box>
     </Box>
   );

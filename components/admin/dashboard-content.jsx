@@ -244,12 +244,14 @@ function ActionTile({ icon: Icon, label, count, href, cta, sub, theme }) {
   );
 }
 
-function ActionCenter({ actionItems = {} }) {
+function ActionCenter({ actionItems = {}, tickets = {} }) {
+  // "Not resolved" = still open + in progress (excludes resolved/closed).
+  const unresolvedTickets = (tickets.open ?? 0) + (tickets.in_progress ?? 0);
   const tiles = [
-    { icon: UserPlus, label: "Awaiting Trainer", d: actionItems.awaiting_trainer, href: "/admin/courses", cta: "Assign now", pick: (it) => it.title, theme: ACTION_THEME.amber },
+    { icon: UserPlus, label: "Trainers need to be assigned", d: actionItems.awaiting_trainer, href: "/admin/courses", cta: "Assign now", pick: (it) => it.title, theme: ACTION_THEME.amber },
     { icon: Link2, label: "Meeting Links to Release", d: actionItems.release_meeting, href: "/admin/courses", cta: "Release", pick: (it) => it.title, theme: ACTION_THEME.indigo },
-    { icon: AlertTriangle, label: "Under-enrolled Soon", d: actionItems.under_enrolled, href: "/admin/courses", cta: "Review", pick: (it) => it.title, theme: ACTION_THEME.rose },
     { icon: Mail, label: "Pending Account Setup", d: actionItems.pending_setup, href: "/admin/users", cta: "Follow up", pick: (it) => it.name, theme: ACTION_THEME.sky },
+    { icon: Ticket, label: "Tickets opened", d: { count: unresolvedTickets }, href: "/admin/tickets", cta: "View tickets", subText: "Awaiting resolution", theme: ACTION_THEME.rose },
   ];
   const totalOpen = tiles.reduce((s, t) => s + (t.d?.count || 0), 0);
   return (
@@ -269,7 +271,7 @@ function ActionCenter({ actionItems = {} }) {
             count={t.d?.count || 0}
             href={t.href}
             cta={t.cta}
-            sub={t.d?.items?.[0] ? `Next: ${t.pick(t.d.items[0])}` : ""}
+            sub={t.subText ?? (t.d?.items?.[0] ? `Next: ${t.pick(t.d.items[0])}` : "")}
             theme={t.theme}
           />
         ))}
@@ -529,7 +531,7 @@ export function AdminDashboardContent() {
       </Box>
 
       {/* ── Action Center — what the admin should do now ── */}
-      <ActionCenter actionItems={action_items} />
+      <ActionCenter actionItems={action_items} tickets={tickets} />
 
       {/* ── Hero metric cards ── */}
       <Box className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

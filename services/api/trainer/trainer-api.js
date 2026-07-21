@@ -74,3 +74,29 @@ export async function updateSessionTopics({ token, sessionId, plannedTopics }) {
     body: { planned_topics: plannedTopics },
   });
 }
+
+/**
+ * GET /trainer/sessions/:sessionId/attendance  (API.md §3.8.1)
+ * Roster for a session with each participant's current status.
+ * Returns: { session: { id, day_number, start_time, end_time, status },
+ *   participants: [{ participant_id, name, job_title, status: "present"|"absent"|"late"|"excused"|null }] }
+ * 403 if the caller isn't the assigned trainer; 404 if the session doesn't exist.
+ */
+export async function fetchSessionAttendance({ token, sessionId }) {
+  return apiClient(`/trainer/sessions/${sessionId}/attendance`, { token });
+}
+
+/**
+ * PUT /trainer/sessions/:sessionId/attendance  (API.md §3.8.2)
+ * Bulk mark/update attendance (idempotent upsert). Rolls up each affected
+ * enrolment's overall status on the backend.
+ * Body: { records: [{ participant_id, status: "present"|"absent"|"late"|"excused" }] } (≥1)
+ * Returns: { session_id, marked, records: [{ participant_id, status }] }
+ */
+export async function markSessionAttendance({ token, sessionId, records }) {
+  return apiClient(`/trainer/sessions/${sessionId}/attendance`, {
+    method: "PUT",
+    token,
+    body: { records },
+  });
+}

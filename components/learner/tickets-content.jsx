@@ -16,6 +16,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { markTicketSeen } from "@/lib/ticket-unread";
 import { fetchMyTickets, fetchMyTicket, replyToMyTicket } from "@/services/api/learner/learner-api";
 import { STATUS_META, PRIORITY_META, categoryLabel } from "@/lib/ticket-meta";
 import { TicketThread } from "@/components/shared/ticket-thread";
@@ -97,6 +98,7 @@ function formatDateTime(iso) {
 }
 
 function LearnerTicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }) {
+  const { user } = useAuth();
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState(null);
@@ -108,10 +110,16 @@ function LearnerTicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }
     setLoadError(null);
     setLoading(true);
     fetchMyTicket({ token, ticketId: ticketRow.id })
-      .then((r) => setDetail(r.ticket))
+      .then((r) => {
+        setDetail(r.ticket);
+        // Seen up to the replies currently in the thread — clears the sidebar
+        // badge for this ticket (and stays cleared after the user's own reply,
+        // since the thread reloads).
+        markTicketSeen(user?.id, ticketRow.id, r.ticket?.messages?.length ?? 0);
+      })
       .catch((e) => setLoadError(e.message || "Couldn't load this conversation"))
       .finally(() => setLoading(false));
-  }, [open, ticketRow?.id, token]);
+  }, [open, ticketRow?.id, token, user?.id]);
 
   const t = detail || ticketRow;
   if (!t) return null;

@@ -500,3 +500,30 @@ export async function deleteLesson({ token, lessonId }) {
     token,
   });
 }
+
+/* ──────────────────────────────────────
+   ATTENDANCE  (API.md §3.8.3 / §3.8.5)
+   ────────────────────────────────────── */
+
+/**
+ * GET /admin/trainings/:trainingRef/attendance  (API.md §3.8.3, ref = UUID or code)
+ * Attendance matrix (sessions × participants) for one training.
+ * Returns: {
+ *   training_id, title,
+ *   sessions: [{ id, day_number, start_time, status }],
+ *   participants: [{ participant_id, name, email, overall_status: "present"|"partial"|"absent",
+ *     attended, total_sessions, attendance: { "<sessionId>": "present"|"absent"|"late"|"excused"|null } }]
+ * }
+ */
+export async function fetchTrainingAttendance({ token, trainingRef }) {
+  return apiClient(`/admin/trainings/${trainingRef}/attendance`, { token });
+}
+
+/**
+ * GET /reports/attendance?format=csv&training_id=:ref  (API.md §3.8.5)
+ * Streams a CSV attendance export. `apiClient` returns the raw Response for
+ * non-JSON content types, so the caller reads `.blob()` and triggers a download.
+ */
+export async function downloadTrainingAttendanceCsv({ token, trainingRef }) {
+  return apiClient(`/reports/attendance?format=csv&training_id=${encodeURIComponent(trainingRef)}`, { token });
+}

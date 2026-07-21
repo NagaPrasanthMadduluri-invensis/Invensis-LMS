@@ -278,7 +278,7 @@ export function AnalyticsDashboard() {
 
       {/* ── Filter bar ── */}
       <Card className="rounded-2xl border border-slate-200 p-4 shadow-sm">
-        <Box className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <Box className="flex flex-col gap-3">
           <Box className="flex shrink-0 items-center gap-2 whitespace-nowrap text-slate-500">
             <Filter className="h-4 w-4 shrink-0" />
             <Text as="span" className="text-xs font-semibold uppercase tracking-wide text-slate-500">Filters</Text>
@@ -288,7 +288,7 @@ export function AnalyticsDashboard() {
             </Box>
           </Box>
 
-          <Box className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap lg:items-center lg:justify-end">
+          <Box className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap lg:items-center">
             <FilterSelect value={range} onChange={setRange} placeholder="Time range" options={RANGE_OPTIONS.filter((o) => o.value !== ALL)} allLabel="All time" />
             <FilterSelect value={mode} onChange={setMode} placeholder="Delivery mode" allLabel="All modes"
               options={Object.entries(MODE_LABEL).map(([value, label]) => ({ value, label }))} />

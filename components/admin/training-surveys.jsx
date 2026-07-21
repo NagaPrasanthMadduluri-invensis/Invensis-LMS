@@ -12,10 +12,11 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  MessageSquare, Plus, Users, AlertCircle, Loader2, CheckCircle2, ClipboardList, User,
+  MessageSquare, Plus, Users, AlertCircle, Loader2, CheckCircle2, ClipboardList, Star, ThumbsUp, Quote,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
+import { cn } from "@/lib/utils";
 import {
   createTrainingSurvey, fetchTrainingSurveys, fetchSurveyResponses,
 } from "@/services/api/admin/admin-api";
@@ -122,6 +123,116 @@ function CreateSurveyDialog({ open, onOpenChange, token, trainingRef, onCreated 
   );
 }
 
+/* ── Star row for an average rating ── */
+function Stars({ value }) {
+  const rounded = Math.round(value || 0);
+  return (
+    <Box className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star key={n} className={cn("h-4 w-4", n <= rounded ? "fill-amber-400 text-amber-400" : "text-slate-200")} />
+      ))}
+    </Box>
+  );
+}
+
+/* ── Aggregate summary for the whole training (below the responses table) ── */
+function ResponsesSummary({ responses, questions }) {
+  const n = responses.length;
+  const ratingQs = questions.filter((q) => q.type === "rating");
+  const boolQ = questions.find((q) => q.type === "boolean");
+  const textQ = questions.find((q) => q.type === "text");
+
+  const avgFor = (qid) => {
+    const vals = responses.map((r) => Number(r.answers?.[qid])).filter((v) => !Number.isNaN(v) && v > 0);
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  };
+
+  const overallQ = ratingQs[0];
+  const overallAvg = overallQ ? avgFor(overallQ.id) : null;
+
+  const recommendYes = boolQ
+    ? responses.filter((r) => r.answers?.[boolQ.id] === true || r.answers?.[boolQ.id] === "true").length
+    : 0;
+  const recommendPct = boolQ && n ? Math.round((recommendYes / n) * 100) : null;
+
+  const comments = textQ
+    ? responses.map((r) => ({ name: r.name, text: r.answers?.[textQ.id] })).filter((c) => c.text && String(c.text).trim())
+    : [];
+
+  return (
+    <Box className="rounded-xl border border-slate-200 bg-slate-50/40 p-5">
+      <Box className="mb-4 flex items-center gap-2">
+        <Box className="h-4 w-1 rounded-full bg-violet-500" />
+        <Text as="p" className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+          Overall experience & rating · whole training
+        </Text>
+      </Box>
+
+      <Box className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Headline overall rating */}
+        <Box className="rounded-xl border border-violet-100 bg-white p-4">
+          <Text as="p" className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Overall rating</Text>
+          <Box className="mt-1 flex items-end gap-2">
+            <Text as="p" className="text-3xl font-extrabold leading-none text-slate-800">{overallAvg != null ? overallAvg.toFixed(1) : "—"}</Text>
+            <Text as="span" className="mb-0.5 text-xs text-slate-400">/ 5</Text>
+          </Box>
+          <Box className="mt-1.5"><Stars value={overallAvg} /></Box>
+          <Text as="p" className="mt-1 text-[11px] text-slate-400">{n} response{n !== 1 ? "s" : ""}</Text>
+        </Box>
+
+        {/* Other rating categories */}
+        {ratingQs.slice(1).map((q) => {
+          const a = avgFor(q.id);
+          return (
+            <Box key={q.id} className="rounded-xl border border-slate-200 bg-white p-4">
+              <Text as="p" className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{q.label}</Text>
+              <Box className="mt-1 flex items-end gap-2">
+                <Text as="p" className="text-2xl font-bold leading-none text-slate-800">{a != null ? a.toFixed(1) : "—"}</Text>
+                <Text as="span" className="mb-0.5 text-xs text-slate-400">/ 5</Text>
+              </Box>
+              <Box className="mt-1.5"><Stars value={a} /></Box>
+            </Box>
+          );
+        })}
+
+        {/* Would recommend */}
+        {boolQ && (
+          <Box className="rounded-xl border border-slate-200 bg-white p-4">
+            <Text as="p" className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{boolQ.label}</Text>
+            <Box className="mt-1 flex items-center gap-2">
+              <ThumbsUp className="h-5 w-5 text-emerald-500" />
+              <Text as="p" className="text-2xl font-bold leading-none text-slate-800">{recommendPct != null ? `${recommendPct}%` : "—"}</Text>
+            </Box>
+            <Text as="p" className="mt-1.5 text-[11px] text-slate-400">{recommendYes} of {n} said yes</Text>
+          </Box>
+        )}
+      </Box>
+
+      {/* Written feedback */}
+      {textQ && (
+        <Box className="mt-5">
+          <Text as="p" className="mb-2 text-xs font-semibold text-slate-600">Feedback</Text>
+          {comments.length === 0 ? (
+            <Text as="p" className="text-xs text-slate-400">No written feedback.</Text>
+          ) : (
+            <Box className="space-y-2">
+              {comments.map((c, i) => (
+                <Box key={i} className="flex gap-2.5 rounded-xl border border-slate-200 bg-white p-3">
+                  <Quote className="mt-0.5 h-4 w-4 shrink-0 text-violet-300" />
+                  <Box className="min-w-0">
+                    <Text as="p" className="text-sm text-slate-700">{c.text}</Text>
+                    <Text as="p" className="mt-0.5 text-[11px] font-medium text-slate-400">— {c.name || "Anonymous"}</Text>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Box>
+      )}
+    </Box>
+  );
+}
+
 /* ── View responses dialog ── */
 function ResponsesDialog({ survey, onOpenChange, token }) {
   const open = !!survey;
@@ -141,7 +252,7 @@ function ResponsesDialog({ survey, onOpenChange, token }) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onOpenChange(false)}>
-      <DialogContent className="sm:max-w-[820px] overflow-hidden" style={{ padding: 0, gap: 0 }}>
+      <DialogContent className="overflow-hidden" style={{ padding: 0, gap: 0, width: "96vw", maxWidth: "1400px" }}>
         <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
           <Box className="flex items-center gap-3">
             <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
@@ -155,7 +266,7 @@ function ResponsesDialog({ survey, onOpenChange, token }) {
             </Box>
           </Box>
         </Box>
-        <Box className="px-6 py-5 max-h-[65vh] overflow-y-auto">
+        <Box className="px-6 py-5 min-h-[440px] max-h-[82vh] overflow-y-auto">
           {error ? (
             <Box className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3">
               <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
@@ -173,41 +284,47 @@ function ResponsesDialog({ survey, onOpenChange, token }) {
               <Text as="p" className="text-sm text-slate-400">No responses submitted yet.</Text>
             </Box>
           ) : (
-            <Box className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-50/80 hover:bg-slate-50/80 border-b border-slate-200/60">
-                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Participant</TableHead>
-                    {questions.map((q) => (
-                      <TableHead key={q.id} className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">{q.label}</TableHead>
-                    ))}
-                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Submitted</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {responses.map((r) => (
-                    <TableRow key={r.id} className="hover:bg-slate-50/70 transition-colors border-b border-slate-100/80 last:border-0 align-top">
-                      <TableCell className="py-3.5">
-                        <Box className="flex items-center gap-2.5">
-                          <Box className="w-8 h-8 rounded-full bg-violet-50 flex items-center justify-center shrink-0">
-                            <User className="h-4 w-4 text-violet-500" />
-                          </Box>
-                          <Box className="min-w-0">
-                            <Text as="p" className="text-sm font-semibold text-slate-800">{r.name || "—"}</Text>
-                            <Text as="p" className="text-xs text-slate-500 truncate">{r.email}</Text>
-                          </Box>
-                        </Box>
-                      </TableCell>
+            <Box className="space-y-6">
+              <Box className="overflow-x-auto rounded-xl border border-slate-200">
+                <Table className="min-w-[960px]">
+                  <TableHeader>
+                    <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-200">
+                      <TableHead className="sticky left-0 z-10 bg-slate-50 min-w-[260px] border-r border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Participant</TableHead>
                       {questions.map((q) => (
-                        <TableCell key={q.id} className="py-3.5 text-sm text-slate-600 max-w-[220px]">
-                          {formatSurveyAnswer(q, r.answers?.[q.id])}
-                        </TableCell>
+                        <TableHead key={q.id} className="min-w-[150px] border-r border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">{q.label}</TableHead>
                       ))}
-                      <TableCell className="py-3.5 text-xs text-slate-500 whitespace-nowrap">{formatDateTime(r.submitted_at)}</TableCell>
+                      <TableHead className="min-w-[150px] text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Submitted</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {responses.map((r, i) => (
+                      <TableRow key={r.id} className={cn("transition-colors border-b border-slate-200 last:border-0 align-top", i % 2 ? "bg-slate-50/40" : "bg-white", "hover:bg-violet-50/40")}>
+                        <TableCell className="sticky left-0 z-10 bg-inherit border-r border-slate-200 py-3.5">
+                          <Box className="flex items-center gap-2.5">
+                            <Box className="w-9 h-9 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
+                              <Text as="span" className="text-xs font-bold text-violet-700">
+                                {(r.name || "?").trim().charAt(0).toUpperCase()}
+                              </Text>
+                            </Box>
+                            <Box className="min-w-0">
+                              <Text as="p" className="text-sm font-semibold text-slate-800">{r.name || "—"}</Text>
+                              <Text as="p" className="text-xs text-slate-500 break-all">{r.email || "—"}</Text>
+                            </Box>
+                          </Box>
+                        </TableCell>
+                        {questions.map((q) => (
+                          <TableCell key={q.id} className="py-3.5 text-sm text-slate-600 align-top border-r border-slate-200">
+                            {formatSurveyAnswer(q, r.answers?.[q.id])}
+                          </TableCell>
+                        ))}
+                        <TableCell className="py-3.5 text-xs text-slate-500 whitespace-nowrap align-top">{formatDateTime(r.submitted_at)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+
+              <ResponsesSummary responses={responses} questions={questions} />
             </Box>
           )}
         </Box>

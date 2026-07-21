@@ -25,6 +25,7 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchMyTrainings, fetchTrainingDetail } from "@/services/api/learner/learner-api";
+import { TrainingGuidelines } from "@/components/learner/training-guidelines";
 
 // Admin/support inbox a learner can reach out to about enrolment.
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@invensis.com";
@@ -292,9 +293,9 @@ function SessionTopics({ sessions }) {
  * managed by an admin, so the call-to-action is to reach out to them.
  */
 function NotEnrolledState({ user, message }) {
-  const subject = encodeURIComponent("Enrolment request — My Courses");
+  const subject = encodeURIComponent("Enrolment request — My Trainings");
   const body = encodeURIComponent(
-    `Hi,\n\nI don't see any training under My Courses` +
+    `Hi,\n\nI don't see any training under My Trainings` +
       (user?.name ? ` for ${user.name}` : "") +
       (user?.email ? ` (${user.email})` : "") +
       `. Could you please check my enrolment and add me to my training?\n\nThanks.`
@@ -395,6 +396,8 @@ export function MyCoursesContent() {
     <Box className="space-y-4">
       <ScheduleCard training={training} />
       <SessionTopics sessions={training.sessions} />
+      {/* Instructions — only shown when the learner has a current enrolment. */}
+      <TrainingGuidelines />
     </Box>
   );
 }

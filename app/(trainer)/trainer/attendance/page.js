@@ -1,6 +1,7 @@
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { ClipboardCheck } from "lucide-react";
+import { TrainerAttendance } from "@/components/trainer/trainer-attendance";
 
 export default function TrainerAttendancePage() {
   return (
@@ -11,9 +12,10 @@ export default function TrainerAttendancePage() {
         </Box>
         <Box>
           <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">Attendance</Text>
-          <Text as="p" className="text-slate-500 text-xs mt-0.5">Track and record learner attendance for your sessions.</Text>
+          <Text as="p" className="text-slate-500 text-xs mt-0.5">Pick a training, then mark each participant present, absent, late or excused per session.</Text>
         </Box>
       </Box>
+      <TrainerAttendance />
     </Box>
   );
 }

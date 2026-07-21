@@ -11,6 +11,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
@@ -20,26 +21,34 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { adminNav } from "@/lib/nav-config";
 import { useAuth } from "@/hooks/use-auth";
+import { useTicketUnread } from "@/hooks/use-ticket-unread";
+import { fetchAdminTickets } from "@/services/api/admin/admin-api";
 
-function NavGroup({ label, items, pathname }) {
+function NavGroup({ label, items, pathname, badges = {} }) {
   return (
     <SidebarGroup>
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                isActive={pathname === item.href}
-                render={<Link href={item.href} />}
-              >
-                <item.icon />
-                <Text as="span" className="flex-1 text-sidebar-foreground font-medium">
-                  {item.title}
-                </Text>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            const badge = badges[item.href];
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  isActive={pathname === item.href}
+                  render={<Link href={item.href} />}
+                >
+                  <item.icon />
+                  <Text as="span" className="flex-1 text-sidebar-foreground font-medium">
+                    {item.title}
+                  </Text>
+                </SidebarMenuButton>
+                {badge > 0 && (
+                  <SidebarMenuBadge className="bg-destructive text-white">{badge > 99 ? "99+" : badge}</SidebarMenuBadge>
+                )}
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
@@ -48,7 +57,8 @@ function NavGroup({ label, items, pathname }) {
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, user, token } = useAuth();
+  const ticketUnread = useTicketUnread({ token, userId: user?.id, fetchTickets: fetchAdminTickets });
 
   const handleFooterClick = (href) => {
     if (href === "/logout") {
@@ -77,8 +87,7 @@ export function AdminSidebar() {
         <NavGroup label="Overview" items={adminNav.main} pathname={pathname} />
         <NavGroup label="Users & Teams" items={adminNav.users} pathname={pathname} />
         <NavGroup label="Trainings & Certificates" items={adminNav.content} pathname={pathname} />
-        <NavGroup label="Operations" items={adminNav.operations} pathname={pathname} />
-        <NavGroup label="Communication" items={adminNav.communication} pathname={pathname} />
+        <NavGroup label="Communication" items={adminNav.communication} pathname={pathname} badges={{ "/admin/tickets": ticketUnread }} />
       </SidebarContent>
       <SidebarSeparator />
       <SidebarFooter>

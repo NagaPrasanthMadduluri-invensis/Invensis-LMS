@@ -290,7 +290,7 @@ export function DashboardContent() {
           </Box>
 
           <Button
-            render={<Link href="/courses" />}
+            render={<Link href="/enrollments" />}
             className="h-9 shrink-0 gap-1 rounded-xl border-0 bg-violet-600 px-5 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
           >
             Browse Courses <ChevronRight className="h-4 w-4" />
@@ -303,8 +303,8 @@ export function DashboardContent() {
         {statCards.map((c) => <StatCard key={c.label} {...c} />)}
       </Box>
 
-      {/* ── My Courses ── */}
-      <Panel title="My Courses" icon={GraduationCap} action={
+      {/* ── My Trainings ── */}
+      <Panel title="My Trainings" icon={GraduationCap} action={
         <Link href="/my-courses" className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-800">
           View all <ArrowRight className="h-3 w-3" />
         </Link>
@@ -383,7 +383,7 @@ export function DashboardContent() {
       {/* ── Upcoming cohorts (register CTA) ── */}
       {upcoming_cohorts.length > 0 && (
         <Panel title="Open Cohorts — Register Now" icon={Sparkles} action={
-          <Link href="/courses" className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-800">
+          <Link href="/enrollments" className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-800">
             Browse all <ArrowRight className="h-3 w-3" />
           </Link>
         }>
@@ -415,7 +415,7 @@ export function DashboardContent() {
                     <Text as="span" className="text-[11px] font-medium text-violet-600">Starts in {c.starts_in_days}d</Text>
                   </Box>
                   <Button
-                    render={<Link href="/courses" />}
+                    render={<Link href="/enrollments" />}
                     size="sm"
                     disabled={c.is_full}
                     className="mt-3 h-8 w-full rounded-lg border-0 bg-violet-600 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-50"

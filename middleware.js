@@ -86,7 +86,11 @@ export function middleware(request) {
 }
 
 export const config = {
+  // Exclude `/api/*` — API route handlers authenticate independently (they read
+  // the session cookie and return JSON 401s). Letting the auth middleware run on
+  // them would 307-redirect fetches to /login or a role's home page, so the
+  // browser receives HTML instead of JSON and the request breaks.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

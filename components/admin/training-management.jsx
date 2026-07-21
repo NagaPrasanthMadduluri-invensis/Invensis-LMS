@@ -38,6 +38,7 @@ import {
 } from "@/services/api/admin/admin-api";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 import { TrainingSurveys } from "@/components/admin/training-surveys";
+import { TrainingAttendance } from "@/components/admin/training-attendance";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pending",   dark: "bg-amber-400/90 text-amber-950",    light: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80" },
@@ -1051,6 +1052,9 @@ export function TrainingManagement({ trainingId }) {
 
       {/* ── Day-wise topics ── */}
       <SessionTopicsCard sessions={detail.sessions} />
+
+      {/* ── Attendance (matrix + CSV export) ── */}
+      <TrainingAttendance trainingRef={trainingId} />
 
       {/* ── Post-training feedback survey ── */}
       <TrainingSurveys trainingRef={trainingId} token={token} />

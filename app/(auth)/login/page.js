@@ -42,7 +42,7 @@ function LoginForm() {
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader className="text-center">
+      <CardHeader className="text-center mb-4">
         <Box className="flex justify-center mb-1">
           <Image
             src="/invensis-learning-logo.svg"
@@ -55,7 +55,7 @@ function LoginForm() {
           />
         </Box>
         <Text as="p" className="text-muted-foreground text-sm">
-          Sign in to your account
+          Sign in to your Invensis Learning Portal
         </Text>
       </CardHeader>
       <CardContent>
