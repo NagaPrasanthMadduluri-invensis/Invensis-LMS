@@ -151,6 +151,9 @@ function ScheduleCard({ training }) {
         <Fact icon={Hourglass} label="Duration">
           {training.duration_hours != null ? `${training.duration_hours} hours` : "—"}
         </Fact>
+        <Fact icon={Clock} label="Hours / Day">
+          {training.hours_per_day ? `${training.hours_per_day} hours` : "—"}
+        </Fact>
         <Fact icon={Video} label="Delivery Mode">
           {mode.label}
         </Fact>
