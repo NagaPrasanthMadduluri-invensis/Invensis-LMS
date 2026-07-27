@@ -9,16 +9,15 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { SidebarBrandHeader } from "@/components/layout/sidebar-brand-header";
 import { ShieldCheck } from "lucide-react";
 import Text from "@/components/ui/text";
-import Box from "@/components/ui/box";
 import { adminNav } from "@/lib/nav-config";
 import { useAuth } from "@/hooks/use-auth";
 import { useTicketUnread } from "@/hooks/use-ticket-unread";
@@ -67,22 +66,12 @@ export function AdminSidebar() {
   };
 
   return (
-    <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-3">
-        <Box className="flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white">
-            <ShieldCheck className="w-6 h-5 text-violet-500"  />
-          </Box>
-          <Box>
-            <Text as="span" className="text-sidebar-foreground text-sm font-bold leading-none block">
-              Invensis Learning
-            </Text>
-            <Text as="span" className="text-sidebar-foreground/50 text-[10px] leading-none block mt-0.5">
-              Admin Portal
-            </Text>
-          </Box>
-        </Box>
-      </SidebarHeader>
+    <Sidebar collapsible="icon">
+      <SidebarBrandHeader
+        icon={ShieldCheck}
+        title="Invensis Learning"
+        subtitle="Admin Portal"
+      />
       <SidebarContent>
         <NavGroup label="Overview" items={adminNav.main} pathname={pathname} />
         <NavGroup label="Users & Teams" items={adminNav.users} pathname={pathname} />

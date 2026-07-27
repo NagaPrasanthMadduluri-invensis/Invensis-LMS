@@ -29,6 +29,8 @@
   --color-brand-gold: var(--il-gold);
   --color-brand-gold-warm: var(--il-gold-warm);
   --color-brand-gold-brand: var(--il-gold-brand);
+  --color-brand-hero: var(--il-hero-deep);
+  --color-brand-hero-glow: var(--il-hero-glow);
   --color-brand-card-dark: var(--il-card-dark);
   --color-brand-card-hover: var(--il-card-hover);
   --color-brand-stats-pill: var(--il-stats-pill);
@@ -91,6 +93,9 @@
   --il-lavender: #c4b5fd;
   --il-accent-vivid: #c155ff;
   --il-brand-violet: #7e2dd1;
+  /* "Up next" hero band — deep plum canvas with an off-centre violet glow */
+  --il-hero-deep: #2e0a4f;
+  --il-hero-glow: #4c1180;
   /* Light tints */
   --il-purple-tint: #f3efff;
   --il-order-purple: #3b18a3;
@@ -117,6 +122,12 @@
   --il-gradient-cta: linear-gradient(90deg, #2d259e 0%, #6769d2 100%);
   --il-gradient-order: linear-gradient(135deg, #1a0b4d 0%, #3b18a3 100%);
   --il-gradient-gold: linear-gradient(to right, #efbd5f 0%, #ec7d50 100%);
+  --il-gradient-up-next: radial-gradient(
+    125% 190% at 86% 42%,
+    #4c1180 0%,
+    #3a0c66 36%,
+    #2e0a4f 68%
+  );
 
   /* === Semantic tokens (shadcn) mapped to the brand === */
   --background: #eef0f5; /* cool-gray canvas so white cards stand out */
@@ -227,6 +238,10 @@
   }
   .bg-brand-gradient-gold {
     background: var(--il-gradient-gold);
+  }
+  /* Learner dashboard "up next" band */
+  .bg-brand-up-next {
+    background: var(--il-gradient-up-next);
   }
   /* Gold gradient clipped to text (e.g. active tab / heading accent) */
   .text-brand-gradient-gold {

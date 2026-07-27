@@ -238,7 +238,9 @@ function SidebarTrigger({
         toggleSidebar()
       }}
       {...props}>
-      <PanelLeftIcon  className="text-white" />
+      {/* Inherits colour from the caller — the trigger sits on the dark
+          sidebar in one place and on the white top nav in another. */}
+      <PanelLeftIcon className="text-current" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

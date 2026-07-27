@@ -14,7 +14,7 @@ export function SponsorShell({ children }) {
           <TopNav portalLabel="Invensis Sponsor" />
           <Box className="flex flex-1 overflow-hidden bg-sidebar">
             <SponsorSidebar />
-            <Box as="main" className="flex-1 overflow-auto p-6 bg-background rounded-t-2xl">
+            <Box as="main" className="flex-1 overflow-auto p-6 bg-background">
               {children}
             </Box>
           </Box>

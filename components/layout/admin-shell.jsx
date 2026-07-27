@@ -14,7 +14,7 @@ export function AdminShell({ children }) {
           <TopNav portalLabel="Invensis Admin" />
           <Box className="flex flex-1 overflow-hidden h-full bg-sidebar">
             <AdminSidebar />
-            <Box as="main" className="flex-1 overflow-auto p-6 bg-background h-full rounded-t-2xl">
+            <Box as="main" className="flex-1 overflow-auto p-6 bg-background h-full">
               {children}
             </Box>
           </Box>
