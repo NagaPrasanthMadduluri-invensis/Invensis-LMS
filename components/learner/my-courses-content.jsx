@@ -108,7 +108,7 @@ function ScheduleSkeleton() {
   );
 }
 
-function ScheduleCard({ training }) {
+function ScheduleCard({ training, enrolmentId }) {
   const mode = MODE_CONFIG[training.delivery_mode] || MODE_CONFIG.virtual;
   const statusCfg = STATUS_CONFIG[training.status] || STATUS_CONFIG.active;
   const ModeIcon = mode.icon;
@@ -120,9 +120,16 @@ function ScheduleCard({ training }) {
       <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
         <Box className="flex flex-wrap items-start justify-between gap-3">
           <Box className="min-w-0">
-            <Text as="span" className="text-[11px] font-mono font-bold text-violet-500 bg-violet-100 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg tracking-wide">
-              {training.training_id}
-            </Text>
+            <Box className="flex flex-wrap items-center gap-1.5">
+              <Text as="span" className="text-[11px] font-mono font-bold text-violet-500 bg-violet-100 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg tracking-wide">
+                {training.training_id}
+              </Text>
+              {enrolmentId && (
+                <Text as="span" className="text-[11px] font-mono font-bold text-slate-500 bg-white ring-1 ring-slate-200 px-2.5 py-1 rounded-lg tracking-wide">
+                  Enrolment ID: {enrolmentId}
+                </Text>
+              )}
+            </Box>
             <Text as="h2" className="text-xl font-bold text-slate-900 leading-tight mt-2.5">
               {training.title}
             </Text>
@@ -351,6 +358,7 @@ function NotEnrolledState({ user, message }) {
 export function MyCoursesContent() {
   const { user, token } = useAuth();
   const [training, setTraining] = useState(null);
+  const [enrolmentId, setEnrolmentId] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -369,6 +377,9 @@ export function MyCoursesContent() {
           e.status = 403;
           throw e;
         }
+        // The enrolment id lives on the list item, not on the training detail —
+        // `first.id` is the training. Tolerate either spelling from the API.
+        setEnrolmentId(first.enrolment_id ?? first.enrollment_id ?? null);
         return fetchTrainingDetail({ token, trainingRef: first.id });
       })
       .then((data) => setTraining(data))
@@ -397,7 +408,7 @@ export function MyCoursesContent() {
 
   return (
     <Box className="space-y-4">
-      <ScheduleCard training={training} />
+      <ScheduleCard training={training} enrolmentId={enrolmentId} />
       <SessionTopics sessions={training.sessions} />
       {/* Instructions — only shown when the learner has a current enrolment. */}
       <TrainingGuidelines />

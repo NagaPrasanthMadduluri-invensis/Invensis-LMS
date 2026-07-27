@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, Award, GraduationCap, Clock, CalendarClock, CheckCircle2,
-  ChevronRight, Video, MapPin, Users, ArrowRight, Sparkles, Flame,
+  ChevronRight, Video, MapPin, ArrowRight,
   CircleUser, RefreshCw, AlertCircle, Rocket, TrendingUp,
 } from "lucide-react";
 import Text from "@/components/ui/text";
@@ -231,7 +231,7 @@ export function DashboardContent() {
 
   const {
     learner = {}, stats = {}, my_courses = {},
-    certificates = [], journey = [], upcoming_cohorts = [],
+    certificates = [], journey = [],
   } = data;
 
   const inProgress = my_courses.in_progress || [];
@@ -379,55 +379,6 @@ export function DashboardContent() {
           )}
         </Panel>
       </Box>
-
-      {/* ── Upcoming cohorts (register CTA) ── */}
-      {upcoming_cohorts.length > 0 && (
-        <Panel title="Open Cohorts — Register Now" icon={Sparkles} action={
-          <Link href="/enrollments" className="flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-800">
-            Browse all <ArrowRight className="h-3 w-3" />
-          </Link>
-        }>
-          <Box className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {upcoming_cohorts.map((c) => {
-              const m = modeOf(c.delivery_mode);
-              const ModeIcon = m.icon;
-              return (
-                <Box key={c.schedule_id} className="rounded-xl border border-slate-200 p-4">
-                  <Box className="flex items-start justify-between gap-2">
-                    <Text as="p" className="min-w-0 truncate text-sm font-semibold text-slate-800">{c.title}</Text>
-                    {c.is_full ? (
-                      <Badge className="shrink-0 border-0 bg-rose-100 text-[10px] font-semibold text-rose-700">Full</Badge>
-                    ) : c.filling_fast ? (
-                      <Badge className="shrink-0 border-0 bg-amber-100 text-[10px] font-semibold text-amber-700"><Flame className="mr-0.5 h-3 w-3" />Filling fast</Badge>
-                    ) : null}
-                  </Box>
-                  <Box className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
-                    <Box className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 ${m.chip}`}>
-                      <ModeIcon className="h-3 w-3" />{m.label}
-                    </Box>
-                    <Box className="flex items-center gap-1"><CalendarClock className="h-3 w-3" />{formatDate(c.start_date)}</Box>
-                    {c.duration_hours != null && <Box className="flex items-center gap-1"><Clock className="h-3 w-3" />{c.duration_hours}h</Box>}
-                  </Box>
-                  <Box className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5">
-                    <Box className="flex items-center gap-1 text-[11px] text-slate-500">
-                      <Users className="h-3 w-3" />{c.seats_left} of {c.capacity} left
-                    </Box>
-                    <Text as="span" className="text-[11px] font-medium text-violet-600">Starts in {c.starts_in_days}d</Text>
-                  </Box>
-                  <Button
-                    render={<Link href="/enrollments" />}
-                    size="sm"
-                    disabled={c.is_full}
-                    className="mt-3 h-8 w-full rounded-lg border-0 bg-violet-600 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
-                  >
-                    {c.is_full ? "Cohort full" : "Register now"}
-                  </Button>
-                </Box>
-              );
-            })}
-          </Box>
-        </Panel>
-      )}
 
       {/* ── Snapshot footer ── */}
       <Box className="flex items-center justify-between px-1">

@@ -23,22 +23,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchMyProfile, updateMyProfile, getAvatarUploadUrl, uploadAvatarFile } from "@/services/api/me";
 
 const COUNTRIES = ["India", "United States", "United Kingdom", "Australia", "UAE", "Singapore", "Canada", "Other"];
-const TIMEZONES = [
-  { value: "Asia/Kolkata", label: "Asia/Kolkata (IST)" },
-  { value: "America/New_York", label: "America/New_York (ET)" },
-  { value: "Europe/London", label: "Europe/London (GMT)" },
-  { value: "Asia/Dubai", label: "Asia/Dubai (GST)" },
-  { value: "Asia/Singapore", label: "Asia/Singapore (SGT)" },
-  { value: "Australia/Sydney", label: "Australia/Sydney (AEST)" },
-];
-const LANGUAGES = [
-  { value: "en", label: "English" },
-  { value: "hi", label: "Hindi" },
-  { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
-  { value: "de", label: "German" },
-  { value: "ar", label: "Arabic" },
-];
 const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 
@@ -97,7 +81,7 @@ function mapFieldErrors(apiErrors, keyMap) {
   return mapped;
 }
 
-const inputCls = "h-10 text-sm bg-background border-slate-200 focus-visible:ring-violet-400";
+const inputCls = "h-10 w-full text-sm bg-background border border-slate-300 focus-visible:border-violet-400 focus-visible:ring-violet-400";
 
 function SectionCard({ icon: Icon, title, description, children }) {
   return (
@@ -166,8 +150,6 @@ export function LearnerProfileSettings() {
   const [lastName, setLastName] = useState(last);
   const [mobile, setMobile] = useState("");
   const [country, setCountry] = useState("India");
-  const [timezone, setTimezone] = useState("Asia/Kolkata");
-  const [language, setLanguage] = useState("en");
   const [personalSaving, setPersonalSaving] = useState(false);
   const [personalSaved, setPersonalSaved] = useState(false);
   const [personalError, setPersonalError] = useState("");
@@ -203,8 +185,6 @@ export function LearnerProfileSettings() {
         setLastName(profile.last_name || last);
         setMobile(profile.phone || "");
         setCountry(profile.country || "India");
-        setTimezone(profile.time_zone || "Asia/Kolkata");
-        setLanguage(profile.preferred_language || "en");
         setCompany(profile.company_name || "");
         setJobTitle(profile.job_title || "");
         setDepartment(profile.department || "");
@@ -276,8 +256,6 @@ export function LearnerProfileSettings() {
           last_name: lastName.trim(),
           phone: mobile.trim(),
           country,
-          time_zone: timezone,
-          preferred_language: language,
         },
       });
       updateUser({ name: `${firstName.trim()} ${lastName.trim()}`.trim() });
@@ -306,16 +284,18 @@ export function LearnerProfileSettings() {
 
     setProfessionalSaving(true);
     try {
-      await updateMyProfile({
-        token,
-        data: {
-          company_name: company.trim(),
-          job_title: jobTitle.trim(),
-          department: department.trim() || null,
-          years_experience: experience.trim() ? Number(experience) : null,
-          linkedin_url: linkedin.trim() || null,
-        },
-      });
+      const data = {
+        company_name: company.trim(),
+        job_title: jobTitle.trim(),
+        department: department.trim() || null,
+        years_experience: experience.trim() ? Number(experience) : null,
+      };
+      // Only send the LinkedIn URL when the learner actually entered one —
+      // omitting the key leaves any stored value untouched, where sending
+      // null would wipe it.
+      if (linkedin.trim()) data.linkedin_url = linkedin.trim();
+
+      await updateMyProfile({ token, data });
       flashSaved(setProfessionalSaved);
     } catch (e) {
       setProfessionalErrors(mapFieldErrors(e.errors, {
@@ -453,22 +433,6 @@ export function LearnerProfileSettings() {
                 <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </FieldRow>
-            <FieldRow label="Time Zone">
-              <Select value={timezone} onValueChange={setTimezone}>
-                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {TIMEZONES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </FieldRow>
-            <FieldRow label="Preferred Language">
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {LANGUAGES.map((l) => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </FieldRow>
