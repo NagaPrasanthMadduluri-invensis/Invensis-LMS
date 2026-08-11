@@ -57,10 +57,10 @@ const FAQS = [
   },
   {
     icon: Clock,
-    q: "I can't log in or access the LMS",
+    q: "I can't log in or access the portal",
     a: (
       <>
-        Access to the LMS is usually provisioned <strong>within ~15 minutes</strong> of your
+        Access to the portal is usually provisioned <strong>within ~15 minutes</strong> of your
         enrolment or account setup. If it&apos;s been longer than that, raise a ticket under{" "}
         <em>&ldquo;Something else&rdquo;</em> and we&apos;ll look into it right away.
       </>

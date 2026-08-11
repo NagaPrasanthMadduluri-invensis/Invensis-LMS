@@ -12,8 +12,8 @@ const newsreader = Newsreader({
 });
 
 export const metadata = {
-  title: "Invensis Learning",
-  description: "Invensis Learning Management System",
+  title: "Invensis Learning Portal",
+  description: "Invensis Learning Portal",
 };
 
 export default function RootLayout({ children }) {
