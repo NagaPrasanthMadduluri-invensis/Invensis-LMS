@@ -234,10 +234,8 @@ function CertificateCanvas({ cert }) {
 
       {/* Footer — signature (right) */}
       <Box className="absolute right-[96px] bottom-[54px] text-center" style={{ fontFamily: "Arial, sans-serif" }}>
-        <svg width="168" height="50" viewBox="0 0 168 50" className="mx-auto" aria-hidden="true">
-          <path d="M6,38 C24,6 34,46 52,24 S82,-2 98,30 122,44 140,14 160,32 166,28"
-            stroke="#16224e" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-        </svg>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/signature.png" alt="Signature of Arvind Rongala" width={168} height={50} className="mx-auto block object-contain h-[50px] w-auto" />
         <Box className="h-px w-[190px] bg-slate-300 mx-auto mt-1" />
         <Box as="p" className="text-[15px] font-bold text-[#16224e] mt-2">Arvind Rongala</Box>
         <Box as="p" className="text-[11px] text-slate-500">Director, Invensis Inc</Box>

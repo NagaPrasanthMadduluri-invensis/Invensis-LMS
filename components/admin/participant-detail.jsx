@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CheckCircle2, Clock, PlayCircle, Award, XCircle, Mail,
   Briefcase, MapPin, Calendar, Hash, Video, Users2, Phone, GraduationCap,
+  Building2, Layers, Clock3, Link2,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -57,7 +58,7 @@ const SECTIONS = [
   { key: "inactive",  title: "Cancelled & transferred", accent: "text-slate-400",   cats: ["cancelled", "transferred", "failed"] },
 ];
 
-function Fact({ icon: Icon, label, value }) {
+function Fact({ icon: Icon, label, value, href }) {
   return (
     <Box className="flex items-start gap-3">
       <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50">
@@ -65,7 +66,18 @@ function Fact({ icon: Icon, label, value }) {
       </Box>
       <Box className="min-w-0">
         <Text as="p" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">{label}</Text>
-        <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5 break-words">{value}</Text>
+        {href ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold text-violet-600 hover:text-violet-700 hover:underline leading-tight mt-0.5 break-all inline-block"
+          >
+            {value}
+          </a>
+        ) : (
+          <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5 break-words">{value}</Text>
+        )}
       </Box>
     </Box>
   );
@@ -215,8 +227,21 @@ export function ParticipantDetail({ userId }) {
         <Box className="p-6">
           <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <Fact icon={Briefcase} label="Job Title" value={p.job_title || "—"} />
+            <Fact icon={Building2} label="Company" value={p.company_name || "—"} />
+            <Fact icon={Layers} label="Department" value={p.department || "—"} />
+            <Fact
+              icon={Clock3}
+              label="Experience"
+              value={p.years_experience != null ? `${p.years_experience} ${p.years_experience === 1 ? "year" : "years"}` : "—"}
+            />
             <Fact icon={MapPin} label="Location" value={p.location || "—"} />
             <Fact icon={Phone} label="Phone" value={p.phone || "—"} />
+            <Fact
+              icon={Link2}
+              label="LinkedIn"
+              value={p.linkedin_url ? "View profile" : "—"}
+              href={p.linkedin_url || undefined}
+            />
             <Fact icon={Calendar} label="Joined" value={formatDate(p.created_at)} />
           </Box>
         </Box>
