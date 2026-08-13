@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   loginUser,
   logoutUser,
+  refreshSession,
   getCurrentUser,
   normalizeUser,
   deriveCapabilities,
@@ -66,9 +67,60 @@ export function AuthProvider({ children }) {
           setSessionMetaCookie({ capabilities: res.capabilities ?? null, sponsor: res.sponsor ?? null });
         })
         .catch(() => {});
+
+      setLoading(false);
+      return;
+    }
+
+    // Access token cookie expired (15-min TTL) but the user cookie is still
+    // alive (7-day TTL): revive the session with the httpOnly refresh cookie
+    // instead of leaving `token` null — which would silently hang every
+    // authenticated data widget on the page.
+    if (storedUser) {
+      refreshSession()
+        .then((res) => {
+          const normalized = normalizeUser(res.user);
+          const caps = deriveCapabilities(res.capabilities, res.user?.role ?? storedUser.role);
+          setTokenCookie(res.accessToken);
+          setUserCookie(res.user);
+          setSessionMetaCookie({ capabilities: res.capabilities ?? null, sponsor: res.sponsor ?? null });
+          setToken(res.accessToken);
+          setUser(normalized);
+          setCapabilities(caps);
+          setSponsor(res.sponsor ?? null);
+        })
+        .catch(() => {
+          // Refresh token is gone/revoked too — the session is truly dead.
+          clearTokenCookie();
+          clearUserCookie();
+          clearSessionMetaCookie();
+          setToken(null);
+          setUser(null);
+          setCapabilities(null);
+          setSponsor(null);
+          router.push("/login");
+        })
+        .finally(() => setLoading(false));
+      return;
     }
 
     setLoading(false);
+  }, [router]);
+
+  // When api-client silently refreshes an expired access token mid-session,
+  // fold the new token + capabilities back into React state so components stop
+  // sending the stale token (which would otherwise 401 on every call).
+  useEffect(() => {
+    function onRefreshed(e) {
+      const detail = e.detail || {};
+      if (!detail.accessToken) return;
+      setToken(detail.accessToken);
+      if (detail.user) setUser(normalizeUser(detail.user));
+      setCapabilities(deriveCapabilities(detail.capabilities, detail.user?.role));
+      setSponsor(detail.sponsor ?? null);
+    }
+    window.addEventListener("lms:session-refreshed", onRefreshed);
+    return () => window.removeEventListener("lms:session-refreshed", onRefreshed);
   }, []);
 
   /**

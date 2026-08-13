@@ -33,6 +33,54 @@ export class TrainerEndpointPending extends Error {
 // Live (API.md §3.3.1 / §3.3.2). Set false only to force the placeholder state.
 export const ENDPOINTS_READY = true;
 
+/* ──────────────────────────────────────
+   SELF-SERVICE PROFILE
+   ────────────────────────────────────── */
+
+/**
+ * GET /trainer/profile — the logged-in trainer's own profile.
+ * Returns { trainer: { id, name, email, bio, experience, rate, certificates,
+ *   specializations, city, country, is_remote, location, resume_key,
+ *   resume_url (short-lived presigned GET or null), is_active } }.
+ */
+export async function fetchMyTrainerProfile({ token }) {
+  return apiClient("/trainer/profile", { token });
+}
+
+/**
+ * PATCH /trainer/profile — update own details.
+ * Body: any subset of { name, bio, experience, certificates, specializations,
+ *   city, country, is_remote, resume_key }. Send null to clear a nullable field.
+ * `rate`, `is_active`, and `email` are admin-only and not accepted here.
+ * Returns the same shape as fetchMyTrainerProfile.
+ */
+export async function updateMyTrainerProfile({ token, data }) {
+  return apiClient("/trainer/profile", { method: "PATCH", token, body: data });
+}
+
+/**
+ * POST /trainer/profile/resume-upload-url
+ * Body: { content_type: "application/pdf" }
+ * Returns { upload_url, resume_key, method, headers, expires_in } — a presigned
+ * PUT URL for direct-to-storage upload. The API never receives the file bytes.
+ */
+export async function getResumeUploadUrl({ token }) {
+  return apiClient("/trainer/profile/resume-upload-url", {
+    method: "POST",
+    token,
+    body: { content_type: "application/pdf" },
+  });
+}
+
+/**
+ * PUT the raw PDF bytes to the presigned URL from getResumeUploadUrl.
+ * Bypasses apiClient — different origin (object storage), no auth header.
+ */
+export async function uploadResumeFile({ uploadUrl, headers, file }) {
+  const res = await fetch(uploadUrl, { method: "PUT", headers, body: file });
+  if (!res.ok) throw new Error("Failed to upload resume. Please try again.");
+}
+
 /**
  * GET /trainer/trainings  (API.md §3.3.1 — trainings assigned to the caller)
  * Returns: { trainings: [{ id, code, title, status, delivery_mode, bucket,
