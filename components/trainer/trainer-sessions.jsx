@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Users,
   Briefcase,
+  Video,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -46,6 +47,8 @@ const PARTICIPANT_STATUS_CONFIG = {
   cancelled: { label: "Cancelled", color: "bg-red-100 text-red-600" },
   transferred: { label: "Transferred", color: "bg-slate-100 text-slate-600" },
 };
+
+const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Meeting" };
 
 function formatDate(d) {
   if (!d) return "—";
@@ -204,6 +207,40 @@ function SessionsPanel({ trainingRef, token }) {
 
   return (
     <Box className="space-y-5">
+      {/* Meeting link — visible to the assigned trainer once the admin releases it,
+          the same link enrolled learners see. */}
+      {data.meeting?.url ? (
+        <Card className="p-0 overflow-hidden rounded-2xl border border-emerald-200 shadow-sm">
+          <Box className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+            <Box className="flex items-center gap-2.5 min-w-0">
+              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+                <Video className="h-4 w-4 text-emerald-600" />
+              </Box>
+              <Box className="min-w-0">
+                <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight">Meeting link is live</Text>
+                <Text as="span" className="text-[11px] text-slate-500">{PLATFORM_LABEL[data.meeting.platform] || "Meeting"}</Text>
+              </Box>
+            </Box>
+            <Button
+              render={<a href={data.meeting.url} target="_blank" rel="noopener noreferrer" />}
+              size="sm"
+              className="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white border-0 rounded-lg text-sm font-semibold shrink-0"
+            >
+              Join Meeting
+            </Button>
+          </Box>
+        </Card>
+      ) : data.delivery_mode !== "in_person" ? (
+        <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
+          <Box className="flex items-center gap-2.5 px-5 py-4">
+            <AlertCircle className="h-4 w-4 shrink-0 text-violet-300" />
+            <Text as="p" className="text-xs text-slate-500">
+              Meeting link hasn&apos;t been released by the admin yet — check back closer to the training date.
+            </Text>
+          </Box>
+        </Card>
+      ) : null}
+
       <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
         <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
           <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
