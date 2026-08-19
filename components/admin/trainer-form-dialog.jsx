@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -10,15 +10,30 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { createTrainer, updateTrainer } from "@/services/api/admin/admin-api";
 import {
-  AlertCircle, GraduationCap, Pencil, User, Mail, Lock, Clock,
-  CheckCircle2, Plus, X, Upload, FileText, Award, Eye, EyeOff,
-  MapPin, Globe2, IndianRupee, Target, Wifi,
+  AlertCircle, GraduationCap, User, Mail, Clock,
+  CheckCircle2, Plus, X, Award, Eye, EyeOff,
+  MapPin, Globe2, IndianRupee, Target, Wifi, Briefcase, Sparkles,
 } from "lucide-react";
 
 const EMPTY = {
-  name: "", email: "", password: "", bio: "", experience: "",
+  name: "", email: "", bio: "", experience: "",
   rate: "", city: "", country: "", is_remote: false, is_active: true,
 };
+
+const AVATAR_COLORS = [
+  "bg-violet-500", "bg-teal-500", "bg-emerald-500", "bg-rose-500",
+  "bg-amber-500", "bg-cyan-500", "bg-pink-500", "bg-indigo-500",
+];
+
+function getInitials(name = "") {
+  return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || "T";
+}
+
+function avatarColor(seed = "") {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) & 0xff;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
 
 const CERT_PRESETS = [
   "PMP", "PMI-ACP", "PRINCE2", "CSM", "CSPO", "SAFe", "ITIL", "Six Sigma",
@@ -68,14 +83,17 @@ function FTextarea({ rows = 3, ...props }) {
   );
 }
 
-function Section({ label, children }) {
+function Section({ label, icon: Icon, hint, children }) {
   return (
-    <Box className="rounded-xl border border-slate-200 overflow-hidden">
-      <Box className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
-        <Box className="w-1 h-4 rounded-full bg-violet-500" />
-        <Text as="p" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</Text>
+    <Box className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+      <Box className="flex items-center gap-2.5 px-4 py-3 bg-slate-50/80 border-b border-slate-200">
+        <Box className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
+          {Icon ? <Icon className="h-3.5 w-3.5 text-violet-600" /> : <Box className="w-1 h-4 rounded-full bg-violet-500" />}
+        </Box>
+        <Text as="p" className="text-[11px] font-bold uppercase tracking-widest text-slate-500">{label}</Text>
+        {hint && <Text as="span" className="ml-auto text-[11px] text-slate-400 normal-case font-normal tracking-normal">{hint}</Text>}
       </Box>
-      <Box className="p-5 bg-white space-y-4">{children}</Box>
+      <Box className="p-5 space-y-4">{children}</Box>
     </Box>
   );
 }
@@ -204,64 +222,10 @@ function SpecializationInput({ value, onChange }) {
   );
 }
 
-function CVUpload({ value, onChange }) {
-  const inputRef = useRef(null);
-
-  function onFileChange(e) {
-    const file = e.target.files?.[0] || null;
-    onChange(file);
-  }
-
-  function clear(e) {
-    e.stopPropagation();
-    onChange(null);
-    if (inputRef.current) inputRef.current.value = "";
-  }
-
-  return (
-    <Box>
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".pdf,.doc,.docx"
-        className="hidden"
-        onChange={onFileChange}
-      />
-      {value ? (
-        <Box className="flex items-center gap-3 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3">
-          <Box className="w-9 h-9 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
-            <FileText className="h-4 w-4 text-violet-600" />
-          </Box>
-          <Box className="flex-1 min-w-0">
-            <Text as="p" className="text-sm font-semibold text-violet-800 truncate">{value.name}</Text>
-            <Text as="p" className="text-[11px] text-violet-500 mt-0.5">{(value.size / 1024).toFixed(0)} KB</Text>
-          </Box>
-          <button type="button" onClick={clear}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-violet-400 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0">
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </Box>
-      ) : (
-        <button type="button" onClick={() => inputRef.current?.click()}
-          className="w-full flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 hover:border-violet-300 hover:bg-violet-50/40 bg-slate-50 py-5 transition-all group">
-          <Box className="w-9 h-9 rounded-xl bg-white border border-slate-200 group-hover:border-violet-200 flex items-center justify-center shadow-sm transition-colors">
-            <Upload className="h-4 w-4 text-slate-400 group-hover:text-violet-500 transition-colors" />
-          </Box>
-          <Box className="text-center">
-            <Text as="p" className="text-xs font-semibold text-slate-600 group-hover:text-violet-600 transition-colors">Click to upload CV</Text>
-            <Text as="p" className="text-[10px] text-slate-400 mt-0.5">PDF, DOC, DOCX</Text>
-          </Box>
-        </button>
-      )}
-    </Box>
-  );
-}
-
 export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", trainer = null, onSaved }) {
   const [form, setForm] = useState(EMPTY);
   const [certifications, setCertifications] = useState([]);
   const [specializations, setSpecializations] = useState([]);
-  const [cvFile, setCvFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState(null);
@@ -269,7 +233,7 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
 
   useEffect(() => {
     if (!open) return;
-    setError(null); setFieldErrors(null); setCvFile(null);
+    setError(null); setFieldErrors(null);
     if (isEdit && trainer) {
       setForm({
         ...EMPTY,
@@ -318,17 +282,10 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
         };
         await updateTrainer({ token, trainerId: trainer.id, data });
       } else {
-        const data = { name: form.name.trim(), email: form.email.trim() };
-        if (form.password.trim()) data.password = form.password.trim();
-        if (form.bio.trim()) data.bio = form.bio.trim();
-        if (form.experience.trim()) data.experience = form.experience.trim();
-        if (form.city.trim()) data.city = form.city.trim();
-        if (form.country.trim()) data.country = form.country.trim();
-        if (form.is_remote) data.is_remote = true;
-        if (rateNum != null) data.rate = rateNum;
-        if (specializations.length) data.specializations = specializations;
-        if (certifications.length) data.certificates = certifications.map((c) => ({ title: c }));
-        await createTrainer({ token, data });
+        // New Trainer collects only name + email. The account is created with no
+        // password (a setup link is emailed), and the trainer fills in the rest
+        // of their profile themselves — the admin can also edit it later.
+        await createTrainer({ token, data: { name: form.name.trim(), email: form.email.trim() } });
       }
       onSaved?.(); onOpenChange(false);
     } catch (e) {
@@ -338,112 +295,146 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[640px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
-          <Box className="flex items-center gap-3">
-            <Box className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shrink-0 shadow-sm">
-              {isEdit ? <Pencil className="w-4 h-4 text-white" /> : <GraduationCap className="w-5 h-5 text-white" />}
+      <DialogContent className={`${isEdit ? "sm:max-w-[960px]" : "sm:max-w-[540px]"} overflow-hidden`} style={{ padding: 0, gap: 0 }}>
+
+        {/* ── Header ── identifies whose profile is being edited ── */}
+        <Box className="bg-gradient-to-r from-violet-600 to-indigo-600 px-7 py-5">
+          {isEdit ? (
+            <Box className="flex items-center gap-4">
+              <Box className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shrink-0 shadow-md ring-2 ring-white/30 ${avatarColor(trainer?.id || form.name)}`}>
+                {getInitials(form.name)}
+              </Box>
+              <Box className="min-w-0 flex-1">
+                <DialogTitle className="text-base font-bold text-white truncate">{form.name || "Edit trainer"}</DialogTitle>
+                <DialogDescription className="text-[13px] text-violet-100 mt-0.5 truncate">
+                  {form.email || "Update this trainer's profile"}
+                </DialogDescription>
+              </Box>
+              <Box className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold shrink-0 ${form.is_active ? "bg-emerald-400/20 text-emerald-50 ring-1 ring-emerald-300/40" : "bg-slate-900/20 text-white/80 ring-1 ring-white/20"}`}>
+                <Box className={`w-1.5 h-1.5 rounded-full ${form.is_active ? "bg-emerald-300" : "bg-slate-300"}`} />
+                {form.is_active ? "Active" : "Inactive"}
+              </Box>
             </Box>
-            <Box>
-              <DialogTitle className="text-[15px] font-bold text-slate-800">
-                {isEdit ? "Edit Trainer" : "Onboard Trainer"}
-              </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 mt-0.5">
-                {isEdit ? "Update any detail of this trainer's profile." : "Create a trainer profile and account."}
-              </DialogDescription>
+          ) : (
+            <Box className="flex items-center gap-3">
+              <Box className="w-11 h-11 rounded-xl bg-white/15 ring-1 ring-white/25 flex items-center justify-center shrink-0">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </Box>
+              <Box>
+                <DialogTitle className="text-[15px] font-bold text-white">Add a new trainer</DialogTitle>
+                <DialogDescription className="text-[13px] text-violet-100 mt-0.5">
+                  Start with their name and email — they set up the rest.
+                </DialogDescription>
+              </Box>
             </Box>
-          </Box>
+          )}
         </Box>
 
-        <Box className="px-6 py-6 space-y-5 max-h-[70vh] overflow-y-auto">
-          <Section label="Identity">
-            <Field label="Full name" required>
-              <FInput icon={User} value={form.name} onChange={set("name")} placeholder="Jane Trainer" />
-            </Field>
-            <Field label="Email" required hint={isEdit ? "Changing this changes their login" : undefined}>
-              <FInput icon={Mail} type="email" value={form.email} onChange={set("email")} placeholder="trainer@example.com" />
-            </Field>
-            {!isEdit && (
-              <Field label="Password">
-                <FInput icon={Lock} type="password" value={form.password} onChange={set("password")} placeholder="Optional — defaults used if blank" />
-              </Field>
-            )}
-          </Section>
-
-          <Section label="Profile">
-            <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Experience">
-                <FInput icon={Clock} value={form.experience} onChange={set("experience")} placeholder="10 years" />
-              </Field>
-              <Field label="Rate" hint="per hour (₹)">
-                <FInput icon={IndianRupee} type="number" min="0" value={form.rate} onChange={set("rate")} placeholder="150" />
-              </Field>
-            </Box>
-            <Field label="Bio">
-              <FTextarea value={form.bio} onChange={set("bio")} placeholder="PMP-certified trainer with expertise in..." rows={3} />
-            </Field>
-          </Section>
-
-          <Section label="Subject Excellence">
-            <Field label="Specializations" hint="What they're qualified to train">
-              <SpecializationInput value={specializations} onChange={setSpecializations} />
-            </Field>
-          </Section>
-
-          <Section label="Location">
-            <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="City">
-                <FInput icon={MapPin} value={form.city} onChange={set("city")} placeholder="Bengaluru" />
-              </Field>
-              <Field label="Country">
-                <FInput icon={Globe2} value={form.country} onChange={set("country")} placeholder="India" />
-              </Field>
-            </Box>
-            <Box className="flex items-center justify-between rounded-xl border border-slate-200 bg-white shadow-sm px-4 py-3">
-              <Box className="flex items-center gap-3">
-                <Box className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.is_remote ? "bg-blue-100" : "bg-slate-100"}`}>
-                  <Wifi className={`h-4 w-4 ${form.is_remote ? "text-blue-600" : "text-slate-400"}`} />
+        <Box className="px-7 py-6 max-h-[74vh] overflow-y-auto bg-slate-50/60">
+          {isEdit ? (
+            <Box className="space-y-5">
+              <Section label="Identity" icon={User}>
+                <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Full name" required>
+                    <FInput icon={User} value={form.name} onChange={set("name")} placeholder="Jane Trainer" />
+                  </Field>
+                  <Field label="Email" required hint="Changing this changes their login">
+                    <FInput icon={Mail} type="email" value={form.email} onChange={set("email")} placeholder="trainer@example.com" />
+                  </Field>
                 </Box>
-                <Box>
-                  <Text as="p" className="text-sm font-semibold text-slate-800">Delivers remotely</Text>
-                  <Text as="p" className="text-xs text-slate-500 mt-0.5">Trainer can run sessions online.</Text>
+              </Section>
+
+              {/* Two columns — use the extra width instead of one long scroll */}
+              <Box className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+                <Box className="space-y-5">
+                  <Section label="Professional" icon={Briefcase}>
+                    <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Field label="Experience">
+                        <FInput icon={Clock} value={form.experience} onChange={set("experience")} placeholder="10 years" />
+                      </Field>
+                      <Field label="Rate" hint="per hour (₹)">
+                        <FInput icon={IndianRupee} type="number" min="0" value={form.rate} onChange={set("rate")} placeholder="150" />
+                      </Field>
+                    </Box>
+                    <Field label="Bio">
+                      <FTextarea value={form.bio} onChange={set("bio")} placeholder="PMP-certified trainer with expertise in…" rows={4} />
+                    </Field>
+                  </Section>
+
+                  <Section label="Based in" icon={MapPin}>
+                    <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Field label="City">
+                        <FInput icon={MapPin} value={form.city} onChange={set("city")} placeholder="Bengaluru" />
+                      </Field>
+                      <Field label="Country">
+                        <FInput icon={Globe2} value={form.country} onChange={set("country")} placeholder="India" />
+                      </Field>
+                    </Box>
+                    <Box className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3">
+                      <Box className="flex items-center gap-3">
+                        <Box className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.is_remote ? "bg-blue-100" : "bg-slate-100"}`}>
+                          <Wifi className={`h-4 w-4 ${form.is_remote ? "text-blue-600" : "text-slate-400"}`} />
+                        </Box>
+                        <Box>
+                          <Text as="p" className="text-sm font-semibold text-slate-800">Delivers remotely</Text>
+                          <Text as="p" className="text-xs text-slate-500 mt-0.5">Can run sessions online.</Text>
+                        </Box>
+                      </Box>
+                      <Switch checked={form.is_remote} onCheckedChange={(v) => setForm((f) => ({ ...f, is_remote: v }))} />
+                    </Box>
+                  </Section>
                 </Box>
-              </Box>
-              <Switch checked={form.is_remote} onCheckedChange={(v) => setForm((f) => ({ ...f, is_remote: v }))} />
-            </Box>
-          </Section>
 
-          <Section label="Certifications">
-            <Field label="Add certifications" hint="Press Enter or comma to add">
-              <CertInput value={certifications} onChange={setCertifications} />
-            </Field>
-          </Section>
+                <Box className="space-y-5">
+                  <Section label="Expertise" icon={Target} hint="What they can train">
+                    <SpecializationInput value={specializations} onChange={setSpecializations} />
+                  </Section>
 
-          {!isEdit && (
-            <Section label="CV / Resume">
-              <Field label="Upload CV" hint="Optional">
-                <CVUpload value={cvFile} onChange={setCvFile} />
-              </Field>
-            </Section>
-          )}
-
-          {isEdit && (
-            <Box className="flex items-center justify-between rounded-xl border border-violet-100 bg-violet-50/60 px-4 py-3.5">
-              <Box className="flex items-center gap-3">
-                <Box className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.is_active ? "bg-emerald-100" : "bg-slate-100"}`}>
-                  <CheckCircle2 className={`h-4 w-4 ${form.is_active ? "text-emerald-600" : "text-slate-400"}`} />
-                </Box>
-                <Box>
-                  <Text as="p" className="text-sm font-semibold text-slate-800">Active trainer</Text>
-                  <Text as="p" className="text-xs text-slate-500 mt-0.5">Inactive trainers can&apos;t be assigned.</Text>
+                  <Section label="Certifications" icon={Award} hint="Enter or comma to add">
+                    <CertInput value={certifications} onChange={setCertifications} />
+                  </Section>
                 </Box>
               </Box>
-              <Switch checked={form.is_active} onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))} />
+
+              <Section label="Account status" icon={CheckCircle2}>
+                <Box className="flex items-center justify-between">
+                  <Box className="flex items-center gap-3">
+                    <Box className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.is_active ? "bg-emerald-100" : "bg-slate-100"}`}>
+                      <CheckCircle2 className={`h-4 w-4 ${form.is_active ? "text-emerald-600" : "text-slate-400"}`} />
+                    </Box>
+                    <Box>
+                      <Text as="p" className="text-sm font-semibold text-slate-800">Active trainer</Text>
+                      <Text as="p" className="text-xs text-slate-500 mt-0.5">Inactive trainers can&apos;t be assigned to trainings.</Text>
+                    </Box>
+                  </Box>
+                  <Switch checked={form.is_active} onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))} />
+                </Box>
+              </Section>
+            </Box>
+          ) : (
+            <Box className="space-y-5">
+              <Section label="Identity" icon={User}>
+                <Field label="Full name" required>
+                  <FInput icon={User} value={form.name} onChange={set("name")} placeholder="Jane Trainer" />
+                </Field>
+                <Field label="Email" required hint="We'll email them a setup link">
+                  <FInput icon={Mail} type="email" value={form.email} onChange={set("email")} placeholder="trainer@example.com" />
+                </Field>
+              </Section>
+
+              <Box className="flex items-start gap-3 rounded-2xl border border-violet-100 bg-violet-50/70 px-4 py-3.5">
+                <Box className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
+                  <Sparkles className="h-4 w-4 text-violet-600" />
+                </Box>
+                <Text as="p" className="text-xs text-slate-600 leading-relaxed">
+                  The trainer gets an email to set their password and fill in their bio, expertise, certifications, and resume. You can review or edit all of it later from this table.
+                </Text>
+              </Box>
             </Box>
           )}
 
           {(error || fieldErrors) && (
-            <Box className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3">
+            <Box className="mt-5 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3">
               <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
               <Box>
                 {error && <Text as="p" className="text-xs text-red-700 font-medium">{error}</Text>}
@@ -457,10 +448,10 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
           )}
         </Box>
 
-        <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
+        <DialogFooter className="px-7 pt-4 pb-6 border-t border-slate-100 bg-white">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
           <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm px-6">
-            {submitting ? "Saving..." : isEdit ? "Save Changes" : "Create Trainer"}
+            {submitting ? "Saving…" : isEdit ? "Save changes" : "Add trainer"}
           </Button>
         </DialogFooter>
       </DialogContent>
