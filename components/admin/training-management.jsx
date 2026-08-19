@@ -833,6 +833,7 @@ export function TrainingManagement({ trainingId }) {
           <Fact icon={Clock} label="Daily Timing" value={`${formatTime(detail.start_time)} – ${formatTime(detail.end_time)}`} />
           <Fact icon={Globe} label="Timezone" value={detail.timezone || "—"} />
           <Fact icon={Hourglass} label="Duration" value={detail.duration_hours != null ? `${detail.duration_hours} hours` : "—"} />
+          <Fact icon={Clock} label="Hours / Day" value={detail.hours_per_day != null ? `${detail.hours_per_day} hours` : "—"} />
           <Fact icon={Users} label="Capacity" value={`${detail.enrolled_count} / ${detail.capacity ?? "—"} enrolled`} />
         </Box>
       </Card>

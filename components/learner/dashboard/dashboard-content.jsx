@@ -14,6 +14,7 @@ import { TrainingsPanel } from "./trainings-panel";
 import { ThisWeekPanel } from "./this-week-panel";
 import { CertificatesPanel } from "./certificates-panel";
 import { RecentActivityPanel } from "./recent-activity-panel";
+import { UpcomingCohortsPanel } from "./upcoming-cohorts-panel";
 import { DashboardSkeleton } from "./dashboard-skeleton";
 import { activeCoursesOf, countdownTo, nextSessionOf, weekAheadOf } from "./dashboard-utils";
 
@@ -133,6 +134,7 @@ export function DashboardContent() {
 
         <Box className="space-y-4">
           <ThisWeekPanel events={weekAhead} />
+          <UpcomingCohortsPanel />
           <CertificatesPanel certificates={certificates} myCourses={my_courses} />
           <RecentActivityPanel journey={journey} />
         </Box>

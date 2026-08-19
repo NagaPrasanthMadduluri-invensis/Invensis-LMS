@@ -23,10 +23,15 @@ import {
   Users,
   Briefcase,
   Video,
+  Building2,
+  Network,
+  GraduationCap,
+  Globe,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { SessionTimezoneConverter } from "@/components/trainer/timezone-converter";
 import {
   fetchMyTrainings,
   fetchTrainerTrainingSessions,
@@ -59,6 +64,19 @@ function formatDateTime(d) {
   return new Date(d).toLocaleString("en-IN", {
     day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true,
   });
+}
+
+// Roster cells: profile attributes are optional on the API, so render an em dash
+// rather than "undefined" when the learner hasn't shared one.
+function blank(v) {
+  return v === null || v === undefined || v === "" ? "—" : v;
+}
+function formatExperience(years) {
+  if (years === null || years === undefined || years === "") return "—";
+  const n = Number(years);
+  if (!Number.isFinite(n)) return String(years);
+  if (n < 1) return "< 1 yr";
+  return `${n} yr${n === 1 ? "" : "s"}`;
 }
 
 /* ── Empty / pending states ── */
@@ -241,6 +259,11 @@ function SessionsPanel({ trainingRef, token }) {
         </Card>
       ) : null}
 
+      {/* Timezone converter — helps the trainer see the session start in their own zone */}
+      {sessions.length > 0 && (
+        <SessionTimezoneConverter sessions={sessions} sourceZoneCode={data.timezone} />
+      )}
+
       <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
         <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
           <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
@@ -289,12 +312,21 @@ function SessionsPanel({ trainingRef, token }) {
             </Box>
           ) : (
             <Box className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[860px]">
                 <TableHeader>
                   <TableRow className="bg-slate-50/80 hover:bg-slate-50/80 border-b border-slate-100">
-                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Name</TableHead>
+                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Learner</TableHead>
                     <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
-                      <Box className="flex items-center gap-1"><Briefcase className="h-3 w-3" /> Job Title</Box>
+                      <Box className="flex items-center gap-1"><Building2 className="h-3 w-3" /> Company</Box>
+                    </TableHead>
+                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                      <Box className="flex items-center gap-1"><Network className="h-3 w-3" /> Department</Box>
+                    </TableHead>
+                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                      <Box className="flex items-center gap-1"><GraduationCap className="h-3 w-3" /> Experience</Box>
+                    </TableHead>
+                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                      <Box className="flex items-center gap-1"><Globe className="h-3 w-3" /> Country</Box>
                     </TableHead>
                     <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Status</TableHead>
                     <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Enrolled</TableHead>
@@ -305,12 +337,21 @@ function SessionsPanel({ trainingRef, token }) {
                     const cfg = PARTICIPANT_STATUS_CONFIG[p.status] || PARTICIPANT_STATUS_CONFIG.confirmed;
                     return (
                       <TableRow key={p.enrolment_id} className="hover:bg-slate-50/70 transition-colors border-b border-slate-100/80 last:border-0">
-                        <TableCell className="py-3.5 font-semibold text-slate-800 text-sm">{p.name}</TableCell>
-                        <TableCell className="py-3.5 text-slate-500 text-sm">{p.job_title || "—"}</TableCell>
-                        <TableCell className="py-3.5">
+                        <TableCell className="py-3.5 align-top">
+                          <Text as="p" className="font-semibold text-slate-800 text-sm leading-tight">{p.name}</Text>
+                          <Box className="flex items-center gap-1 mt-0.5">
+                            <Briefcase className="h-3 w-3 shrink-0 text-slate-300" />
+                            <Text as="span" className="text-[11px] text-slate-400">{p.job_title || "Job title not shared"}</Text>
+                          </Box>
+                        </TableCell>
+                        <TableCell className="py-3.5 align-top text-slate-600 text-sm">{blank(p.company)}</TableCell>
+                        <TableCell className="py-3.5 align-top text-slate-600 text-sm">{blank(p.department)}</TableCell>
+                        <TableCell className="py-3.5 align-top text-slate-600 text-sm">{formatExperience(p.experience_years)}</TableCell>
+                        <TableCell className="py-3.5 align-top text-slate-600 text-sm">{blank(p.country)}</TableCell>
+                        <TableCell className="py-3.5 align-top">
                           <Badge className={`border-0 text-[10px] font-medium ${cfg.color}`}>{cfg.label}</Badge>
                         </TableCell>
-                        <TableCell className="py-3.5 text-slate-500 text-sm">{formatDate(p.enrolled_at)}</TableCell>
+                        <TableCell className="py-3.5 align-top text-slate-500 text-sm">{formatDate(p.enrolled_at)}</TableCell>
                       </TableRow>
                     );
                   })}

@@ -19,6 +19,8 @@ import {
   LifeBuoy,
   BookText,
   AlertCircle,
+  BadgeCheck,
+  Ticket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Text from "@/components/ui/text";
@@ -227,6 +229,53 @@ function ScheduleCard({ training, enrolmentId }) {
             <Text as="p" className="text-xs text-slate-500">
               Meeting link hasn&apos;t been released yet — check back closer to the training date.
             </Text>
+          </Box>
+        </Box>
+      )}
+
+      {/* Exam certification — driven by the CMS `certification_included` flag.
+          true → included (good news); false → offer a voucher request; null → nothing. */}
+      {training.certification_included === true && (
+        <Box className="border-t px-6 py-4">
+          <Box className="flex items-start gap-3 rounded-xl bg-emerald-50 ring-1 ring-emerald-200 px-4 py-3">
+            <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+              <BadgeCheck className="h-4 w-4 text-emerald-600" />
+            </Box>
+            <Box className="min-w-0">
+              <Text as="p" className="text-sm font-semibold text-emerald-800 leading-tight">
+                🎉 Exam certification is included!
+              </Text>
+              <Text as="p" className="text-xs text-emerald-700 mt-0.5">
+                The exam certification cost is already covered in your training fee — nothing extra to pay.
+              </Text>
+            </Box>
+          </Box>
+        </Box>
+      )}
+
+      {training.certification_included === false && (
+        <Box className="border-t px-6 py-4">
+          <Box className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-50 ring-1 ring-amber-200 px-4 py-3">
+            <Box className="flex items-start gap-3 min-w-0">
+              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100">
+                <Ticket className="h-4 w-4 text-amber-600" />
+              </Box>
+              <Box className="min-w-0">
+                <Text as="p" className="text-sm font-semibold text-amber-900 leading-tight">
+                  Exam certification isn&apos;t included
+                </Text>
+                <Text as="p" className="text-xs text-amber-700 mt-0.5">
+                  You can request an exam voucher — an additional cost applies depending on the course.
+                </Text>
+              </Box>
+            </Box>
+            <Button
+              render={<a href="/tickets/new" />}
+              size="sm"
+              className="h-9 px-4 bg-amber-600 hover:bg-amber-700 text-white border-0 rounded-lg text-sm font-semibold shrink-0"
+            >
+              Request Exam Voucher
+            </Button>
           </Box>
         </Box>
       )}

@@ -12,6 +12,17 @@ export async function fetchLearnerDashboard({ token }) {
 }
 
 /**
+ * GET /learner/upcoming-cohorts  — upcoming CMS schedules for the learner's
+ * course, in the country they paid from.
+ * Returns { course_slug, country, cohorts: [{ id, event_code, training_mode,
+ *   start_date, end_date, start_time, end_time, timezone_code, batch_type,
+ *   final_price, currency_code, capacity, enrolled_count, ... }] }.
+ */
+export async function fetchUpcomingCohorts({ token, limit = 3 }) {
+  return apiClient(`/learner/upcoming-cohorts?limit=${limit}`, { token });
+}
+
+/**
  * GET /lms/courses?user_id=X
  * Returns { courses: [...] }
  */
