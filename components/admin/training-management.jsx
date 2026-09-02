@@ -39,6 +39,7 @@ import {
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 import { TrainingSurveys } from "@/components/admin/training-surveys";
 import { TrainingAttendance } from "@/components/admin/training-attendance";
+import { ResourceManager } from "@/components/admin/resource-manager";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pending",   dark: "bg-amber-400/90 text-amber-950",    light: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80" },
@@ -1059,6 +1060,14 @@ export function TrainingManagement({ trainingId }) {
 
       {/* ── Post-training feedback survey ── */}
       <TrainingSurveys trainingRef={trainingId} token={token} />
+
+      {/* ── Supplementary resources (added during/after this training run) ── */}
+      <ResourceManager
+        scope="training"
+        refId={trainingId}
+        heading="Supplementary Resources"
+        subheading="Extra material for this run — added during or after the training. Enrolled learners also see the course's predefined resources."
+      />
 
       <AssignTrainerDialog open={assignOpen} onOpenChange={setAssignOpen} token={token} trainingRef={trainingId} currentTrainerId={detail.trainer?.id} onAssigned={load} />
       <AddParticipantDialog open={addOpen} onOpenChange={setAddOpen} token={token} trainingRef={trainingId} onAdded={load} />
