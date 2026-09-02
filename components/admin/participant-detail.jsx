@@ -7,8 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CheckCircle2, Clock, PlayCircle, Award, XCircle, Mail,
   Briefcase, MapPin, Calendar, Hash, Video, Users2, Phone, GraduationCap,
-  Building2, Layers, Clock3, Link2,
+  Building2, Layers, Clock3, Link2, ExternalLink,
 } from "lucide-react";
+import Link from "next/link";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
@@ -110,10 +111,20 @@ function TrainingCard({ e }) {
             <Text as="span" className="text-xs text-slate-500 font-mono">{e.training_code}</Text>
           </Box>
         </Box>
-        <Badge className={`border-0 text-[11px] font-semibold px-2 py-0.5 shrink-0 ${meta.badge}`}>
-          <StatusIcon className="h-3 w-3 mr-1" />
-          {meta.label}
-        </Badge>
+        <Box className="flex items-center gap-2 shrink-0">
+          <Badge className={`border-0 text-[11px] font-semibold px-2 py-0.5 ${meta.badge}`}>
+            <StatusIcon className="h-3 w-3 mr-1" />
+            {meta.label}
+          </Badge>
+          <Link
+            href={`/admin/courses/${e.training_id}`}
+            title="Open training detail"
+            aria-label="Open training detail"
+            className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-violet-600 hover:border-violet-300 hover:bg-violet-50 transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </Box>
       </Box>
 
       <Box className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3">
