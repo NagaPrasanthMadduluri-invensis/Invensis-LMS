@@ -28,6 +28,7 @@ import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchMyTrainings, fetchTrainingDetail } from "@/services/api/learner/learner-api";
 import { TrainingGuidelines } from "@/components/learner/training-guidelines";
+import { TrainingResources } from "@/components/learner/training-resources";
 
 // Admin/support inbox a learner can reach out to about enrolment.
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@invensis.com";
@@ -408,6 +409,7 @@ export function MyCoursesContent() {
   const { user, token } = useAuth();
   const [training, setTraining] = useState(null);
   const [enrolmentId, setEnrolmentId] = useState(null);
+  const [trainingRef, setTrainingRef] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -429,6 +431,7 @@ export function MyCoursesContent() {
         // The enrolment id lives on the list item, not on the training detail —
         // `first.id` is the training. Tolerate either spelling from the API.
         setEnrolmentId(first.enrolment_id ?? first.enrollment_id ?? null);
+        setTrainingRef(first.id);
         return fetchTrainingDetail({ token, trainingRef: first.id });
       })
       .then((data) => setTraining(data))
@@ -459,6 +462,8 @@ export function MyCoursesContent() {
     <Box className="space-y-4">
       <ScheduleCard training={training} enrolmentId={enrolmentId} />
       <SessionTopics sessions={training.sessions} />
+      {/* Course + session materials the admin/trainer has shared. */}
+      <TrainingResources trainingRef={trainingRef} />
       {/* Instructions — only shown when the learner has a current enrolment. */}
       <TrainingGuidelines />
     </Box>

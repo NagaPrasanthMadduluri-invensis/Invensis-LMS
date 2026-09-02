@@ -104,6 +104,18 @@ export async function fetchTrainingDetail({ token, trainingRef }) {
 }
 
 /**
+ * GET /courses/my/trainings/:trainingRef/resources
+ * Courseware for a training the caller is enrolled in: the course's predefined
+ * resources plus this run's supplementary material. Each resource carries a
+ * short-lived `url` (download link for files, or the external link).
+ * Returns { training: { id, code }, predefined: [...], supplementary: [...] }.
+ * 403 if the caller isn't enrolled in the training.
+ */
+export async function fetchMyTrainingResources({ token, trainingRef }) {
+  return apiClient(`/courses/my/trainings/${trainingRef}/resources`, { token });
+}
+
+/**
  * GET /lms/courses/:courseId?user_id=X
  * Returns { course, enrollment, modules[] }
  */
