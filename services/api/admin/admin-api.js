@@ -65,6 +65,35 @@ export async function assignTrainer({ token, trainingRef, trainerId }) {
 }
 
 /**
+ * PATCH /admin/trainings/:trainingRef/status
+ * Set lifecycle status: "completed" | "suspended" | "active" (reactivate).
+ * data = { status, note? }. Rescheduling is a separate call. Returns { training }.
+ */
+export async function setTrainingStatus({ token, trainingRef, status, note }) {
+  return apiClient(`/admin/trainings/${trainingRef}/status`, {
+    method: "PATCH",
+    token,
+    body: { status, ...(note ? { note } : {}) },
+  });
+}
+
+/**
+ * PATCH /admin/trainings/:trainingRef/reschedule
+ * Postpone + move to a new date/time/timezone. The training's schedule and its
+ * day-wise sessions are updated in place (planned topics preserved) and status
+ * becomes "postponed" — reflected in every portal.
+ * data = { start_date (YYYY-MM-DD), start_time?, end_time? (HH:MM), timezone?,
+ *          session_dates?, note? }. Returns { training } with new dates.
+ */
+export async function rescheduleTraining({ token, trainingRef, data }) {
+  return apiClient(`/admin/trainings/${trainingRef}/reschedule`, {
+    method: "PATCH",
+    token,
+    body: data,
+  });
+}
+
+/**
  * PATCH /admin/trainings/:trainingRef — set/release the meeting link.
  * data = { meeting_url?, meeting_platform?, meeting_released?, min_seats_override? }
  * Releasing (meeting_released: true) requires enrolled_count ≥ min_seats unless

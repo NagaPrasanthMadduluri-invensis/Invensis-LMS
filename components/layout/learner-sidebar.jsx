@@ -21,9 +21,10 @@ import Text from "@/components/ui/text";
 import { learnerNav } from "@/lib/nav-config";
 import { useAuth } from "@/hooks/use-auth";
 import { useTicketUnread } from "@/hooks/use-ticket-unread";
+import { useProfileCompletion } from "@/providers/profile-completion-provider";
 import { fetchMyTickets } from "@/services/api/learner/learner-api";
 
-function NavGroup({ label, items, pathname, badges = {} }) {
+function NavGroup({ label, items, pathname, badges = {}, dots = {} }) {
   return (
     <SidebarGroup>
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
@@ -31,6 +32,7 @@ function NavGroup({ label, items, pathname, badges = {} }) {
         <SidebarMenu>
           {items.map((item) => {
             const badge = badges[item.href];
+            const dot = dots[item.href];
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
@@ -41,6 +43,9 @@ function NavGroup({ label, items, pathname, badges = {} }) {
                   <Text as="span" className="flex-1 text-sidebar-foreground font-medium">
                     {item.title}
                   </Text>
+                  {dot && (
+                    <span className="ml-auto h-2 w-2 shrink-0 rounded-full bg-red-500" aria-label="Incomplete" />
+                  )}
                 </SidebarMenuButton>
                 {badge > 0 && (
                   <SidebarMenuBadge className="bg-destructive text-white">{badge > 99 ? "99+" : badge}</SidebarMenuBadge>
@@ -58,6 +63,8 @@ export function LearnerSidebar() {
   const pathname = usePathname();
   const { logout, capabilities, user, token } = useAuth();
   const ticketUnread = useTicketUnread({ token, userId: user?.id, fetchTickets: fetchMyTickets });
+  const completion = useProfileCompletion();
+  const profileIncomplete = !!completion && completion.tracked && !completion.loading && !completion.complete;
 
   const handleFooterClick = (href) => {
     if (href === "/logout") {
@@ -79,7 +86,7 @@ export function LearnerSidebar() {
         subtitle="Learner Portal"
       />
       <SidebarContent>
-        <NavGroup label="Main" items={learnerNav.main} pathname={pathname} />
+        <NavGroup label="Main" items={learnerNav.main} pathname={pathname} dots={{ "/profile": profileIncomplete }} />
         <NavGroup label="Learning" items={learnerNav.learning} pathname={pathname} />
         <NavGroup label="Payments" items={paymentsItems} pathname={pathname} />
         <NavGroup label="Support" items={learnerNav.support} pathname={pathname} badges={{ "/tickets": ticketUnread }} />

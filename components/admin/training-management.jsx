@@ -26,7 +26,7 @@ import {
   Hash, Calendar, Clock, Globe, Hourglass, Users, UserCheck, UserX, UserPlus,
   Mail, Phone, Briefcase, MapPin, Video, MoreHorizontal, Pencil, ArrowLeftRight, XCircle,
   ExternalLink, Plus, BookText, AlertCircle, User, Link2, MessageSquare, CheckSquare2, ChevronDown,
-  CheckCircle2, GraduationCap, Loader2,
+  CheckCircle2, GraduationCap, Loader2, CalendarClock, Ban, PlayCircle, AlertTriangle,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -34,7 +34,7 @@ import { useAuth } from "@/hooks/use-auth";
 import {
   fetchAdminTrainingDetail, fetchAdminTrainings, fetchTrainers, assignTrainer,
   addParticipant, updateMeeting, updateParticipant, cancelEnrolment, transferEnrolment,
-  completeEnrolment, completeAllEnrolments,
+  completeEnrolment, completeAllEnrolments, setTrainingStatus, rescheduleTraining,
 } from "@/services/api/admin/admin-api";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 import { TrainingSurveys } from "@/components/admin/training-surveys";
@@ -47,6 +47,8 @@ const STATUS_CONFIG = {
   ongoing:   { label: "Ongoing",   dark: "bg-blue-400/90 text-blue-950",      light: "bg-blue-50 text-blue-700 ring-1 ring-blue-200/80" },
   completed: { label: "Completed", dark: "bg-white/20 text-white/90",          light: "bg-slate-100 text-slate-600" },
   cancelled: { label: "Cancelled", dark: "bg-red-400/90 text-red-950",         light: "bg-red-50 text-red-600 ring-1 ring-red-200/80" },
+  postponed: { label: "Postponed", dark: "bg-orange-400/90 text-orange-950",   light: "bg-orange-50 text-orange-700 ring-1 ring-orange-200/80" },
+  suspended: { label: "Suspended", dark: "bg-rose-400/90 text-rose-950",       light: "bg-rose-50 text-rose-700 ring-1 ring-rose-200/80" },
 };
 
 // Per-participant enrolment status → badge style + label.
@@ -755,6 +757,171 @@ function CompleteConfirmDialog({ open, onOpenChange, token, mode, participant, t
   );
 }
 
+/* ── Reschedule (Postpone) dialog ── */
+// Common IANA timezones; the current one is always included so it's never lost.
+const TIMEZONES = [
+  "Asia/Kolkata", "Asia/Dubai", "Asia/Singapore", "Asia/Tokyo",
+  "Europe/London", "Europe/Berlin", "Europe/Paris",
+  "America/New_York", "America/Chicago", "America/Los_Angeles",
+  "Australia/Sydney", "UTC",
+];
+function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDone }) {
+  const [form, setForm] = useState({ start_date: "", start_time: "", end_time: "", timezone: "", note: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (open && detail) {
+      setForm({
+        start_date: detail.start_date || "",
+        start_time: (detail.start_time || "09:00").slice(0, 5),
+        end_time: (detail.end_time || "17:00").slice(0, 5),
+        timezone: detail.timezone || "Asia/Kolkata",
+        note: "",
+      });
+      setError(null);
+    }
+  }, [open, detail]);
+
+  const tzOptions = detail?.timezone && !TIMEZONES.includes(detail.timezone)
+    ? [detail.timezone, ...TIMEZONES] : TIMEZONES;
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  async function submit() {
+    if (!form.start_date) { setError("Pick a new start date."); return; }
+    setSubmitting(true); setError(null);
+    try {
+      const { training } = await rescheduleTraining({
+        token, trainingRef,
+        data: {
+          start_date: form.start_date,
+          start_time: form.start_time || undefined,
+          end_time: form.end_time || undefined,
+          timezone: form.timezone || undefined,
+          note: form.note.trim() || undefined,
+        },
+      });
+      onDone(training);
+      onOpenChange(false);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const dayCount = Array.isArray(detail?.session_dates) ? detail.session_dates.length : null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-base flex items-center gap-2"><CalendarClock className="h-4 w-4 text-orange-500" /> Reschedule Training</DialogTitle>
+          <DialogDescription className="text-xs text-slate-500 mt-0.5">
+            Moves this training to a new date{dayCount ? ` (${dayCount} day${dayCount === 1 ? "" : "s"}, consecutive from the new start)` : ""} and marks it <b>Postponed</b>. Everyone — trainer, learners, sponsor — sees the new schedule immediately.
+          </DialogDescription>
+        </DialogHeader>
+        <Box className="px-6 py-5 space-y-4">
+          <Box className="space-y-1.5">
+            <Label className="text-xs">New start date *</Label>
+            <Input type="date" value={form.start_date} onChange={(e) => set("start_date", e.target.value)} className="h-9 text-sm" />
+          </Box>
+          <Box className="grid grid-cols-2 gap-3">
+            <Box className="space-y-1.5">
+              <Label className="text-xs">Start time</Label>
+              <Input type="time" value={form.start_time} onChange={(e) => set("start_time", e.target.value)} className="h-9 text-sm" />
+            </Box>
+            <Box className="space-y-1.5">
+              <Label className="text-xs">End time</Label>
+              <Input type="time" value={form.end_time} onChange={(e) => set("end_time", e.target.value)} className="h-9 text-sm" />
+            </Box>
+          </Box>
+          <Box className="space-y-1.5">
+            <Label className="text-xs">Timezone</Label>
+            <Select value={form.timezone} onValueChange={(v) => set("timezone", v)}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select timezone" /></SelectTrigger>
+              <SelectContent>
+                {tzOptions.map((tz) => <SelectItem key={tz} value={tz} className="text-sm">{tz}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Box>
+          <Box className="space-y-1.5">
+            <Label className="text-xs">Reason / note (optional)</Label>
+            <Textarea value={form.note} onChange={(e) => set("note", e.target.value)} rows={2} placeholder="e.g. Trainer unavailable; moved to next month" className="text-sm" />
+          </Box>
+          {error && (
+            <Box className="flex items-center gap-1.5 text-red-600"><AlertCircle className="h-3.5 w-3.5 shrink-0" /><Text as="span" className="text-xs">{error}</Text></Box>
+          )}
+        </Box>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={submitting}>Cancel</Button>
+          <Button size="sm" onClick={submit} disabled={submitting} className="bg-orange-600 hover:bg-orange-700 text-white">
+            {submitting ? "Rescheduling…" : "Reschedule & Postpone"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ── Status change (Complete / Suspend / Reactivate) dialog ── */
+const STATUS_ACTION = {
+  completed: { title: "Mark as Completed", verb: "Complete", icon: CheckCircle2, tone: "bg-emerald-600 hover:bg-emerald-700", desc: "Marks the training finished. This is final and can't be changed afterwards." },
+  suspended: { title: "Suspend Training", verb: "Suspend", icon: Ban, tone: "bg-rose-600 hover:bg-rose-700", desc: "Puts the training on hold indefinitely. You can reactivate it later." },
+  active: { title: "Reactivate Training", verb: "Reactivate", icon: PlayCircle, tone: "bg-violet-600 hover:bg-violet-700", desc: "Returns the training to Active. Clears any postponed/suspended flag." },
+};
+function StatusChangeDialog({ status, onOpenChange, token, trainingRef, onDone }) {
+  const [note, setNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const open = !!status;
+  const cfg = status ? STATUS_ACTION[status] : null;
+
+  useEffect(() => { if (status) { setNote(""); setError(null); } }, [status]);
+
+  async function submit() {
+    setSubmitting(true); setError(null);
+    try {
+      const { training } = await setTrainingStatus({ token, trainingRef, status, note: note.trim() || undefined });
+      onDone(training);
+      onOpenChange(null);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!cfg) return null;
+  const Icon = cfg.icon;
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onOpenChange(null)}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-base flex items-center gap-2"><Icon className="h-4 w-4" /> {cfg.title}</DialogTitle>
+          <DialogDescription className="text-xs text-slate-500 mt-0.5">{cfg.desc}</DialogDescription>
+        </DialogHeader>
+        <Box className="px-6 py-5 space-y-3">
+          <Box className="space-y-1.5">
+            <Label className="text-xs">Note (optional)</Label>
+            <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Reason or context" className="text-sm" />
+          </Box>
+          {error && (
+            <Box className="flex items-center gap-1.5 text-red-600"><AlertCircle className="h-3.5 w-3.5 shrink-0" /><Text as="span" className="text-xs">{error}</Text></Box>
+          )}
+        </Box>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(null)} disabled={submitting}>Cancel</Button>
+          <Button size="sm" onClick={submit} disabled={submitting} className={`${cfg.tone} text-white`}>
+            {submitting ? "Saving…" : cfg.verb}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ══════════════════════════════════════════════════════ Main component ══ */
 export function TrainingManagement({ trainingId }) {
   const { token } = useAuth();
@@ -769,6 +936,8 @@ export function TrainingManagement({ trainingId }) {
   const [transferParticipant, setTransferParticipant] = useState(null);
   const [completeParticipant, setCompleteParticipant] = useState(null);
   const [completeAllOpen, setCompleteAllOpen] = useState(false);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [statusAction, setStatusAction] = useState(null); // "completed" | "suspended" | "active"
 
   const load = useCallback(() => {
     if (!token) return;
@@ -803,6 +972,7 @@ export function TrainingManagement({ trainingId }) {
   }
 
   const statusCfg = STATUS_CONFIG[detail.status] || STATUS_CONFIG.active;
+  const isTerminal = detail.status === "completed" || detail.status === "cancelled";
   const isVirtual = detail.delivery_mode !== "in_person";
   const canRelease = detail.enrolled_count >= (detail.min_seats ?? 1);
   const confirmedCount = detail.participants.filter((p) => p.status === "confirmed").length;
@@ -836,6 +1006,62 @@ export function TrainingManagement({ trainingId }) {
           <Fact icon={Hourglass} label="Duration" value={detail.duration_hours != null ? `${detail.duration_hours} hours` : "—"} />
           <Fact icon={Clock} label="Hours / Day" value={detail.hours_per_day != null ? `${detail.hours_per_day} hours` : "—"} />
           <Fact icon={Users} label="Capacity" value={`${detail.enrolled_count} / ${detail.capacity ?? "—"} enrolled`} />
+        </Box>
+      </Card>
+
+      {/* ── Status management ── */}
+      <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-white">
+        {detail.due_for_update && (
+          <Box className="flex items-start gap-2.5 bg-amber-50 border-b border-amber-200/70 px-6 py-3">
+            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+            <Text as="p" className="text-xs text-amber-800">
+              <b>Due for update.</b> This training&apos;s end date has passed but it&apos;s still open. Mark it Completed, or Postpone/Suspend it.
+            </Text>
+          </Box>
+        )}
+        <Box className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
+          <Box className="min-w-0">
+            <Box className="flex items-center gap-2">
+              <Text as="h3" className="text-sm font-bold text-slate-800">Status</Text>
+              <Badge className={`border-0 text-[10px] font-semibold ${statusCfg.light}`}>{statusCfg.label}</Badge>
+            </Box>
+            {detail.status === "postponed" && detail.postponed_at && (
+              <Text as="p" className="text-[11px] text-orange-600 mt-1">
+                Postponed{detail.status_note ? ` — ${detail.status_note}` : ""}. Showing the new date above.
+              </Text>
+            )}
+            {detail.status === "suspended" && (
+              <Text as="p" className="text-[11px] text-rose-600 mt-1">
+                On hold{detail.status_note ? ` — ${detail.status_note}` : ""}.
+              </Text>
+            )}
+          </Box>
+          {isTerminal ? (
+            <Text as="span" className="text-[11px] text-slate-400">This training is {detail.status} — status is final.</Text>
+          ) : (
+            <Box className="flex flex-wrap items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => setRescheduleOpen(true)}
+                className="h-8 px-3 border-orange-200 text-orange-700 hover:bg-orange-50 rounded-lg text-xs font-semibold">
+                <CalendarClock className="h-3.5 w-3.5 mr-1" /> {detail.status === "postponed" ? "Reschedule again" : "Postpone / Reschedule"}
+              </Button>
+              {(detail.status === "suspended" || detail.status === "postponed") && (
+                <Button size="sm" variant="outline" onClick={() => setStatusAction("active")}
+                  className="h-8 px-3 border-violet-200 text-violet-700 hover:bg-violet-50 rounded-lg text-xs font-semibold">
+                  <PlayCircle className="h-3.5 w-3.5 mr-1" /> Set Active
+                </Button>
+              )}
+              {detail.status !== "suspended" && (
+                <Button size="sm" variant="outline" onClick={() => setStatusAction("suspended")}
+                  className="h-8 px-3 border-rose-200 text-rose-700 hover:bg-rose-50 rounded-lg text-xs font-semibold">
+                  <Ban className="h-3.5 w-3.5 mr-1" /> Suspend
+                </Button>
+              )}
+              <Button size="sm" onClick={() => setStatusAction("completed")}
+                className="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-white border-0 rounded-lg text-xs font-semibold">
+                <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Mark Completed
+              </Button>
+            </Box>
+          )}
         </Box>
       </Card>
 
@@ -1077,6 +1303,8 @@ export function TrainingManagement({ trainingId }) {
       <TransferDialog participant={transferParticipant} onOpenChange={() => setTransferParticipant(null)} token={token} currentTrainingId={detail.id} onDone={load} />
       <CompleteConfirmDialog mode="single" participant={completeParticipant} open={!!completeParticipant} onOpenChange={(v) => !v && setCompleteParticipant(null)} token={token} onDone={load} />
       <CompleteConfirmDialog mode="bulk" open={completeAllOpen} onOpenChange={setCompleteAllOpen} token={token} trainingRef={trainingId} confirmedCount={confirmedCount} onDone={load} />
+      <RescheduleDialog open={rescheduleOpen} onOpenChange={setRescheduleOpen} token={token} trainingRef={trainingId} detail={detail} onDone={load} />
+      <StatusChangeDialog status={statusAction} onOpenChange={setStatusAction} token={token} trainingRef={trainingId} onDone={load} />
     </Box>
   );
 }

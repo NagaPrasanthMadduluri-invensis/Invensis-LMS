@@ -18,6 +18,8 @@ const STATUS_CONFIG = {
   scheduled: { label: "Scheduled", color: "bg-blue-100 text-blue-700" },
   completed: { label: "Completed", color: "bg-slate-100 text-slate-600" },
   cancelled: { label: "Cancelled", color: "bg-red-100 text-red-600" },
+  postponed: { label: "Postponed", color: "bg-orange-100 text-orange-700" },
+  suspended: { label: "Suspended", color: "bg-rose-100 text-rose-700" },
 };
 
 function formatDate(d) {

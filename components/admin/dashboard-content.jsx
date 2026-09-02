@@ -80,6 +80,8 @@ const STATUS_BADGE = {
   pending:     "bg-amber-100 text-amber-700",
   completed:   "bg-violet-100 text-violet-700",
   cancelled:   "bg-rose-100 text-rose-700",
+  postponed:   "bg-orange-100 text-orange-700",
+  suspended:   "bg-rose-100 text-rose-700",
   confirmed:   "bg-emerald-100 text-emerald-700",
   transferred: "bg-violet-100 text-violet-700",
   failed:      "bg-rose-100 text-rose-700",

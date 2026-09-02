@@ -47,6 +47,8 @@ const STATUS = {
   ongoing:   { label: "In Progress", chip: "bg-sky-100 text-sky-700",       icon: CircleDashed },
   completed: { label: "Completed",   chip: "bg-emerald-100 text-emerald-700", icon: CheckCircle2 },
   cancelled: { label: "Cancelled",   chip: "bg-rose-100 text-rose-700",     icon: AlertCircle },
+  postponed: { label: "Postponed",   chip: "bg-orange-100 text-orange-700", icon: CalendarClock },
+  suspended: { label: "Suspended",   chip: "bg-rose-100 text-rose-700",     icon: AlertCircle },
 };
 function statusOf(s) { return STATUS[s] || { label: s || "—", chip: "bg-slate-100 text-slate-600", icon: CircleDashed }; }
 

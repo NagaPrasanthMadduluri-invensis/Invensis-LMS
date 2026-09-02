@@ -19,6 +19,7 @@ import { UserCog } from "lucide-react";
 import Text from "@/components/ui/text";
 import { trainerNav } from "@/lib/nav-config";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfileCompletion } from "@/providers/profile-completion-provider";
 
 function NavGroup({ label, items, pathname }) {
   return (
@@ -48,6 +49,8 @@ function NavGroup({ label, items, pathname }) {
 export function TrainerSidebar() {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const completion = useProfileCompletion();
+  const profileIncomplete = !!completion && completion.tracked && !completion.loading && !completion.complete;
 
   return (
     <Sidebar collapsible="icon">
@@ -79,9 +82,12 @@ export function TrainerSidebar() {
                 }
               >
                 <item.icon />
-                <Text as="span" className="text-sidebar-foreground font-medium">
+                <Text as="span" className="flex-1 text-sidebar-foreground font-medium">
                   {item.title}
                 </Text>
+                {item.href === "/trainer/profile" && profileIncomplete && (
+                  <span className="ml-auto h-2 w-2 shrink-0 rounded-full bg-red-500" aria-label="Incomplete" />
+                )}
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

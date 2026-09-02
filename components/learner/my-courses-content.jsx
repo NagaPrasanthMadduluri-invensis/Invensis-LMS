@@ -46,6 +46,8 @@ const STATUS_CONFIG = {
   ongoing: { label: "Ongoing", color: "bg-blue-100 text-blue-700" },
   completed: { label: "Completed", color: "bg-gray-100 text-gray-700" },
   cancelled: { label: "Cancelled", color: "bg-red-100 text-red-700" },
+  postponed: { label: "Postponed", color: "bg-orange-100 text-orange-700" },
+  suspended: { label: "Suspended", color: "bg-rose-100 text-rose-700" },
 };
 
 const BATCH_LABEL = {

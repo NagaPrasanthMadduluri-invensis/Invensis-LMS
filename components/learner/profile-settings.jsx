@@ -20,6 +20,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfileCompletion } from "@/providers/profile-completion-provider";
 import { fetchMyProfile, updateMyProfile, getAvatarUploadUrl, uploadAvatarFile } from "@/services/api/me";
 
 const COUNTRIES = ["India", "United States", "United Kingdom", "Australia", "UAE", "Singapore", "Canada", "Other"];
@@ -136,6 +137,7 @@ function ProfileSkeleton() {
 
 export function LearnerProfileSettings() {
   const { user, sponsor, token, updateUser } = useAuth();
+  const completion = useProfileCompletion();
   const { first, last } = splitName(user?.name);
 
   const [profileLoading, setProfileLoading] = useState(true);
@@ -259,6 +261,7 @@ export function LearnerProfileSettings() {
         },
       });
       updateUser({ name: `${firstName.trim()} ${lastName.trim()}`.trim() });
+      completion?.refresh?.();
       flashSaved(setPersonalSaved);
     } catch (e) {
       setPersonalErrors(mapFieldErrors(e.errors, { first_name: "firstName", last_name: "lastName", phone: "mobile" }));
@@ -296,6 +299,7 @@ export function LearnerProfileSettings() {
       if (linkedin.trim()) data.linkedin_url = linkedin.trim();
 
       await updateMyProfile({ token, data });
+      completion?.refresh?.();
       flashSaved(setProfessionalSaved);
     } catch (e) {
       setProfessionalErrors(mapFieldErrors(e.errors, {

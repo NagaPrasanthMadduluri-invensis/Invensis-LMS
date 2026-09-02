@@ -22,6 +22,8 @@ const STATUS_CONFIG = {
   ongoing:   { label: "Ongoing",   badge: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",       accent: "bg-blue-500" },
   completed: { label: "Completed", badge: "bg-slate-100 text-slate-600",                          accent: "bg-slate-400" },
   cancelled: { label: "Cancelled", badge: "bg-red-50 text-red-600 ring-1 ring-red-200",           accent: "bg-red-500" },
+  postponed: { label: "Postponed", badge: "bg-orange-50 text-orange-700 ring-1 ring-orange-200",  accent: "bg-orange-500" },
+  suspended: { label: "Suspended", badge: "bg-rose-50 text-rose-700 ring-1 ring-rose-200",        accent: "bg-rose-500" },
 };
 
 const MODE_LABEL = {
@@ -87,7 +89,12 @@ function TrainingCard({ training, onClick }) {
           <Text as="span" className="text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg tracking-wide">
             {training.code}
           </Text>
-          <Badge className={`text-[10px] font-semibold border-0 ${statusCfg.badge}`}>{statusCfg.label}</Badge>
+          <Box className="flex items-center gap-1.5">
+            {training.due_for_update && (
+              <Badge className="text-[10px] font-semibold border-0 bg-amber-100 text-amber-800 ring-1 ring-amber-300">Due for Update</Badge>
+            )}
+            <Badge className={`text-[10px] font-semibold border-0 ${statusCfg.badge}`}>{statusCfg.label}</Badge>
+          </Box>
         </Box>
 
         {/* Title */}
@@ -263,6 +270,8 @@ export function TrainingsList() {
     { key: "pending", label: "Pending" },
     { key: "active", label: "Active" },
     { key: "ongoing", label: "Ongoing" },
+    { key: "postponed", label: "Postponed" },
+    { key: "suspended", label: "Suspended" },
     { key: "completed", label: "Completed" },
     { key: "cancelled", label: "Cancelled" },
   ];

@@ -16,6 +16,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfileCompletion } from "@/providers/profile-completion-provider";
 import {
   fetchMyTrainerProfile,
   updateMyTrainerProfile,
@@ -93,6 +94,7 @@ function ProfileSkeleton() {
 
 export function TrainerProfileSettings() {
   const { token, updateUser } = useAuth();
+  const completion = useProfileCompletion();
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -183,6 +185,7 @@ export function TrainerProfileSettings() {
       const { trainer } = await updateMyTrainerProfile({ token, data: { resume_key } });
       setResumeUrl(trainer.resume_url || null);
       setResumeKey(trainer.resume_key || null);
+      completion?.refresh?.();
     } catch (err) {
       setResumeError(err.message || "Failed to upload resume. Please try again.");
     } finally {
@@ -198,6 +201,7 @@ export function TrainerProfileSettings() {
       const { trainer } = await updateMyTrainerProfile({ token, data: { resume_key: null } });
       setResumeUrl(trainer.resume_url || null);
       setResumeKey(trainer.resume_key || null);
+      completion?.refresh?.();
     } catch (err) {
       setResumeError(err.message || "Failed to remove resume. Please try again.");
     } finally {
@@ -235,6 +239,7 @@ export function TrainerProfileSettings() {
       setSpecInput("");
       updateUser({ name: trainer.name });
       setSaved(true);
+      completion?.refresh?.();
       setTimeout(() => setSaved(false), 2000);
     } catch (e) {
       setErrors(mapFieldErrors(e.errors, { name: "name", bio: "bio", experience: "experience" }));
