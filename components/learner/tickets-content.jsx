@@ -20,10 +20,11 @@ import { markTicketSeen } from "@/lib/ticket-unread";
 import { fetchMyTickets, fetchMyTicket, replyToMyTicket } from "@/services/api/learner/learner-api";
 import { STATUS_META, PRIORITY_META, categoryLabel } from "@/lib/ticket-meta";
 import { TicketThread } from "@/components/shared/ticket-thread";
+import { formatInstantDate, formatInstantDateTime } from "@/lib/datetime";
 
+// `created_at` is a real instant, so it shows on the reader's own clock.
 function formatDate(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return formatInstantDate(iso, { day: "2-digit" });
 }
 
 function StatChip({ icon: Icon, value, label, cls }) {
@@ -93,8 +94,7 @@ function TicketRow({ t, onClick }) {
 }
 
 function formatDateTime(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return formatInstantDateTime(iso, { day: "2-digit", hour: "2-digit" });
 }
 
 function LearnerTicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }) {

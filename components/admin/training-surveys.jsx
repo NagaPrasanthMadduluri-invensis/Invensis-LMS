@@ -23,11 +23,10 @@ import {
 import {
   POST_TRAINING_QUESTIONS, POST_TRAINING_SURVEY_TITLE, formatSurveyAnswer,
 } from "@/lib/survey-questions";
+import { formatInstantDateTime } from "@/lib/datetime";
 
-function formatDateTime(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
-}
+// `submitted_at` is a real instant — shown on the reader's clock.
+const formatDateTime = (iso) => formatInstantDateTime(iso);
 
 /* ── Create post-training survey dialog ── */
 function CreateSurveyDialog({ open, onOpenChange, token, trainingRef, onCreated }) {

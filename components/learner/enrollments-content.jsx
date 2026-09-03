@@ -16,15 +16,11 @@ import Box from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchMyTrainings } from "@/services/api/learner/learner-api";
+import { dateValue, formatDate as fmtDate } from "@/lib/datetime";
 
 /* ── formatting ── */
 function formatDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-  } catch {
-    return iso;
-  }
+  return iso ? fmtDate(iso) : "—";
 }
 function dateRange(start, end) {
   if (!start && !end) return "Dates to be confirmed";
@@ -263,7 +259,7 @@ export function EnrollmentsContent() {
   // "Next" = everything not yet finished, soonest first; the earliest is highlighted.
   const upcoming = trainings
     .filter((t) => !isFinished(t) && t.status !== "cancelled")
-    .sort((a, b) => new Date(a.start_date ?? 0) - new Date(b.start_date ?? 0));
+    .sort((a, b) => dateValue(a.start_date) - dateValue(b.start_date));
 
   if (completed.length === 0 && upcoming.length === 0) {
     return <EmptyState icon={CreditCard} text="You're not enrolled in any trainings yet." />;

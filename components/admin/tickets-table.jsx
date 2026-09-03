@@ -21,6 +21,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { formatInstantDate, formatInstantDateTime } from "@/lib/datetime";
 import { markTicketSeen } from "@/lib/ticket-unread";
 import { fetchAdminTickets, fetchAdminTicket, updateTicketStatus, replyToAdminTicket } from "@/services/api/admin/admin-api";
 import { STATUS_META, PRIORITY_META, categoryLabel, TICKET_CATEGORIES } from "@/lib/ticket-meta";
@@ -38,14 +39,9 @@ function avatarColor(id = "") {
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xff;
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
-function formatDateTime(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
-}
-function formatDate(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-}
+// Ticket timestamps are real instants — shown on the reader's clock.
+const formatDateTime = (iso) => formatInstantDateTime(iso, { day: "2-digit", hour: "2-digit" });
+const formatDate = (iso) => formatInstantDate(iso, { day: "2-digit" });
 
 const STATUS_OPTIONS = ["open", "in_progress", "resolved", "closed"];
 

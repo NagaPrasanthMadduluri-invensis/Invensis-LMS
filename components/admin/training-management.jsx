@@ -40,6 +40,7 @@ import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 import { TrainingSurveys } from "@/components/admin/training-surveys";
 import { TrainingAttendance } from "@/components/admin/training-attendance";
 import { ResourceManager } from "@/components/admin/resource-manager";
+import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatTime as fmtTime } from "@/lib/datetime";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pending",   dark: "bg-amber-400/90 text-amber-950",    light: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80" },
@@ -63,21 +64,11 @@ const ENROLMENT_STATUS = {
 const MODE_LABEL = { virtual: "Live Virtual", in_person: "In Person", hybrid: "Hybrid", one_to_one: "1-to-1 Coaching" };
 const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Other" };
 
-function formatDate(d) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-}
-function formatTime(t) {
-  if (!t) return "—";
-  const [h, m] = t.split(":");
-  const date = new Date();
-  date.setHours(Number(h), Number(m), 0, 0);
-  return date.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", hour12: true });
-}
-function formatSessionDateTime(iso) {
-  if (!iso) return null;
-  return new Date(iso).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
-}
+// Schedules and sessions are wall-clock values — printed exactly as the API
+// sent them, in the training's own timezone. See `lib/datetime`.
+const formatDate = (d) => fmtDate(d);
+const formatTime = (t) => fmtTime(t);
+const formatSessionDateTime = (iso) => fmtDateTime(iso, { year: undefined, fallback: null });
 
 /* ── Shared form helpers ── */
 function FInput({ icon: Icon, accentColor = "indigo", textarea, rows, ...props }) {

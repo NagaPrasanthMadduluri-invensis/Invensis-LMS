@@ -14,6 +14,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { formatDate as fmtDate } from "@/lib/datetime";
 import { fetchAdminTrainings } from "@/services/api/admin/admin-api";
 
 const STATUS_CONFIG = {
@@ -30,10 +31,8 @@ const MODE_LABEL = {
   virtual: "Live Virtual", in_person: "In Person", hybrid: "Hybrid", one_to_one: "1-to-1",
 };
 
-function formatDate(d) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-}
+// Training dates print exactly as the API sent them — see `lib/datetime`.
+const formatDate = (d) => fmtDate(d);
 
 function StatCard({ label, value, icon: Icon, bg, border, iconBg, iconCls, valueCls, labelCls }) {
   return (

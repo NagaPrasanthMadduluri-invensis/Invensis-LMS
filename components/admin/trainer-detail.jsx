@@ -15,6 +15,7 @@ import Link from "next/link";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { formatDate as fmtDate, formatInstantDate } from "@/lib/datetime";
 import { fetchTrainerDetail } from "@/services/api/admin/admin-api";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 
@@ -22,10 +23,10 @@ function initialsOf(name = "") {
   return name.trim().split(/\s+/).slice(0, 2).map((p) => p.charAt(0).toUpperCase()).join("") || "T";
 }
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-}
+// Training dates are wall-clock values and print exactly as sent; the audit
+// timestamps beside them are real instants. See `lib/datetime`.
+const formatDate = (iso) => fmtDate(iso, { day: "2-digit" });
+const formatStamp = (iso) => formatInstantDate(iso, { day: "2-digit" });
 
 function formatRange(start, end) {
   if (!start && !end) return "Not scheduled";
@@ -168,7 +169,7 @@ function TrainingCard({ a }) {
         )}
         {!a.active && (
           <Box className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-500 text-[11px] font-medium px-2 py-0.5 rounded-lg ring-1 ring-slate-200">
-            Unassigned {a.removed_at ? `· ${formatDate(a.removed_at)}` : ""}
+            Unassigned {a.removed_at ? `· ${formatStamp(a.removed_at)}` : ""}
           </Box>
         )}
       </Box>

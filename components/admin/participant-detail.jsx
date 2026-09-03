@@ -13,6 +13,7 @@ import Link from "next/link";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { formatDate as fmtDate, formatInstantDate } from "@/lib/datetime";
 import { fetchParticipantDetail } from "@/services/api/admin/admin-api";
 
 const AVATAR_COLORS = [
@@ -30,10 +31,10 @@ function avatarColor(id = "") {
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-}
+// Training dates are wall-clock values and print exactly as sent; the audit
+// timestamps beside them are real instants. See `lib/datetime`.
+const formatDate = (iso) => fmtDate(iso, { day: "2-digit" });
+const formatStamp = (iso) => formatInstantDate(iso, { day: "2-digit" });
 
 function formatRange(start, end) {
   if (!start && !end) return "Not scheduled";
@@ -253,7 +254,7 @@ export function ParticipantDetail({ userId }) {
               value={p.linkedin_url ? "View profile" : "—"}
               href={p.linkedin_url || undefined}
             />
-            <Fact icon={Calendar} label="Joined" value={formatDate(p.created_at)} />
+            <Fact icon={Calendar} label="Joined" value={formatStamp(p.created_at)} />
           </Box>
         </Box>
       </Card>

@@ -50,16 +50,19 @@ import {
   MODE_LABEL,
   BUCKET_LABEL,
 } from "./analytics-charts";
+import { instantValue, toDateInput } from "@/lib/datetime";
 
 /* ── helpers ── */
 const ALL = "all";
 
+// Start date (YYYY-MM-DD) for a "last N months" preset, on the local calendar
+// — `toISOString()` would report the UTC day and slip a day west of Greenwich.
 function presetFrom(preset) {
   if (preset === ALL) return "";
   const months = { "3m": 3, "6m": 6, "12m": 12, "24m": 24 }[preset] ?? 12;
   const d = new Date();
   d.setMonth(d.getMonth() - months);
-  return d.toISOString().slice(0, 10);
+  return toDateInput(d);
 }
 
 const RANGE_OPTIONS = [
@@ -83,22 +86,15 @@ const SPONSORSHIP_OPTIONS = [
   { value: "corporate", label: "Corporate" },
 ];
 
+// `generated_at` is a real instant, so its age is measured against real "now".
 function timeAgo(iso) {
-  if (!iso) return "now";
-  const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  const at = instantValue(iso, null);
+  if (at === null) return "now";
+  const mins = Math.round((Date.now() - at) / 60000);
   if (mins < 1) return "just now";
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.round(mins / 60);
   return hrs < 24 ? `${hrs}h ago` : `${Math.round(hrs / 24)}d ago`;
-}
-
-function formatDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-  } catch {
-    return iso;
-  }
 }
 
 const cap = (s = "") => s.charAt(0).toUpperCase() + s.slice(1);

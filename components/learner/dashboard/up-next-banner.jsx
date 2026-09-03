@@ -4,14 +4,17 @@ import { Button } from "@/components/ui/button";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { deliveryLabel, formatSessionWindow, isSessionLive } from "./dashboard-utils";
+import { apiNow } from "@/lib/datetime";
 
 /**
  * The single most actionable thing on the page: the learner's next session,
  * with a one-click way into it. Rendered only when there IS a next session —
  * `DashboardContent` skips this band entirely otherwise.
  */
-export function UpNextBanner({ course, detail, session }) {
-  const live = isSessionLive(session);
+export function UpNextBanner({ course, detail, session, generatedAt }) {
+  // "Live right now" is judged against the server's clock read in the
+  // training's timezone — never the browser's. See `lib/datetime`.
+  const live = isSessionLive(session, apiNow(generatedAt, detail?.timezone || course?.timezone));
   const window = formatSessionWindow(session.start_time, session.end_time, detail?.timezone);
   const meetingUrl = detail?.meeting?.url ?? null;
 

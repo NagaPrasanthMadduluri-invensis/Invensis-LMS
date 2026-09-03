@@ -18,6 +18,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { formatInstantDate } from "@/lib/datetime";
 import { fetchParticipants } from "@/services/api/admin/admin-api";
 
 const AVATAR_COLORS = [
@@ -41,10 +42,8 @@ function avatarColor(id = "") {
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
 
-function formatJoined(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-}
+// `created_at` is a real instant — shown on the reader's clock.
+const formatJoined = (iso) => formatInstantDate(iso, { day: "2-digit" });
 
 function StatCard({ label, value, icon: Icon, bg, border, iconBg, iconCls, valueCls, labelCls }) {
   return (

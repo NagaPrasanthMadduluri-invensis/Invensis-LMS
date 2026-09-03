@@ -18,6 +18,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { formatDate } from "@/lib/datetime";
 import { fetchAdminCertificates } from "@/services/api/admin/admin-api";
 
 const MODE_LABEL = {
@@ -39,14 +40,8 @@ const STATUS = {
   none: { label: "No completions", cls: "bg-slate-100 text-slate-500" },
 };
 
-function fmtDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-  } catch {
-    return String(iso);
-  }
-}
+// Training dates print exactly as the API sent them — see `lib/datetime`.
+const fmtDate = (iso) => formatDate(iso);
 
 function ListSkeleton() {
   return (

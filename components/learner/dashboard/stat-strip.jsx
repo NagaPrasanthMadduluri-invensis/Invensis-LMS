@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { completedThisMonth, programmeProgress, targetHoursOf } from "./dashboard-utils";
+import { apiNow } from "@/lib/datetime";
 
 const RADIUS = 42;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -54,10 +55,11 @@ function Stat({ label, value, unit, footnote, footnoteClass = "text-muted-foregr
  * The at-a-glance row. One card divided into cells rather than five floating
  * cards — it reads as a single summary instead of five competing ones.
  */
-export function StatStrip({ stats = {}, myCourses = {}, journey = [] }) {
+export function StatStrip({ stats = {}, myCourses = {}, journey = [], generatedAt }) {
   const progress = programmeProgress(myCourses);
   const upcoming = stats.upcoming ?? 0;
-  const newlyCompleted = completedThisMonth(journey);
+  // "This month" is the server's calendar month, not the browser's.
+  const newlyCompleted = completedThisMonth(journey, apiNow(generatedAt));
   const targetHours = targetHoursOf(myCourses);
   const certificates = stats.certificates_earned ?? 0;
 

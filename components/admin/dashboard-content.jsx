@@ -16,6 +16,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { formatDate as fmtDate, instantValue } from "@/lib/datetime";
 import { fetchAdminOverview } from "@/services/api/admin/admin-api";
 
 /* ──────────────────────────────────────────────────────────
@@ -43,30 +44,14 @@ function avatarColor(seed = "") {
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-  } catch {
-    return iso;
-  }
-}
+// Training dates print exactly as the API sent them — see `lib/datetime`.
+const formatDate = (iso) => fmtDate(iso);
 
-function formatDateTime(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString("en-IN", {
-      day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
-}
-
+// `generated_at` is a real instant, so its age is measured against real "now".
 function timeAgo(iso) {
-  if (!iso) return "";
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.round(diff / 60000);
+  const at = instantValue(iso, null);
+  if (at === null) return "";
+  const mins = Math.round((Date.now() - at) / 60000);
   if (mins < 1) return "just now";
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.round(mins / 60);

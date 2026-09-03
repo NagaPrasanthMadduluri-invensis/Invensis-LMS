@@ -8,6 +8,8 @@
  * CSS + an @media print block.
  */
 
+import { formatDate, formatInstantDate, toDateInput } from "@/lib/datetime";
+
 const esc = (v) =>
   String(v ?? "")
     .replace(/&/g, "&amp;")
@@ -28,18 +30,8 @@ function money(n, currency = "USD") {
   }
 }
 
-function fmtDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return String(iso);
-  }
-}
+// Report window bounds are plain YYYY-MM-DD filters — printed as sent.
+const fmtDate = (iso) => formatDate(iso, { locale: "en-US" });
 
 const cap = (s = "") => String(s).charAt(0).toUpperCase() + String(s).slice(1);
 
@@ -137,7 +129,7 @@ function table(items, cols) {
 
 function documentShell(title, bodyHtml) {
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${STYLE}</style></head><body>${bodyHtml}<div class="footer">Invensis Learning · Confidential · Generated ${esc(
-    fmtDate(new Date().toISOString())
+    fmtDate(toDateInput())
   )}</div></body></html>`;
 }
 
@@ -260,7 +252,7 @@ export function printSalesReport(report, { trainerName } = {}) {
       <div><h1>Sales Report</h1><div class="sub">Revenue &amp; performance snapshot</div></div>
       <div class="meta" style="text-align:right;margin-top:0">
         <div><b>Period:</b> ${esc(periodLabel(f))}</div>
-        <div><b>Generated:</b> ${esc(fmtDate(report.generated_at))}</div>
+        <div><b>Generated:</b> ${esc(formatInstantDate(report.generated_at, { locale: "en-US" }))}</div>
       </div>
     </div>
     <div class="meta"><b>Filters:</b> ${esc(activeFiltersLabel(f, { trainerName }))}</div>

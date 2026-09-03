@@ -35,6 +35,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { formatInstantDateTime } from "@/lib/datetime";
 import { fetchOrders } from "@/services/api/admin/admin-api";
 
 const STATUS_STYLE = {
@@ -77,13 +78,8 @@ function TableSkeleton() {
   );
 }
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleString("en-IN", {
-    day: "2-digit", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit", hour12: true,
-  });
-}
+// `ordered_at` is a real instant — shown on the reader's clock.
+const formatDate = (iso) => formatInstantDateTime(iso, { day: "2-digit", hour: "2-digit" });
 
 export function OrdersTable() {
   const { token } = useAuth();

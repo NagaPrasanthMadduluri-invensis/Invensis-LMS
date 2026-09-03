@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchCertificates, fetchLearnerSurveys, submitSurveyResponse } from "@/services/api/learner/learner-api";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
+import { formatDate, wallFields } from "@/lib/datetime";
 
 /* ── date / delivery formatting for the certificate line ── */
 function ordinal(n) {
@@ -23,22 +24,24 @@ function ordinal(n) {
   const v = n % 100;
   return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
 }
-function parseDate(d) {
-  return d ? new Date(`${d}T00:00:00`) : null;
-}
+// Training dates print exactly as the API sent them — see `lib/datetime`.
+// `wallFields` reads the digits straight off the value, so the certificate
+// text is the same wherever (and whenever) it is generated.
+const monthName = (d) =>
+  formatDate(d, { locale: "en-US", month: "long", day: undefined, year: undefined, fallback: "" });
+
 function dayMonthYear(d) {
-  const dt = parseDate(d);
-  if (!dt) return "";
-  return `${ordinal(dt.getDate())} ${dt.toLocaleString("en-US", { month: "long" })} ${dt.getFullYear()}`;
+  const f = wallFields(d);
+  if (!f) return "";
+  return `${ordinal(f.day)} ${monthName(d)} ${f.year}`;
 }
 function certificateDateText(start, end) {
-  const s = parseDate(start);
-  const e = parseDate(end);
+  const s = wallFields(start);
+  const e = wallFields(end);
   if (!s) return "";
   if (!e || start === end) return `on ${dayMonthYear(start)}`;
-  const sameMonth = s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear();
-  if (sameMonth) {
-    return `from ${ordinal(s.getDate())} to ${ordinal(e.getDate())} ${e.toLocaleString("en-US", { month: "long" })} ${e.getFullYear()}`;
+  if (s.month === e.month && s.year === e.year) {
+    return `from ${ordinal(s.day)} to ${ordinal(e.day)} ${monthName(end)} ${e.year}`;
   }
   return `from ${dayMonthYear(start)} to ${dayMonthYear(end)}`;
 }

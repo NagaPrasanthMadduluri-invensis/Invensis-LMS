@@ -18,6 +18,7 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchSponsoredLearners } from "@/services/api/sponsor/sponsor-api";
+import { formatInstantDate } from "@/lib/datetime";
 
 function initialsOf(name = "") {
   return (
@@ -132,7 +133,7 @@ export function SponsoredLearners() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right text-xs text-muted-foreground">
-                  {l.enrolled_at ? new Date(l.enrolled_at).toLocaleDateString() : "—"}
+                  {formatInstantDate(l.enrolled_at)}
                 </TableCell>
               </TableRow>
             ))}

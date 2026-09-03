@@ -10,6 +10,7 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchUpcomingCohorts } from "@/services/api/learner/learner-api";
+import { formatDate } from "@/lib/datetime";
 
 const MODE_LABEL = {
   live_virtual: "Live Virtual",
@@ -23,19 +24,21 @@ const COHORT_LIMIT = 3;
 
 function fmtDateRange(start, end) {
   if (!start) return "—";
-  const opts = { day: "numeric", month: "short", year: "numeric" };
-  const s = new Date(start).toLocaleDateString("en-US", opts);
+  const s = formatDate(start, { locale: "en-US" });
   if (!end || end === start) return s;
-  const e = new Date(end).toLocaleDateString("en-US", opts);
-  return `${s} – ${e}`;
+  return `${s} – ${formatDate(end, { locale: "en-US" })}`;
 }
 
-function fmtTime(t) {
-  if (!t) return null;
-  const [h, m] = String(t).split(":");
-  const d = new Date();
-  d.setHours(Number(h), Number(m || 0), 0, 0);
-  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+/**
+ * The cohort's time, printed exactly as the CMS sent it — no parsing and no
+ * reformatting. These come straight through `GET /learner/upcoming-cohorts`
+ * from the CMS schedule listing, and they are the CMS's own strings read in
+ * the cohort's `timezone_code`; putting them through a Date would only invite
+ * it to be re-read in some other zone.
+ */
+function rawTime(t) {
+  const value = t == null ? "" : String(t).trim();
+  return value || null;
 }
 
 function fmtPrice(amount, currency) {
@@ -51,7 +54,7 @@ function fmtPrice(amount, currency) {
 
 function CohortCard({ c }) {
   const mode = MODE_LABEL[c.training_mode] || c.training_mode || "Training";
-  const time = fmtTime(c.start_time);
+  const time = rawTime(c.start_time);
   const price = fmtPrice(c.final_price, c.currency_code);
   const seatsLeft = c.capacity != null && c.enrolled_count != null ? c.capacity - c.enrolled_count : null;
 

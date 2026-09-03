@@ -14,10 +14,13 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchCourses, syncCourses } from "@/services/api/admin/course-resources-api";
+import { instantValue } from "@/lib/datetime";
 
+// `last_synced_at` is a real instant — its age is measured against real "now".
 function timeAgo(iso) {
-  if (!iso) return "never";
-  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  const at = instantValue(iso, null);
+  if (at === null) return "never";
+  const s = Math.floor((Date.now() - at) / 1000);
   if (s < 60) return "just now";
   if (s < 3600) return `${Math.floor(s / 60)}m ago`;
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;

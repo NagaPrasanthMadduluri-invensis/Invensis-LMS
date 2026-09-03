@@ -18,6 +18,7 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { formatDate } from "@/lib/datetime";
 import {
   fetchMyTrainings,
   fetchTrainerTrainingSessions,
@@ -44,11 +45,8 @@ const TRAINING_STATUS = {
   cancelled: "bg-rose-100 text-rose-600",
 };
 
-function fmtDate(d) {
-  if (!d) return "—";
-  const x = new Date(d);
-  return Number.isNaN(x.getTime()) ? "—" : x.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
-}
+// Session/training dates print exactly as sent — see `lib/datetime`.
+const fmtDate = (d) => formatDate(d, { year: undefined });
 
 /* ── Training picker card ── */
 function TrainingCard({ training, active, onClick }) {

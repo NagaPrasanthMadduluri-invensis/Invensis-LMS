@@ -30,6 +30,7 @@ import Text from "@/components/ui/text";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchSalesReport } from "@/services/api/admin/reports-api";
 import { printSalesReport } from "./report-pdf";
+import { formatDate, formatInstantDateTime, toDateInput } from "@/lib/datetime";
 
 const ALL = "all";
 const CARD = "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm";
@@ -68,13 +69,14 @@ const MODE_LABEL = Object.fromEntries(MODE_OPTIONS.map((o) => [o.value, o.label]
 const BUCKET_LABEL = Object.fromEntries(BUCKET_OPTIONS.map((o) => [o.value, o.label]));
 const cap = (s = "") => s.charAt(0).toUpperCase() + s.slice(1);
 
-// Start date (YYYY-MM-DD) for a "last N months" preset.
+// Start date (YYYY-MM-DD) for a "last N months" preset, on the local calendar
+// — `toISOString()` would report the UTC day and slip a day west of Greenwich.
 function presetFrom(range) {
   if (range === ALL || range === "custom") return "";
   const months = { "6m": 6, "12m": 12, "24m": 24 }[range] ?? 12;
   const d = new Date();
   d.setMonth(d.getMonth() - months);
-  return d.toISOString().slice(0, 10);
+  return toDateInput(d);
 }
 
 function money(n, currency = "USD") {
@@ -87,14 +89,15 @@ function money(n, currency = "USD") {
   }
 }
 
-function fmtD(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
-  } catch {
-    return iso;
-  }
-}
+// Report window bounds are plain YYYY-MM-DD filters — printed as sent.
+const fmtD = (iso) => formatDate(iso, { locale: "en-US" });
+
+// `generated_at` is a real instant, shown on the reader's clock.
+const GENERATED_AT_FMT = {
+  locale: "en-US",
+  day: "numeric", month: "numeric", year: "numeric",
+  hour: "numeric", minute: "2-digit", second: "2-digit",
+};
 
 /* ── Section eyebrow that separates the three report zones ── */
 function SectionTitle({ children, hint }) {
@@ -381,7 +384,7 @@ export function ReportsView() {
     // otherwise the range is open-ended and (with future-dated records) leaks in
     // data beyond the selected span. "All time" stays unbounded; custom uses the
     // entered end date.
-    to: isCustom ? customTo : range === ALL ? "" : new Date().toISOString().slice(0, 10),
+    to: isCustom ? customTo : range === ALL ? "" : toDateInput(),
     delivery_mode: mode === ALL ? "" : mode,
     bucket: bucket === ALL ? "" : bucket,
     status: status === ALL ? "" : status,
@@ -531,7 +534,7 @@ export function ReportsView() {
           <TrainersCard trainers={data.trainers} topTrainers={data.top_trainers} currency={cur} />
 
           <Text as="p" className="pt-1 text-center text-[11px] text-slate-400">
-            Generated {new Date(data.generated_at).toLocaleString("en-US")} · figures count confirmed + completed enrolments
+            Generated {formatInstantDateTime(data.generated_at, GENERATED_AT_FMT)} · figures count confirmed + completed enrolments
           </Text>
         </>
       )}

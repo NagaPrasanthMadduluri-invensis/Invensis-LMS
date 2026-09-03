@@ -32,6 +32,7 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { SessionTimezoneConverter } from "@/components/trainer/timezone-converter";
+import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatInstantDate } from "@/lib/datetime";
 import {
   fetchMyTrainings,
   fetchTrainerTrainingSessions,
@@ -57,16 +58,11 @@ const PARTICIPANT_STATUS_CONFIG = {
 
 const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Meeting" };
 
-function formatDate(d) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-}
-function formatDateTime(d) {
-  if (!d) return "—";
-  return new Date(d).toLocaleString("en-IN", {
-    day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true,
-  });
-}
+// Scheduled dates print exactly as sent; `enrolled_at` is a real instant, so
+// it gets the reader's clock. See `lib/datetime`.
+const formatDate = (d) => fmtDate(d);
+const formatEnrolledAt = (d) => formatInstantDate(d);
+const formatDateTime = (d) => fmtDateTime(d, { year: undefined });
 
 // Roster cells: profile attributes are optional on the API, so render an em dash
 // rather than "undefined" when the learner hasn't shared one.
@@ -353,7 +349,7 @@ function SessionsPanel({ trainingRef, token }) {
                         <TableCell className="py-3.5 align-top">
                           <Badge className={`border-0 text-[10px] font-medium ${cfg.color}`}>{cfg.label}</Badge>
                         </TableCell>
-                        <TableCell className="py-3.5 align-top text-slate-500 text-sm">{formatDate(p.enrolled_at)}</TableCell>
+                        <TableCell className="py-3.5 align-top text-slate-500 text-sm">{formatEnrolledAt(p.enrolled_at)}</TableCell>
                       </TableRow>
                     );
                   })}

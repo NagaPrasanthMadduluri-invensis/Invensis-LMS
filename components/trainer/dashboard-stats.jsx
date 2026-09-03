@@ -10,6 +10,7 @@ import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchMyTrainings } from "@/services/api/trainer/trainer-api";
 import Link from "next/link";
+import { formatDate as fmtDate } from "@/lib/datetime";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pending",   color: "bg-amber-100 text-amber-700" },
@@ -22,10 +23,8 @@ const STATUS_CONFIG = {
   suspended: { label: "Suspended", color: "bg-rose-100 text-rose-700" },
 };
 
-function formatDate(d) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-}
+// Training dates print exactly as the API sent them — see `lib/datetime`.
+const formatDate = (d) => fmtDate(d);
 
 function StatCard({ label, value, icon: Icon, bg, border, iconBg, iconCls, valueCls, labelCls }) {
   return (

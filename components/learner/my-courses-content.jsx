@@ -29,6 +29,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchMyTrainings, fetchTrainingDetail } from "@/services/api/learner/learner-api";
 import { TrainingGuidelines } from "@/components/learner/training-guidelines";
 import { TrainingResources } from "@/components/learner/training-resources";
+import { formatDate as fmtDate, formatDateTime, formatTime as fmtTime } from "@/lib/datetime";
 
 // Admin/support inbox a learner can reach out to about enrolment.
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@invensis.com";
@@ -58,23 +59,11 @@ const BATCH_LABEL = {
 
 const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Meeting" };
 
-function formatDate(dateStr) {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+// "2026-09-15" → "15 Sep 2026", exactly as the API sent it.
+const formatDate = (dateStr) => fmtDate(dateStr);
 
 // "09:00:00" → "9:00 AM"
-function formatTime(timeStr) {
-  if (!timeStr) return "—";
-  const [h, m] = timeStr.split(":");
-  const date = new Date();
-  date.setHours(Number(h), Number(m), 0, 0);
-  return date.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", hour12: true });
-}
+const formatTime = (timeStr) => fmtTime(timeStr);
 
 function Fact({ icon: Icon, label, children }) {
   return (
@@ -286,12 +275,10 @@ function ScheduleCard({ training, enrolmentId }) {
   );
 }
 
-// ISO-8601 UTC timestamp → "15 Sep, 9:00 AM"
+// Session timestamp → "15 Sep, 9:00 AM" in the training's own timezone, which
+// is what the stored wall clock already reads.
 function formatSessionTime(iso) {
-  if (!iso) return null;
-  return new Date(iso).toLocaleString("en-IN", {
-    day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true,
-  });
+  return formatDateTime(iso, { year: undefined, fallback: null });
 }
 
 /**

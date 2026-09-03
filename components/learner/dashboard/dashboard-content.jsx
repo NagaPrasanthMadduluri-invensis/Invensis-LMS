@@ -17,6 +17,7 @@ import { RecentActivityPanel } from "./recent-activity-panel";
 import { UpcomingCohortsPanel } from "./upcoming-cohorts-panel";
 import { DashboardSkeleton } from "./dashboard-skeleton";
 import { activeCoursesOf, countdownTo, nextSessionOf, weekAheadOf } from "./dashboard-utils";
+import { apiNow, dateValue } from "@/lib/datetime";
 
 // The dashboard payload has no session-level data, so we top it up with the
 // training detail endpoint. Capped — a learner with a dozen enrolments
@@ -24,7 +25,7 @@ import { activeCoursesOf, countdownTo, nextSessionOf, weekAheadOf } from "./dash
 const DETAIL_FETCH_LIMIT = 4;
 
 /** One-line status under the greeting, e.g. "2 trainings in flight · next session starts in 12 min". */
-function summaryLine({ stats, nextUp }) {
+function summaryLine({ stats, nextUp, generatedAt }) {
   const active = stats.in_progress ?? 0;
   const upcoming = stats.upcoming ?? 0;
 
@@ -35,7 +36,12 @@ function summaryLine({ stats, nextUp }) {
         ? `${upcoming} training${upcoming === 1 ? "" : "s"} lined up`
         : "No active trainings";
 
-  const countdown = nextUp?.session ? countdownTo(nextUp.session.start_time) : null;
+  const countdown = nextUp?.session
+    ? countdownTo(
+        nextUp.session.start_time,
+        apiNow(generatedAt, nextUp.detail?.timezone || nextUp.course?.timezone),
+      )
+    : null;
   const tail = countdown
     ? countdown === "in progress"
       ? "your session is live right now"
@@ -103,7 +109,14 @@ export function DashboardContent() {
 
   if (!data) return <DashboardSkeleton />;
 
-  const { learner = {}, stats = {}, my_courses = {}, certificates = [], journey = [] } = data;
+  const {
+    learner = {},
+    stats = {},
+    my_courses = {},
+    certificates = [],
+    journey = [],
+    generated_at: generatedAt,
+  } = data;
 
   // The next session across every active training — earliest start wins.
   const nextUp = activeCoursesOf(my_courses)
@@ -113,19 +126,26 @@ export function DashboardContent() {
       return session ? { course, detail, session } : null;
     })
     .filter(Boolean)
-    .sort((a, b) => new Date(a.session.start_time ?? 0) - new Date(b.session.start_time ?? 0))[0];
+    .sort((a, b) => dateValue(a.session.start_time) - dateValue(b.session.start_time))[0];
 
-  const weekAhead = weekAheadOf({ courses: activeCoursesOf(my_courses), details });
+  const weekAhead = weekAheadOf({ courses: activeCoursesOf(my_courses), details, generatedAt });
 
   return (
     <Box className="w-full space-y-4">
       {/* Prefer the dashboard payload's name; fall back to the signed-in
           account when the learner profile hasn't got one. */}
-      <DashboardHeader name={learner.name || user?.name} summary={summaryLine({ stats, nextUp })} />
+      <DashboardHeader name={learner.name || user?.name} summary={summaryLine({ stats, nextUp, generatedAt })} />
 
-      {nextUp && <UpNextBanner course={nextUp.course} detail={nextUp.detail} session={nextUp.session} />}
+      {nextUp && (
+        <UpNextBanner
+          course={nextUp.course}
+          detail={nextUp.detail}
+          session={nextUp.session}
+          generatedAt={generatedAt}
+        />
+      )}
 
-      <StatStrip stats={stats} myCourses={my_courses} journey={journey} />
+      <StatStrip stats={stats} myCourses={my_courses} journey={journey} generatedAt={generatedAt} />
 
       {/* The right rail holds fixed-width summary panels; the trainings list
           absorbs whatever width is left, so this scales to any viewport. */}

@@ -17,6 +17,7 @@ import { Receipt, FileText, CreditCard, AlertCircle, RefreshCw } from "lucide-re
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { formatDate } from "@/lib/datetime";
 import { fetchInvoices } from "@/services/api/invoices/invoices-api";
 
 /* Status → badge style. Finance app sends: draft, pending, partial, paid, overdue. */
@@ -50,12 +51,8 @@ function money(amount, currency) {
   }
 }
 
-function fmtDate(d) {
-  if (!d) return "—";
-  const parsed = new Date(d);
-  if (Number.isNaN(parsed.getTime())) return "—";
-  return parsed.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-}
+// CRM invoice dates print exactly as the CRM sent them — see `lib/datetime`.
+const fmtDate = (d) => formatDate(d);
 
 function TableSkeleton() {
   return (

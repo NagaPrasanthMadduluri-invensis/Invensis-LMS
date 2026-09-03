@@ -11,6 +11,7 @@ import Box from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchTrainingAttendance, downloadTrainingAttendanceCsv } from "@/services/api/admin/admin-api";
+import { formatDate } from "@/lib/datetime";
 
 /* Per-session cell states. `null` = unmarked. */
 const CELL = {
@@ -28,11 +29,8 @@ const OVERALL = {
   absent: "bg-rose-100 text-rose-600",
 };
 
-function fmtDate(d) {
-  if (!d) return "—";
-  const x = new Date(d);
-  return Number.isNaN(x.getTime()) ? "—" : x.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
-}
+// Session dates print exactly as sent — see `lib/datetime`.
+const fmtDate = (d) => formatDate(d, { year: undefined });
 
 export function TrainingAttendance({ trainingRef }) {
   const { token } = useAuth();

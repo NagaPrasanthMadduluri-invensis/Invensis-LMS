@@ -6,14 +6,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, MessagesSquare, Lock } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
+import { formatInstantDateTime } from "@/lib/datetime";
 
 function initialsOf(name = "") {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || "?";
 }
 
+// Message timestamps are real instants — shown on the reader's own clock.
 function formatTime(iso) {
-  if (!iso) return "";
-  return new Date(iso).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  return formatInstantDateTime(iso, { day: "2-digit", year: undefined, hour: "2-digit", fallback: "" });
 }
 
 /**

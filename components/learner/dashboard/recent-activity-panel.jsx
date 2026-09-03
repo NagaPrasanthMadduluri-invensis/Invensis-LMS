@@ -3,13 +3,14 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 import { formatDate } from "./dashboard-utils";
+import { dateValue } from "@/lib/datetime";
 
 const MAX_ITEMS = 5;
 
 /** The journey feed, newest first — enrolments and completions. */
 export function RecentActivityPanel({ journey = [] }) {
   const items = [...journey]
-    .sort((a, b) => new Date(b.date ?? 0) - new Date(a.date ?? 0))
+    .sort((a, b) => dateValue(b.date) - dateValue(a.date))
     .slice(0, MAX_ITEMS);
 
   return (
