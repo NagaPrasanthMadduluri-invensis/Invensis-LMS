@@ -32,7 +32,7 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { SessionTimezoneConverter } from "@/components/trainer/timezone-converter";
-import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatInstantDate } from "@/lib/datetime";
+import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatInstantDate, timezoneLabel } from "@/lib/datetime";
 import {
   fetchMyTrainings,
   fetchTrainerTrainingSessions,
@@ -62,7 +62,13 @@ const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Meeting
 // it gets the reader's clock. See `lib/datetime`.
 const formatDate = (d) => fmtDate(d);
 const formatEnrolledAt = (d) => formatInstantDate(d);
-const formatDateTime = (d) => fmtDateTime(d, { year: undefined });
+// The session's own wall clock plus the zone it belongs to — identical text
+// for a trainer in any country. The converter below turns it into their zone.
+function formatDateTime(d, tz) {
+  const when = fmtDateTime(d, { year: undefined });
+  const zone = timezoneLabel(tz, d);
+  return zone && when !== "—" ? `${when} ${zone}` : when;
+}
 
 // Roster cells: profile attributes are optional on the API, so render an em dash
 // rather than "undefined" when the learner hasn't shared one.
@@ -94,7 +100,7 @@ function PendingState({ what }) {
 }
 
 /* ── One day's session, with inline topic editing ── */
-function SessionItem({ session, token, onSaved }) {
+function SessionItem({ session, token, onSaved, timezone }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(session.planned_topics || "");
   const [saving, setSaving] = useState(false);
@@ -133,7 +139,7 @@ function SessionItem({ session, token, onSaved }) {
         <Box className="min-w-0 flex-1">
           <Text as="p" className="text-sm font-semibold leading-tight text-slate-800">Day {session.day_number}</Text>
           {session.start_time && (
-            <Text as="span" className="text-[11px] text-slate-400">{formatDateTime(session.start_time)}</Text>
+            <Text as="span" className="text-[11px] text-slate-400">{formatDateTime(session.start_time, timezone)}</Text>
           )}
         </Box>
         <Badge className={`border-0 text-[10px] shrink-0 ${statusCfg.color}`}>{statusCfg.label}</Badge>
@@ -283,7 +289,7 @@ function SessionsPanel({ trainingRef, token }) {
           ) : (
             <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {sessions.map((s) => (
-                <SessionItem key={s.id ?? s.day_number} session={s} token={token} onSaved={onSaved} />
+                <SessionItem key={s.id ?? s.day_number} session={s} token={token} onSaved={onSaved} timezone={data.timezone} />
               ))}
             </Box>
           )}

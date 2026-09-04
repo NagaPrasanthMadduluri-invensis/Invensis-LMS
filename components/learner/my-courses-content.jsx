@@ -29,7 +29,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchMyTrainings, fetchTrainingDetail } from "@/services/api/learner/learner-api";
 import { TrainingGuidelines } from "@/components/learner/training-guidelines";
 import { TrainingResources } from "@/components/learner/training-resources";
-import { formatDate as fmtDate, formatDateTime, formatTime as fmtTime } from "@/lib/datetime";
+import { formatDate as fmtDate, formatDateTime, formatTime as fmtTime, timezoneLabel } from "@/lib/datetime";
 
 // Admin/support inbox a learner can reach out to about enrolment.
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@invensis.com";
@@ -145,6 +145,9 @@ function ScheduleCard({ training, enrolmentId }) {
         </Fact>
         <Fact icon={Clock} label="Daily Timing">
           {formatTime(training.start_time)} – {formatTime(training.end_time)}
+          {timezoneLabel(training.timezone, training.start_date)
+            ? ` ${timezoneLabel(training.timezone, training.start_date)}`
+            : ""}
         </Fact>
         <Fact icon={Globe} label="Timezone">
           {training.timezone || "—"}
@@ -275,10 +278,14 @@ function ScheduleCard({ training, enrolmentId }) {
   );
 }
 
-// Session timestamp → "15 Sep, 9:00 AM" in the training's own timezone, which
-// is what the stored wall clock already reads.
-function formatSessionTime(iso) {
-  return formatDateTime(iso, { year: undefined, fallback: null });
+// Session timestamp → "15 Sep, 9:00 AM GST". The stored wall clock already
+// reads in the training's own timezone, so it is printed as-is and the zone
+// is named alongside it — the same text for a learner anywhere in the world.
+function formatSessionTime(iso, tz) {
+  const when = formatDateTime(iso, { year: undefined, fallback: null });
+  if (!when) return null;
+  const zone = timezoneLabel(tz, iso);
+  return zone ? `${when} ${zone}` : when;
 }
 
 /**
@@ -286,7 +293,7 @@ function formatSessionTime(iso) {
  * `sessions[]` (day_number, planned_topics) straight from the learner training
  * detail — updates the moment the trainer saves.
  */
-function SessionTopics({ sessions }) {
+function SessionTopics({ sessions, timezone }) {
   const list = Array.isArray(sessions) ? sessions : [];
   // Only show this section once the trainer has published at least one topic.
   const anyTopics = list.some((s) => s.planned_topics?.trim());
@@ -306,7 +313,7 @@ function SessionTopics({ sessions }) {
       <Box className="p-5">
         <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {list.map((s) => {
-            const when = formatSessionTime(s.start_time);
+            const when = formatSessionTime(s.start_time, timezone);
             const hasTopics = !!s.planned_topics?.trim();
             return (
               <Box key={s.day_number} className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
@@ -450,7 +457,7 @@ export function MyCoursesContent() {
   return (
     <Box className="space-y-4">
       <ScheduleCard training={training} enrolmentId={enrolmentId} />
-      <SessionTopics sessions={training.sessions} />
+      <SessionTopics sessions={training.sessions} timezone={training.timezone} />
       {/* Course + session materials the admin/trainer has shared. */}
       <TrainingResources trainingRef={trainingRef} />
       {/* Instructions — only shown when the learner has a current enrolment. */}

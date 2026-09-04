@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+// The lucide `Calendar` icon already owns that name in this file.
+import { Calendar as DatePicker } from "@/components/ui/calendar";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -40,7 +42,16 @@ import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 import { TrainingSurveys } from "@/components/admin/training-surveys";
 import { TrainingAttendance } from "@/components/admin/training-attendance";
 import { ResourceManager } from "@/components/admin/resource-manager";
-import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatTime as fmtTime } from "@/lib/datetime";
+import {
+  datesBetween,
+  formatDate,
+  formatDateTime,
+  formatTime,
+  timezoneLabel,
+  toDateInput,
+  toPickerDate,
+  wallFields,
+} from "@/lib/datetime";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pending",   dark: "bg-amber-400/90 text-amber-950",    light: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80" },
@@ -66,9 +77,14 @@ const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Other" 
 
 // Schedules and sessions are wall-clock values — printed exactly as the API
 // sent them, in the training's own timezone. See `lib/datetime`.
-const formatDate = (d) => fmtDate(d);
-const formatTime = (t) => fmtTime(t);
-const formatSessionDateTime = (iso) => fmtDateTime(iso, { year: undefined, fallback: null });
+// "4 Jan, 9:00 AM GST" — the stored wall clock, printed as-is, with the
+// training's zone named alongside so it reads the same anywhere in the world.
+function formatSessionDateTime(iso, tz) {
+  const when = formatDateTime(iso, { year: undefined, fallback: null });
+  if (!when) return null;
+  const zone = timezoneLabel(tz, iso);
+  return zone ? `${when} ${zone}` : when;
+}
 
 /* ── Shared form helpers ── */
 function FInput({ icon: Icon, accentColor = "indigo", textarea, rows, ...props }) {
@@ -155,7 +171,7 @@ function FSelect({ value, onChange, disabled, placeholder, children }) {
 }
 
 /* ── Fact display block ── */
-function Fact({ icon: Icon, label, value }) {
+function Fact({ icon: Icon, label, value, hint }) {
   return (
     <Box className="flex items-start gap-3">
       <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
@@ -164,13 +180,26 @@ function Fact({ icon: Icon, label, value }) {
       <Box className="min-w-0">
         <Text as="p" className="text-[11px] uppercase tracking-wide text-slate-400 font-medium">{label}</Text>
         <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5">{value}</Text>
+        {hint && <Text as="p" className="text-[11px] text-slate-400 mt-0.5">{hint}</Text>}
       </Box>
     </Box>
   );
 }
 
+/**
+ * "10 training days · 40 day span" — only when the days aren't consecutive,
+ * which a reschedule can now produce (a two-month window may hold ten days).
+ */
+function trainingDaysHint(detail) {
+  const days = Array.isArray(detail?.session_dates) ? detail.session_dates.length : 0;
+  if (!days) return null;
+  const span = datesBetween(detail.start_date, detail.end_date).length;
+  if (span <= days) return null;
+  return `${days} training day${days === 1 ? "" : "s"} across a ${span}-day span`;
+}
+
 /* ── Day-wise topics timeline ── */
-function SessionTopicsCard({ sessions }) {
+function SessionTopicsCard({ sessions, timezone }) {
   const list = Array.isArray(sessions) ? sessions : [];
   const anyTopics = list.some((s) => s.planned_topics?.trim());
 
@@ -198,7 +227,7 @@ function SessionTopicsCard({ sessions }) {
         ) : (
           <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {list.map((s) => {
-              const when = formatSessionDateTime(s.start_time);
+              const when = formatSessionDateTime(s.start_time, timezone);
               const hasTopics = !!s.planned_topics?.trim();
               return (
                 <Box key={s.day_number} className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
@@ -756,40 +785,160 @@ const TIMEZONES = [
   "America/New_York", "America/Chicago", "America/Los_Angeles",
   "Australia/Sydney", "UTC",
 ];
+
+// Minutes past midnight for "HH:MM" — mirrors the server's own arithmetic.
+function minutesOf(t) {
+  const [h, m] = String(t || "").split(":");
+  const mins = Number(h) * 60 + Number(m);
+  return Number.isFinite(mins) ? mins : null;
+}
+
+// 510 → "8h 30m". Used for the hours-per-day and total-hours previews.
+function durationLabel(mins) {
+  if (mins == null || mins <= 0) return "—";
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return [h ? `${h}h` : null, m ? `${m}m` : null].filter(Boolean).join(" ") || "0h";
+}
+
+/** One figure in the preview strip. */
+function PreviewStat({ icon: Icon, label, value, tone = "slate" }) {
+  const tones = {
+    slate: "text-slate-800",
+    orange: "text-orange-700",
+    violet: "text-violet-700",
+  };
+  return (
+    <Box className="min-w-0">
+      <Box className="flex items-center gap-1.5">
+        <Icon className="h-3 w-3 text-slate-400 shrink-0" />
+        <Text as="span" className="text-[10px] font-medium uppercase tracking-wide text-slate-400">{label}</Text>
+      </Box>
+      <Text as="p" className={`mt-0.5 truncate text-sm font-bold ${tones[tone]}`}>{value}</Text>
+    </Box>
+  );
+}
+
+/**
+ * Reschedule = pick the exact days the training runs on.
+ *
+ * The window (new start/new end) bounds the calendar; inside it the admin
+ * selects the individual training days, which need not be consecutive — a
+ * two-month window might hold only ten teaching days. Everything else on the
+ * dialog is derived and shown as a live preview: the effective start and end
+ * are the first and last day picked, hours-per-day comes from the daily
+ * window, and the day count and total hours follow from the selection.
+ */
 function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDone }) {
-  const [form, setForm] = useState({ start_date: "", start_time: "", end_time: "", timezone: "", note: "" });
+  const [windowStart, setWindowStart] = useState("");
+  const [windowEnd, setWindowEnd] = useState("");
+  const [picked, setPicked] = useState([]); // ["2026-11-02", …] always sorted
+  const [times, setTimes] = useState({ start_time: "", end_time: "" });
+  const [timezone, setTimezone] = useState("");
+  const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  // Open with the training's current schedule already laid out, so the admin
+  // starts from what exists and moves it rather than building from scratch.
   useEffect(() => {
-    if (open && detail) {
-      setForm({
-        start_date: detail.start_date || "",
-        start_time: (detail.start_time || "09:00").slice(0, 5),
-        end_time: (detail.end_time || "17:00").slice(0, 5),
-        timezone: detail.timezone || "Asia/Kolkata",
-        note: "",
-      });
-      setError(null);
-    }
+    if (!open || !detail) return;
+    const current = (Array.isArray(detail.session_dates) ? detail.session_dates : [])
+      .map((d) => String(d).slice(0, 10))
+      .sort();
+    setPicked(current);
+    setWindowStart(current[0] || detail.start_date || "");
+    setWindowEnd(current[current.length - 1] || detail.end_date || detail.start_date || "");
+    setTimes({
+      start_time: (detail.start_time || "09:00").slice(0, 5),
+      end_time: (detail.end_time || "17:00").slice(0, 5),
+    });
+    setTimezone(detail.timezone || "Asia/Kolkata");
+    setNote("");
+    setError(null);
   }, [open, detail]);
 
   const tzOptions = detail?.timezone && !TIMEZONES.includes(detail.timezone)
     ? [detail.timezone, ...TIMEZONES] : TIMEZONES;
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  /* ── Derived: the window, and the days available inside it ── */
+  const windowValid = !!windowStart && !!windowEnd && windowStart <= windowEnd;
+  const windowDays = useMemo(
+    () => (windowValid ? datesBetween(windowStart, windowEnd) : []),
+    [windowValid, windowStart, windowEnd]
+  );
+
+  // Selections outside the window are dropped, so the day count on screen is
+  // always the day count that will be saved.
+  useEffect(() => {
+    if (!windowValid) return;
+    setPicked((prev) => {
+      const inside = prev.filter((d) => d >= windowStart && d <= windowEnd);
+      return inside.length === prev.length ? prev : inside;
+    });
+  }, [windowValid, windowStart, windowEnd]);
+
+  /* ── Derived: previews ── */
+  const startMins = minutesOf(times.start_time);
+  const endMins = minutesOf(times.end_time);
+  const perDayMins = startMins != null && endMins != null && endMins > startMins ? endMins - startMins : null;
+
+  const dayCount = picked.length;
+  const newStart = picked[0] || null;
+  const newEnd = picked[dayCount - 1] || null;
+  const spanDays = newStart && newEnd ? datesBetween(newStart, newEnd).length : 0;
+  const totalMins = perDayMins != null ? perDayMins * dayCount : null;
+
+  // Days already delivered. The API remaps sessions by day number, so a
+  // delivered day inside the new day count is moved to its new date; one
+  // beyond the new count is kept rather than orphaning its attendance rows.
+  const deliveredDays = (Array.isArray(detail?.sessions) ? detail.sessions : [])
+    .filter((sn) => sn.status === "completed" || sn.status === "ongoing");
+  const strandedDays = deliveredDays.filter((sn) => (sn.day_number ?? 0) > dayCount).length;
+  const originalCount = Array.isArray(detail?.session_dates) ? detail.session_dates.length : 0;
+
+  /* ── Calendar wiring. react-day-picker speaks local Dates. ── */
+  const selectedDates = useMemo(() => picked.map(toPickerDate).filter(Boolean), [picked]);
+  const onSelectDates = (dates) => {
+    const next = (dates || [])
+      .map(toDateInput)
+      .filter((d) => d && d >= windowStart && d <= windowEnd);
+    setPicked([...new Set(next)].sort());
+  };
+
+  const months = useMemo(() => {
+    if (!windowValid) return 1;
+    const a = wallFields(windowStart);
+    const b = wallFields(windowEnd);
+    const span = (b.year - a.year) * 12 + (b.month - a.month) + 1;
+    return Math.min(Math.max(span, 1), 2);
+  }, [windowValid, windowStart, windowEnd]);
+
+  const selectAll = () => setPicked(windowDays);
+  const selectWeekdays = () =>
+    setPicked(windowDays.filter((d) => {
+      const wd = wallFields(d)?.weekday;
+      return wd !== 0 && wd !== 6;
+    }));
+  const clearAll = () => setPicked([]);
+
+  const canSubmit = windowValid && dayCount > 0 && perDayMins != null && !submitting;
 
   async function submit() {
-    if (!form.start_date) { setError("Pick a new start date."); return; }
+    if (!windowValid) { setError("The window's end date must be on or after its start date."); return; }
+    if (!dayCount) { setError("Pick at least one training day on the calendar."); return; }
+    if (perDayMins == null) { setError("The daily end time must be after the start time."); return; }
     setSubmitting(true); setError(null);
     try {
       const { training } = await rescheduleTraining({
         token, trainingRef,
         data: {
-          start_date: form.start_date,
-          start_time: form.start_time || undefined,
-          end_time: form.end_time || undefined,
-          timezone: form.timezone || undefined,
-          note: form.note.trim() || undefined,
+          session_dates: picked,
+          start_date: picked[0],
+          start_time: times.start_time || undefined,
+          end_time: times.end_time || undefined,
+          timezone: timezone || undefined,
+          note: note.trim() || undefined,
         },
       });
       onDone(training);
@@ -801,53 +950,224 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
     }
   }
 
-  const dayCount = Array.isArray(detail?.session_dates) ? detail.session_dates.length : null;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-3xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-base flex items-center gap-2"><CalendarClock className="h-4 w-4 text-orange-500" /> Reschedule Training</DialogTitle>
+          <DialogTitle className="text-base flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-orange-500" /> Reschedule Training
+          </DialogTitle>
           <DialogDescription className="text-xs text-slate-500 mt-0.5">
-            Moves this training to a new date{dayCount ? ` (${dayCount} day${dayCount === 1 ? "" : "s"}, consecutive from the new start)` : ""} and marks it <b>Postponed</b>. Everyone — trainer, learners, sponsor — sees the new schedule immediately.
+            Set the window, then pick the exact days this training runs on — they don&apos;t have to be
+            consecutive. Saving marks the training <b>Postponed</b>; trainer, learners and sponsor all see
+            the new schedule immediately.
           </DialogDescription>
         </DialogHeader>
-        <Box className="px-6 py-5 space-y-4">
-          <Box className="space-y-1.5">
-            <Label className="text-xs">New start date *</Label>
-            <Input type="date" value={form.start_date} onChange={(e) => set("start_date", e.target.value)} className="h-9 text-sm" />
-          </Box>
-          <Box className="grid grid-cols-2 gap-3">
-            <Box className="space-y-1.5">
-              <Label className="text-xs">Start time</Label>
-              <Input type="time" value={form.start_time} onChange={(e) => set("start_time", e.target.value)} className="h-9 text-sm" />
+
+        <Box className="px-6 py-5 space-y-5">
+          {/* ── 1. The window ── */}
+          <Box className="space-y-2.5">
+            <Box className="flex items-center gap-2">
+              <Text as="span" className="text-xs font-bold text-slate-700">1 · Reschedule window</Text>
+              <Separator className="flex-1" />
             </Box>
-            <Box className="space-y-1.5">
-              <Label className="text-xs">End time</Label>
-              <Input type="time" value={form.end_time} onChange={(e) => set("end_time", e.target.value)} className="h-9 text-sm" />
+            <Box className="grid grid-cols-2 gap-3">
+              <Box className="space-y-1.5">
+                <Label className="text-xs">New start date *</Label>
+                <Input
+                  type="date"
+                  value={windowStart}
+                  max={windowEnd || undefined}
+                  onChange={(e) => setWindowStart(e.target.value)}
+                  className="h-9 text-sm"
+                />
+              </Box>
+              <Box className="space-y-1.5">
+                <Label className="text-xs">New end date *</Label>
+                <Input
+                  type="date"
+                  value={windowEnd}
+                  min={windowStart || undefined}
+                  onChange={(e) => setWindowEnd(e.target.value)}
+                  className="h-9 text-sm"
+                />
+              </Box>
             </Box>
+            {!windowValid && (windowStart || windowEnd) && (
+              <Text as="p" className="text-[11px] text-amber-600">
+                Set both dates — the end date must be on or after the start date.
+              </Text>
+            )}
           </Box>
-          <Box className="space-y-1.5">
-            <Label className="text-xs">Timezone</Label>
-            <Select value={form.timezone} onValueChange={(v) => set("timezone", v)}>
-              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select timezone" /></SelectTrigger>
-              <SelectContent>
-                {tzOptions.map((tz) => <SelectItem key={tz} value={tz} className="text-sm">{tz}</SelectItem>)}
-              </SelectContent>
-            </Select>
+
+          {/* ── 2. The session dates ── */}
+          <Box className="space-y-2.5">
+            <Box className="flex items-center gap-2">
+              <Text as="span" className="text-xs font-bold text-slate-700">2 · Training days</Text>
+              <Separator className="flex-1" />
+              {originalCount > 0 && (
+                <Text as="span" className="text-[10px] text-slate-400 shrink-0">was {originalCount} day{originalCount === 1 ? "" : "s"}</Text>
+              )}
+            </Box>
+
+            {!windowValid ? (
+              <Box className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center">
+                <Text as="p" className="text-xs text-slate-400">Pick the window above to choose the training days.</Text>
+              </Box>
+            ) : (
+              <>
+                <Box className="flex flex-wrap items-center gap-2">
+                  <Badge className="border-0 bg-orange-100 text-orange-700 text-[11px] font-bold">
+                    {dayCount} of {windowDays.length} day{windowDays.length === 1 ? "" : "s"} selected
+                  </Badge>
+                  <Box className="ml-auto flex flex-wrap items-center gap-1.5">
+                    <Button type="button" variant="outline" size="sm" onClick={selectWeekdays} className="h-7 text-[11px] px-2.5">
+                      Weekdays
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={selectAll} className="h-7 text-[11px] px-2.5">
+                      All days
+                    </Button>
+                    <Button type="button" variant="ghost" size="sm" onClick={clearAll} className="h-7 text-[11px] px-2.5 text-slate-500">
+                      Clear
+                    </Button>
+                  </Box>
+                </Box>
+
+                <Box className="rounded-xl border border-slate-200 bg-white p-2 flex justify-center overflow-x-auto">
+                  <DatePicker
+                    mode="multiple"
+                    numberOfMonths={months}
+                    selected={selectedDates}
+                    onSelect={onSelectDates}
+                    defaultMonth={toPickerDate(windowStart)}
+                    startMonth={toPickerDate(windowStart)}
+                    endMonth={toPickerDate(windowEnd)}
+                    // Two separate matchers on purpose: `{ before, after }` in a
+                    // single object is react-day-picker's *interval* matcher,
+                    // which would disable the inside of the window instead.
+                    disabled={[
+                      { before: toPickerDate(windowStart) },
+                      { after: toPickerDate(windowEnd) },
+                    ]}
+                    className="p-0"
+                  />
+                </Box>
+              </>
+            )}
           </Box>
+
+          {/* ── 3. The daily window ── */}
+          <Box className="space-y-2.5">
+            <Box className="flex items-center gap-2">
+              <Text as="span" className="text-xs font-bold text-slate-700">3 · Daily timing</Text>
+              <Separator className="flex-1" />
+            </Box>
+            <Box className="grid grid-cols-3 gap-3">
+              <Box className="space-y-1.5">
+                <Label className="text-xs">Start time</Label>
+                <Input
+                  type="time"
+                  value={times.start_time}
+                  onChange={(e) => setTimes((t) => ({ ...t, start_time: e.target.value }))}
+                  className="h-9 text-sm"
+                />
+              </Box>
+              <Box className="space-y-1.5">
+                <Label className="text-xs">End time</Label>
+                <Input
+                  type="time"
+                  value={times.end_time}
+                  onChange={(e) => setTimes((t) => ({ ...t, end_time: e.target.value }))}
+                  className="h-9 text-sm"
+                />
+              </Box>
+              <Box className="space-y-1.5">
+                <Label className="text-xs">Timezone</Label>
+                <Select value={timezone} onValueChange={setTimezone}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Timezone" /></SelectTrigger>
+                  <SelectContent>
+                    {tzOptions.map((tz) => <SelectItem key={tz} value={tz} className="text-sm">{tz}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Box>
+            </Box>
+            {startMins != null && endMins != null && perDayMins == null && (
+              <Text as="p" className="text-[11px] text-amber-600">The end time must be after the start time.</Text>
+            )}
+          </Box>
+
+          {/* ── Live preview of everything that will be saved ── */}
+          <Box className="rounded-xl border border-violet-200 bg-violet-50/60 px-4 py-3.5">
+            <Text as="p" className="text-[10px] font-bold uppercase tracking-wide text-violet-500 mb-2.5">
+              New schedule preview
+            </Text>
+            <Box className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
+              <PreviewStat icon={Calendar} label="New start date" tone="orange" value={newStart ? formatDate(newStart) : "—"} />
+              <PreviewStat icon={Calendar} label="New end date" tone="orange" value={newEnd ? formatDate(newEnd) : "—"} />
+              <PreviewStat icon={CalendarClock} label="Days of training" tone="violet" value={dayCount ? `${dayCount} day${dayCount === 1 ? "" : "s"}` : "—"} />
+              <PreviewStat icon={Clock} label="Hours per day" value={durationLabel(perDayMins)} />
+              <PreviewStat icon={Hourglass} label="Total hours" value={durationLabel(totalMins)} />
+              <PreviewStat
+                icon={Globe}
+                label="Spans"
+                value={spanDays ? `${spanDays} calendar day${spanDays === 1 ? "" : "s"}` : "—"}
+              />
+            </Box>
+            {dayCount > 0 && perDayMins != null && (
+              <Text as="p" className="mt-2.5 text-[11px] text-violet-700/80">
+                {dayCount} session{dayCount === 1 ? "" : "s"} of {durationLabel(perDayMins)}, {formatTime(times.start_time)} – {formatTime(times.end_time)}
+                {timezone ? ` ${timezone}` : ""}
+                {spanDays > dayCount ? ` · ${spanDays - dayCount} non-training day${spanDays - dayCount === 1 ? "" : "s"} in between` : ""}
+              </Text>
+            )}
+          </Box>
+
+          {/* What rescheduling does to days that have already been delivered. */}
+          {deliveredDays.length > 0 && dayCount > 0 && (
+            <Box className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5">
+              <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <Box className="space-y-1">
+                <Text as="p" className="text-[11px] font-semibold text-amber-800">
+                  {deliveredDays.length} day{deliveredDays.length === 1 ? " is" : "s are"} already under way or completed
+                </Text>
+                <Text as="p" className="text-[11px] text-amber-700">
+                  Day{deliveredDays.length === 1 ? "" : "s"} {deliveredDays.map((sn) => sn.day_number).join(", ")} will
+                  move to the new date{deliveredDays.length === 1 ? "" : "s"} and go back to <b>Scheduled</b>; any
+                  attendance already marked is kept.
+                  {strandedDays > 0 && (
+                    <> {strandedDays} of them fall beyond the {dayCount} day{dayCount === 1 ? "" : "s"} you&apos;ve
+                    picked, so those stay on their current dates instead of being removed.</>
+                  )}
+                </Text>
+              </Box>
+            </Box>
+          )}
+
           <Box className="space-y-1.5">
             <Label className="text-xs">Reason / note (optional)</Label>
-            <Textarea value={form.note} onChange={(e) => set("note", e.target.value)} rows={2} placeholder="e.g. Trainer unavailable; moved to next month" className="text-sm" />
+            <Textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={2}
+              placeholder="e.g. Trainer unavailable; moved to next month"
+              className="text-sm"
+            />
           </Box>
+
           {error && (
-            <Box className="flex items-center gap-1.5 text-red-600"><AlertCircle className="h-3.5 w-3.5 shrink-0" /><Text as="span" className="text-xs">{error}</Text></Box>
+            <Box className="flex items-center gap-1.5 text-red-600">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              <Text as="span" className="text-xs">{error}</Text>
+            </Box>
           )}
         </Box>
+
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={submitting}>Cancel</Button>
-          <Button size="sm" onClick={submit} disabled={submitting} className="bg-orange-600 hover:bg-orange-700 text-white">
-            {submitting ? "Rescheduling…" : "Reschedule & Postpone"}
+          <Button size="sm" onClick={submit} disabled={!canSubmit} className="bg-orange-600 hover:bg-orange-700 text-white">
+            {submitting
+              ? "Rescheduling…"
+              : `Reschedule ${dayCount || 0} day${dayCount === 1 ? "" : "s"} & Postpone`}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -991,8 +1311,19 @@ export function TrainingManagement({ trainingId }) {
           <Text as="h2" className="text-xl font-bold text-slate-900 leading-tight">{detail.title}</Text>
         </Box>
         <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-          <Fact icon={Calendar} label="Dates" value={`${formatDate(detail.start_date)} – ${formatDate(detail.end_date)}`} />
-          <Fact icon={Clock} label="Daily Timing" value={`${formatTime(detail.start_time)} – ${formatTime(detail.end_time)}`} />
+          <Fact
+            icon={Calendar}
+            label="Dates"
+            value={`${formatDate(detail.start_date)} – ${formatDate(detail.end_date)}`}
+            hint={trainingDaysHint(detail)}
+          />
+          <Fact
+            icon={Clock}
+            label="Daily Timing"
+            value={`${formatTime(detail.start_time)} – ${formatTime(detail.end_time)}${
+              timezoneLabel(detail.timezone, detail.start_date) ? ` ${timezoneLabel(detail.timezone, detail.start_date)}` : ""
+            }`}
+          />
           <Fact icon={Globe} label="Timezone" value={detail.timezone || "—"} />
           <Fact icon={Hourglass} label="Duration" value={detail.duration_hours != null ? `${detail.duration_hours} hours` : "—"} />
           <Fact icon={Clock} label="Hours / Day" value={detail.hours_per_day != null ? `${detail.hours_per_day} hours` : "—"} />
@@ -1270,7 +1601,7 @@ export function TrainingManagement({ trainingId }) {
       </Card>
 
       {/* ── Day-wise topics ── */}
-      <SessionTopicsCard sessions={detail.sessions} />
+      <SessionTopicsCard sessions={detail.sessions} timezone={detail.timezone} />
 
       {/* ── Attendance (matrix + CSV export) ── */}
       <TrainingAttendance trainingRef={trainingId} />
