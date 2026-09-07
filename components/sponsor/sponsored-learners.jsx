@@ -18,7 +18,8 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchSponsoredLearners } from "@/services/api/sponsor/sponsor-api";
-import { formatInstantDate } from "@/lib/datetime";
+import { SessionDates, sessionDatesOf } from "@/components/shared/session-dates";
+import { formatDate, formatInstantDate } from "@/lib/datetime";
 
 function initialsOf(name = "") {
   return (
@@ -96,6 +97,7 @@ export function SponsoredLearners() {
             <TableRow>
               <TableHead>Learner</TableHead>
               <TableHead>Training</TableHead>
+              <TableHead>Dates</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Enrolled</TableHead>
             </TableRow>
@@ -120,6 +122,19 @@ export function SponsoredLearners() {
                   <Text as="p" className="text-sm">{l.training_title || l.training_code || "—"}</Text>
                   {l.training_code && l.training_title && (
                     <Text as="span" className="text-[11px] text-muted-foreground">{l.training_code}</Text>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {l.start_date ? (
+                    <Box className="space-y-1">
+                      <Text as="p" className="text-sm">
+                        {formatDate(l.start_date)} – {formatDate(l.end_date)}
+                      </Text>
+                      {/* the exact days the learner is in class */}
+                      <SessionDates dates={sessionDatesOf(l)} accent="amber" compact />
+                    </Box>
+                  ) : (
+                    <Text as="span" className="text-sm text-muted-foreground">—</Text>
                   )}
                 </TableCell>
                 <TableCell>

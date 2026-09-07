@@ -32,7 +32,8 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { SessionTimezoneConverter } from "@/components/trainer/timezone-converter";
-import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatInstantDate, timezoneLabel } from "@/lib/datetime";
+import { SessionDates, sessionDatesOf } from "@/components/shared/session-dates";
+import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatInstantDate, formatTime as fmtTime, timezoneLabel } from "@/lib/datetime";
 import {
   fetchMyTrainings,
   fetchTrainerTrainingSessions,
@@ -61,6 +62,7 @@ const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Meeting
 // Scheduled dates print exactly as sent; `enrolled_at` is a real instant, so
 // it gets the reader's clock. See `lib/datetime`.
 const formatDate = (d) => fmtDate(d);
+const formatTime = (t) => fmtTime(t);
 const formatEnrolledAt = (d) => formatInstantDate(d);
 // The session's own wall clock plus the zone it belongs to — identical text
 // for a trainer in any country. The converter below turns it into their zone.
@@ -226,9 +228,57 @@ function SessionsPanel({ trainingRef, token }) {
 
   const sessions = data.sessions || [];
   const participants = data.participants || [];
+  const sessionDays = sessionDatesOf(data);
 
   return (
     <Box className="space-y-5">
+      {/* Schedule — the training's date range plus the exact days it runs on */}
+      <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
+        <Box className="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-4 border-b border-slate-100">
+          <Box className="flex items-center gap-2.5">
+            <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+              <CalendarDays className="h-4 w-4 text-violet-500" />
+            </Box>
+            <Box>
+              <Text as="p" className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Dates</Text>
+              <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5">
+                {formatDate(data.start_date)} – {formatDate(data.end_date)}
+              </Text>
+            </Box>
+          </Box>
+          {(data.start_time || data.end_time) && (
+            <Box className="flex items-center gap-2.5">
+              <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+                <Clock className="h-4 w-4 text-violet-500" />
+              </Box>
+              <Box>
+                <Text as="p" className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Daily Timing</Text>
+                <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5">
+                  {formatTime(data.start_time)} – {formatTime(data.end_time)}
+                  {timezoneLabel(data.timezone, data.start_date) ? ` ${timezoneLabel(data.timezone, data.start_date)}` : ""}
+                </Text>
+              </Box>
+            </Box>
+          )}
+          {data.timezone && (
+            <Box className="flex items-center gap-2.5">
+              <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+                <Globe className="h-4 w-4 text-violet-500" />
+              </Box>
+              <Box>
+                <Text as="p" className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Timezone</Text>
+                <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5">{data.timezone}</Text>
+              </Box>
+            </Box>
+          )}
+        </Box>
+        {sessionDays.length > 0 && (
+          <Box className="px-5 py-4">
+            <SessionDates dates={sessionDays} />
+          </Box>
+        )}
+      </Card>
+
       {/* Meeting link — visible to the assigned trainer once the admin releases it,
           the same link enrolled learners see. */}
       {data.meeting?.url ? (

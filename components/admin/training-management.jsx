@@ -42,6 +42,7 @@ import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 import { TrainingSurveys } from "@/components/admin/training-surveys";
 import { TrainingAttendance } from "@/components/admin/training-attendance";
 import { ResourceManager } from "@/components/admin/resource-manager";
+import { SessionDates, sessionDatesOf } from "@/components/shared/session-dates";
 import {
   datesBetween,
   formatDate,
@@ -1287,6 +1288,7 @@ export function TrainingManagement({ trainingId }) {
   const isVirtual = detail.delivery_mode !== "in_person";
   const canRelease = detail.enrolled_count >= (detail.min_seats ?? 1);
   const confirmedCount = detail.participants.filter((p) => p.status === "confirmed").length;
+  const sessionDays = sessionDatesOf(detail);
 
   function onMeetingSaved(training) {
     setMeeting({ url: training?.meeting_url ?? null, platform: training?.meeting_platform ?? null, released: !!training?.meeting_released });
@@ -1329,6 +1331,13 @@ export function TrainingManagement({ trainingId }) {
           <Fact icon={Clock} label="Hours / Day" value={detail.hours_per_day != null ? `${detail.hours_per_day} hours` : "—"} />
           <Fact icon={Users} label="Capacity" value={`${detail.enrolled_count} / ${detail.capacity ?? "—"} enrolled`} />
         </Box>
+
+        {/* The individual training days behind the date range above */}
+        {sessionDays.length > 0 && (
+          <Box className="border-t border-slate-100 px-6 py-4">
+            <SessionDates dates={sessionDays} />
+          </Box>
+        )}
       </Card>
 
       {/* ── Status management ── */}

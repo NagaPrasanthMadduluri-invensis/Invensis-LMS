@@ -29,6 +29,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchMyTrainings, fetchTrainingDetail } from "@/services/api/learner/learner-api";
 import { TrainingGuidelines } from "@/components/learner/training-guidelines";
 import { TrainingResources } from "@/components/learner/training-resources";
+import { SessionDates, sessionDatesOf } from "@/components/shared/session-dates";
 import { formatDate as fmtDate, formatDateTime, formatTime as fmtTime, timezoneLabel } from "@/lib/datetime";
 
 // Admin/support inbox a learner can reach out to about enrolment.
@@ -106,7 +107,7 @@ function ScheduleCard({ training, enrolmentId }) {
   const mode = MODE_CONFIG[training.delivery_mode] || MODE_CONFIG.virtual;
   const statusCfg = STATUS_CONFIG[training.status] || STATUS_CONFIG.active;
   const ModeIcon = mode.icon;
-  const sessionDates = Array.isArray(training.session_dates) ? training.session_dates : [];
+  const sessionDates = sessionDatesOf(training);
 
   return (
     <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
@@ -176,19 +177,7 @@ function ScheduleCard({ training, enrolmentId }) {
       {/* Session dates */}
       {sessionDates.length > 0 && (
         <Box className="border-t px-6 py-4">
-          <Box className="flex items-center gap-1.5 mb-2.5">
-            <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
-            <Text as="span" className="text-[11px] uppercase tracking-wide text-muted-foreground">
-              {sessionDates.length} Session{sessionDates.length !== 1 ? "s" : ""}
-            </Text>
-          </Box>
-          <Box className="flex flex-wrap gap-2">
-            {sessionDates.map((d, i) => (
-              <Badge key={d} className="border border-violet-100 bg-violet-50 text-violet-600">
-                Day {i + 1} · {formatDate(d)}
-              </Badge>
-            ))}
-          </Box>
+          <SessionDates dates={sessionDates} />
         </Box>
       )}
 
