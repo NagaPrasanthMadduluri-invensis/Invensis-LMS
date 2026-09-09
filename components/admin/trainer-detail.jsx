@@ -16,7 +16,8 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate as fmtDate, formatInstantDate } from "@/lib/datetime";
-import { fetchTrainerDetail } from "@/services/api/admin/admin-api";
+import { fetchTrainerDetail, resendTrainerSetupEmail } from "@/services/api/admin/admin-api";
+import { ResendSetupButton } from "@/components/admin/resend-setup-button";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 
 function initialsOf(name = "") {
@@ -214,6 +215,8 @@ export function TrainerDetail({ trainerId }) {
   const rating = trainer.rating || {};
   const summary = trainer.summary || {};
   const hasRatings = (rating.reviews || 0) > 0;
+  // Onboarded, but the trainer never followed their setup link.
+  const setupPending = trainer.is_active && trainer.has_password === false;
 
   return (
     <Box className="space-y-5">
@@ -233,6 +236,11 @@ export function TrainerDetail({ trainerId }) {
                   <Badge className={`border-0 text-[11px] font-semibold px-2.5 py-0.5 ${trainer.is_active ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200" : "bg-red-100 text-red-600 ring-1 ring-red-200"}`}>
                     {trainer.is_active ? "● Active" : "● Inactive"}
                   </Badge>
+                  {setupPending && (
+                    <Badge className="border-0 text-[11px] font-semibold px-2.5 py-0.5 bg-amber-50 text-amber-700 ring-1 ring-amber-200">
+                      ● Setup pending
+                    </Badge>
+                  )}
                 </Box>
                 <Text as="p" className="text-sm text-slate-500 mt-1">{trainer.email}</Text>
                 {/* Overall rating inline */}
@@ -251,13 +259,21 @@ export function TrainerDetail({ trainerId }) {
                 </Box>
               </Box>
             </Box>
-            <Button
-              variant="outline"
-              className="border-violet-200 text-violet-700 hover:bg-violet-100 bg-white shrink-0"
-              onClick={() => setEditOpen(true)}
-            >
-              <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit Profile
-            </Button>
+            <Box className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+              {setupPending && (
+                <ResendSetupButton
+                  label="Resend setup email"
+                  onResend={() => resendTrainerSetupEmail({ token, trainerId: trainer.id })}
+                />
+              )}
+              <Button
+                variant="outline"
+                className="border-violet-200 text-violet-700 hover:bg-violet-100 bg-white shrink-0"
+                onClick={() => setEditOpen(true)}
+              >
+                <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit Profile
+              </Button>
+            </Box>
           </Box>
         </Box>
 

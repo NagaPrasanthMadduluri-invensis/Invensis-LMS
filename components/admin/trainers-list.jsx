@@ -21,7 +21,8 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
-import { fetchTrainers } from "@/services/api/admin/admin-api";
+import { ResendSetupButton } from "@/components/admin/resend-setup-button";
+import { fetchTrainers, resendTrainerSetupEmail } from "@/services/api/admin/admin-api";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 
 const ALL = "__all__";
@@ -122,8 +123,10 @@ function TagCell({ items, tone, icon: Icon }) {
 }
 
 /* ── Trainer row ── */
-function TrainerRow({ trainer, onEdit }) {
+function TrainerRow({ trainer, onEdit, onResendSetup }) {
   const active = trainer.is_active !== false;
+  // Onboarded, but the trainer never followed their setup link.
+  const setupPending = active && trainer.has_password === false;
   const specs = Array.isArray(trainer.specializations) ? trainer.specializations : [];
   const certs = certTitles(trainer);
 
@@ -146,6 +149,11 @@ function TrainerRow({ trainer, onEdit }) {
               {trainer.is_remote && (
                 <Badge className="border-0 text-[10px] font-semibold px-2 py-0.5 bg-blue-50 text-blue-700 ring-1 ring-blue-200">
                   <Wifi className="h-2.5 w-2.5 mr-1" /> Remote
+                </Badge>
+              )}
+              {setupPending && (
+                <Badge className="border-0 text-[10px] font-semibold px-2 py-0.5 bg-amber-50 text-amber-700 ring-1 ring-amber-200">
+                  Setup pending
                 </Badge>
               )}
             </Box>
@@ -182,7 +190,10 @@ function TrainerRow({ trainer, onEdit }) {
 
       {/* Actions */}
       <TableCell className="py-3.5 pr-5 text-right">
-        <Box className="flex items-center gap-2 justify-end">
+        <Box className="flex items-center gap-2 justify-end flex-wrap">
+          {setupPending && (
+            <ResendSetupButton label="Resend setup email" onResend={() => onResendSetup(trainer)} />
+          )}
           <button
             className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs font-semibold rounded-lg shadow-sm transition-colors shrink-0 whitespace-nowrap"
             onClick={() => onEdit(trainer)}
@@ -396,7 +407,14 @@ export function TrainersList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((t) => <TrainerRow key={t.id} trainer={t} onEdit={setEditTrainer} />)}
+                {rows.map((t) => (
+                  <TrainerRow
+                    key={t.id}
+                    trainer={t}
+                    onEdit={setEditTrainer}
+                    onResendSetup={(tr) => resendTrainerSetupEmail({ token, trainerId: tr.id })}
+                  />
+                ))}
               </TableBody>
             </Table>
           </Box>

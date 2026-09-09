@@ -14,7 +14,8 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate as fmtDate, formatInstantDate } from "@/lib/datetime";
-import { fetchParticipantDetail } from "@/services/api/admin/admin-api";
+import { fetchParticipantDetail, resendParticipantSetupEmail } from "@/services/api/admin/admin-api";
+import { ResendSetupButton } from "@/components/admin/resend-setup-button";
 
 const AVATAR_COLORS = [
   "bg-violet-500", "bg-violet-500", "bg-teal-500", "bg-emerald-500",
@@ -211,6 +212,7 @@ export function ParticipantDetail({ userId }) {
       {/* Profile hero */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-7 py-7">
+          <Box className="flex items-start justify-between gap-4 flex-wrap">
           <Box className="flex items-center gap-5">
             <Box className={`h-16 w-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shrink-0 shadow-sm ${avatarColor(p.id || "")}`}>
               {getInitials(p.name)}
@@ -233,6 +235,14 @@ export function ParticipantDetail({ userId }) {
                 <Text as="p" className="text-sm text-slate-500 truncate">{p.email}</Text>
               </Box>
             </Box>
+          </Box>
+          {/* Never followed their setup link — send it again */}
+          {setupPending && (
+            <ResendSetupButton
+              label="Resend setup email"
+              onResend={() => resendParticipantSetupEmail({ token, participantId: p.id })}
+            />
+          )}
           </Box>
         </Box>
 

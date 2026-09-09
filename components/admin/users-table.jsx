@@ -19,7 +19,8 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { formatInstantDate } from "@/lib/datetime";
-import { fetchParticipants } from "@/services/api/admin/admin-api";
+import { fetchParticipants, resendParticipantSetupEmail } from "@/services/api/admin/admin-api";
+import { ResendSetupButton } from "@/components/admin/resend-setup-button";
 
 const AVATAR_COLORS = [
   "bg-violet-100 text-violet-700",
@@ -318,9 +319,17 @@ export function UsersTable() {
                           </Badge>
                         </TableCell>
 
-                        {/* Row affordance */}
+                        {/* Actions + row affordance */}
                         <TableCell className="py-4 pr-5 text-right">
-                          <RowChevron className="h-4 w-4 text-slate-300 inline-block group-hover:text-violet-500 transition-colors" />
+                          <Box className="flex items-center gap-2 justify-end">
+                            {setupPending && (
+                              <ResendSetupButton
+                                label="Resend setup email"
+                                onResend={() => resendParticipantSetupEmail({ token, participantId: u.id })}
+                              />
+                            )}
+                            <RowChevron className="h-4 w-4 text-slate-300 shrink-0 group-hover:text-violet-500 transition-colors" />
+                          </Box>
                         </TableCell>
 
                       </TableRow>

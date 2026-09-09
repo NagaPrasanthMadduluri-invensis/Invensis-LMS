@@ -209,6 +209,30 @@ export async function updateParticipant({ token, participantId, data }) {
 }
 
 /**
+ * POST /admin/participants/:participantId/resend-setup-email
+ * Re-sends the "set your password" mail to a learner whose account is still
+ * Setup pending. Supersedes any earlier link. Returns { email, sent_at,
+ * expires_at }. 409 if the account is already set up or deactivated.
+ */
+export async function resendParticipantSetupEmail({ token, participantId }) {
+  return apiClient(`/admin/participants/${participantId}/resend-setup-email`, {
+    method: "POST",
+    token,
+  });
+}
+
+/**
+ * POST /admin/trainers/:trainerId/resend-setup-email
+ * Same, for a trainer who never received their onboarding mail.
+ */
+export async function resendTrainerSetupEmail({ token, trainerId }) {
+  return apiClient(`/admin/trainers/${trainerId}/resend-setup-email`, {
+    method: "POST",
+    token,
+  });
+}
+
+/**
  * PATCH /admin/enrolments/:enrolmentId/cancel — cancel an enrolment (frees seat).
  * Reason is required and audited. Returns { id, status }.
  */
