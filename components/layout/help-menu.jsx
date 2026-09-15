@@ -5,7 +5,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -61,12 +60,12 @@ export function HelpMenu() {
         <HelpCircle className="h-5 w-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72 p-2">
-        <DropdownMenuLabel className="px-2 pt-1 pb-0.5">
+        <Box className="px-2 pt-1 pb-0.5">
           <Text as="p" className="text-sm font-semibold text-foreground">Need help?</Text>
           <Text as="p" className="text-xs text-muted-foreground mt-0.5">
             Reach our operations team, or raise a support ticket.
           </Text>
-        </DropdownMenuLabel>
+        </Box>
 
         <DropdownMenuSeparator />
 
