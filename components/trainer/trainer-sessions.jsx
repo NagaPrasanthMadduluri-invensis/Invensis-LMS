@@ -315,7 +315,11 @@ function SessionsPanel({ trainingRef, token }) {
 
       {/* Timezone converter — helps the trainer see the session start in their own zone */}
       {sessions.length > 0 && (
-        <SessionTimezoneConverter sessions={sessions} sourceZoneCode={data.timezone} />
+        <SessionTimezoneConverter
+          sessions={sessions}
+          sourceZoneCode={data.timezone}
+          sourceCountryCode={data.country_code}
+        />
       )}
 
       <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">

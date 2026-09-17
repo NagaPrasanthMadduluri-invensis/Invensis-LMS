@@ -15,76 +15,248 @@ import Box from "@/components/ui/box";
  * ingestion), so a stored timestamp's *UTC components* ARE the wall time in the
  * session's own timezone. We turn that back into a real instant using the
  * source zone's offset, then format it in the trainer's chosen zone.
+ *
+ * Resolving WHICH zone a session is in is the delicate part. The schedule feed
+ * gives us a timezone abbreviation, and abbreviations are not unique: "CST" is
+ * China (UTC+8), Taiwan (UTC+8) *and* Mexico/US-Central (UTC-6). Guessing wrong
+ * puts a trainer on a call 14 hours out, with nothing on screen to suggest the
+ * time is wrong. So resolution is layered, most trustworthy first:
+ *
+ *   1. `timezone` already an IANA name ("Asia/Manila")  → use it.
+ *   2. ISO 3166-1 alpha-2 country code ("PH")           → unambiguous, use it.
+ *   3. Abbreviation, and only if it maps to ONE zone    → use it.
+ *   4. Otherwise                                        → refuse, and say so.
+ *
+ * Step 4 matters as much as the rest: showing a warning is recoverable, showing
+ * a confident wrong time is not.
  */
 
-// CMS/schedule timezone abbreviations → IANA zone. Abbreviations are ambiguous,
-// so we map the ones the catalogue actually uses; a value already containing a
-// "/" is treated as an IANA zone as-is.
-const SOURCE_ZONE = {
-  IST: "Asia/Kolkata",
-  GST: "Asia/Dubai",
-  SGT: "Asia/Singapore",
-  JST: "Asia/Tokyo",
-  AEST: "Australia/Sydney",
-  AEDT: "Australia/Sydney",
-  GMT: "Europe/London",
-  UTC: "UTC",
-  BST: "Europe/London",
-  CET: "Europe/Paris",
-  CEST: "Europe/Paris",
-  EST: "America/New_York",
-  EDT: "America/New_York",
-  CST: "America/Chicago",
-  CDT: "America/Chicago",
-  MST: "America/Denver",
-  MDT: "America/Denver",
-  PST: "America/Los_Angeles",
-  PDT: "America/Los_Angeles",
-};
-
-// Country (or region for multi-zone countries) → representative IANA zone.
+// Countries offered in the trainer's own "show me my local time" picker. This
+// is the TARGET of the conversion and is chosen by the trainer, so unlike
+// COUNTRY_CODE_ZONE below it is a display list: multi-zone countries appear once
+// per zone, labelled, rather than being omitted.
 const COUNTRY_ZONES = [
   { label: "India", zone: "Asia/Kolkata" },
   { label: "United Arab Emirates", zone: "Asia/Dubai" },
   { label: "Singapore", zone: "Asia/Singapore" },
+  { label: "Malaysia", zone: "Asia/Kuala_Lumpur" },
+  { label: "Philippines", zone: "Asia/Manila" },
+  { label: "Thailand", zone: "Asia/Bangkok" },
+  { label: "Vietnam", zone: "Asia/Ho_Chi_Minh" },
+  { label: "Indonesia (Jakarta)", zone: "Asia/Jakarta" },
+  { label: "Hong Kong", zone: "Asia/Hong_Kong" },
+  { label: "China", zone: "Asia/Shanghai" },
+  { label: "Taiwan", zone: "Asia/Taipei" },
+  { label: "Japan", zone: "Asia/Tokyo" },
+  { label: "South Korea", zone: "Asia/Seoul" },
+  { label: "Pakistan", zone: "Asia/Karachi" },
+  { label: "Bangladesh", zone: "Asia/Dhaka" },
+  { label: "Sri Lanka", zone: "Asia/Colombo" },
+  { label: "Saudi Arabia", zone: "Asia/Riyadh" },
+  { label: "Qatar", zone: "Asia/Qatar" },
   { label: "United Kingdom", zone: "Europe/London" },
   { label: "Ireland", zone: "Europe/Dublin" },
   { label: "Germany", zone: "Europe/Berlin" },
   { label: "France", zone: "Europe/Paris" },
   { label: "Netherlands", zone: "Europe/Amsterdam" },
   { label: "Spain", zone: "Europe/Madrid" },
+  { label: "Portugal", zone: "Europe/Lisbon" },
+  { label: "Finland", zone: "Europe/Helsinki" },
+  { label: "Poland", zone: "Europe/Warsaw" },
   { label: "South Africa", zone: "Africa/Johannesburg" },
   { label: "Nigeria", zone: "Africa/Lagos" },
-  { label: "Saudi Arabia", zone: "Asia/Riyadh" },
-  { label: "Qatar", zone: "Asia/Qatar" },
-  { label: "Pakistan", zone: "Asia/Karachi" },
-  { label: "Bangladesh", zone: "Asia/Dhaka" },
-  { label: "Sri Lanka", zone: "Asia/Colombo" },
-  { label: "Malaysia", zone: "Asia/Kuala_Lumpur" },
-  { label: "Indonesia (Jakarta)", zone: "Asia/Jakarta" },
-  { label: "Philippines", zone: "Asia/Manila" },
-  { label: "China", zone: "Asia/Shanghai" },
-  { label: "Hong Kong", zone: "Asia/Hong_Kong" },
-  { label: "Japan", zone: "Asia/Tokyo" },
-  { label: "South Korea", zone: "Asia/Seoul" },
+  { label: "Kenya", zone: "Africa/Nairobi" },
+  { label: "Egypt", zone: "Africa/Cairo" },
   { label: "United States (Eastern)", zone: "America/New_York" },
   { label: "United States (Central)", zone: "America/Chicago" },
   { label: "United States (Mountain)", zone: "America/Denver" },
   { label: "United States (Pacific)", zone: "America/Los_Angeles" },
   { label: "Canada (Eastern)", zone: "America/Toronto" },
   { label: "Canada (Pacific)", zone: "America/Vancouver" },
-  { label: "Brazil (São Paulo)", zone: "America/Sao_Paulo" },
   { label: "Mexico", zone: "America/Mexico_City" },
+  { label: "Brazil (São Paulo)", zone: "America/Sao_Paulo" },
   { label: "Australia (Sydney)", zone: "Australia/Sydney" },
+  { label: "Australia (Adelaide)", zone: "Australia/Adelaide" },
   { label: "Australia (Perth)", zone: "Australia/Perth" },
   { label: "New Zealand", zone: "Pacific/Auckland" },
 ];
 
-function resolveSourceZone(code) {
-  if (!code) return null;
-  if (code.includes("/")) return code; // already IANA
-  return SOURCE_ZONE[code.trim().toUpperCase()] || null;
+// ISO 3166-1 alpha-2 → IANA zone. The authoritative path: a country code is
+// never ambiguous, unlike the abbreviation that ships alongside it.
+//
+// Countries spanning several zones are deliberately absent — for those the
+// country alone doesn't pin a zone either, so they fall through to the
+// abbreviation (which for those feeds IS specific: AEDT vs AWST, EST vs PST).
+const COUNTRY_CODE_ZONE = {
+  IN: "Asia/Kolkata",
+  PK: "Asia/Karachi",
+  BD: "Asia/Dhaka",
+  LK: "Asia/Colombo",
+  NP: "Asia/Kathmandu",
+  AE: "Asia/Dubai",
+  SA: "Asia/Riyadh",
+  QA: "Asia/Qatar",
+  KW: "Asia/Kuwait",
+  BH: "Asia/Bahrain",
+  OM: "Asia/Muscat",
+  IL: "Asia/Jerusalem",
+  TR: "Europe/Istanbul",
+  SG: "Asia/Singapore",
+  MY: "Asia/Kuala_Lumpur",
+  PH: "Asia/Manila",
+  TH: "Asia/Bangkok",
+  VN: "Asia/Ho_Chi_Minh",
+  HK: "Asia/Hong_Kong",
+  TW: "Asia/Taipei",
+  CN: "Asia/Shanghai",
+  JP: "Asia/Tokyo",
+  KR: "Asia/Seoul",
+  GB: "Europe/London",
+  IE: "Europe/Dublin",
+  DE: "Europe/Berlin",
+  FR: "Europe/Paris",
+  NL: "Europe/Amsterdam",
+  BE: "Europe/Brussels",
+  LU: "Europe/Luxembourg",
+  CH: "Europe/Zurich",
+  AT: "Europe/Vienna",
+  IT: "Europe/Rome",
+  ES: "Europe/Madrid",
+  PT: "Europe/Lisbon",
+  SE: "Europe/Stockholm",
+  NO: "Europe/Oslo",
+  DK: "Europe/Copenhagen",
+  FI: "Europe/Helsinki",
+  PL: "Europe/Warsaw",
+  CZ: "Europe/Prague",
+  GR: "Europe/Athens",
+  RO: "Europe/Bucharest",
+  ZA: "Africa/Johannesburg",
+  NG: "Africa/Lagos",
+  KE: "Africa/Nairobi",
+  EG: "Africa/Cairo",
+  GH: "Africa/Accra",
+  TZ: "Africa/Dar_es_Salaam",
+  UG: "Africa/Kampala",
+  MA: "Africa/Casablanca",
+  MX: "America/Mexico_City",
+  CO: "America/Bogota",
+  PE: "America/Lima",
+  CL: "America/Santiago",
+  AR: "America/Argentina/Buenos_Aires",
+  NZ: "Pacific/Auckland",
+  // Multi-zone, intentionally omitted: US, CA, AU, BR, RU, ID, KZ, MN.
+};
+
+// Timezone abbreviation → IANA zone. Last-resort fallback, used only when there
+// is no IANA name and no country code.
+//
+// `null` marks an abbreviation that genuinely maps to more than one zone. Those
+// resolve to nothing rather than to a plausible-looking wrong answer — the whole
+// point of the country-code path above. Kept as explicit entries (not omissions)
+// so the ambiguity is documented where the next person will look.
+const SOURCE_ZONE = {
+  // — unambiguous —
+  UTC: "UTC",
+  GMT: "Europe/London",
+  BST: "Europe/London", // British Summer Time in this feed
+  WET: "Europe/Lisbon",
+  WEST: "Europe/Lisbon",
+  CET: "Europe/Paris",
+  CEST: "Europe/Paris",
+  EET: "Europe/Helsinki",
+  EEST: "Europe/Helsinki",
+  MSK: "Europe/Moscow",
+  SAST: "Africa/Johannesburg",
+  WAT: "Africa/Lagos",
+  EAT: "Africa/Nairobi",
+  CAT: "Africa/Harare",
+  GST: "Asia/Dubai",
+  PKT: "Asia/Karachi",
+  BDT: "Asia/Dhaka",
+  NPT: "Asia/Kathmandu",
+  SGT: "Asia/Singapore",
+  MYT: "Asia/Kuala_Lumpur",
+  PHT: "Asia/Manila",
+  PHST: "Asia/Manila",
+  ICT: "Asia/Bangkok",
+  WIB: "Asia/Jakarta",
+  WITA: "Asia/Makassar",
+  WIT: "Asia/Jayapura",
+  HKT: "Asia/Hong_Kong",
+  JST: "Asia/Tokyo",
+  KST: "Asia/Seoul",
+  AEST: "Australia/Sydney",
+  AEDT: "Australia/Sydney",
+  ACST: "Australia/Adelaide",
+  ACDT: "Australia/Adelaide",
+  AWST: "Australia/Perth",
+  NZST: "Pacific/Auckland",
+  NZDT: "Pacific/Auckland",
+  EDT: "America/New_York",
+  CDT: "America/Chicago",
+  MDT: "America/Denver",
+  PDT: "America/Los_Angeles",
+  BRT: "America/Sao_Paulo",
+  BRST: "America/Sao_Paulo",
+  ART: "America/Argentina/Buenos_Aires",
+  CLT: "America/Santiago",
+  COT: "America/Bogota",
+  PET: "America/Lima",
+
+  // — collide in principle, but this feed only ever uses one meaning —
+  // Verified against the CMS schedule-listing endpoint: EST is returned for
+  // `us` and `ca` (both America/New_York rules), AST only for the Gulf states
+  // (all UTC+3, no DST). Keeping these mapped preserves conversion for the
+  // busiest markets; a country code, when present, overrides anyway.
+  EST: "America/New_York",
+  MST: "America/Denver",
+  PST: "America/Los_Angeles",
+  AST: "Asia/Riyadh",
+
+  // — dominant meaning, but a genuine collision exists —
+  // The feed returns IST for both `in` (UTC+5:30) and `il` (UTC+2). India is
+  // the overwhelming majority of volume, so it stays the default rather than
+  // dropping every Indian training to "can't convert"; an `il` schedule is
+  // corrected the moment its country code is populated.
+  IST: "Asia/Kolkata",
+
+  // — genuinely undecidable: no default is defensible —
+  // `mx`, `cn` and `tw` all return CST, and China/Mexico are 14 hours apart.
+  // Guessing here is how a trainer misses a session, so we refuse instead.
+  CST: null,
+};
+
+// Abbreviations we know are ambiguous — used to explain *why* we couldn't
+// resolve, rather than claiming the code is simply unrecognised.
+const AMBIGUOUS = new Set(
+  Object.keys(SOURCE_ZONE).filter((k) => SOURCE_ZONE[k] === null)
+);
+
+/**
+ * Resolve the IANA zone a schedule's times are expressed in.
+ * @param {string|null} code         `timezone` from the schedule (IANA name or abbreviation)
+ * @param {string|null} countryCode  ISO 3166-1 alpha-2 of the schedule's country
+ * @returns {{ zone: string|null, reason: "iana"|"country"|"abbr"|"ambiguous"|"unknown" }}
+ */
+function resolveSourceZone(code, countryCode) {
+  const raw = typeof code === "string" ? code.trim() : "";
+
+  // 1. Already an IANA zone.
+  if (raw.includes("/")) return { zone: raw, reason: "iana" };
+
+  // 2. Country code — unambiguous, so it outranks the abbreviation.
+  const cc = typeof countryCode === "string" ? countryCode.trim().toUpperCase() : "";
+  if (COUNTRY_CODE_ZONE[cc]) return { zone: COUNTRY_CODE_ZONE[cc], reason: "country" };
+
+  // 3. Abbreviation, but only where it maps to exactly one zone.
+  const abbr = raw.toUpperCase();
+  if (SOURCE_ZONE[abbr]) return { zone: SOURCE_ZONE[abbr], reason: "abbr" };
+
+  // 4. Refuse rather than guess.
+  return { zone: null, reason: AMBIGUOUS.has(abbr) ? "ambiguous" : "unknown" };
 }
+
 
 // Offset (ms) of `zone` at a given instant, via Intl.
 function zoneOffsetMs(instant, zone) {
@@ -126,8 +298,8 @@ function zoneAbbr(instant, zone) {
   return part?.value || "";
 }
 
-export function SessionTimezoneConverter({ sessions = [], sourceZoneCode }) {
-  const sourceZone = resolveSourceZone(sourceZoneCode);
+export function SessionTimezoneConverter({ sessions = [], sourceZoneCode, sourceCountryCode }) {
+  const { zone: sourceZone, reason } = resolveSourceZone(sourceZoneCode, sourceCountryCode);
 
   // Default to the trainer's own detected timezone when it's in our list.
   const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -184,7 +356,18 @@ export function SessionTimezoneConverter({ sessions = [], sourceZoneCode }) {
         {!sourceZone ? (
           <Box className="rounded-xl border border-dashed border-amber-200 bg-amber-50 px-4 py-3">
             <Text as="p" className="text-xs text-amber-700">
-              Couldn&apos;t match the session timezone ({sourceZoneCode || "unknown"}), so times can&apos;t be converted automatically.
+              {reason === "ambiguous" ? (
+                <>
+                  &ldquo;{sourceZoneCode}&rdquo; is used by more than one country, so we can&apos;t
+                  tell which timezone this session is in. Please confirm the start time with
+                  the admin rather than relying on a converted time.
+                </>
+              ) : (
+                <>
+                  Couldn&apos;t match the session timezone ({sourceZoneCode || "unknown"}), so
+                  times can&apos;t be converted automatically.
+                </>
+              )}
             </Text>
           </Box>
         ) : rows.length === 0 ? (
