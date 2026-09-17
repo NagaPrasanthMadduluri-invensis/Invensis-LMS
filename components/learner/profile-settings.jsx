@@ -13,8 +13,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
+import { PhoneInput, splitPhone, isPhoneValid } from "@/components/ui/phone-input";
 import {
-  User, Briefcase, GraduationCap, Shield, Camera, Mail, Phone,
+  User, Briefcase, GraduationCap, Shield, Camera, Mail,
   Building2, Link2, BookOpen, CheckCircle2, Award, Lock, Bell, ShieldCheck,
 } from "lucide-react";
 import Text from "@/components/ui/text";
@@ -23,7 +25,25 @@ import { useAuth } from "@/hooks/use-auth";
 import { useProfileCompletion } from "@/providers/profile-completion-provider";
 import { fetchMyProfile, updateMyProfile, getAvatarUploadUrl, uploadAvatarFile } from "@/services/api/me";
 
-const COUNTRIES = ["India", "United States", "United Kingdom", "Australia", "UAE", "Singapore", "Canada", "Other"];
+// A fixed list rather than free text: trainers see the industry in place of the
+// employer name on their roster, so it only groups usefully if it's consistent.
+const INDUSTRIES = [
+  "Information Technology",
+  "Banking & Financial Services",
+  "Insurance",
+  "Healthcare & Pharmaceuticals",
+  "Manufacturing",
+  "Retail & E-commerce",
+  "Telecommunications",
+  "Energy & Utilities",
+  "Construction & Real Estate",
+  "Transportation & Logistics",
+  "Education",
+  "Government & Public Sector",
+  "Media & Entertainment",
+  "Professional Services & Consulting",
+  "Other",
+];
 const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 
@@ -32,34 +52,43 @@ function splitName(name = "") {
   return { first: parts[0] || "", last: parts.slice(1).join(" ") };
 }
 
-const MOBILE_PATTERN = /^\+?[0-9\s-]{7,15}$/;
-
-function isValidUrl(value) {
-  try {
-    new URL(value);
-    return true;
-  } catch {
-    return false;
-  }
-}
+// A LinkedIn profile or company page, with or without the scheme/subdomain —
+// `linkedin.com/in/lena`, `https://www.linkedin.com/company/acme`, `in.linkedin.com/in/x`.
+const LINKEDIN_PATTERN =
+  /^(https?:\/\/)?([a-z]{2,3}\.)?linkedin\.com\/(in|pub|company|school)\/[\w\-%.()]+\/?(\?.*)?$/i;
 
 const validateFirstName = (v) => (v.trim() ? null : "First name is required.");
 const validateLastName = (v) => (v.trim() ? null : "Last name is required.");
+const validateCountry = (v) => (v.trim() ? null : "Country is required.");
+const validateCity = (v) => (v.trim() ? null : "City is required.");
+// The dial code and the digits are validated together: a number is only valid
+// for a given country, so libphonenumber checks the pair, not a generic pattern.
 function validateMobile(v) {
-  if (!v.trim()) return "Mobile number is required.";
-  if (!MOBILE_PATTERN.test(v.trim())) return "Enter a valid mobile number.";
-  return null;
+  if (!v || !v.trim()) return "Mobile number is required.";
+  const { country, national } = splitPhone(v);
+  if (!national) return "Mobile number is required.";
+  return isPhoneValid(country, national) ? null : "Enter a valid mobile number for the selected country.";
 }
 const validateCompany = (v) => (v.trim() ? null : "Company name is required.");
+const validateIndustry = (v) => (v.trim() ? null : "Industry is required.");
 const validateJobTitle = (v) => (v.trim() ? null : "Job title is required.");
+const validateDepartment = (v) => (v.trim() ? null : "Department is required.");
 function validateExperience(v) {
-  if (!v.trim()) return null;
-  if (Number.isNaN(Number(v)) || Number(v) < 0) return "Enter a valid number of years.";
+  if (!v.trim()) return "Years of experience is required.";
+  const n = Number(v);
+  if (Number.isNaN(n) || n < 0) return "Enter a valid number of years.";
+  if (n > 80) return "Enter 80 years or fewer.";
   return null;
 }
+// People paste `linkedin.com/in/x` as often as the full URL; the API only takes
+// a fully-qualified one.
+const withScheme = (v) => (/^https?:\/\//i.test(v) ? v : `https://${v}`);
+
 function validateLinkedin(v) {
-  if (!v.trim()) return null;
-  return isValidUrl(v.trim()) ? null : "Enter a valid URL (e.g. https://linkedin.com/in/...).";
+  if (!v.trim()) return "LinkedIn profile is required.";
+  return LINKEDIN_PATTERN.test(v.trim())
+    ? null
+    : "Enter a LinkedIn profile URL (e.g. https://linkedin.com/in/your-name).";
 }
 
 // Only clears an existing error once the field becomes valid — never adds a
@@ -103,12 +132,11 @@ function SectionCard({ icon: Icon, title, description, children }) {
   );
 }
 
-function FieldRow({ label, htmlFor, optional, error, children }) {
+function FieldRow({ label, htmlFor, error, children }) {
   return (
     <Box className="space-y-1.5">
       <Label htmlFor={htmlFor} className="text-xs font-semibold text-slate-600">
         {label}
-        {optional && <Text as="span" className="text-slate-400 font-normal ml-1">(Optional)</Text>}
       </Label>
       {children}
       {error && <Text as="p" className="text-xs text-red-600">{error}</Text>}
@@ -140,6 +168,13 @@ export function LearnerProfileSettings() {
   const completion = useProfileCompletion();
   const { first, last } = splitName(user?.name);
 
+  // Country and city lists are served by /api/locations, which keeps the 7.7 MB
+  // `country-state-city` dataset on the server. Cities depend on the chosen
+  // country, so they're fetched again whenever it changes.
+  const [countryOptions, setCountryOptions] = useState([]);
+  const [cityOptions, setCityOptions] = useState([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
+
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState(null);
 
@@ -152,6 +187,7 @@ export function LearnerProfileSettings() {
   const [lastName, setLastName] = useState(last);
   const [mobile, setMobile] = useState("");
   const [country, setCountry] = useState("India");
+  const [city, setCity] = useState("");
   const [personalSaving, setPersonalSaving] = useState(false);
   const [personalSaved, setPersonalSaved] = useState(false);
   const [personalError, setPersonalError] = useState("");
@@ -159,6 +195,7 @@ export function LearnerProfileSettings() {
 
   /* ── 2. Professional information ── */
   const [company, setCompany] = useState("");
+  const [industry, setIndustry] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [department, setDepartment] = useState("");
   const [experience, setExperience] = useState("");
@@ -179,6 +216,48 @@ export function LearnerProfileSettings() {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [preferencesSaved, setPreferencesSaved] = useState(false);
 
+  // Country list — static, so fetched once and cached hard by the route.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/locations?type=countries")
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        setCountryOptions(
+          (d.countries || []).map((c) => ({
+            value: c.name,
+            label: c.name,
+            iso: c.iso,
+            prefix: <Text as="span" className="text-base leading-none">{c.flag}</Text>,
+          }))
+        );
+      })
+      .catch(() => setCountryOptions([]));
+    return () => { cancelled = true; };
+  }, []);
+
+  // Cities for the selected country. The country is stored by name, so the ISO
+  // code the API needs is resolved from the country list.
+  const countryIso = countryOptions.find((c) => c.value === country)?.iso;
+
+  useEffect(() => {
+    if (!countryIso) {
+      setCityOptions([]);
+      return;
+    }
+    let cancelled = false;
+    setCitiesLoading(true);
+    fetch(`/api/locations?type=cities&country=${countryIso}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        setCityOptions((d.cities || []).map((name) => ({ value: name, label: name })));
+      })
+      .catch(() => { if (!cancelled) setCityOptions([]); })
+      .finally(() => { if (!cancelled) setCitiesLoading(false); });
+    return () => { cancelled = true; };
+  }, [countryIso]);
+
   useEffect(() => {
     if (!token) return;
     fetchMyProfile({ token })
@@ -187,7 +266,9 @@ export function LearnerProfileSettings() {
         setLastName(profile.last_name || last);
         setMobile(profile.phone || "");
         setCountry(profile.country || "India");
+        setCity(profile.city || "");
         setCompany(profile.company_name || "");
+        setIndustry(profile.industry || "");
         setJobTitle(profile.job_title || "");
         setDepartment(profile.department || "");
         setExperience(profile.years_experience != null ? String(profile.years_experience) : "");
@@ -242,9 +323,13 @@ export function LearnerProfileSettings() {
     const firstNameError = validateFirstName(firstName);
     const lastNameError = validateLastName(lastName);
     const mobileError = validateMobile(mobile);
+    const countryError = validateCountry(country);
+    const cityError = validateCity(city);
     if (firstNameError) errors.firstName = firstNameError;
     if (lastNameError) errors.lastName = lastNameError;
     if (mobileError) errors.mobile = mobileError;
+    if (countryError) errors.country = countryError;
+    if (cityError) errors.city = cityError;
     setPersonalErrors(errors);
     setPersonalError("");
     if (Object.keys(errors).length) return;
@@ -258,13 +343,16 @@ export function LearnerProfileSettings() {
           last_name: lastName.trim(),
           phone: mobile.trim(),
           country,
+          city: city.trim(),
         },
       });
       updateUser({ name: `${firstName.trim()} ${lastName.trim()}`.trim() });
       completion?.refresh?.();
       flashSaved(setPersonalSaved);
     } catch (e) {
-      setPersonalErrors(mapFieldErrors(e.errors, { first_name: "firstName", last_name: "lastName", phone: "mobile" }));
+      setPersonalErrors(mapFieldErrors(e.errors, {
+        first_name: "firstName", last_name: "lastName", phone: "mobile", country: "country", city: "city",
+      }));
       setPersonalError(e.message || "Failed to save. Please try again.");
     } finally {
       setPersonalSaving(false);
@@ -274,11 +362,15 @@ export function LearnerProfileSettings() {
   async function saveProfessionalInfo() {
     const errors = {};
     const companyError = validateCompany(company);
+    const industryError = validateIndustry(industry);
     const jobTitleError = validateJobTitle(jobTitle);
+    const departmentError = validateDepartment(department);
     const experienceError = validateExperience(experience);
     const linkedinError = validateLinkedin(linkedin);
     if (companyError) errors.company = companyError;
+    if (industryError) errors.industry = industryError;
     if (jobTitleError) errors.jobTitle = jobTitleError;
+    if (departmentError) errors.department = departmentError;
     if (experienceError) errors.experience = experienceError;
     if (linkedinError) errors.linkedin = linkedinError;
     setProfessionalErrors(errors);
@@ -287,23 +379,25 @@ export function LearnerProfileSettings() {
 
     setProfessionalSaving(true);
     try {
-      const data = {
-        company_name: company.trim(),
-        job_title: jobTitle.trim(),
-        department: department.trim() || null,
-        years_experience: experience.trim() ? Number(experience) : null,
-      };
-      // Only send the LinkedIn URL when the learner actually entered one —
-      // omitting the key leaves any stored value untouched, where sending
-      // null would wipe it.
-      if (linkedin.trim()) data.linkedin_url = linkedin.trim();
-
-      await updateMyProfile({ token, data });
+      await updateMyProfile({
+        token,
+        data: {
+          company_name: company.trim(),
+          industry: industry.trim(),
+          job_title: jobTitle.trim(),
+          department: department.trim(),
+          years_experience: Number(experience),
+          // The API requires a fully-qualified URL; the form accepts the bare
+          // `linkedin.com/in/...` form people paste, so normalise on the way out.
+          linkedin_url: withScheme(linkedin.trim()),
+        },
+      });
       completion?.refresh?.();
       flashSaved(setProfessionalSaved);
     } catch (e) {
       setProfessionalErrors(mapFieldErrors(e.errors, {
-        company_name: "company", job_title: "jobTitle", years_experience: "experience", linkedin_url: "linkedin",
+        company_name: "company", industry: "industry", job_title: "jobTitle",
+        department: "department", years_experience: "experience", linkedin_url: "linkedin",
       }));
       setProfessionalError(e.message || "Failed to save. Please try again.");
     } finally {
@@ -420,25 +514,48 @@ export function LearnerProfileSettings() {
               </Box>
             </FieldRow>
             <FieldRow label="Mobile Number" htmlFor="mobile" error={personalErrors.mobile}>
-              <Box className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  id="mobile" value={mobile}
-                  onChange={(e) => {
-                    setMobile(e.target.value);
-                    clearErrorIfValid(setPersonalErrors, "mobile", validateMobile, e.target.value);
-                  }}
-                  placeholder="+91 90000 00000" aria-invalid={!!personalErrors.mobile} className={`${inputCls} pl-9`}
-                />
-              </Box>
+              <PhoneInput
+                id="mobile" value={mobile}
+                onChange={(v) => {
+                  setMobile(v);
+                  clearErrorIfValid(setPersonalErrors, "mobile", validateMobile, v);
+                }}
+                invalid={!!personalErrors.mobile}
+              />
             </FieldRow>
-            <FieldRow label="Country">
-              <Select value={country} onValueChange={setCountry}>
-                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            <FieldRow label="Country" htmlFor="country" error={personalErrors.country}>
+              <Combobox
+                id="country" value={country}
+                onChange={(v) => {
+                  setCountry(v);
+                  // The old city belongs to the old country — clear it rather
+                  // than leave a mismatched pair behind.
+                  setCity("");
+                  clearErrorIfValid(setPersonalErrors, "country", validateCountry, v);
+                }}
+                options={countryOptions}
+                placeholder="Select your country"
+                searchPlaceholder="Search countries..."
+                emptyText="No country found."
+                loading={countryOptions.length === 0}
+                invalid={!!personalErrors.country}
+              />
+            </FieldRow>
+            <FieldRow label="City" htmlFor="city" error={personalErrors.city}>
+              <Combobox
+                id="city" value={city}
+                onChange={(v) => {
+                  setCity(v);
+                  clearErrorIfValid(setPersonalErrors, "city", validateCity, v);
+                }}
+                options={cityOptions}
+                placeholder={country ? "Select your city" : "Pick a country first"}
+                searchPlaceholder="Search cities..."
+                emptyText="No city found for this country."
+                disabled={!countryIso}
+                loading={citiesLoading}
+                invalid={!!personalErrors.city}
+              />
             </FieldRow>
           </Box>
 
@@ -466,6 +583,22 @@ export function LearnerProfileSettings() {
                 />
               </Box>
             </FieldRow>
+            <FieldRow label="Industry" htmlFor="industry" error={professionalErrors.industry}>
+              <Select
+                value={industry}
+                onValueChange={(v) => {
+                  setIndustry(v);
+                  clearErrorIfValid(setProfessionalErrors, "industry", validateIndustry, v);
+                }}
+              >
+                <SelectTrigger id="industry" aria-invalid={!!professionalErrors.industry} className={inputCls}>
+                  <SelectValue placeholder="Select your industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </FieldRow>
             <FieldRow label="Job Title" htmlFor="jobTitle" error={professionalErrors.jobTitle}>
               <Input
                 id="jobTitle" value={jobTitle}
@@ -476,10 +609,17 @@ export function LearnerProfileSettings() {
                 aria-invalid={!!professionalErrors.jobTitle} className={inputCls}
               />
             </FieldRow>
-            <FieldRow label="Department" htmlFor="department" optional>
-              <Input id="department" value={department} onChange={(e) => setDepartment(e.target.value)} className={inputCls} />
+            <FieldRow label="Department" htmlFor="department" error={professionalErrors.department}>
+              <Input
+                id="department" value={department}
+                onChange={(e) => {
+                  setDepartment(e.target.value);
+                  clearErrorIfValid(setProfessionalErrors, "department", validateDepartment, e.target.value);
+                }}
+                aria-invalid={!!professionalErrors.department} className={inputCls}
+              />
             </FieldRow>
-            <FieldRow label="Years of Experience" htmlFor="experience" optional error={professionalErrors.experience}>
+            <FieldRow label="Years of Experience" htmlFor="experience" error={professionalErrors.experience}>
               <Input
                 id="experience" type="number" min="0" value={experience}
                 onChange={(e) => {
@@ -489,7 +629,7 @@ export function LearnerProfileSettings() {
                 aria-invalid={!!professionalErrors.experience} className={inputCls}
               />
             </FieldRow>
-            <FieldRow label="LinkedIn Profile" htmlFor="linkedin" optional error={professionalErrors.linkedin}>
+            <FieldRow label="LinkedIn Profile" htmlFor="linkedin" error={professionalErrors.linkedin}>
               <Box className="relative">
                 <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input

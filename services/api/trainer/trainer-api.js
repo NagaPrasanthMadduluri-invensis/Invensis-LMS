@@ -98,14 +98,16 @@ export async function fetchMyTrainings({ token }) {
  *   { id, training_id, title, delivery_mode, bucket, status, start_date, end_date,
  *     timezone, batch_type, venue,
  *     sessions: [{ id, day_number, planned_topics, start_time, end_time, status }],
- *     participants: [{ enrolment_id, participant_id, name, job_title, company,
- *       department, experience_years, city, country, location, status, enrolled_at }] }
+ *     participants: [{ enrolment_id, participant_id, name, job_title, industry,
+ *       department, experience_years, city, country, location, status }] }
  * `sessions[].id` is the sessionId used by PATCH /trainer/sessions/:id/topics.
- * Roster profile fields (company / department / experience_years / city / country)
- * come from the xCRM participant record, falling back to the learner's own
- * profile; any of them can be null when not shared.
- * Roster privacy: `participants[]` intentionally omits email/phone/account state —
- * that's admin-only (API.md §3.2.11).
+ * Roster profile fields (department / experience_years / city / country) come from
+ * the xCRM participant record, falling back to the learner's own profile; any of
+ * them can be null when not shared. `industry` is self-entered only — it comes
+ * from the learner's profile and is null until they fill it in.
+ * Roster privacy: `participants[]` intentionally omits email/phone/account state,
+ * the employer name and the enrolment date — a trainer sees the learner's industry
+ * in place of their company; the company name is admin-only (API.md §3.2.11).
  * 403 if the caller isn't the currently-assigned trainer for this training.
  */
 export async function fetchTrainerTrainingSessions({ token, trainingRef }) {

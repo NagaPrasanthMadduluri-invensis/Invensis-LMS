@@ -23,7 +23,7 @@ import {
   Users,
   Briefcase,
   Video,
-  Building2,
+  Factory,
   Network,
   GraduationCap,
   Globe,
@@ -33,7 +33,7 @@ import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { SessionTimezoneConverter } from "@/components/trainer/timezone-converter";
 import { SessionDates, sessionDatesOf } from "@/components/shared/session-dates";
-import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatInstantDate, formatTime as fmtTime, timezoneLabel } from "@/lib/datetime";
+import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatTime as fmtTime, timezoneLabel } from "@/lib/datetime";
 import {
   fetchMyTrainings,
   fetchTrainerTrainingSessions,
@@ -59,11 +59,9 @@ const PARTICIPANT_STATUS_CONFIG = {
 
 const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Meeting" };
 
-// Scheduled dates print exactly as sent; `enrolled_at` is a real instant, so
-// it gets the reader's clock. See `lib/datetime`.
+// Scheduled dates print exactly as sent. See `lib/datetime`.
 const formatDate = (d) => fmtDate(d);
 const formatTime = (t) => fmtTime(t);
-const formatEnrolledAt = (d) => formatInstantDate(d);
 // The session's own wall clock plus the zone it belongs to — identical text
 // for a trainer in any country. The converter below turns it into their zone.
 function formatDateTime(d, tz) {
@@ -370,12 +368,12 @@ function SessionsPanel({ trainingRef, token }) {
             </Box>
           ) : (
             <Box className="overflow-x-auto">
-              <Table className="min-w-[860px]">
+              <Table className="min-w-[720px]">
                 <TableHeader>
                   <TableRow className="bg-slate-50/80 hover:bg-slate-50/80 border-b border-slate-100">
                     <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Learner</TableHead>
                     <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
-                      <Box className="flex items-center gap-1"><Building2 className="h-3 w-3" /> Company</Box>
+                      <Box className="flex items-center gap-1"><Factory className="h-3 w-3" /> Industry</Box>
                     </TableHead>
                     <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
                       <Box className="flex items-center gap-1"><Network className="h-3 w-3" /> Department</Box>
@@ -387,7 +385,6 @@ function SessionsPanel({ trainingRef, token }) {
                       <Box className="flex items-center gap-1"><Globe className="h-3 w-3" /> Country</Box>
                     </TableHead>
                     <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Status</TableHead>
-                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Enrolled</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -402,14 +399,13 @@ function SessionsPanel({ trainingRef, token }) {
                             <Text as="span" className="text-[11px] text-slate-400">{p.job_title || "Job title not shared"}</Text>
                           </Box>
                         </TableCell>
-                        <TableCell className="py-3.5 align-top text-slate-600 text-sm">{blank(p.company)}</TableCell>
+                        <TableCell className="py-3.5 align-top text-slate-600 text-sm">{blank(p.industry)}</TableCell>
                         <TableCell className="py-3.5 align-top text-slate-600 text-sm">{blank(p.department)}</TableCell>
                         <TableCell className="py-3.5 align-top text-slate-600 text-sm">{formatExperience(p.experience_years)}</TableCell>
                         <TableCell className="py-3.5 align-top text-slate-600 text-sm">{blank(p.country)}</TableCell>
                         <TableCell className="py-3.5 align-top">
                           <Badge className={`border-0 text-[10px] font-medium ${cfg.color}`}>{cfg.label}</Badge>
                         </TableCell>
-                        <TableCell className="py-3.5 align-top text-slate-500 text-sm">{formatEnrolledAt(p.enrolled_at)}</TableCell>
                       </TableRow>
                     );
                   })}

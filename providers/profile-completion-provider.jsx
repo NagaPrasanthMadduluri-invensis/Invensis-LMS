@@ -9,8 +9,8 @@ import { fetchMyTrainerProfile } from "@/services/api/trainer/trainer-api";
 export const ProfileCompletionContext = createContext(null);
 
 // Fields that must be filled for a profile to count as "complete", per role.
-// Trainer: everything except `rate` (admin-only anyway). Learner: everything
-// except the photo and LinkedIn URL.
+// Trainer: everything except `rate` (admin-only anyway). Learner: every field on
+// the Personal and Professional tabs except the photo.
 const REQUIRED = {
   trainer: [
     { key: "name", label: "Full name" },
@@ -26,10 +26,13 @@ const REQUIRED = {
     { key: "last_name", label: "Last name" },
     { key: "phone", label: "Mobile number" },
     { key: "country", label: "Country" },
+    { key: "city", label: "City" },
     { key: "company_name", label: "Company" },
+    { key: "industry", label: "Industry" },
     { key: "job_title", label: "Job title" },
     { key: "department", label: "Department" },
     { key: "years_experience", label: "Years of experience" },
+    { key: "linkedin_url", label: "LinkedIn profile" },
   ],
 };
 
@@ -51,10 +54,13 @@ function flatten(role, data) {
     last_name: p.last_name ?? null,
     phone: p.phone,
     country: p.country,
+    city: p.city,
     company_name: p.company_name,
+    industry: p.industry,
     job_title: p.job_title,
     department: p.department,
     years_experience: p.years_experience,
+    linkedin_url: p.linkedin_url,
   };
 }
 
