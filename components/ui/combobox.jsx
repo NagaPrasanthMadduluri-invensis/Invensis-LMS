@@ -19,9 +19,12 @@ import {
 const MAX_VISIBLE = 100;
 
 /**
- * Searchable single-select. `options` is [{ value, label, prefix?, triggerLabel? }];
- * `prefix` renders ahead of the label (used for country flags) and `triggerLabel`
- * is a shorter form shown on the closed trigger when space is tight.
+ * Searchable single-select. `options` is
+ * [{ value, label, prefix?, triggerLabel?, keywords? }]; `prefix` renders ahead
+ * of the label (used for country flags), `triggerLabel` is a shorter form shown
+ * on the closed trigger when space is tight, and `keywords` adds extra text to
+ * match on without showing it — a timezone can then be found by any of its
+ * cities, not just the few that fit in the label.
  *
  * Filtering is done here rather than by cmdk (`shouldFilter={false}`) so the
  * rendered list can be capped — cmdk would otherwise score all 20k rows on every
@@ -55,14 +58,25 @@ export function Combobox({
     const q = query.trim().toLowerCase();
     if (!q) return options.slice(0, MAX_VISIBLE);
     const out = [];
-    // Prefix matches first — typing "ind" should surface India before Indonesia
-    // and before every city that merely contains "ind".
+    const seen = new Set();
+    const take = (o) => {
+      if (seen.has(o.value)) return;
+      seen.add(o.value);
+      out.push(o);
+    };
+    // Prefix matches on the visible label first — typing "ind" should surface
+    // India before Indonesia, and both before anything that merely contains it.
     for (const o of options) {
-      if (o.label.toLowerCase().startsWith(q)) out.push(o);
+      if (o.label.toLowerCase().startsWith(q)) take(o);
       if (out.length >= MAX_VISIBLE) return out;
     }
     for (const o of options) {
-      if (!o.label.toLowerCase().startsWith(q) && o.label.toLowerCase().includes(q)) out.push(o);
+      if (o.label.toLowerCase().includes(q)) take(o);
+      if (out.length >= MAX_VISIBLE) return out;
+    }
+    // Then the hidden keywords, so a match you can't see ranks below one you can.
+    for (const o of options) {
+      if (o.keywords && o.keywords.toLowerCase().includes(q)) take(o);
       if (out.length >= MAX_VISIBLE) return out;
     }
     return out;
