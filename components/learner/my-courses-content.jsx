@@ -108,6 +108,9 @@ function ScheduleCard({ training, enrolmentId }) {
   const statusCfg = STATUS_CONFIG[training.status] || STATUS_CONFIG.active;
   const ModeIcon = mode.icon;
   const sessionDates = sessionDatesOf(training);
+  // Add-ons on this learner's own order. Older detail responses predate the
+  // field, so default to [] rather than letting `.length` throw.
+  const addons = training.addons ?? [];
 
   return (
     <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
@@ -217,6 +220,38 @@ function ScheduleCard({ training, enrolmentId }) {
         </Box>
       )}
 
+      {/* Add-ons bought with this seat (exam voucher, membership, …), read from
+          the learner's own order. When present these ARE the answer to "is the
+          exam covered?", so they replace the generic "not included" prompt
+          below rather than sitting alongside it. */}
+      {addons.length > 0 && (
+        <Box className="border-t px-6 py-4">
+          <Box className="flex items-start gap-3 rounded-xl bg-emerald-50 ring-1 ring-emerald-200 px-4 py-3">
+            <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+              <BadgeCheck className="h-4 w-4 text-emerald-600" />
+            </Box>
+            <Box className="min-w-0">
+              <Text as="p" className="text-sm font-semibold text-emerald-800 leading-tight">
+                {addons.length === 1 ? "Add-on included" : "Add-ons included"} with your purchase
+              </Text>
+              <Box className="mt-1.5 flex flex-wrap gap-1.5">
+                {addons.map((a, i) => (
+                  <Text
+                    key={`${a.name}-${i}`}
+                    as="span"
+                    className="inline-flex items-center gap-1 rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                  >
+                    <BadgeCheck className="h-3 w-3 shrink-0" />
+                    {a.name}
+                    {a.quantity > 1 ? ` ×${a.quantity}` : ""}
+                  </Text>
+                ))}
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      )}
+
       {/* Exam certification — driven by the CMS `certification_included` flag.
           true → included (good news); false → offer a voucher request; null → nothing. */}
       {training.certification_included === true && (
@@ -237,7 +272,7 @@ function ScheduleCard({ training, enrolmentId }) {
         </Box>
       )}
 
-      {training.certification_included === false && (
+      {training.certification_included === false && addons.length === 0 && (
         <Box className="border-t px-6 py-4">
           <Box className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-50 ring-1 ring-amber-200 px-4 py-3">
             <Box className="flex items-start gap-3 min-w-0">
@@ -390,6 +425,46 @@ function NotEnrolledState({ user, message }) {
   );
 }
 
+/*
+ * Which training to open by default.
+ *
+ * The API returns them oldest-first (by start date), so taking list[0] opened
+ * whatever the learner enrolled in *first* — typically a training that finished
+ * months ago. What someone wants on landing is the one they still have to
+ * attend, so prefer, in order:
+ *
+ *   1. in progress  — a training running right now
+ *   2. upcoming     — the SOONEST one still ahead (not the oldest)
+ *   3. finished     — the MOST RECENT one, when nothing is left to attend
+ *
+ * `enrolment_status` is checked as well as the training's own status: a learner
+ * can be marked complete on a training that is still running for everyone else.
+ */
+function pickDefaultTraining(list) {
+  if (!Array.isArray(list) || list.length === 0) return null;
+
+  const isDone = (t) => t.enrolment_status === "completed" || t.status === "completed";
+  const live = list.filter((t) => !isDone(t));
+
+  const ongoing = live.find((t) => t.status === "ongoing");
+  if (ongoing) return ongoing;
+
+  // Soonest still ahead. Dates are wall-clock "YYYY-MM-DD", so they compare
+  // lexicographically without going near a Date object (see lib/datetime).
+  const today = new Date().toISOString().slice(0, 10);
+  const ahead = live
+    .filter((t) => t.start_date && t.start_date >= today)
+    .sort((a, b) => a.start_date.localeCompare(b.start_date));
+  if (ahead.length) return ahead[0];
+
+  // Nothing ahead — fall back to whatever is left, most recent first, so a
+  // learner with only past trainings still lands on the latest one.
+  const byRecency = [...list].sort((a, b) =>
+    String(b.start_date ?? "").localeCompare(String(a.start_date ?? ""))
+  );
+  return live[0] ?? byRecency[0];
+}
+
 export function MyCoursesContent() {
   const { user, token } = useAuth();
   const [training, setTraining] = useState(null);
@@ -407,7 +482,7 @@ export function MyCoursesContent() {
     fetchMyTrainings({ token })
       .then((res) => {
         const list = res?.trainings || res || [];
-        const first = list[0];
+        const first = pickDefaultTraining(list);
         if (!first) {
           const e = new Error("You are not enrolled in any training yet");
           e.status = 403;

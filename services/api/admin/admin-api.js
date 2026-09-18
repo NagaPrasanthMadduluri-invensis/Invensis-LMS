@@ -69,11 +69,16 @@ export async function assignTrainer({ token, trainingRef, trainerId }) {
  * Set lifecycle status: "completed" | "suspended" | "active" (reactivate).
  * data = { status, note? }. Rescheduling is a separate call. Returns { training }.
  */
-export async function setTrainingStatus({ token, trainingRef, status, note }) {
+/**
+ * Completing a training also completes its enrolments, so the API refuses with
+ * `409 { code: "attendance_pending", attendance_pending: <n> }` while any seat's
+ * attendance is still unmarked. Re-call with `force: true` to go ahead anyway.
+ */
+export async function setTrainingStatus({ token, trainingRef, status, note, force }) {
   return apiClient(`/admin/trainings/${trainingRef}/status`, {
     method: "PATCH",
     token,
-    body: { status, ...(note ? { note } : {}) },
+    body: { status, ...(note ? { note } : {}), ...(force ? { force: true } : {}) },
   });
 }
 

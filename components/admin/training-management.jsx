@@ -1186,19 +1186,30 @@ function StatusChangeDialog({ status, onOpenChange, token, trainingRef, onDone }
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  // Set when the API refuses because attendance is still unmarked. Holds the
+  // count so the admin is told how many seats they'd be completing unverified.
+  const [attendanceWarning, setAttendanceWarning] = useState(null);
   const open = !!status;
   const cfg = status ? STATUS_ACTION[status] : null;
 
-  useEffect(() => { if (status) { setNote(""); setError(null); } }, [status]);
+  useEffect(() => { if (status) { setNote(""); setError(null); setAttendanceWarning(null); } }, [status]);
 
-  async function submit() {
+  async function submit({ force = false } = {}) {
     setSubmitting(true); setError(null);
     try {
-      const { training } = await setTrainingStatus({ token, trainingRef, status, note: note.trim() || undefined });
+      const { training } = await setTrainingStatus({
+        token, trainingRef, status, note: note.trim() || undefined, force,
+      });
       onDone(training);
       onOpenChange(null);
     } catch (e) {
-      setError(e.message);
+      // Not a failure — the API is asking the admin to confirm. Swap the button
+      // for an explicit override rather than showing it as a red error.
+      if (e.status === 409 && e.data?.code === "attendance_pending") {
+        setAttendanceWarning({ count: e.data.attendance_pending, message: e.message });
+      } else {
+        setError(e.message);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -1219,15 +1230,34 @@ function StatusChangeDialog({ status, onOpenChange, token, trainingRef, onDone }
             <Label className="text-xs">Note (optional)</Label>
             <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Reason or context" className="text-sm" />
           </Box>
+          {attendanceWarning && (
+            <Box className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 space-y-1">
+              <Box className="flex items-start gap-1.5">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-600 mt-0.5" />
+                <Text as="span" className="text-xs text-amber-800 font-medium">Attendance not marked</Text>
+              </Box>
+              <Text as="p" className="text-xs text-amber-700">
+                {attendanceWarning.count} {attendanceWarning.count === 1 ? "learner has" : "learners have"} no
+                attendance recorded. Completing now marks {attendanceWarning.count === 1 ? "their seat" : "their seats"}{" "}
+                complete without it.
+              </Text>
+            </Box>
+          )}
           {error && (
             <Box className="flex items-center gap-1.5 text-red-600"><AlertCircle className="h-3.5 w-3.5 shrink-0" /><Text as="span" className="text-xs">{error}</Text></Box>
           )}
         </Box>
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => onOpenChange(null)} disabled={submitting}>Cancel</Button>
-          <Button size="sm" onClick={submit} disabled={submitting} className={`${cfg.tone} text-white`}>
-            {submitting ? "Saving…" : cfg.verb}
-          </Button>
+          {attendanceWarning ? (
+            <Button size="sm" onClick={() => submit({ force: true })} disabled={submitting} className="bg-amber-600 hover:bg-amber-700 text-white">
+              {submitting ? "Saving…" : "Complete anyway"}
+            </Button>
+          ) : (
+            <Button size="sm" onClick={() => submit()} disabled={submitting} className={`${cfg.tone} text-white`}>
+              {submitting ? "Saving…" : cfg.verb}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
