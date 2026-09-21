@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -9,10 +9,11 @@ import { VerifiedCertificate, VerifyNotFound } from "@/components/public/verify-
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 /**
- * Public verification form.
+ * Public verification form, for someone typing an ID by hand.
  *
- * `initialCode` comes from /verify/<code>, i.e. a QR scan — in that case the
- * lookup runs immediately so the holder sees the result without typing.
+ * A scanned QR does NOT come here — /verify/<code> renders the result directly,
+ * because the code is already in the URL and re-asking for it is asking the
+ * holder to retype what they just scanned.
  */
 export function VerifyForm({ initialCode = "" }) {
   const [code, setCode] = useState(initialCode);
@@ -37,9 +38,6 @@ export function VerifyForm({ initialCode = "" }) {
       setLoading(false);
     }
   }, []);
-
-  // A scanned QR should resolve on arrival, not wait for a click.
-  useEffect(() => { if (initialCode) verify(initialCode, ""); }, [initialCode, verify]);
 
   return (
     <Box className="mx-auto w-full max-w-3xl px-4 py-10 sm:py-14">

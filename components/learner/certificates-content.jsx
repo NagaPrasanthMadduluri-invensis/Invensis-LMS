@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +69,46 @@ function sessionDatesText(sessionDates) {
     return `on ${joinWithAnd(days.map((d) => ordinal(d.f.day)))} ${monthName(days[0].raw)} ${days[0].f.year}`;
   }
   return `on ${joinWithAnd(days.map((d) => dayMonthYear(d.raw)))}`;
+}
+
+/**
+ * Session dates with consecutive runs collapsed, as the attendance letter reads:
+ *   "3rd to 6th, 10th to 13th, 17th to 20th, and 24th to 27th September, 2026"
+ *
+ * Different from the certificate, which lists every day. A letter covering four
+ * weeks would otherwise run to sixteen separate ordinals.
+ */
+function sessionDateRangesText(sessionDates) {
+  const days = (sessionDates ?? [])
+    .map((d) => ({ raw: d, f: wallFields(d) }))
+    .filter((x) => x.f)
+    .sort((a, b) => a.raw.localeCompare(b.raw));
+  if (days.length === 0) return "";
+
+  const sameMonth = days.every((d) => d.f.month === days[0].f.month && d.f.year === days[0].f.year);
+  if (!sameMonth) {
+    // Crossing a month: spell each date out rather than collapse across the
+    // boundary, where "29th to 2nd" would be unreadable.
+    return joinWithAnd(days.map((d) => dayMonthYear(d.raw)));
+  }
+
+  // Group consecutive calendar days into runs.
+  const runs = [];
+  for (const d of days) {
+    const last = runs[runs.length - 1];
+    if (last && d.f.day === last[last.length - 1].f.day + 1) last.push(d);
+    else runs.push([d]);
+  }
+  const parts = runs.map((run) =>
+    run.length === 1
+      ? ordinal(run[0].f.day)
+      : `${ordinal(run[0].f.day)} to ${ordinal(run[run.length - 1].f.day)}`
+  );
+  // Oxford comma before the final "and", matching the reference letter.
+  const list = parts.length > 1
+    ? `${parts.slice(0, -1).join(", ")}, and ${parts[parts.length - 1]}`
+    : parts[0];
+  return `${list} ${monthName(days[0].raw)}, ${days[0].f.year}`;
 }
 
 /** Fallback for a certificate with no session dates recorded. */
@@ -141,12 +181,27 @@ async function generateCertificatePdf(node, { width, height, scale = 2 } = {}) {
   return pdf.output("blob");
 }
 
+/**
+ * Which document this credential is, and the canvas size it renders at.
+ *
+ * A Letter of Course Attendance is portrait A4; the Certificate of Training is
+ * landscape. Both the preview scaler and the PDF capture read their dimensions
+ * from here, so the two can never disagree about the page size.
+ */
+function documentSpec(cert) {
+  const isLetter = cert?.credential_type === "attendance_letter";
+  return isLetter
+    ? { isLetter: true, Canvas: AttendanceLetterCanvas, width: LETTER_W, height: LETTER_H }
+    : { isLetter: false, Canvas: CertificateCanvas, width: CERT_W, height: CERT_H };
+}
+
 function certificatePdfName(cert) {
   const base = (cert?.title || "certificate")
     .replace(/[^\w\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-");
-  return `${base || "certificate"}.pdf`;
+  const kind = cert?.credential_type === "attendance_letter" ? "letter-of-attendance" : "certificate";
+  return `${base || "certificate"}-${kind}.pdf`;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -183,6 +238,137 @@ function useQrDataUrl(code) {
 const CERT_W = 1000;
 const CERT_H = 707;
 
+/* ── Centre-block geometry ──
+   The centre block is absolutely placed and grows *downward*, while the QR and
+   the PMI mark are pinned to the footer. A cohort that ran on a dozen separate
+   days makes the "which took place …" line wrap to three or four lines, and it
+   used to run straight across the QR — an overprinted QR won't scan, so the
+   certificate loses the verification it exists to carry.
+
+   `CENTER_BOTTOM` is the floor the block has to stay above. The QR box starts
+   at y≈510 and the PMI mark at y≈527, so this leaves a clear band between the
+   text and both of them. */
+const CENTER_TOP = 150;
+const CENTER_BOTTOM = 496;
+const DATES_FONT = 15;
+
+/*
+ * Fit the centre block above the footer.
+ *
+ * One knob, `t` (0 = the design as drawn, 1 = as tight as it goes), driving the
+ * three things that can give: the vertical rhythm between the lines, the size
+ * of the dates line (the only part whose length varies), and how far up the
+ * whole block sits. Stepping them together means a certificate that is barely
+ * too tall is nudged rather than visibly squashed — at t≈0.1 nothing reads as
+ * different, and only a genuinely enormous session list reaches the end.
+ *
+ * Deliberately layout (margins / font-size / top) rather than a
+ * `transform: scale()`: the PDF is a html2canvas-pro raster of this same node,
+ * and plain layout rasterises predictably where a nested transform does not.
+ * Written straight to the DOM in a layout effect rather than through state, so
+ * there's no second render pass and nothing to flash before the capture runs.
+ */
+function useFitCenterBlock(centerRef, datesRef, deps) {
+  useLayoutEffect(() => {
+    const box = centerRef.current;
+    if (!box) return;
+
+    const apply = (t) => {
+      // `--fit` scales every mt-[calc(…)] gap inside the block at once.
+      box.style.setProperty("--fit", String(1 - 0.45 * t));
+      box.style.top = `${CENTER_TOP - 38 * t}px`;
+      if (datesRef.current) datesRef.current.style.fontSize = `${DATES_FONT - 4.5 * t}px`;
+    };
+
+    for (let t = 0; t <= 1.0001; t += 0.05) {
+      apply(t);
+      // offsetHeight/offsetTop, not a client rect: the on-page preview scales
+      // the whole certificate with a transform, and these stay in layout px.
+      if (box.offsetTop + box.offsetHeight <= CENTER_BOTTOM) break;
+    }
+  }, deps); // eslint-disable-line react-hooks/exhaustive-deps
+}
+
+/* A4 portrait at the same 2x scale the landscape certificate uses. */
+const LETTER_W = 707;
+const LETTER_H = 1000;
+
+/**
+ * Letter of Course Attendance.
+ *
+ * A different document from the Certificate of Training, not a variant of it:
+ * portrait, prose rather than display type, and it states plainly that no
+ * qualification is being certified. Issued when the awarding body examines the
+ * learner (see `credential_type`), so Invensis can only attest attendance.
+ */
+function AttendanceLetterCanvas({ cert }) {
+  const mode = cert.mode_of_training || DELIVERY_TEXT[cert.delivery_mode] || "classroom";
+  const dates = sessionDateRangesText(cert.session_dates)
+    || certificateDateText(cert.start_date, cert.end_date).replace(/^(on|from) /, "");
+  const qrUrl = useQrDataUrl(cert.certificate_id);
+
+  return (
+    <Box
+      className="certificate-canvas relative bg-white overflow-hidden shadow-xl"
+      style={{ width: LETTER_W, height: LETTER_H, fontFamily: "Arial, Helvetica, sans-serif" }}
+    >
+      {/* Blue corner ribbons, top-left and bottom-right */}
+      <svg className="absolute inset-0" width={LETTER_W} height={LETTER_H} viewBox={`0 0 ${LETTER_W} ${LETTER_H}`} aria-hidden="true">
+        <defs>
+          <linearGradient id="latl" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="150" y2="230">
+            <stop offset="0" stopColor="#1b3f79" /><stop offset="1" stopColor="#3f8ed6" />
+          </linearGradient>
+          <linearGradient id="labr" gradientUnits="userSpaceOnUse" x1="707" y1="1000" x2="557" y2="770">
+            <stop offset="0" stopColor="#1b3f79" /><stop offset="1" stopColor="#3f8ed6" />
+          </linearGradient>
+        </defs>
+        <polygon points="0,0 118,0 0,236" fill="url(#latl)" />
+        <polygon points="46,0 118,0 0,236 0,150" fill="#ffffff" opacity="0.55" />
+        <polygon points="707,1000 589,1000 707,764" fill="url(#labr)" />
+        <polygon points="661,1000 589,1000 707,764 707,850" fill="#ffffff" opacity="0.55" />
+      </svg>
+
+      {/* Title + logo */}
+      <Box className="absolute inset-x-0 top-[110px] flex flex-col items-center">
+        <Box as="p" className="text-[15px] tracking-[0.18em] text-[#1f2d5c]">LETTER OF COURSE ATTENDANCE</Box>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/invensis-learning-logo.svg" alt="Invensis Learning" width={250} height={61} className="mt-9 block" />
+      </Box>
+
+      {/* Body */}
+      <Box className="absolute left-[80px] right-[80px] top-[350px]">
+        <Box as="p" className="text-[14.5px] leading-[1.75] text-[#1a2b45] text-justify">
+          This letter is to verify that{" "}
+          <Box as="span" className="font-bold">{cert.participant_name || "—"}</Box>{" "}
+          has attended the{" "}
+          <Box as="span" className="font-bold">{cert.title}</Box>{" "}
+          (Training ID: {cert.training_id || "—"}), which took place {dates ? `from ${dates}` : ""} via {mode}.
+        </Box>
+
+        {/* The disclaimer is the point of the document — bold, in quotes, as issued. */}
+        <Box as="p" className="mt-9 text-[14.5px] leading-[1.75] font-bold text-[#1a2b45] text-justify">
+          &lsquo;This is a letter confirming course attendance only and is not a document demonstrating or
+          certifying the achievement of any qualification in the subject matter of the training course&rsquo;.
+        </Box>
+
+        <Box as="p" className="mt-[70px] text-[14.5px] text-[#1a2b45]">On behalf of Invensis Learning.</Box>
+
+        {/* QR in place of the signature, as on the certificate */}
+        <Box className="mt-7">
+          {qrUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={qrUrl} alt={`Scan to verify ${cert.certificate_id}`} width={104} height={104} className="block" />
+          ) : (
+            <Box className="h-[104px] w-[104px] bg-slate-100" />
+          )}
+          <Box as="p" className="mt-2 text-[12px] font-bold text-[#1a2b45]">Scan to verify</Box>
+          <Box as="p" className="text-[11px] text-slate-500">{verifyDisplayHost()}</Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
 function CertificateCanvas({ cert }) {
   // Wording is admin-selected on the training; the local map is only a fallback
   // for a certificate issued before that field existed.
@@ -193,6 +379,9 @@ function CertificateCanvas({ cert }) {
     sessionDatesText(cert.session_dates) || certificateDateText(cert.start_date, cert.end_date);
   const pdus = cert.pdus ?? null;
   const qrUrl = useQrDataUrl(cert.certificate_id);
+  const centerRef = useRef(null);
+  const datesRef = useRef(null);
+  useFitCenterBlock(centerRef, datesRef, [dateText, delivery, cert.title, cert.participant_name]);
   return (
     <Box
       className="certificate-canvas relative bg-white overflow-hidden shadow-xl"
@@ -306,27 +495,39 @@ function CertificateCanvas({ cert }) {
         )}
       </Box>
 
-      {/* Center content */}
-      <Box className="absolute inset-x-0 top-[150px] flex flex-col items-center text-center px-[130px]">
+      {/* Center content — `top` is owned by useFitCenterBlock (see above). */}
+      <Box
+        ref={centerRef}
+        className="absolute inset-x-0 flex flex-col items-center text-center px-[130px]"
+        style={{ top: CENTER_TOP }}
+      >
         <Box as="h2" className="text-[58px] leading-none tracking-[0.16em] font-semibold text-[#1f2d5c]">CERTIFICATE</Box>
-        <Box className="flex items-center gap-3 mt-3">
+        <Box className="flex items-center gap-3 mt-[calc(12px*var(--fit,1))]">
           <Box className="h-px w-16 bg-[#cba044]" />
           <Box as="span" className="text-[15px] tracking-[0.4em] text-[#b98a34] font-semibold">OF TRAINING</Box>
           <Box className="h-px w-16 bg-[#cba044]" />
         </Box>
 
-        <Box as="p" className="mt-9 text-[12px] tracking-[0.3em] uppercase text-slate-400" style={{ fontFamily: "Arial, sans-serif" }}>
+        <Box as="p" className="mt-[calc(36px*var(--fit,1))] text-[12px] tracking-[0.3em] uppercase text-slate-400" style={{ fontFamily: "Arial, sans-serif" }}>
           This certificate is presented to
         </Box>
-        <Box as="p" className="mt-4 text-[52px] leading-tight text-[#2f8fd0] font-normal" style={{ fontFamily: "'Segoe Script', 'Bradley Hand', 'Brush Script MT', Georgia, cursive" }}>
+        <Box as="p" className="mt-[calc(16px*var(--fit,1))] text-[52px] leading-tight text-[#2f8fd0] font-normal" style={{ fontFamily: "'Segoe Script', 'Bradley Hand', 'Brush Script MT', Georgia, cursive" }}>
           {cert.participant_name || "—"}
         </Box>
 
-        <Box as="p" className="mt-5 text-[12px] tracking-[0.3em] uppercase text-slate-400" style={{ fontFamily: "Arial, sans-serif" }}>
+        <Box as="p" className="mt-[calc(20px*var(--fit,1))] text-[12px] tracking-[0.3em] uppercase text-slate-400" style={{ fontFamily: "Arial, sans-serif" }}>
           For the successful completion of
         </Box>
-        <Box as="p" className="mt-3 text-[27px] text-[#1f2d5c] font-semibold">{cert.title}</Box>
-        <Box as="p" className="mt-3 text-[15px] text-slate-500" style={{ fontFamily: "Arial, sans-serif" }}>
+        <Box as="p" className="mt-[calc(12px*var(--fit,1))] text-[27px] text-[#1f2d5c] font-semibold">{cert.title}</Box>
+        {/* Pulled a little wider than the block's padding: a long session list
+            wraps to fewer lines, which is what keeps it clear of the QR. Font
+            size is owned by useFitCenterBlock. */}
+        <Box
+          as="p"
+          ref={datesRef}
+          className="mt-[calc(12px*var(--fit,1))] -mx-[34px] leading-[1.5] text-slate-500"
+          style={{ fontFamily: "Arial, sans-serif", fontSize: DATES_FONT }}
+        >
           which took place {dateText}, via {delivery}.
         </Box>
       </Box>
@@ -398,20 +599,21 @@ function CertificateCanvas({ cert }) {
 function ScaledCertificate({ cert }) {
   const ref = useRef(null);
   const [scale, setScale] = useState(0);
+  const { Canvas, width, height } = documentSpec(cert);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
       const w = entries[0].contentRect.width;
-      setScale(w / CERT_W);
+      setScale(w / width);
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [width]);
   return (
-    <Box ref={ref} className="relative w-full" style={{ aspectRatio: `${CERT_W} / ${CERT_H}` }}>
+    <Box ref={ref} className="relative w-full" style={{ aspectRatio: `${width} / ${height}` }}>
       <Box className="absolute top-0 left-0 origin-top-left" style={{ transform: `scale(${scale})` }}>
-        <CertificateCanvas cert={cert} />
+        <Canvas cert={cert} />
       </Box>
     </Box>
   );
@@ -689,7 +891,8 @@ export function CertificatesContent() {
         return;
       }
       try {
-        const blob = await generateCertificatePdf(node, { width: CERT_W, height: CERT_H });
+        const { width, height } = documentSpec(captureCert);
+        const blob = await generateCertificatePdf(node, { width, height });
         if (cancelled) return;
         const url = URL.createObjectURL(blob);
         setPdf({ url, name: certificatePdfName(captureCert) });
@@ -776,7 +979,10 @@ export function CertificatesContent() {
       {/* Off-screen capture root — parked off-canvas (see globals.css) so the
           certificate is laid out for html2canvas but never visible on screen. */}
       <Box ref={captureRef} className="certificate-print-root" aria-hidden="true">
-        {captureCert && <CertificateCanvas cert={captureCert} />}
+        {captureCert && (() => {
+          const { Canvas } = documentSpec(captureCert);
+          return <Canvas cert={captureCert} />;
+        })()}
       </Box>
     </>
   );

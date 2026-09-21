@@ -4,17 +4,22 @@
  * Certificate verification result.
  *
  * Mirrors the four states in the reference design:
- *   1. Verified certificate, PMI course with PDUs   → PDU seal + accreditation
- *   2. Verified certificate, no PDUs                → same card, seal omitted
- *   3. Letter of Course Attendance                  → not issued by this system
- *   4. Not found                                    → the empty state
+ *   1. Certificate of Training, PMI course with PDUs → PDU seal + accreditation
+ *   2. Certificate of Training, non-PMI              → same card, seal omitted
+ *   3. Letter of Course Attendance                   → amber banner + advisory
+ *   4. Not found                                     → the empty state
+ *
+ * State 3 is driven by `credential_type` from the API: a certification course
+ * that INCLUDES the certification is examined by the awarding body, so Invensis
+ * attests attendance only — never achievement. That distinction is a legal one,
+ * which is why the advisory is not optional on that state.
  *
  * Nothing here is behind auth, so it shows only what is already printed on the
  * certificate face — never an email, participant id, or anything about the
  * order that paid for it.
  */
 
-import { CheckCircle2, XCircle, ShieldCheck, Share2, Link2 } from "lucide-react";
+import { CheckCircle2, XCircle, ShieldCheck, Share2, Link2, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -97,6 +102,7 @@ export function VerifyNotFound({ query }) {
 export function VerifiedCertificate({ certificate: c }) {
   const [copied, setCopied] = useState(false);
   const dates = trainingDatesText(c.session_dates, c.start_date, c.end_date);
+  const isAttendance = c.credential_type === "attendance_letter";
 
   async function share() {
     try {
@@ -110,20 +116,31 @@ export function VerifiedCertificate({ certificate: c }) {
 
   return (
     <Box className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      {/* Banner */}
-      <Box className="flex flex-wrap items-start justify-between gap-4 bg-[#0b2e5c] px-6 py-5">
+      {/* Banner — navy for a certificate, amber for an attendance letter, so the
+          two are distinguishable before reading a word. */}
+      <Box className={`flex flex-wrap items-start justify-between gap-4 px-6 py-5 ${isAttendance ? "bg-[#7a4a06]" : "bg-[#0b2e5c]"}`}>
         <Box className="min-w-0">
-          <Box className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-300 ring-1 ring-emerald-400/30">
-            <CheckCircle2 className="h-3 w-3" /> Verified · Certificate of Training
+          <Box className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${
+            isAttendance
+              ? "bg-amber-400/15 text-amber-200 ring-amber-300/30"
+              : "bg-emerald-500/15 text-emerald-300 ring-emerald-400/30"
+          }`}>
+            <CheckCircle2 className="h-3 w-3" /> Verified · {isAttendance ? "Letter of Course Attendance" : "Certificate of Training"}
           </Box>
           <Text as="h2" className="mt-2 text-xl font-bold text-white">{c.course_title}</Text>
           <Text as="p" className="mt-0.5 text-xs text-slate-300">
-            Certificate ID · <Text as="span" className="font-mono">{c.certificate_id}</Text>
-            {"  ·  "}Training ID · <Text as="span" className="font-mono">{c.training_id}</Text>
+            {isAttendance ? (
+              <>Training ID · <Text as="span" className="font-mono">{c.training_id}</Text></>
+            ) : (
+              <>
+                Certificate ID · <Text as="span" className="font-mono">{c.certificate_id}</Text>
+                {"  ·  "}Training ID · <Text as="span" className="font-mono">{c.training_id}</Text>
+              </>
+            )}
           </Text>
         </Box>
-        {/* PDU seal — state 1 only; a non-PDU course simply omits it. */}
-        {c.pdus != null && (
+        {/* PDU seal — never on an attendance letter: no qualification is claimed. */}
+        {!isAttendance && c.pdus != null && (
           <Box className="flex h-[74px] w-[74px] shrink-0 flex-col items-center justify-center rounded-full text-[#4a3105] ring-2 ring-[#8f5f14]/50"
                style={{ background: "linear-gradient(90deg,#8f5f14 0%,#c7942f 12%,#e8c45a 30%,#f7e694 46%,#e0b34e 62%,#c7942f 80%,#8f5f14 100%)" }}>
             <Text as="span" className="text-xl font-extrabold leading-none">{c.pdus}</Text>
@@ -140,34 +157,62 @@ export function VerifiedCertificate({ certificate: c }) {
         <Box className="min-w-0">
           <Text as="p" className="text-lg font-bold text-slate-900">{c.holder_name}</Text>
           <Text as="p" className="text-sm text-slate-600">
-            Successfully completed <Text as="strong" className="font-semibold text-slate-800">{c.course_title}</Text>
+            {isAttendance ? "Attended" : "Successfully completed"}{" "}
+            <Text as="strong" className="font-semibold text-slate-800">{c.course_title}</Text>
           </Text>
         </Box>
       </Box>
 
       {/* Details */}
       <Box className="grid grid-cols-1 gap-x-8 gap-y-4 px-6 py-5 sm:grid-cols-2">
-        <Detail label="Certificate ID" value={c.certificate_id} mono />
+        {/* An attendance letter is identified by its Training ID alone — it
+            carries no Certificate ID, because no certificate was awarded. */}
+        {!isAttendance && <Detail label="Certificate ID" value={c.certificate_id} mono />}
         <Detail label="Training ID" value={c.training_id} mono />
-        <Detail label="Course Identifier" value={c.course_identifier} mono />
-        {c.pdu_claim_code && <Detail label="PDU Claim Code" value={c.pdu_claim_code} mono />}
+        {/* Course Identifier and the claim code are PMI accreditation fields —
+            a non-certification course has neither, so the rows are omitted
+            rather than shown empty. */}
+        {!isAttendance && c.is_certification && <Detail label="Course Identifier" value={c.course_identifier} mono />}
+        {!isAttendance && c.pdu_claim_code && <Detail label="PDU Claim Code" value={c.pdu_claim_code} mono />}
         <Detail label="Training Mode" value={c.training_mode} />
         <Detail label="Date of Issue" value={formatInstantDate(c.issued_at)} />
         <Detail label="Training Dates" value={dates} full />
-        {(c.is_certification || c.pdus != null) && (
-          <Box className="sm:col-span-2">
-            <Text as="p" className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Accreditation</Text>
-            <Box className="mt-1 flex flex-wrap gap-1.5">
-              {c.is_certification && (
+        {/* Accreditation: PMI marks for a certification course, the Invensis
+            line otherwise. Omitted entirely on an attendance letter — claiming
+            accreditation there is exactly what the advisory below denies. */}
+        {!isAttendance && (
+        <Box className="sm:col-span-2">
+          <Text as="p" className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Accreditation</Text>
+          <Box className="mt-1 flex flex-wrap gap-1.5">
+            {c.is_certification ? (
+              <>
                 <Text as="span" className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">PMI®</Text>
-              )}
-              {c.pdus != null && (
-                <Text as="span" className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">{c.pdus} PDUs</Text>
-              )}
-            </Box>
+                {c.pdus != null && (
+                  <Text as="span" className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">{c.pdus} PDUs</Text>
+                )}
+              </>
+            ) : (
+              <Text as="span" className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                Invensis Certified Learning
+              </Text>
+            )}
           </Box>
+        </Box>
         )}
       </Box>
+
+      {/* Advisory — required on an attendance letter. Says plainly what the
+          document is not, so a reader cannot mistake it for a qualification. */}
+      {isAttendance && (
+        <Box className="mx-6 mb-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+          <Text as="p" className="text-xs leading-relaxed text-amber-900">
+            This is a letter confirming <Text as="strong" className="font-semibold">course attendance only</Text> and is
+            not a document demonstrating or certifying the achievement of any qualification in the subject matter of
+            the training course.
+          </Text>
+        </Box>
+      )}
 
       {/* Footer */}
       <Box className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
