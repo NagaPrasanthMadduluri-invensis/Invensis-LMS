@@ -15,6 +15,10 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchCertificates, fetchLearnerSurveys, submitSurveyResponse } from "@/services/api/learner/learner-api";
 import jsPDF from "jspdf";
+import QRCode from "qrcode";
+/* Printed certificates are scanned long after issue, so the QR must point at a
+   public portal, never at whatever host generated the PDF. */
+import { verifyUrlFor, verifyDisplayHost } from "@/lib/verify-url";
 import html2canvas from "html2canvas-pro";
 import { formatDate, wallFields } from "@/lib/datetime";
 
@@ -35,6 +39,39 @@ function dayMonthYear(d) {
   if (!f) return "";
   return `${ordinal(f.day)} ${monthName(d)} ${f.year}`;
 }
+/** "5th, 6th, 12th and 13th" — Oxford-comma-free list, "and" before the last. */
+function joinWithAnd(parts) {
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return parts[0];
+  return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
+}
+
+/**
+ * The days the training actually ran:
+ *   "on 5th, 6th, 12th and 13th September 2026"
+ *
+ * Listed rather than given as a range because a rescheduled cohort skips days —
+ * "from 5th to 13th" would claim eight days of training that didn't happen.
+ * Dates sharing a month collapse onto one month/year; a run that crosses a
+ * month or year boundary spells each date out so neither is ambiguous.
+ */
+function sessionDatesText(sessionDates) {
+  const days = (sessionDates ?? [])
+    .map((d) => ({ raw: d, f: wallFields(d) }))
+    .filter((x) => x.f)
+    .sort((a, b) => a.raw.localeCompare(b.raw));
+  if (days.length === 0) return "";
+
+  const sameMonth = days.every(
+    (d) => d.f.month === days[0].f.month && d.f.year === days[0].f.year
+  );
+  if (sameMonth) {
+    return `on ${joinWithAnd(days.map((d) => ordinal(d.f.day)))} ${monthName(days[0].raw)} ${days[0].f.year}`;
+  }
+  return `on ${joinWithAnd(days.map((d) => dayMonthYear(d.raw)))}`;
+}
+
+/** Fallback for a certificate with no session dates recorded. */
 function certificateDateText(start, end) {
   const s = wallFields(start);
   const e = wallFields(end);
@@ -117,12 +154,45 @@ function certificatePdfName(cert) {
    SVG/CSS (no external assets). Rendered scaled-to-fit for the on-page
    preview and at full size inside the hidden print root for download.
    ═══════════════════════════════════════════════════════════════ */
+/**
+ * QR as a data-URL PNG.
+ *
+ * Rendered to an <img> rather than an SVG or <canvas> because html2canvas-pro
+ * rasterises a loaded image reliably, and `waitForImages` already blocks the
+ * PDF until every image has settled — an SVG QR can come out blank.
+ * Error-correction level M so a scuffed print still scans.
+ */
+function useQrDataUrl(code) {
+  const [url, setUrl] = useState(null);
+  useEffect(() => {
+    if (!code) { setUrl(null); return; }
+    let cancelled = false;
+    QRCode.toDataURL(verifyUrlFor(code), {
+      margin: 0,
+      width: 300,
+      errorCorrectionLevel: "M",
+      color: { dark: "#16224e", light: "#ffffff" },
+    })
+      .then((u) => { if (!cancelled) setUrl(u); })
+      .catch(() => { if (!cancelled) setUrl(null); });
+    return () => { cancelled = true; };
+  }, [code]);
+  return url;
+}
+
 const CERT_W = 1000;
 const CERT_H = 707;
 
 function CertificateCanvas({ cert }) {
-  const delivery = DELIVERY_TEXT[cert.delivery_mode] || "classroom";
-  const dateText = certificateDateText(cert.start_date, cert.end_date);
+  // Wording is admin-selected on the training; the local map is only a fallback
+  // for a certificate issued before that field existed.
+  const delivery = cert.mode_of_training || DELIVERY_TEXT[cert.delivery_mode] || "classroom";
+  // Prefer the real session days; fall back to the range only when a schedule
+  // never recorded them.
+  const dateText =
+    sessionDatesText(cert.session_dates) || certificateDateText(cert.start_date, cert.end_date);
+  const pdus = cert.pdus ?? null;
+  const qrUrl = useQrDataUrl(cert.certificate_id);
   return (
     <Box
       className="certificate-canvas relative bg-white overflow-hidden shadow-xl"
@@ -192,10 +262,48 @@ function CertificateCanvas({ cert }) {
         <img src="/invensis-learning-logo.svg" alt="Invensis Learning" width={210} height={51} className="block" />
       </Box>
 
-      {/* Certified badge (top right) */}
-      <Box className="absolute top-[36px] right-[60px]">
+      {/* Certified badge (top right), with the PDU count beneath it */}
+      <Box className="absolute top-[36px] right-[60px] flex flex-col items-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/certified-badge.png" alt="Invensis Learning Certified" width={118} height={118} className="block" />
+        {pdus != null && (
+          /* Gold "35 PDUs" pill, matched to the certified seal above it.
+             Built from stacked gradient layers rather than one background with
+             an inset shadow: html2canvas-pro rasterises linear-gradients
+             faithfully but drops inset box-shadows, so the sheen has to be a
+             real element or it vanishes from the downloaded PDF. */
+          <Box className="relative mt-1 overflow-hidden rounded-full ring-1 ring-[#8f5f14]/60">
+            {/* Base metal, graded LEFT TO RIGHT. Previously this ran top-to-
+                bottom with a bright stop at 50%, which painted a light stripe
+                straight across the middle of the pill — the banding has to run
+                the same way as the glaze or the two cross and produce that
+                stripe. */}
+            <Box
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(90deg,#8f5f14 0%,#c7942f 12%,#e8c45a 30%,#f7e694 46%,#e0b34e 62%,#c7942f 80%,#8f5f14 100%)",
+              }}
+            />
+            {/* Glaze: a soft sheen travelling left to right, peaking just past
+                the middle where the base is brightest, so the highlight lands
+                on the metal's own light band instead of fighting it. */}
+            <Box
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.30) 30%,rgba(255,255,255,0.55) 46%,rgba(255,255,255,0.18) 66%,rgba(255,255,255,0) 100%)",
+              }}
+            />
+            <Box
+              as="span"
+              className="relative block px-4 py-[3px] text-[13px] font-bold text-[#4a3105]"
+              style={{ fontFamily: "Arial, sans-serif" }}
+            >
+              {pdus} PDUs
+            </Box>
+          </Box>
+        )}
       </Box>
 
       {/* Center content */}
@@ -223,26 +331,64 @@ function CertificateCanvas({ cert }) {
         </Box>
       </Box>
 
-      {/* Footer — IDs (left) */}
-      <Box className="absolute left-[92px] bottom-[62px] flex gap-[64px]" style={{ fontFamily: "Arial, sans-serif" }}>
+      {/* PMI registered mark — certification courses only */}
+      {cert.is_certification && (
+        <Box className="absolute left-[92px] bottom-[128px] flex items-center gap-3" style={{ fontFamily: "Arial, sans-serif" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/pmi-logo.png"
+            alt=""
+            width={52}
+            height={52}
+            className="block rounded-full object-contain"
+            // The mark is optional artwork: if the asset is absent the wording
+            // still prints rather than leaving a broken image on a certificate.
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
+          />
+          <Box>
+            <Box as="p" className="text-[12px] text-slate-600 leading-snug">
+              PMP<sup>®</sup> is registered mark of
+            </Box>
+            <Box as="p" className="text-[12px] text-slate-600 leading-snug">
+              Project Management Institute. inc
+            </Box>
+          </Box>
+        </Box>
+      )}
+
+      {/* Footer — printed identifiers (left) */}
+      <Box className="absolute left-[92px] bottom-[56px] flex gap-[46px]" style={{ fontFamily: "Arial, sans-serif" }}>
         <Box>
-          <Box as="p" className="text-[17px] font-bold text-[#16224e] tracking-wide">{cert.activity_id || "—"}</Box>
-          <Box as="p" className="text-[11px] text-slate-400 mt-1">Activity ID</Box>
+          <Box as="p" className="text-[17px] font-bold text-[#16224e] tracking-wide">{cert.training_id || "—"}</Box>
+          <Box as="p" className="text-[11px] text-slate-400 mt-1">Training ID</Box>
         </Box>
         <Box>
           <Box as="p" className="text-[17px] font-bold text-[#16224e] tracking-wide">{cert.certificate_id || "—"}</Box>
           <Box as="p" className="text-[11px] text-slate-400 mt-1">Certificate ID</Box>
         </Box>
+        <Box>
+          <Box as="p" className="text-[17px] font-bold text-[#16224e] tracking-wide">{cert.course_identifier || "—"}</Box>
+          <Box as="p" className="text-[11px] text-slate-400 mt-1">Course Identifier</Box>
+        </Box>
+        {cert.pdu_claim_code && (
+          <Box>
+            <Box as="p" className="text-[17px] font-bold text-[#16224e] tracking-wide">{cert.pdu_claim_code}</Box>
+            <Box as="p" className="text-[11px] text-slate-400 mt-1">PDU Claim Code</Box>
+          </Box>
+        )}
       </Box>
 
-      {/* Footer — signature (right) */}
+      {/* Footer — verification QR (right), in place of the signature block.
+          Encodes the public verify URL for this certificate's ID. */}
       <Box className="absolute right-[96px] bottom-[54px] text-center" style={{ fontFamily: "Arial, sans-serif" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/signature.png" alt="Signature of Arvind Rongala" width={168} height={50} className="mx-auto block object-contain h-[50px] w-auto" />
-        <Box className="h-px w-[190px] bg-slate-300 mx-auto mt-1" />
-        <Box as="p" className="text-[15px] font-bold text-[#16224e] mt-2">Arvind Rongala</Box>
-        <Box as="p" className="text-[11px] text-slate-500">Director, Invensis Inc</Box>
-        <Box as="p" className="text-[11px] text-slate-400">www.invensislearning.com</Box>
+        {qrUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img src={qrUrl} alt={`Scan to verify certificate ${cert.certificate_id}`} width={104} height={104} className="mx-auto block" />
+        ) : (
+          <Box className="mx-auto h-[104px] w-[104px] bg-slate-100" />
+        )}
+        <Box as="p" className="text-[11px] font-semibold text-[#16224e] mt-2">Scan to verify</Box>
+        <Box as="p" className="text-[10px] text-slate-400">{verifyDisplayHost()}</Box>
       </Box>
     </Box>
   );
@@ -447,8 +593,8 @@ function CertificateCard({ cert, survey, onDownload, onGiveFeedback }) {
 
         <Box className="flex items-center gap-4 text-xs">
           <Box>
-            <Text as="p" className="text-[10px] uppercase tracking-wide text-slate-400">Activity ID</Text>
-            <Text as="p" className="font-mono font-semibold text-slate-700">{cert.activity_id || "—"}</Text>
+            <Text as="p" className="text-[10px] uppercase tracking-wide text-slate-400">Training ID</Text>
+            <Text as="p" className="font-mono font-semibold text-slate-700">{cert.training_id || "—"}</Text>
           </Box>
           <Box>
             <Text as="p" className="text-[10px] uppercase tracking-wide text-slate-400">Certificate ID</Text>

@@ -346,6 +346,78 @@ export async function fetchAdminCertificates({ token }) {
   return apiClient("/admin/certificates", { token });
 }
 
+/* ── Certificate management ───────────────────────────────
+   Generating a certificate and RELEASING it are separate steps: a learner sees
+   nothing until an admin releases. Release/generate take an optional
+   `enrolmentIds` array — omit it to act on the whole training. */
+
+/** Completed trainings, with per-training generated/released/download counts. */
+export async function fetchCertifiableTrainings({ token }) {
+  return apiClient("/admin/certificates/trainings", { token });
+}
+
+/** One training: header, summary counts and every learner's certificate line. */
+export async function fetchTrainingCertificates({ token, trainingRef }) {
+  return apiClient(`/admin/certificates/trainings/${trainingRef}`, { token });
+}
+
+/** Create certificate rows for eligible seats missing one. Does NOT release. */
+export async function generateCertificates({ token, trainingRef, enrolmentIds }) {
+  return apiClient(`/admin/certificates/trainings/${trainingRef}/generate`, {
+    method: "POST",
+    token,
+    body: enrolmentIds?.length ? { enrolment_ids: enrolmentIds } : {},
+  });
+}
+
+/** Make certificates visible to learners. */
+export async function releaseCertificates({ token, trainingRef, enrolmentIds }) {
+  return apiClient(`/admin/certificates/trainings/${trainingRef}/release`, {
+    method: "POST",
+    token,
+    body: enrolmentIds?.length ? { enrolment_ids: enrolmentIds } : {},
+  });
+}
+
+/**
+ * Set PDUs (8-60) and the PMI claim code for a training. Training-level: every
+ * learner on the cohort earns the same PDUs and claims against the same code.
+ * Must be set before certificates can be generated.
+ */
+export async function setTrainingPdus({ token, trainingRef, pdus, pduClaimCode, certificateMode }) {
+  return apiClient(`/admin/certificates/trainings/${trainingRef}/pdus`, {
+    method: "PUT",
+    token,
+    body: {
+      pdus,
+      pdu_claim_code: pduClaimCode,
+      ...(certificateMode !== undefined ? { certificate_mode: certificateMode || null } : {}),
+    },
+  });
+}
+
+/** Take a released certificate back out of the learner's view. */
+export async function revokeCertificate({ token, certificateId, reason }) {
+  return apiClient(`/admin/certificates/${certificateId}/revoke`, {
+    method: "POST",
+    token,
+    body: reason ? { reason } : {},
+  });
+}
+
+/**
+ * Correct an issued certificate. Course title and session dates are NOT
+ * editable — they come from the training. Send null for learner_name to clear
+ * the override and fall back to the participant record.
+ */
+export async function updateCertificate({ token, certificateId, data }) {
+  return apiClient(`/admin/certificates/${certificateId}`, {
+    method: "PATCH",
+    token,
+    body: data,
+  });
+}
+
 /**
  * GET /lms/admin/dashboard
  * Returns { stats, recent_users, recent_orders }

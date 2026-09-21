@@ -1,7 +1,7 @@
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { Award } from "lucide-react";
-import { CertificatesList } from "@/components/admin/certificates-list";
+import { CertificateGenerator } from "@/components/admin/certificate-generator";
 
 export default function AdminCertificatesPage() {
   return (
@@ -13,11 +13,11 @@ export default function AdminCertificatesPage() {
         <Box>
           <Text as="h1" className="text-xl font-bold text-slate-800 leading-tight">Certificates</Text>
           <Text as="p" className="text-slate-400 text-xs mt-0.5">
-            Admin &rsaquo; <Text as="span" className="text-slate-500 font-medium">Certificates</Text>
+            Admin &rsaquo; <Text as="span" className="text-slate-500 font-medium">Certificates</Text> &mdash; generate and release learner certificates
           </Text>
         </Box>
       </Box>
-      <CertificatesList />
+      <CertificateGenerator />
     </Box>
   );
 }

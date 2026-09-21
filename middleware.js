@@ -4,7 +4,9 @@ const TOKEN_COOKIE = "lms_token";
 const USER_COOKIE  = "lms_user";
 
 // Reachable without auth.
-const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/reset-password", "/set-password"];
+// `/verify` is public by design: a certificate holder scanning the QR on a
+// printed certificate has no account and must not be sent to a login screen.
+const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/reset-password", "/set-password", "/verify"];
 // Of those, only these bounce an already-authenticated user to their portal.
 // Password-flow pages stay reachable even with a stale session (email-link clicks).
 const AUTH_REDIRECT_PATHS = ["/login", "/register"];

@@ -48,7 +48,9 @@ export async function fetchMyTrainings({ token }) {
  * GET /learner/certificates
  * The caller's training certificates (one per completed enrolment). Each item:
  *   { training_id, training_code, title, delivery_mode, start_date, end_date,
- *     participant_name, activity_id, certificate_id, issued, issued_at,
+ *     participant_name, training_id, certificate_id, course_identifier,
+ *     pdus, pdu_claim_code, mode_of_training, session_dates, is_certification,
+ *     issued, issued_at,
  *     completed_at }
  * `issued` is true once the learner has submitted the feedback survey.
  */
