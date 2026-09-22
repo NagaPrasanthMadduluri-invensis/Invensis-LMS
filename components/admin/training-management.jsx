@@ -1334,6 +1334,19 @@ export function TrainingManagement({ trainingId }) {
             <Box className="flex items-center gap-2 flex-wrap">
               <Hash className="h-4 w-4 text-violet-400" />
               <Text as="span" className="text-sm font-mono font-semibold tracking-wide text-violet-700">{detail.training_id}</Text>
+              {/* The CMS event code for this schedule, matching the card in the
+                  list and the Course Identifier printed on the certificate.
+                  Manually created schedules have none — the chip is then
+                  omitted rather than shown empty. */}
+              {detail.event_code && (
+                <Text
+                  as="span"
+                  title={`Schedule event code · ${detail.event_code}`}
+                  className="rounded-lg bg-white/70 px-2 py-0.5 text-sm font-mono font-semibold tracking-wide text-slate-500 ring-1 ring-slate-200"
+                >
+                  {detail.event_code}
+                </Text>
+              )}
               <Badge className={`border-0 text-[10px] font-semibold ${statusCfg.light}`}>{statusCfg.label}</Badge>
             </Box>
             <Badge className="border-0 bg-violet-100 text-violet-700 text-[11px] font-medium">

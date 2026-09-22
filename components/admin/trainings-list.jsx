@@ -83,12 +83,29 @@ function TrainingCard({ training, onClick }) {
     >
       <Box className="p-5 flex flex-col flex-1 gap-4">
 
-        {/* Row 1: Training ID + Status */}
-        <Box className="flex items-center justify-between">
-          <Text as="span" className="text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg tracking-wide">
-            {training.code}
-          </Text>
-          <Box className="flex items-center gap-1.5">
+        {/* Row 1: Training ID + schedule event code + Status.
+            The event code is the CMS's own identifier for the schedule
+            ("INL000055") — the same value printed on a certificate as its
+            Course Identifier. It is shown next to the Training ID so an admin
+            can match a training here against the schedule in the CMS without
+            opening it. Older/manually created schedules have none, and the
+            chip is then omitted rather than shown empty. */}
+        <Box className="flex items-center justify-between gap-2">
+          <Box className="flex min-w-0 items-center gap-1.5">
+            <Text as="span" className="shrink-0 text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg tracking-wide">
+              {training.code}
+            </Text>
+            {training.event_code && (
+              <Text
+                as="span"
+                title={`Schedule event code · ${training.event_code}`}
+                className="shrink-0 text-[11px] font-mono font-bold text-slate-500 bg-slate-50 ring-1 ring-slate-200 px-2.5 py-1 rounded-lg tracking-wide"
+              >
+                {training.event_code}
+              </Text>
+            )}
+          </Box>
+          <Box className="flex shrink-0 items-center gap-1.5">
             {training.due_for_update && (
               <Badge className="text-[10px] font-semibold border-0 bg-amber-100 text-amber-800 ring-1 ring-amber-300">Due for Update</Badge>
             )}
@@ -259,7 +276,12 @@ export function TrainingsList() {
   }, {});
   const filtered = trainings.filter((t) => {
     const q = search.toLowerCase();
-    const matchesSearch = t.title.toLowerCase().includes(q) || t.code.toLowerCase().includes(q);
+    // The event code is searchable too — an admin arriving from the CMS has
+    // the INL code in hand, not the Training ID.
+    const matchesSearch =
+      t.title.toLowerCase().includes(q) ||
+      t.code.toLowerCase().includes(q) ||
+      (t.event_code ?? "").toLowerCase().includes(q);
     const matchesStatus = statusFilter === "all" || t.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -293,7 +315,7 @@ export function TrainingsList() {
         <Box className="relative">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
-            placeholder="Search by training ID or title..."
+            placeholder="Search by training ID, event code or title..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             autoComplete="off"
