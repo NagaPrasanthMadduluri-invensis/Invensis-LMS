@@ -100,7 +100,12 @@ function FilterSelect({ icon: Icon, value, onChange, allLabel, options, width = 
   );
 }
 
-/* ── Tag list cell (specializations / certifications) ── */
+/* ── Tag list cell (specializations / certifications) ──
+   Tag text is free-form and occasionally enormous — one trainer's
+   specialization is a single 200-character "A || B || C || ..." string. A chip
+   is `whitespace-nowrap`, so left uncapped that one value sets the column's
+   intrinsic width and crushes every other column. Each chip is therefore
+   capped and ellipsised, with the full text on hover. ── */
 function TagCell({ items, tone, icon: Icon }) {
   if (!items || items.length === 0) return <Text as="span" className="text-xs text-slate-300">—</Text>;
   const shown = items.slice(0, 2);
@@ -109,14 +114,15 @@ function TagCell({ items, tone, icon: Icon }) {
     ? "bg-amber-50 text-amber-700 ring-amber-200"
     : "bg-violet-50 text-violet-700 ring-violet-200";
   return (
-    <Box className="flex flex-wrap gap-1">
+    <Box className="flex flex-wrap items-center gap-1">
       {shown.map((s) => (
-        <Badge key={s} className={`border-0 ring-1 text-[10px] font-semibold px-2 py-0.5 ${toneCls}`}>
-          {Icon && <Icon className="h-2.5 w-2.5 mr-1 shrink-0" />}{s}
+        <Badge key={s} title={s} className={`max-w-full border-0 ring-1 text-[10px] font-semibold px-2 py-0.5 ${toneCls}`}>
+          {Icon && <Icon className="h-2.5 w-2.5 mr-1 shrink-0" />}
+          <Text as="span" className="min-w-0 truncate text-[10px] font-semibold text-inherit">{s}</Text>
         </Badge>
       ))}
       {extra > 0 && (
-        <Badge className="border-0 bg-slate-100 text-slate-500 text-[10px] font-semibold px-1.5 py-0.5">+{extra}</Badge>
+        <Badge title={items.slice(2).join(", ")} className="shrink-0 border-0 bg-slate-100 text-slate-500 text-[10px] font-semibold px-1.5 py-0.5">+{extra}</Badge>
       )}
     </Box>
   );
@@ -140,9 +146,9 @@ function TrainerRow({ trainer, onEdit, onResendSetup }) {
               {initialsOf(trainer.name)}
             </AvatarFallback>
           </Avatar>
-          <Box className="min-w-0">
+          <Box className="min-w-0 flex-1">
             <Box className="flex items-center gap-2 flex-wrap">
-              <Text as="p" className="text-sm font-semibold text-slate-900 leading-tight">{trainer.name}</Text>
+              <Text as="p" title={trainer.name} className="max-w-full truncate text-sm font-semibold text-slate-900 leading-tight">{trainer.name}</Text>
               <Badge className={`border-0 text-[10px] font-semibold px-2 py-0.5 ${active ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : "bg-red-50 text-red-600 ring-1 ring-red-200"}`}>
                 {active ? "Active" : "Inactive"}
               </Badge>
@@ -157,7 +163,7 @@ function TrainerRow({ trainer, onEdit, onResendSetup }) {
                 </Badge>
               )}
             </Box>
-            <Text as="span" className="text-xs text-slate-400">{trainer.email}</Text>
+            <Text as="span" title={trainer.email} className="block truncate text-xs text-slate-400">{trainer.email}</Text>
           </Box>
         </Box>
       </TableCell>
@@ -176,7 +182,7 @@ function TrainerRow({ trainer, onEdit, onResendSetup }) {
       <TableCell className="py-3.5 hidden md:table-cell align-middle">
         <Box className="flex items-center gap-1.5">
           <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-          <Text as="span" className="text-xs text-slate-500">{trainer.location || "—"}</Text>
+          <Text as="span" title={trainer.location || ""} className="min-w-0 truncate text-xs text-slate-500">{trainer.location || "—"}</Text>
         </Box>
       </TableCell>
 
@@ -184,15 +190,15 @@ function TrainerRow({ trainer, onEdit, onResendSetup }) {
       <TableCell className="py-3.5 hidden sm:table-cell align-middle">
         <Box className="flex items-center gap-1.5">
           <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-          <Text as="span" className="text-xs text-slate-500 whitespace-nowrap">{trainer.experience || "—"}</Text>
+          <Text as="span" title={trainer.experience || ""} className="min-w-0 truncate text-xs text-slate-500">{trainer.experience || "—"}</Text>
         </Box>
       </TableCell>
 
       {/* Actions */}
       <TableCell className="py-3.5 pr-5 text-right">
-        <Box className="flex items-center gap-2 justify-end flex-wrap">
+        <Box className="flex items-center gap-2 justify-end">
           {setupPending && (
-            <ResendSetupButton label="Resend setup email" onResend={() => onResendSetup(trainer)} />
+            <ResendSetupButton label="Resend" onResend={() => onResendSetup(trainer)} />
           )}
           <button
             className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-orange-100 hover:bg-orange-200 text-orange-700 text-xs font-semibold rounded-lg shadow-sm transition-colors shrink-0 whitespace-nowrap"
@@ -394,30 +400,39 @@ export function TrainersList() {
         </Card>
       ) : (
         <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-          <Box className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-100">
-                  <TableHead className={`${thBase} pl-5`}>Trainer</TableHead>
-                  <TableHead className={`${thBase} hidden lg:table-cell`}>Specializations</TableHead>
-                  <TableHead className={`${thBase} hidden xl:table-cell`}>Certifications</TableHead>
-                  <TableHead className={`${thBase} hidden md:table-cell`}>Location</TableHead>
-                  <TableHead className={`${thBase} hidden sm:table-cell`}>Experience</TableHead>
-                  <TableHead className={`${thBase} pr-5 text-right`}>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((t) => (
-                  <TrainerRow
-                    key={t.id}
-                    trainer={t}
-                    onEdit={setEditTrainer}
-                    onResendSetup={(tr) => resendTrainerSetupEmail({ token, trainerId: tr.id })}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
+          {/* `table-fixed` is the fix for the collapsed-column layout: under the
+              default `auto` layout a single wide cell (a long specialization
+              chip, a sentence-long experience string) sets the table's
+              intrinsic width, and every other column is squeezed down to its
+              minimum — a character or two per line. Fixed layout takes the
+              widths from the header instead, so content can never renegotiate
+              them; anything too long ellipsises inside its own column.
+
+              The min-widths step with the breakpoints at which each column
+              appears, so the table scrolls horizontally rather than cramping.
+              `Table` supplies its own overflow-x-auto container. */}
+          <Table className="table-fixed min-w-[530px] sm:min-w-[730px] md:min-w-[880px] lg:min-w-[1120px] xl:min-w-[1320px]">
+            <TableHeader>
+              <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-100">
+                <TableHead className={`${thBase} pl-5 w-[280px]`}>Trainer</TableHead>
+                <TableHead className={`${thBase} hidden lg:table-cell w-[240px]`}>Specializations</TableHead>
+                <TableHead className={`${thBase} hidden xl:table-cell w-[200px]`}>Certifications</TableHead>
+                <TableHead className={`${thBase} hidden md:table-cell w-[150px]`}>Location</TableHead>
+                <TableHead className={`${thBase} hidden sm:table-cell w-[200px]`}>Experience</TableHead>
+                <TableHead className={`${thBase} pr-5 text-right w-[250px]`}>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((t) => (
+                <TrainerRow
+                  key={t.id}
+                  trainer={t}
+                  onEdit={setEditTrainer}
+                  onResendSetup={(tr) => resendTrainerSetupEmail({ token, trainerId: tr.id })}
+                />
+              ))}
+            </TableBody>
+          </Table>
         </Card>
       )}
 

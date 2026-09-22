@@ -232,112 +232,116 @@ export function UsersTable() {
           </Box>
         ) : (
           <>
-            <Box className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-100">
-                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 pl-5">User</TableHead>
-                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Email</TableHead>
-                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Job Title</TableHead>
-                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Location</TableHead>
-                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 text-center">Enrolments</TableHead>
-                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Joined</TableHead>
-                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Status</TableHead>
-                    <TableHead className="py-3 pr-5" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((u) => {
-                    const setupPending = u.account_active && !u.has_password;
-                    return (
-                      <TableRow
-                        key={u.id}
-                        onClick={() => router.push(`/admin/users/${u.id}`)}
-                        className="group cursor-pointer hover:bg-violet-50/40 border-b border-slate-100 last:border-0 transition-colors"
-                      >
+            {/* `table-fixed` + explicit column widths: under the default `auto`
+                layout a long email or job title sets the table's intrinsic
+                width and the remaining columns collapse to their minimum. Here
+                the header owns the widths and overlong values ellipsise inside
+                their own column. Job Title and Joined fold away on narrower
+                screens rather than every column being cramped at once. */}
+            <Table className="table-fixed min-w-[920px] md:min-w-[1080px] lg:min-w-[1260px] xl:min-w-[1400px]">
+              <TableHeader>
+                <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-100">
+                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 pl-5 w-[240px]">User</TableHead>
+                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 w-[260px]">Email</TableHead>
+                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 hidden lg:table-cell w-[180px]">Job Title</TableHead>
+                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 hidden md:table-cell w-[160px]">Location</TableHead>
+                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 text-center w-[120px]">Enrolments</TableHead>
+                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 hidden xl:table-cell w-[140px]">Joined</TableHead>
+                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 w-[150px]">Status</TableHead>
+                  <TableHead className="py-3 pr-5 w-[150px]" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((u) => {
+                  const setupPending = u.account_active && !u.has_password;
+                  return (
+                    <TableRow
+                      key={u.id}
+                      onClick={() => router.push(`/admin/users/${u.id}`)}
+                      className="group cursor-pointer hover:bg-violet-50/40 border-b border-slate-100 last:border-0 transition-colors"
+                    >
 
-                        {/* User */}
-                        <TableCell className="py-4 pl-5">
-                          <Box className="flex items-center gap-3">
-                            <Box className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${avatarColor(u.id)}`}>
-                              {getInitials(u.name)}
-                            </Box>
-                            <Text as="p" className="text-sm font-semibold text-slate-700 leading-tight">{u.name}</Text>
+                      {/* User */}
+                      <TableCell className="py-4 pl-5">
+                        <Box className="flex items-center gap-3">
+                          <Box className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${avatarColor(u.id)}`}>
+                            {getInitials(u.name)}
                           </Box>
-                        </TableCell>
+                          <Text as="p" title={u.name} className="min-w-0 truncate text-sm font-semibold text-slate-700 leading-tight">{u.name}</Text>
+                        </Box>
+                      </TableCell>
 
-                        {/* Email */}
-                        <TableCell className="py-4">
-                          <Box className="flex items-center gap-1.5">
-                            <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                            <Text as="span" className="text-sm text-slate-600">{u.email}</Text>
-                          </Box>
-                        </TableCell>
+                      {/* Email */}
+                      <TableCell className="py-4">
+                        <Box className="flex items-center gap-1.5">
+                          <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                          <Text as="span" title={u.email} className="min-w-0 truncate text-sm text-slate-600">{u.email}</Text>
+                        </Box>
+                      </TableCell>
 
-                        {/* Job title */}
-                        <TableCell className="py-4">
-                          <Box className="flex items-center gap-1.5">
-                            <Briefcase className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                            <Text as="span" className="text-sm text-slate-600">{u.job_title || "—"}</Text>
-                          </Box>
-                        </TableCell>
+                      {/* Job title */}
+                      <TableCell className="py-4 hidden lg:table-cell">
+                        <Box className="flex items-center gap-1.5">
+                          <Briefcase className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                          <Text as="span" title={u.job_title || ""} className="min-w-0 truncate text-sm text-slate-600">{u.job_title || "—"}</Text>
+                        </Box>
+                      </TableCell>
 
-                        {/* Location */}
-                        <TableCell className="py-4">
-                          <Box className="flex items-center gap-1.5">
-                            <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                            <Text as="span" className="text-sm text-slate-600">{u.location || "—"}</Text>
-                          </Box>
-                        </TableCell>
+                      {/* Location */}
+                      <TableCell className="py-4 hidden md:table-cell">
+                        <Box className="flex items-center gap-1.5">
+                          <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                          <Text as="span" title={u.location || ""} className="min-w-0 truncate text-sm text-slate-600">{u.location || "—"}</Text>
+                        </Box>
+                      </TableCell>
 
-                        {/* Enrolments */}
-                        <TableCell className="py-4 text-center">
-                          <Box className="inline-flex items-center gap-1.5 bg-violet-50 text-violet-700 text-sm font-bold px-2.5 py-1 rounded-lg ring-1 ring-violet-200">
-                            <BookOpen className="h-3.5 w-3.5" />
-                            {u.enrolment_count}
-                          </Box>
-                        </TableCell>
+                      {/* Enrolments */}
+                      <TableCell className="py-4 text-center">
+                        <Box className="inline-flex items-center gap-1.5 bg-violet-50 text-violet-700 text-sm font-bold px-2.5 py-1 rounded-lg ring-1 ring-violet-200">
+                          <BookOpen className="h-3.5 w-3.5" />
+                          {u.enrolment_count}
+                        </Box>
+                      </TableCell>
 
-                        {/* Joined */}
-                        <TableCell className="py-4">
-                          <Box className="flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                            <Text as="span" className="text-sm text-slate-600">{formatJoined(u.created_at)}</Text>
-                          </Box>
-                        </TableCell>
+                      {/* Joined */}
+                      <TableCell className="py-4 hidden xl:table-cell">
+                        <Box className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                          <Text as="span" className="min-w-0 truncate text-sm text-slate-600">{formatJoined(u.created_at)}</Text>
+                        </Box>
+                      </TableCell>
 
-                        {/* Status */}
-                        <TableCell className="py-4">
-                          <Badge className={`border-0 text-xs font-semibold px-2.5 py-0.5 ${
-                            !u.account_active
-                              ? "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
-                              : setupPending
-                              ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
-                              : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-                          }`}>
-                            {!u.account_active ? "● Inactive" : setupPending ? "● Setup pending" : "● Active"}
-                          </Badge>
-                        </TableCell>
+                      {/* Status */}
+                      <TableCell className="py-4">
+                        <Badge className={`max-w-full border-0 text-xs font-semibold px-2.5 py-0.5 ${
+                          !u.account_active
+                            ? "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
+                            : setupPending
+                            ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
+                            : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                        }`}>
+                          {!u.account_active ? "● Inactive" : setupPending ? "● Setup pending" : "● Active"}
+                        </Badge>
+                      </TableCell>
 
-                        {/* Actions + row affordance */}
-                        <TableCell className="py-4 pr-5 text-right">
-                          <Box className="flex items-center gap-2 justify-end">
-                            {setupPending && (
-                              <ResendSetupButton
-                                label="Resend setup email"
-                                onResend={() => resendParticipantSetupEmail({ token, participantId: u.id })}
-                              />
-                            )}
-                            <RowChevron className="h-4 w-4 text-slate-300 shrink-0 group-hover:text-violet-500 transition-colors" />
-                          </Box>
-                        </TableCell>
+                      {/* Actions + row affordance */}
+                      <TableCell className="py-4 pr-5 text-right">
+                        <Box className="flex items-center gap-2 justify-end">
+                          {setupPending && (
+                            <ResendSetupButton
+                              label="Resend"
+                              onResend={() => resendParticipantSetupEmail({ token, participantId: u.id })}
+                            />
+                          )}
+                          <RowChevron className="h-4 w-4 text-slate-300 shrink-0 group-hover:text-violet-500 transition-colors" />
+                        </Box>
+                      </TableCell>
 
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </Box>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
 
             {totalPages > 1 && (
               <Box className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
