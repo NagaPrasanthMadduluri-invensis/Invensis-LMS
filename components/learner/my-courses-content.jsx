@@ -426,12 +426,11 @@ function NotEnrolledState({ user, message }) {
 }
 
 /*
- * Which training to open by default.
+ * Which training to open when no specific one was asked for.
  *
- * The API returns them oldest-first (by start date), so taking list[0] opened
- * whatever the learner enrolled in *first* — typically a training that finished
- * months ago. What someone wants on landing is the one they still have to
- * attend, so prefer, in order:
+ * /my-courses now lists every training, so this only runs on a direct hit to
+ * the detail view without a reference — a bookmark of the old single-training
+ * URL, for instance. It prefers, in order:
  *
  *   1. in progress  — a training running right now
  *   2. upcoming     — the SOONEST one still ahead (not the oldest)
@@ -465,7 +464,28 @@ function pickDefaultTraining(list) {
   return live[0] ?? byRecency[0];
 }
 
-export function MyCoursesContent() {
+/*
+ * Match a list entry to the reference in the URL. The detail endpoint accepts
+ * a uuid or a training code, so the URL carries the readable code
+ * ("TRN-2026-0019") — but the ENROLMENT id only exists on the list row, which
+ * is why the list is fetched even when the training is named outright.
+ */
+function findTraining(list, ref) {
+  if (!ref) return null;
+  const needle = String(ref).toLowerCase();
+  return (list ?? []).find(
+    (t) => String(t.code ?? "").toLowerCase() === needle || String(t.id ?? "").toLowerCase() === needle
+  ) ?? null;
+}
+
+/**
+ * The full detail for one training.
+ *
+ * `trainingRef` is the code or uuid from the URL. Without one — a bookmark of
+ * the old single-training page — it falls back to picking the most relevant
+ * training, so that link keeps working rather than 404ing.
+ */
+export function MyCoursesContent({ trainingRef: requestedRef = null }) {
   const { user, token } = useAuth();
   const [training, setTraining] = useState(null);
   const [enrolmentId, setEnrolmentId] = useState(null);
@@ -476,27 +496,33 @@ export function MyCoursesContent() {
     if (!token || !user) return;
 
     setError(null);
-    // Resolve the learner's own enrolled training first, then open its detail by
-    // UUID. Using the real training id (not a hardcoded code) means the detail
-    // request always targets a training this learner is actually enrolled in.
+    /* The list is fetched even when the URL names a training, for two reasons:
+       it carries the enrolment id (which the detail response does not), and
+       matching against it means a learner can only ever open a training they
+       actually hold a seat on — the guard is the learner's own enrolments, not
+       a value pasted into the address bar. */
     fetchMyTrainings({ token })
       .then((res) => {
         const list = res?.trainings || res || [];
-        const first = pickDefaultTraining(list);
-        if (!first) {
-          const e = new Error("You are not enrolled in any training yet");
+        const match = requestedRef ? findTraining(list, requestedRef) : pickDefaultTraining(list);
+        if (!match) {
+          const e = new Error(
+            requestedRef
+              ? "That training isn't one of your enrolments"
+              : "You are not enrolled in any training yet"
+          );
           e.status = 403;
           throw e;
         }
         // The enrolment id lives on the list item, not on the training detail —
-        // `first.id` is the training. Tolerate either spelling from the API.
-        setEnrolmentId(first.enrolment_id ?? first.enrollment_id ?? null);
-        setTrainingRef(first.id);
-        return fetchTrainingDetail({ token, trainingRef: first.id });
+        // `match.id` is the training. Tolerate either spelling from the API.
+        setEnrolmentId(match.enrolment_id ?? match.enrollment_id ?? null);
+        setTrainingRef(match.id);
+        return fetchTrainingDetail({ token, trainingRef: match.id });
       })
       .then((data) => setTraining(data))
       .catch((err) => setError(err));
-  }, [token, user]);
+  }, [token, user, requestedRef]);
 
   // 403 → not enrolled (or not a learner). Show the contact-admin state, not a
   // scary error — there is simply nothing the learner can see yet.

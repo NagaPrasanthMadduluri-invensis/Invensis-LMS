@@ -230,7 +230,7 @@ export function TrainingsPanel({ myCourses = {}, details = {} }) {
           </Text>
           {counts.all === 0 && (
             <Button
-              render={<Link href="/enrollments" />}
+              render={<Link href="/my-courses" />}
               size="lg"
               className="mt-2 h-9 rounded-xl px-4 text-sm font-semibold"
             >
