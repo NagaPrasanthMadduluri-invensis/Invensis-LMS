@@ -409,7 +409,7 @@ export function CertificateGenerator() {
                   {busy === "pdu" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save PDUs"}
                 </Button>
                 <Text as="p" className="text-[11px] text-slate-400 flex-1 min-w-[200px]">
-                  PDUs and claim code are required before generating. All three apply to every certificate on this training, including ones already generated. Mode is what prints after &ldquo;which took place on &hellip;, via&rdquo;.
+                  All optional — a course with no PMI accreditation simply omits them. Each applies to every certificate on this training, including ones already generated, so they can be filled in after generating. Mode is what prints after &ldquo;which took place on &hellip;, via&rdquo;.
                 </Text>
               </Box>
             </Box>
