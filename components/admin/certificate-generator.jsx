@@ -74,7 +74,7 @@ function CertificationBadge({ courseType }) {
 
 /* ── Edit dialog: correct an issued certificate ── */
 function EditCertificateDialog({ cert, token, onClose, onSaved }) {
-  const [form, setForm] = useState({ learner_name: "", certificate_code: "", course_identifier: "" });
+  const [form, setForm] = useState({ learner_name: "", course_title: "", certificate_code: "", course_identifier: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
@@ -83,6 +83,7 @@ function EditCertificateDialog({ cert, token, onClose, onSaved }) {
     setError(null);
     setForm({
       learner_name: cert.learner_name ?? "",
+      course_title: cert.course_title ?? "",
       certificate_code: cert.certificate_code ?? "",
       course_identifier: cert.course_identifier ?? "",
     });
@@ -98,6 +99,10 @@ function EditCertificateDialog({ cert, token, onClose, onSaved }) {
       // name prints again.
       const name = form.learner_name.trim();
       if (name !== (cert.learner_name ?? "")) data.learner_name = name === "" ? null : name;
+      // Same contract as the name: emptying the box clears the override, so the
+      // training's own title prints again.
+      const courseTitle = form.course_title.trim();
+      if (courseTitle !== (cert.course_title ?? "")) data.course_title = courseTitle === "" ? null : courseTitle;
       const code = form.certificate_code.trim();
       if (code && code !== cert.certificate_code) data.certificate_code = code;
       const ident = form.course_identifier.trim();
@@ -122,7 +127,7 @@ function EditCertificateDialog({ cert, token, onClose, onSaved }) {
             <Pencil className="h-4 w-4" /> Edit certificate
           </DialogTitle>
           <DialogDescription className="text-xs text-slate-500 mt-0.5">
-            Course name and session dates come from the training and cannot be changed here.
+            Session dates come from the training and cannot be changed here.
           </DialogDescription>
         </DialogHeader>
         <Box className="px-6 py-5 space-y-4">
@@ -131,6 +136,14 @@ function EditCertificateDialog({ cert, token, onClose, onSaved }) {
             <Input value={form.learner_name} onChange={(e) => setForm({ ...form, learner_name: e.target.value })} className="h-9 text-sm" />
             <Text as="p" className="text-[11px] text-slate-400">
               From the participant record: {cert.source_learner_name || "—"}. Clear the box to restore it.
+            </Text>
+          </Box>
+          <Box className="space-y-1.5">
+            <Label className="text-xs">Course name (as printed)</Label>
+            <Input value={form.course_title} onChange={(e) => setForm({ ...form, course_title: e.target.value })} className="h-9 text-sm" />
+            <Text as="p" className="text-[11px] text-slate-400">
+              From the training: {cert.source_course_title || "—"}. Clear the box to restore it.
+              Changing this affects only what the certificate prints — the training keeps its own name.
             </Text>
           </Box>
           <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -183,7 +196,7 @@ export function CertificateGenerator() {
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(() => new Set());
   const [editing, setEditing] = useState(null);
-  const [pduForm, setPduForm] = useState({ pdus: "", code: "", mode: "" });
+  const [pduForm, setPduForm] = useState({ pdus: "", code: "", mode: "", trademark: "" });
 
   useEffect(() => {
     if (!token) return;
@@ -203,6 +216,7 @@ export function CertificateGenerator() {
         pdus: d.training.pdus != null ? String(d.training.pdus) : "",
         code: d.training.pdu_claim_code ?? "",
         mode: d.training.certificate_mode ?? "",
+        trademark: d.training.trademark_name ?? "",
       });
       setSelected(new Set());
     } catch (e) {
@@ -364,6 +378,17 @@ export function CertificateGenerator() {
                     ))}
                   </select>
                 </Box>
+                <Box className="space-y-1.5 min-w-[190px]">
+                  <Label className="text-xs font-semibold text-slate-600">
+                    Trademark <Text as="span" className="font-normal text-slate-400">(optional)</Text>
+                  </Label>
+                  <Input
+                    value={pduForm.trademark}
+                    onChange={(e) => setPduForm({ ...pduForm, trademark: e.target.value })}
+                    placeholder="ITIL®"
+                    className="h-9 text-sm"
+                  />
+                </Box>
                 <Button
                   size="sm"
                   variant="outline"
@@ -378,6 +403,7 @@ export function CertificateGenerator() {
                     pdus: pduForm.pdus,
                     pduClaimCode: pduForm.code,
                     certificateMode: pduForm.mode,
+                    trademarkName: pduForm.trademark,
                   }))}
                 >
                   {busy === "pdu" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save PDUs"}

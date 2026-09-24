@@ -243,6 +243,33 @@ function useQrDataUrl(code) {
 
    Declared once and shared by both documents so the Certificate of Training
    and the Letter of Course Attendance cannot drift apart. */
+/* Certificate typography — the three families the reference PDF embeds
+   (confirmed with `pdffonts`: Montserrat Regular/SemiBold/Bold, MongolianBaiti,
+   Mulish-Regular).
+
+   Montserrat and Mulish are self-hosted by next/font (see app/layout.js), so
+   they are guaranteed present when html2canvas-pro rasterises the page.
+
+   The TITLE keeps the serif it always had. Mongolian Baiti was tried and
+   dropped: it is a Microsoft system font, absent from Google Fonts and not
+   redistributable, so it could only be named — it would render on Windows and
+   fall back to something else everywhere else, and the certificate is
+   rasterised in the LEARNER's browser, not ours. Georgia is present on every
+   mainstream platform, so every learner gets the same title. */
+/* Printed at the very bottom of every document. Fixed wording — it explains
+   why there is no signature, which the QR replaced. */
+const DIGITAL_NOTICE =
+  "This certificate is digitally generated and does not require a signature. Scan the QR code to verify its authenticity";
+
+/* Attribution for a trademarked scheme, on the Letter of Course Attendance.
+   Only the mark itself is admin-entered; this sentence is fixed. */
+const trademarkLine = (mark) =>
+  `${mark} is a trademark of the PeopleCert group.\nUsed under PeopleCert. All rights reserved.`;
+
+const FONT_TITLE = "Georgia, 'Times New Roman', serif";
+const FONT_NAME = "var(--font-mulish), 'Mulish', 'Segoe UI', sans-serif";
+const FONT_BODY = "var(--font-montserrat), 'Montserrat', 'Segoe UI', Arial, sans-serif";
+
 const INK_BLACK = "text-[#000000]";   // labels + prose
 /* #1b4689, sampled from the glyph cores of the reference certificate's own
    identifier row (pdftoppm at 200dpi, dominant ink colour). Earlier attempts
@@ -259,6 +286,22 @@ const INK_TITLE = "text-[#10143d]";   // document title
 
 const CERT_W = 1000;
 const CERT_H = 707;
+
+/* Corner artwork.
+   Sized by WIDTH, not height. Scaling these to the full canvas height made them
+   ~302px wide — roughly double the reference and visually dominant. Measured off
+   the reference certificate (1066x752), the corner art occupies 15.8% of the
+   width on the left and 11.6% on the right, so the widths are taken from those
+   percentages and each height follows the PNG's own ratio (538x1259, 401x920).
+   Nothing is stretched, and they read as corner accents rather than full-bleed
+   bands. */
+const CORNER_TL_W = Math.round(0.158 * CERT_W);                    // 158
+const CORNER_TL_H = Math.round((1259 / 538) * CORNER_TL_W);        // 370
+/* The bottom-right art is kept narrow deliberately: its coloured band begins
+   ~28% in, i.e. at x≈916, which clears the QR code's right edge at x=904. */
+const CORNER_BR_W = Math.round(0.116 * CERT_W);                    // 116
+const CORNER_BR_H = Math.round((920 / 401) * CORNER_BR_W);         // 266
+
 
 /* ── Centre-block geometry ──
    The centre block is absolutely placed and grows *downward*, while the QR and
@@ -315,6 +358,14 @@ function useFitCenterBlock(centerRef, datesRef, deps) {
 const LETTER_W = 707;
 const LETTER_H = 1000;
 
+/* Letter corner artwork. One asset (102x172) used at both corners — the
+   bottom-right copy is the same image rotated 180°, which is what the old SVG
+   wedges did by mirroring their points. Width matches the wedge it replaces
+   (118px, ~17% of the page); the height follows the PNG's own ratio so it is
+   never stretched. */
+const LETTER_CORNER_W = 118;
+const LETTER_CORNER_H = Math.round((172 / 102) * LETTER_CORNER_W);   // 199
+
 /**
  * Letter of Course Attendance.
  *
@@ -332,23 +383,32 @@ function AttendanceLetterCanvas({ cert }) {
   return (
     <Box
       className="certificate-canvas relative bg-white overflow-hidden shadow-xl"
-      style={{ width: LETTER_W, height: LETTER_H, fontFamily: "Arial, Helvetica, sans-serif" }}
+      style={{ width: LETTER_W, height: LETTER_H, fontFamily: FONT_BODY }}
     >
       {/* Blue corner ribbons, top-left and bottom-right */}
-      <svg className="absolute inset-0" width={LETTER_W} height={LETTER_H} viewBox={`0 0 ${LETTER_W} ${LETTER_H}`} aria-hidden="true">
-        <defs>
-          <linearGradient id="latl" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="150" y2="230">
-            <stop offset="0" stopColor="#1b3f79" /><stop offset="1" stopColor="#3f8ed6" />
-          </linearGradient>
-          <linearGradient id="labr" gradientUnits="userSpaceOnUse" x1="707" y1="1000" x2="557" y2="770">
-            <stop offset="0" stopColor="#1b3f79" /><stop offset="1" stopColor="#3f8ed6" />
-          </linearGradient>
-        </defs>
-        <polygon points="0,0 118,0 0,236" fill="url(#latl)" />
-        <polygon points="46,0 118,0 0,236 0,150" fill="#ffffff" opacity="0.55" />
-        <polygon points="707,1000 589,1000 707,764" fill="url(#labr)" />
-        <polygon points="661,1000 589,1000 707,764 707,850" fill="#ffffff" opacity="0.55" />
-      </svg>
+      {/* Corner artwork — the supplied PNG, replacing the hand-drawn SVG wedges.
+          PNG rather than SVG for the same reason as the certificate: html2canvas-pro
+          rasterises a loaded raster reliably. Decorative only, so aria-hidden, and
+          first in the DOM so the letter's text paints over it. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/letter-corner.png"
+        alt=""
+        aria-hidden="true"
+        width={LETTER_CORNER_W}
+        height={LETTER_CORNER_H}
+        className="pointer-events-none absolute left-0 top-0 select-none"
+      />
+      {/* Same asset rotated 180°, exactly as the old wedges mirrored their points. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/letter-corner.png"
+        alt=""
+        aria-hidden="true"
+        width={LETTER_CORNER_W}
+        height={LETTER_CORNER_H}
+        className="pointer-events-none absolute right-0 bottom-0 rotate-180 select-none"
+      />
 
       {/* Title + logo */}
       <Box className="absolute inset-x-0 top-[110px] flex flex-col items-center">
@@ -394,6 +454,20 @@ function AttendanceLetterCanvas({ cert }) {
           <Box as="p" className="mt-2 text-[12px] font-bold text-[#1a2b45]">Scan to verify</Box>
         </Box>
       </Box>
+
+      {/* Foot of the page, centred. The trademark attribution appears only when
+          an admin has entered a mark — a half-written attribution would be
+          worse than none. The digital-generation notice always prints. */}
+      <Box className="absolute inset-x-[80px] bottom-[42px] text-center">
+        {cert.trademark_name && (
+          <Box as="p" className={`whitespace-pre-line text-[11.5px] leading-[1.6] ${INK_BLACK}`}>
+            {trademarkLine(cert.trademark_name)}
+          </Box>
+        )}
+        <Box as="p" className={`text-[8px] leading-[1.4] text-slate-400 ${cert.trademark_name ? "mt-5" : ""}`}>
+          {DIGITAL_NOTICE}
+        </Box>
+      </Box>
     </Box>
   );
 }
@@ -414,65 +488,55 @@ function CertificateCanvas({ cert }) {
   return (
     <Box
       className="certificate-canvas relative bg-white overflow-hidden shadow-xl"
-      style={{ width: CERT_W, height: CERT_H, fontFamily: "Georgia, 'Times New Roman', serif" }}
+      style={{ width: CERT_W, height: CERT_H, fontFamily: FONT_BODY }}
     >
-      {/* Decorative ribbons + faint guilloche arcs */}
-      <svg className="absolute inset-0" width={CERT_W} height={CERT_H} viewBox={`0 0 ${CERT_W} ${CERT_H}`} aria-hidden="true">
-        <defs>
-          <linearGradient id="cornerFadeTL" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="48" y2="155">
-            <stop offset="0" stopColor="#f4d9d9" />
-            <stop offset="1" stopColor="#ffffff" />
-          </linearGradient>
-          <linearGradient id="cornerFadeBR" gradientUnits="userSpaceOnUse" x1="1000" y1="707" x2="952" y2="552">
-            <stop offset="0" stopColor="#f4d9d9" />
-            <stop offset="1" stopColor="#ffffff" />
-          </linearGradient>
+      {/* Full-bleed background. The asset is 3511x2482 (aspect 1.415) against a
+          1000x707 canvas (1.414), so it maps edge to edge with no distortion
+          and no cropping. First in the DOM, so the corner artwork and every
+          piece of text paint over it. The canvas keeps `bg-white` underneath,
+          which is what the PDF capture falls back to if the image ever fails
+          to load — a certificate must never render on a transparent page.
 
-          {/* Solid for the first half of each stripe's length, then fading to transparent */}
-          <linearGradient id="cornerMaskGradTL" gradientUnits="userSpaceOnUse" x1="0" y1="394" x2="128" y2="0">
-            <stop offset="0" stopColor="#fff" stopOpacity="1" />
-            <stop offset="0.5" stopColor="#fff" stopOpacity="1" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0" />
-          </linearGradient>
-          <mask id="cornerMaskTL" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="420">
-            <rect x="0" y="0" width="200" height="420" fill="url(#cornerMaskGradTL)" />
-          </mask>
-          <linearGradient id="cornerMaskGradBR" gradientUnits="userSpaceOnUse" x1="1000" y1="313" x2="872" y2="707">
-            <stop offset="0" stopColor="#fff" stopOpacity="1" />
-            <stop offset="0.5" stopColor="#fff" stopOpacity="1" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0" />
-          </linearGradient>
-          <mask id="cornerMaskBR" maskUnits="userSpaceOnUse" x="800" y="290" width="200" height="420">
-            <rect x="800" y="290" width="200" height="420" fill="url(#cornerMaskGradBR)" />
-          </mask>
-        </defs>
+          This is the Certificate of Training only. The Letter of Course
+          Attendance is portrait (707x1000) and stays plain white; stretching a
+          landscape background onto it would visibly distort the pattern. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/certificate-background.png"
+        alt=""
+        aria-hidden="true"
+        width={CERT_W}
+        height={CERT_H}
+        className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover"
+      />
 
-        <g opacity="0.05" stroke="#16224e" fill="none">
-          <circle cx="720" cy="360" r="140" />
-          <circle cx="720" cy="360" r="185" />
-          <circle cx="720" cy="360" r="230" />
-          <circle cx="720" cy="360" r="275" />
-        </g>
+      {/* Corner artwork — supplied PNGs, replacing the SVG ribbons that were
+          drawn by hand. Both assets carry ink across their whole height, so
+          each is anchored to its corner and sized from the reference's own
+          proportions (see the CORNER_* constants).
+          PNG rather than SVG on purpose: html2canvas-pro rasterises a loaded
+          raster reliably, whereas an SVG's output depends on the rasteriser
+          honouring its viewBox.
 
-        {/* top-left — steeply-slanted stripes: navy · blue · gold · fade · red.
-            Solid along the base half, dissolving over the outer half via the mask. */}
-        <g opacity="0.5" mask="url(#cornerMaskTL)">
-          <polygon points="0,394 0,293 96,0 128,0" fill="#16224e" />
-          <polygon points="0,293 0,205 64,0 96,0" fill="#2f6fd0" />
-          <polygon points="0,205 0,126 32,0 64,0" fill="url(#cornerFadeTL)" />
-          <polygon points="0,126 0,0 32,0" fill="#e23b3b" />
-          <line x1="0" y1="205" x2="64" y2="0" stroke="#cba044" strokeWidth="2.5" />
-        </g>
-
-        {/* bottom-right — mirror */}
-        <g opacity="0.5" mask="url(#cornerMaskBR)">
-          <polygon points="1000,313 1000,414 904,707 872,707" fill="#16224e" />
-          <polygon points="1000,414 1000,502 936,707 904,707" fill="#2f6fd0" />
-          <polygon points="1000,502 1000,581 968,707 936,707" fill="url(#cornerFadeBR)" />
-          <polygon points="1000,581 1000,707 968,707" fill="#e23b3b" />
-          <line x1="1000" y1="502" x2="936" y2="707" stroke="#cba044" strokeWidth="2.5" />
-        </g>
-      </svg>
+          They sit first in the DOM so every piece of text paints over them. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/certificate-corner-tl.png"
+        alt=""
+        aria-hidden="true"
+        width={CORNER_TL_W}
+        height={CORNER_TL_H}
+        className="pointer-events-none absolute left-0 top-0 select-none"
+      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/certificate-corner-br.png"
+        alt=""
+        aria-hidden="true"
+        width={CORNER_BR_W}
+        height={CORNER_BR_H}
+        className="pointer-events-none absolute right-0 bottom-0 select-none"
+      />
 
       {/* Logo (top center) */}
       <Box className="absolute top-[44px] left-1/2 -translate-x-1/2">
@@ -516,7 +580,7 @@ function CertificateCanvas({ cert }) {
             <Box
               as="span"
               className="relative block px-4 py-[3px] text-[13px] font-bold text-[#4a3105]"
-              style={{ fontFamily: "Arial, sans-serif" }}
+              style={{ fontFamily: FONT_BODY }}
             >
               {pdus} PDUs
             </Box>
@@ -530,24 +594,24 @@ function CertificateCanvas({ cert }) {
         className="absolute inset-x-0 flex flex-col items-center text-center px-[130px]"
         style={{ top: CENTER_TOP }}
       >
-        <Box as="h2" className={`text-[58px] leading-none tracking-[0.16em] font-normal ${INK_TITLE}`}>CERTIFICATE</Box>
+        <Box as="h2" className={`text-[58px] leading-none tracking-[0.16em] font-normal ${INK_TITLE}`} style={{ fontFamily: FONT_TITLE }}>CERTIFICATE</Box>
         <Box className="flex items-center gap-3 mt-[calc(12px*var(--fit,1))]">
           <Box className="h-px w-16 bg-[#cba044]" />
-          <Box as="span" className={`text-[15px] tracking-[0.4em] font-normal ${INK_TITLE}`}>OF TRAINING</Box>
+          <Box as="span" className={`text-[15px] tracking-[0.4em] font-normal ${INK_TITLE}`} style={{ fontFamily: FONT_TITLE }}>OF TRAINING</Box>
           <Box className="h-px w-16 bg-[#cba044]" />
         </Box>
 
-        <Box as="p" className={`mt-[calc(36px*var(--fit,1))] text-[12px] tracking-[0.3em] uppercase ${INK_BLACK}`} style={{ fontFamily: "Arial, sans-serif" }}>
+        <Box as="p" className={`mt-[calc(20px*var(--fit,1))] text-[12px] tracking-[0.18em] uppercase ${INK_BLACK}`} style={{ fontFamily: FONT_BODY }}>
           This certificate is presented to
         </Box>
-        <Box as="p" className="mt-[calc(16px*var(--fit,1))] text-[52px] leading-tight text-[#2f8fd0] font-normal" style={{ fontFamily: "'Segoe Script', 'Bradley Hand', 'Brush Script MT', Georgia, cursive" }}>
+        <Box as="p" className="mt-[calc(16px*var(--fit,1))] text-[44px] leading-tight text-[#2f8fd0] font-normal" style={{ fontFamily: FONT_NAME }}>
           {cert.participant_name || "—"}
         </Box>
 
-        <Box as="p" className={`mt-[calc(20px*var(--fit,1))] text-[12px] tracking-[0.3em] uppercase ${INK_BLACK}`} style={{ fontFamily: "Arial, sans-serif" }}>
+        <Box as="p" className={`mt-[calc(20px*var(--fit,1))] text-[12px] tracking-[0.18em] uppercase ${INK_BLACK}`} style={{ fontFamily: FONT_BODY }}>
           For the successful completion of
         </Box>
-        <Box as="p" className="mt-[calc(12px*var(--fit,1))] text-[27px] text-[#1f2d5c] font-semibold">{cert.title}</Box>
+        <Box as="p" className="mt-[calc(12px*var(--fit,1))] text-[27px] text-[#1f2d5c] font-normal">{cert.title}</Box>
         {/* Pulled a little wider than the block's padding: a long session list
             wraps to fewer lines, which is what keeps it clear of the QR. Font
             size is owned by useFitCenterBlock. */}
@@ -555,7 +619,7 @@ function CertificateCanvas({ cert }) {
           as="p"
           ref={datesRef}
           className={`mt-[calc(12px*var(--fit,1))] -mx-[34px] leading-[1.5] ${INK_BLACK}`}
-          style={{ fontFamily: "Arial, sans-serif", fontSize: DATES_FONT }}
+          style={{ fontFamily: FONT_BODY, fontSize: DATES_FONT }}
         >
           which took place {dateText}, via {delivery}.
         </Box>
@@ -563,7 +627,7 @@ function CertificateCanvas({ cert }) {
 
       {/* PMI registered mark — certification courses only */}
       {cert.is_certification && (
-        <Box className="absolute left-[92px] bottom-[128px] flex items-center gap-3" style={{ fontFamily: "Arial, sans-serif" }}>
+        <Box className="absolute left-[92px] bottom-[128px] flex items-center gap-3" style={{ fontFamily: FONT_BODY }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/pmi-logo.png"
@@ -587,7 +651,7 @@ function CertificateCanvas({ cert }) {
       )}
 
       {/* Footer — printed identifiers (left) */}
-      <Box className="absolute left-[92px] bottom-[56px] flex gap-[46px]" style={{ fontFamily: "Arial, sans-serif" }}>
+      <Box className="absolute left-[92px] bottom-[56px] flex gap-[46px]" style={{ fontFamily: FONT_BODY }}>
         <Box>
           <Box as="p" className={`text-[17px] font-bold tracking-wide ${INK_NAVY}`}>{cert.training_id || "—"}</Box>
           <Box as="p" className={`text-[12.5px] mt-1 ${INK_BLACK}`}>Training ID</Box>
@@ -610,7 +674,7 @@ function CertificateCanvas({ cert }) {
 
       {/* Footer — verification QR (right), in place of the signature block.
           Encodes the public verify URL for this certificate's ID. */}
-      <Box className="absolute right-[96px] bottom-[54px] text-center" style={{ fontFamily: "Arial, sans-serif" }}>
+      <Box className="absolute right-[96px] bottom-[54px] text-center" style={{ fontFamily: FONT_BODY }}>
         {qrUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img src={qrUrl} alt={`Scan to verify certificate ${cert.certificate_id}`} width={104} height={104} className="mx-auto block" />
@@ -618,6 +682,14 @@ function CertificateCanvas({ cert }) {
           <Box className="mx-auto h-[104px] w-[104px] bg-slate-100" />
         )}
         <Box as="p" className="text-[11px] font-semibold text-[#16224e] mt-2">Scan to verify</Box>
+      </Box>
+
+      {/* Foot of the page, centred — the same notice the Letter of Course
+          Attendance carries, so both documents explain the missing signature
+          the same way. No trademark line here: that attribution belongs to the
+          attendance letter. */}
+      <Box className="absolute inset-x-[92px] bottom-[20px] text-center">
+        <Box as="p" className="text-[8px] leading-[1.4] text-slate-400">{DIGITAL_NOTICE}</Box>
       </Box>
     </Box>
   );
@@ -1022,7 +1094,7 @@ export function CertificatesContent() {
 function CertificatePdfDialog({ open, pdf, error, title, onClose }) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-4xl w-[92vw]">
+      <DialogContent className="sm:max-w-[1400px] w-[95vw]">
         <DialogHeader>
           <DialogTitle>Your certificate{title ? ` — ${title}` : ""}</DialogTitle>
           <DialogDescription>
@@ -1043,10 +1115,10 @@ function CertificatePdfDialog({ open, pdf, error, title, onClose }) {
             <iframe
               src={pdf.url}
               title="Certificate PDF"
-              className="w-full h-[62vh] rounded-lg border border-slate-200 bg-slate-50"
+              className="w-full h-[78vh] rounded-lg border border-slate-200 bg-slate-50"
             />
           ) : (
-            <Box className="flex h-[62vh] flex-col items-center justify-center gap-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-500">
+            <Box className="flex h-[78vh] flex-col items-center justify-center gap-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-500">
               <Loader2 className="h-7 w-7 animate-spin text-amber-500" />
               <Text as="p" className="text-sm">Generating your certificate PDF…</Text>
             </Box>
@@ -1056,10 +1128,12 @@ function CertificatePdfDialog({ open, pdf, error, title, onClose }) {
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Close</Button>
           {pdf && (
-            <Button asChild className="bg-amber-500 hover:bg-amber-600 text-white border-0">
-              <a href={pdf.url} download={pdf.name}>
-                <Download className="h-4 w-4 mr-2" /> Download PDF
-              </a>
+            <Button
+              render={<a href={pdf.url} download={pdf.name} />}
+              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white border-0"
+            >
+              <Download className="h-4 w-4 shrink-0" />
+              <Text as="span" className="text-sm font-medium text-white">Download PDF</Text>
             </Button>
           )}
         </DialogFooter>

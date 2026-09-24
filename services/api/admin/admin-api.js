@@ -384,7 +384,7 @@ export async function releaseCertificates({ token, trainingRef, enrolmentIds }) 
  * learner on the cohort earns the same PDUs and claims against the same code.
  * Must be set before certificates can be generated.
  */
-export async function setTrainingPdus({ token, trainingRef, pdus, pduClaimCode, certificateMode }) {
+export async function setTrainingPdus({ token, trainingRef, pdus, pduClaimCode, certificateMode, trademarkName }) {
   return apiClient(`/admin/certificates/trainings/${trainingRef}/pdus`, {
     method: "PUT",
     token,
@@ -396,6 +396,7 @@ export async function setTrainingPdus({ token, trainingRef, pdus, pduClaimCode, 
       ...(pdus !== undefined ? { pdus: pdus === "" || pdus === null ? null : Number(pdus) } : {}),
       ...(pduClaimCode !== undefined ? { pdu_claim_code: pduClaimCode?.trim() || null } : {}),
       ...(certificateMode !== undefined ? { certificate_mode: certificateMode || null } : {}),
+      ...(trademarkName !== undefined ? { trademark_name: trademarkName?.trim() || null } : {}),
     },
   });
 }
