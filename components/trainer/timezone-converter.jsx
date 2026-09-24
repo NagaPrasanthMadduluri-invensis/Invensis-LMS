@@ -10,6 +10,7 @@ import {
   listTimeZones,
   soleZoneForCountry,
   canonicalZone,
+  isKnownZone,
 } from "@/lib/timezones";
 
 /*
@@ -161,8 +162,18 @@ const AMBIGUOUS = new Set(
 function resolveSourceZone(code, countryCode) {
   const raw = typeof code === "string" ? code.trim() : "";
 
-  // 1. Already an IANA zone.
-  if (raw.includes("/")) return { zone: raw, reason: "iana" };
+  /* 1. Already an IANA zone — but only if the tz database actually knows it.
+     A "/" is not proof: the feed can carry a zone that was renamed, misspelled
+     ("Asia/Kolkatta") or invented ("India/Delhi"), and handing any of those to
+     `Intl.DateTimeFormat` throws RangeError rather than returning a fallback.
+     That throw happens inside the `useMemo` below, i.e. during render, where
+     nothing catches it — the whole page is replaced by "Application error: a
+     client-side exception has occurred". A zone we cannot verify is treated
+     like any other unresolvable one: fall through and show the warning. */
+  if (raw.includes("/")) {
+    if (isKnownZone(raw)) return { zone: raw, reason: "iana" };
+    return { zone: null, reason: "unknown" };
+  }
 
   // 2. Country code. The tz database settles this on its own wherever a country
   // has exactly one zone — "IN" pins Asia/Kolkata, "AU" (seven zones) pins
@@ -234,7 +245,7 @@ export function SessionTimezoneConverter({ sessions = [], sourceZoneCode, source
   const [targetZone, setTargetZone] = useState(initial);
 
   const rows = useMemo(() => {
-    if (!sourceZone) return [];
+    if (!sourceZone || !isKnownZone(targetZone)) return [];
     return sessions
       .filter((s) => s.start_time)
       .map((s) => {

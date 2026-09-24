@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import {
   Search, Calendar, Users, Clock, UserCheck, UserX, UserPlus,
   ChevronRight, BookOpen, LayoutGrid, Link2, LinkIcon, X, SlidersHorizontal,
+  AlertCircle,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -26,6 +27,17 @@ const STATUS_CONFIG = {
   postponed: { label: "Postponed", badge: "bg-orange-50 text-orange-700 ring-1 ring-orange-200",  accent: "bg-orange-500" },
   suspended: { label: "Suspended", badge: "bg-rose-50 text-rose-700 ring-1 ring-rose-200",        accent: "bg-rose-500" },
 };
+
+/* Lifecycle order for the status tabs. This is an ORDERING, not a list of tabs
+   to render: which tabs appear is decided by the statuses the API actually
+   returns. Hardcoding the tabs meant offering Pending and Ongoing — statuses no
+   code path ever assigns — so an admin could filter to a bucket that can only
+   ever be empty. Anything the API returns that isn't listed here still gets a
+   tab, appended at the end, so a new status can never go missing from the UI. */
+const STATUS_ORDER = ["active", "ongoing", "pending", "postponed", "suspended", "completed", "cancelled"];
+
+// Fallback label for a status the UI has no config for yet.
+const titleCase = (v) => String(v ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 const MODE_LABEL = {
   virtual: "Live Virtual", in_person: "In Person", hybrid: "Hybrid", one_to_one: "1-to-1",
@@ -232,6 +244,7 @@ export function TrainingsList() {
   const [trainings, setTrainings] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dueOnly, setDueOnly] = useState(false);
   const [error, setError] = useState(null);
 
   const pathname = usePathname();
@@ -282,19 +295,35 @@ export function TrainingsList() {
       t.title.toLowerCase().includes(q) ||
       t.code.toLowerCase().includes(q) ||
       (t.event_code ?? "").toLowerCase().includes(q);
-    const matchesStatus = statusFilter === "all" || t.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    if (!matchesSearch) return false;
+    if (statusFilter !== "all" && t.status !== statusFilter) return false;
+    // "Due for update" = ended but never marked completed. The single most
+    // actionable subset in this list, so it gets its own toggle.
+    if (dueOnly && !t.due_for_update) return false;
+    return true;
   });
 
+  const hasFilters = !!search || statusFilter !== "all" || dueOnly;
+
+  function clearFilters() {
+    setSearch(""); setStatusFilter("all"); setDueOnly(false);
+  }
+
+  const dueCount = trainings.filter((t) => t.due_for_update).length;
+
+  /* Tabs come from the statuses present in the response. `statusCounts` is
+     already derived from `trainings`, so this needs no second pass over the
+     data. The selected tab is kept even once it empties, so the list can't
+     reshuffle under a reader who has just filtered by it. */
   const STATUS_TABS = [
     { key: "all", label: "All" },
-    { key: "pending", label: "Pending" },
-    { key: "active", label: "Active" },
-    { key: "ongoing", label: "Ongoing" },
-    { key: "postponed", label: "Postponed" },
-    { key: "suspended", label: "Suspended" },
-    { key: "completed", label: "Completed" },
-    { key: "cancelled", label: "Cancelled" },
+    ...Object.keys(statusCounts)
+      .filter((k) => statusCounts[k] > 0 || k === statusFilter)
+      .sort((a, b) => {
+        const ia = STATUS_ORDER.indexOf(a), ib = STATUS_ORDER.indexOf(b);
+        return (ia === -1 ? STATUS_ORDER.length : ia) - (ib === -1 ? STATUS_ORDER.length : ib);
+      })
+      .map((k) => ({ key: k, label: STATUS_CONFIG[k]?.label ?? titleCase(k) })),
   ];
 
   return (
@@ -365,6 +394,36 @@ export function TrainingsList() {
                 </button>
               );
             })}
+
+            {/* Not a status — a cross-cutting "needs attention" filter — so it
+                sits after a divider rather than reading as another status. Same
+                dimensions as the tabs so the row stays one control strip. */}
+            <Box className="mx-1 h-5 w-px bg-slate-200 shrink-0" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={() => setDueOnly((v) => !v)}
+              aria-pressed={dueOnly}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
+                dueOnly
+                  ? "bg-amber-500 border-amber-500 text-white shadow-sm"
+                  : "bg-white border-slate-200 text-slate-600 hover:border-amber-300 hover:text-amber-600"
+              }`}
+            >
+              <AlertCircle className="h-3.5 w-3.5" /> Due for update
+              <Text as="span" className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
+                dueOnly ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+              }`}>{dueCount}</Text>
+            </button>
+
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+              >
+                <X className="h-3.5 w-3.5" /> Clear
+              </button>
+            )}
           </Box>
           <Text as="p" className="ml-auto text-xs text-slate-400 shrink-0 tabular-nums">
             Showing {filtered.length} of {trainings.length}

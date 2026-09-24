@@ -7,13 +7,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CheckCircle2, Clock, PlayCircle, Award, XCircle, Mail,
   Briefcase, MapPin, Calendar, Hash, Video, Users2, Phone, GraduationCap,
-  Building2, Layers, Clock3, Link2, ExternalLink,
+  Building2, Layers, Clock3, Link2, ExternalLink, LogIn,
 } from "lucide-react";
 import Link from "next/link";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate as fmtDate, formatInstantDate } from "@/lib/datetime";
+import { lastLoginLabel, lastLoginTitle, hasNeverLoggedIn } from "@/lib/last-login";
 import { fetchParticipantDetail, resendParticipantSetupEmail } from "@/services/api/admin/admin-api";
 import { ResendSetupButton } from "@/components/admin/resend-setup-button";
 
@@ -61,7 +62,7 @@ const SECTIONS = [
   { key: "inactive",  title: "Cancelled & transferred", accent: "text-slate-400",   cats: ["cancelled", "transferred", "failed"] },
 ];
 
-function Fact({ icon: Icon, label, value, href }) {
+function Fact({ icon: Icon, label, value, href, title, muted = false }) {
   return (
     <Box className="flex items-start gap-3">
       <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50">
@@ -79,7 +80,8 @@ function Fact({ icon: Icon, label, value, href }) {
             {value}
           </a>
         ) : (
-          <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5 break-words">{value}</Text>
+          <Text as="p" title={title}
+            className={`text-sm leading-tight mt-0.5 break-words ${muted ? "italic font-medium text-slate-400" : "font-semibold text-slate-800"}`}>{value}</Text>
         )}
       </Box>
     </Box>
@@ -265,6 +267,10 @@ export function ParticipantDetail({ userId }) {
               href={p.linkedin_url || undefined}
             />
             <Fact icon={Calendar} label="Joined" value={formatStamp(p.created_at)} />
+            {/* Sits beside Joined on purpose — "joined in March, never signed
+                in" is the pair an admin reads to spot a stalled invitation. */}
+            <Fact icon={LogIn} label="Last Login" value={lastLoginLabel(p.last_login_at)}
+              title={lastLoginTitle(p.last_login_at)} muted={hasNeverLoggedIn(p.last_login_at)} />
           </Box>
         </Box>
       </Card>

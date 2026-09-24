@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import { lastLoginLabel, lastLoginTitle, hasNeverLoggedIn } from "@/lib/last-login";
 import {
   Users, GraduationCap, BookOpen, ClipboardList, Award, Gauge,
   UserCheck, CalendarClock, CheckCircle2, RefreshCw, Ticket,
@@ -310,7 +311,7 @@ function RecentEnrolmentsTable({ rows = [] }) {
           <Table>
             <TableHeader>
               <TableHeadRow cols={[
-                { l: "Participant" }, { l: "Email" }, { l: "Location" }, { l: "Training" },
+                { l: "Participant" }, { l: "Email" }, { l: "Last login" }, { l: "Sponsor" }, { l: "Location" }, { l: "Training" },
                 { l: "Scheduled" }, { l: "Mode" }, { l: "Total hrs", c: true }, { l: "Hrs/day", c: true }, { l: "Status" },
               ]} />
             </TableHeader>
@@ -332,6 +333,23 @@ function RecentEnrolmentsTable({ rows = [] }) {
                       </Box>
                     </TableCell>
                     <TableCell className="py-2.5"><Text as="span" className="text-[11px] text-slate-500">{e.participant_email}</Text></TableCell>
+                    <TableCell className="py-2.5">
+                      <Text as="span" title={lastLoginTitle(e.last_login_at)}
+                        className={`whitespace-nowrap text-[11px] ${hasNeverLoggedIn(e.last_login_at) ? "italic text-slate-400" : "text-slate-600"}`}>
+                        {lastLoginLabel(e.last_login_at)}
+                      </Text>
+                    </TableCell>
+                    {/* Sponsor — blank for a self-funded seat rather than a
+                        dash, which would read as data we failed to fetch. */}
+                    <TableCell className="py-2.5">
+                      {e.sponsor_name ? (
+                        <Text as="span" title={e.sponsor_name} className="block max-w-[150px] truncate text-[11px] text-slate-600">
+                          {e.sponsor_name}
+                        </Text>
+                      ) : (
+                        <Text as="span" className="text-[11px] text-slate-300">&nbsp;</Text>
+                      )}
+                    </TableCell>
                     <TableCell className="py-2.5">
                       <Box className="flex items-center gap-1 whitespace-nowrap text-[11px] text-slate-600"><MapPin className="h-3 w-3 text-slate-400" />{location}</Box>
                     </TableCell>

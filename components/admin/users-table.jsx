@@ -13,7 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Search, Users, X, BookOpen, UserCheck, UserX, Mail, Calendar, Briefcase, MapPin, ChevronLeft, ChevronRight, ChevronRight as RowChevron,
+  Search, Users, X, BookOpen, UserCheck, UserX, Mail, Calendar, Briefcase, MapPin, LogIn, Building2, ChevronRight as RowChevron,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -21,6 +21,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { formatInstantDate } from "@/lib/datetime";
 import { fetchParticipants, resendParticipantSetupEmail } from "@/services/api/admin/admin-api";
 import { ResendSetupButton } from "@/components/admin/resend-setup-button";
+import { DataPagination } from "@/components/shared/data-pagination";
+import { pageCount } from "@/lib/pagination";
+import { lastLoginLabel, lastLoginTitle, hasNeverLoggedIn } from "@/lib/last-login";
 
 const AVATAR_COLORS = [
   "bg-violet-100 text-violet-700",
@@ -60,7 +63,9 @@ function StatCard({ label, value, icon: Icon, bg, border, iconBg, iconCls, value
   );
 }
 
-const PAGE_LIMIT = 100;
+// Ten rows a page: enough to scan without scrolling, and the page a deep link
+// or a jump lands on stays cheap to fetch.
+const PAGE_LIMIT = 10;
 
 export function UsersTable() {
   const { token } = useAuth();
@@ -95,11 +100,23 @@ export function UsersTable() {
   const hasFilters = !!(search || location || jobTitle);
   const users = data?.participants || [];
   const total = data?.total || 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
+  const totalPages = pageCount(total, PAGE_LIMIT);
 
-  const activeCount = users.filter((u) => u.account_active).length;
-  const inactiveCount = users.length - activeCount;
-  const totalEnrolments = users.reduce((s, u) => s + (u.enrolment_count || 0), 0);
+  /* Figures for the stat cards come from the API's `summary`, which is computed
+     over the whole filtered set. Deriving them from `users` would describe only
+     the ten rows on screen — "Active: 7" out of five hundred. Older responses
+     predate `summary`, so fall back to the page rather than render nothing. */
+  const summary = data?.summary;
+  const activeCount = summary?.active ?? users.filter((u) => u.account_active).length;
+  const inactiveCount = summary?.inactive ?? users.length - activeCount;
+  const totalEnrolments = summary?.total_enrolments ?? users.reduce((s, u) => s + (u.enrolment_count || 0), 0);
+
+  /* A filter can shrink the result set under the page you are on — searching
+     while on page 30 would otherwise fetch a page that no longer exists and
+     show an empty table. Snap back into range and refetch. */
+  useEffect(() => {
+    if (!loading && page > totalPages) setPage(totalPages);
+  }, [loading, page, totalPages]);
 
   if (error) {
     return (
@@ -238,14 +255,16 @@ export function UsersTable() {
                 the header owns the widths and overlong values ellipsise inside
                 their own column. Job Title and Joined fold away on narrower
                 screens rather than every column being cramped at once. */}
-            <Table className="table-fixed min-w-[920px] md:min-w-[1080px] lg:min-w-[1260px] xl:min-w-[1400px]">
+            <Table className="table-fixed min-w-[1070px] md:min-w-[1230px] lg:min-w-[1410px] xl:min-w-[1750px]">
               <TableHeader>
                 <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-100">
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 pl-5 w-[240px]">User</TableHead>
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 w-[260px]">Email</TableHead>
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 hidden lg:table-cell w-[180px]">Job Title</TableHead>
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 hidden md:table-cell w-[160px]">Location</TableHead>
+                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 w-[150px]">Last Login</TableHead>
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 text-center w-[120px]">Enrolments</TableHead>
+                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 hidden xl:table-cell w-[200px]">Sponsor</TableHead>
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 hidden xl:table-cell w-[140px]">Joined</TableHead>
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 w-[150px]">Status</TableHead>
                   <TableHead className="py-3 pr-5 w-[150px]" />
@@ -295,12 +314,39 @@ export function UsersTable() {
                         </Box>
                       </TableCell>
 
+                      {/* Last login — "Never" is a real answer here, not missing
+                          data: the account exists but has not been signed into. */}
+                      <TableCell className="py-4">
+                        <Box className="flex items-center gap-1.5">
+                          <LogIn className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                          <Text as="span" title={lastLoginTitle(u.last_login_at)}
+                            className={`min-w-0 truncate text-sm ${hasNeverLoggedIn(u.last_login_at) ? "italic text-slate-400" : "text-slate-600"}`}>
+                            {lastLoginLabel(u.last_login_at)}
+                          </Text>
+                        </Box>
+                      </TableCell>
+
                       {/* Enrolments */}
                       <TableCell className="py-4 text-center">
                         <Box className="inline-flex items-center gap-1.5 bg-violet-50 text-violet-700 text-sm font-bold px-2.5 py-1 rounded-lg ring-1 ring-violet-200">
                           <BookOpen className="h-3.5 w-3.5" />
                           {u.enrolment_count}
                         </Box>
+                      </TableCell>
+
+                      {/* Sponsor — who paid for the seat. Blank for a
+                          self-funded learner: there is no third party to name,
+                          and inventing a dash would read as missing data. */}
+                      <TableCell className="py-4 hidden xl:table-cell">
+                        {u.sponsor_name ? (
+                          <Box className="flex items-center gap-1.5">
+                            <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                            <Text as="span" title={u.sponsor_email || u.sponsor_name}
+                              className="min-w-0 truncate text-sm text-slate-600">{u.sponsor_name}</Text>
+                          </Box>
+                        ) : (
+                          <Text as="span" className="text-sm text-slate-300">&nbsp;</Text>
+                        )}
                       </TableCell>
 
                       {/* Joined */}
@@ -343,29 +389,13 @@ export function UsersTable() {
               </TableBody>
             </Table>
 
-            {totalPages > 1 && (
-              <Box className="flex items-center justify-between px-5 py-3 border-t border-slate-100">
-                <Text as="span" className="text-xs text-slate-400">
-                  Page {page} of {totalPages} · {total} users
-                </Text>
-                <Box className="flex items-center gap-2">
-                  <Button
-                    variant="outline" size="sm" disabled={page <= 1}
-                    onClick={() => setPage((p) => p - 1)}
-                    className="h-8 px-3 text-xs"
-                  >
-                    <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Prev
-                  </Button>
-                  <Button
-                    variant="outline" size="sm" disabled={page >= totalPages}
-                    onClick={() => setPage((p) => p + 1)}
-                    className="h-8 px-3 text-xs"
-                  >
-                    Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                  </Button>
-                </Box>
-              </Box>
-            )}
+            <DataPagination
+              page={page}
+              perPage={PAGE_LIMIT}
+              total={total}
+              onPageChange={setPage}
+              siblings={2}
+            />
           </>
         )}
       </Card>

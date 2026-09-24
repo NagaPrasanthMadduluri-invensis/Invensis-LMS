@@ -5,43 +5,9 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchMyProfile } from "@/services/api/me";
 import { fetchMyTrainerProfile } from "@/services/api/trainer/trainer-api";
+import { missingProfileFields } from "@/lib/profile-completion";
 
 export const ProfileCompletionContext = createContext(null);
-
-// Fields that must be filled for a profile to count as "complete", per role.
-// Trainer: everything except `rate` (admin-only anyway). Learner: every field on
-// the Personal and Professional tabs except the photo.
-const REQUIRED = {
-  trainer: [
-    { key: "name", label: "Full name" },
-    { key: "bio", label: "Bio" },
-    { key: "experience", label: "Experience" },
-    { key: "city", label: "City" },
-    { key: "country", label: "Country" },
-    { key: "specializations", label: "Specializations" },
-    { key: "resume_key", label: "Resume" },
-  ],
-  learner: [
-    { key: "first_name", label: "First name" },
-    { key: "last_name", label: "Last name" },
-    { key: "phone", label: "Mobile number" },
-    { key: "country", label: "Country" },
-    { key: "city", label: "City" },
-    { key: "company_name", label: "Company" },
-    { key: "industry", label: "Industry" },
-    { key: "job_title", label: "Job title" },
-    { key: "department", label: "Department" },
-    { key: "years_experience", label: "Years of experience" },
-    { key: "linkedin_url", label: "LinkedIn profile" },
-  ],
-};
-
-function isFilled(v) {
-  if (v === null || v === undefined) return false;
-  if (typeof v === "string") return v.trim() !== "";
-  if (Array.isArray(v)) return v.length > 0;
-  return true; // numbers (incl. 0), booleans
-}
 
 // Flatten a role's profile response into the flat shape REQUIRED keys expect.
 function flatten(role, data) {
@@ -52,6 +18,7 @@ function flatten(role, data) {
   return {
     first_name: p.first_name ?? (u.name ? u.name.split(" ")[0] : null),
     last_name: p.last_name ?? null,
+    employment_status: p.employment_status,
     phone: p.phone,
     country: p.country,
     city: p.city,
@@ -88,8 +55,7 @@ export function ProfileCompletionProvider({ children }) {
       const data = role === "trainer"
         ? await fetchMyTrainerProfile({ token })
         : await fetchMyProfile({ token });
-      const flat = flatten(role, data);
-      const missing = REQUIRED[role].filter((f) => !isFilled(flat[f.key]));
+      const missing = missingProfileFields(role, flatten(role, data));
       setState({ loading: false, complete: missing.length === 0, missing });
     } catch {
       // On error, don't nag — treat as complete so we never block on a hiccup.

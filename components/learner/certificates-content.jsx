@@ -18,7 +18,7 @@ import jsPDF from "jspdf";
 import QRCode from "qrcode";
 /* Printed certificates are scanned long after issue, so the QR must point at a
    public portal, never at whatever host generated the PDF. */
-import { verifyUrlFor, verifyDisplayHost } from "@/lib/verify-url";
+import { verifyUrlFor } from "@/lib/verify-url";
 import html2canvas from "html2canvas-pro";
 import { formatDate, wallFields } from "@/lib/datetime";
 
@@ -235,6 +235,28 @@ function useQrDataUrl(code) {
   return url;
 }
 
+/* Printed-document palette.
+   Sampled from the reference certificate PDF, which uses #12143d for the
+   printed identifiers — the same navy as the Invensis mark — and a near-black
+   (#070706) for the body copy. Pure #000 is used here for that copy, as
+   specified; the two are visually indistinguishable in print.
+
+   Declared once and shared by both documents so the Certificate of Training
+   and the Letter of Course Attendance cannot drift apart. */
+const INK_BLACK = "text-[#000000]";   // labels + prose
+/* #1b4689, sampled from the glyph cores of the reference certificate's own
+   identifier row (pdftoppm at 200dpi, dominant ink colour). Earlier attempts
+   used the mark's navy #12143d, which measures L*=8.7 and reads as plain black
+   against white — the reference is L*=30.4 and is unmistakably blue, which is
+   the whole point of colouring these fields. */
+const INK_NAVY = "text-[#1b4689]";    // printed identifiers
+/* The document title. Sampled from the reference the same way: "CERTIFICATE"
+   is #10143d and "OF TRAINING" #12133d — the same navy either side of
+   antialiasing, NOT the gold this used to render the subtitle in. Only the
+   rules flanking the subtitle are gold there. Shared by the word and the
+   subtitle so they stay identical. */
+const INK_TITLE = "text-[#10143d]";   // document title
+
 const CERT_W = 1000;
 const CERT_H = 707;
 
@@ -330,28 +352,36 @@ function AttendanceLetterCanvas({ cert }) {
 
       {/* Title + logo */}
       <Box className="absolute inset-x-0 top-[110px] flex flex-col items-center">
-        <Box as="p" className="text-[15px] tracking-[0.18em] text-[#1f2d5c]">LETTER OF COURSE ATTENDANCE</Box>
+        <Box as="p" className={`text-[15px] tracking-[0.18em] ${INK_TITLE}`}>LETTER OF COURSE ATTENDANCE</Box>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/invensis-learning-logo.svg" alt="Invensis Learning" width={250} height={61} className="mt-9 block" />
+        {/* PNG, not the SVG, deliberately. html2canvas-pro rasterises a loaded
+            raster image reliably; handing it an SVG makes the output depend on
+            that rasteriser honouring the viewBox, and when it doesn't the mark
+            renders as a solid block of its own fill colour. The PNG is a 10x
+            render of the same SVG, so it is identical artwork at 1528x372 —
+            far more than the ~500px this box needs at capture scale 2. */}
+        <img src="/invensis-learning-logo.png" alt="Invensis Learning" width={250} height={61} className="mt-9 block" />
       </Box>
 
       {/* Body */}
       <Box className="absolute left-[80px] right-[80px] top-[350px]">
-        <Box as="p" className="text-[14.5px] leading-[1.75] text-[#1a2b45] text-justify">
+        <Box as="p" className={`text-[14.5px] leading-[1.75] text-justify ${INK_BLACK}`}>
           This letter is to verify that{" "}
           <Box as="span" className="font-bold">{cert.participant_name || "—"}</Box>{" "}
           has attended the{" "}
           <Box as="span" className="font-bold">{cert.title}</Box>{" "}
-          (Training ID: {cert.training_id || "—"}), which took place {dates ? `from ${dates}` : ""} via {mode}.
+          (Training ID:{" "}
+          <Box as="span" className={`font-bold ${INK_NAVY}`}>{cert.training_id || "—"}</Box>
+          ), which took place {dates ? `from ${dates}` : ""} via {mode}.
         </Box>
 
         {/* The disclaimer is the point of the document — bold, in quotes, as issued. */}
-        <Box as="p" className="mt-9 text-[14.5px] leading-[1.75] font-bold text-[#1a2b45] text-justify">
+        <Box as="p" className={`mt-9 text-[14.5px] leading-[1.75] font-bold text-justify ${INK_BLACK}`}>
           &lsquo;This is a letter confirming course attendance only and is not a document demonstrating or
           certifying the achievement of any qualification in the subject matter of the training course&rsquo;.
         </Box>
 
-        <Box as="p" className="mt-[70px] text-[14.5px] text-[#1a2b45]">On behalf of Invensis Learning.</Box>
+        <Box as="p" className={`mt-[70px] text-[14.5px] ${INK_BLACK}`}>On behalf of Invensis Learning.</Box>
 
         {/* QR in place of the signature, as on the certificate */}
         <Box className="mt-7">
@@ -362,7 +392,6 @@ function AttendanceLetterCanvas({ cert }) {
             <Box className="h-[104px] w-[104px] bg-slate-100" />
           )}
           <Box as="p" className="mt-2 text-[12px] font-bold text-[#1a2b45]">Scan to verify</Box>
-          <Box as="p" className="text-[11px] text-slate-500">{verifyDisplayHost()}</Box>
         </Box>
       </Box>
     </Box>
@@ -448,7 +477,7 @@ function CertificateCanvas({ cert }) {
       {/* Logo (top center) */}
       <Box className="absolute top-[44px] left-1/2 -translate-x-1/2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/invensis-learning-logo.svg" alt="Invensis Learning" width={210} height={51} className="block" />
+        <img src="/invensis-learning-logo.png" alt="Invensis Learning" width={210} height={51} className="block" />
       </Box>
 
       {/* Certified badge (top right), with the PDU count beneath it */}
@@ -501,21 +530,21 @@ function CertificateCanvas({ cert }) {
         className="absolute inset-x-0 flex flex-col items-center text-center px-[130px]"
         style={{ top: CENTER_TOP }}
       >
-        <Box as="h2" className="text-[58px] leading-none tracking-[0.16em] font-semibold text-[#1f2d5c]">CERTIFICATE</Box>
+        <Box as="h2" className={`text-[58px] leading-none tracking-[0.16em] font-normal ${INK_TITLE}`}>CERTIFICATE</Box>
         <Box className="flex items-center gap-3 mt-[calc(12px*var(--fit,1))]">
           <Box className="h-px w-16 bg-[#cba044]" />
-          <Box as="span" className="text-[15px] tracking-[0.4em] text-[#b98a34] font-semibold">OF TRAINING</Box>
+          <Box as="span" className={`text-[15px] tracking-[0.4em] font-normal ${INK_TITLE}`}>OF TRAINING</Box>
           <Box className="h-px w-16 bg-[#cba044]" />
         </Box>
 
-        <Box as="p" className="mt-[calc(36px*var(--fit,1))] text-[12px] tracking-[0.3em] uppercase text-slate-400" style={{ fontFamily: "Arial, sans-serif" }}>
+        <Box as="p" className={`mt-[calc(36px*var(--fit,1))] text-[12px] tracking-[0.3em] uppercase ${INK_BLACK}`} style={{ fontFamily: "Arial, sans-serif" }}>
           This certificate is presented to
         </Box>
         <Box as="p" className="mt-[calc(16px*var(--fit,1))] text-[52px] leading-tight text-[#2f8fd0] font-normal" style={{ fontFamily: "'Segoe Script', 'Bradley Hand', 'Brush Script MT', Georgia, cursive" }}>
           {cert.participant_name || "—"}
         </Box>
 
-        <Box as="p" className="mt-[calc(20px*var(--fit,1))] text-[12px] tracking-[0.3em] uppercase text-slate-400" style={{ fontFamily: "Arial, sans-serif" }}>
+        <Box as="p" className={`mt-[calc(20px*var(--fit,1))] text-[12px] tracking-[0.3em] uppercase ${INK_BLACK}`} style={{ fontFamily: "Arial, sans-serif" }}>
           For the successful completion of
         </Box>
         <Box as="p" className="mt-[calc(12px*var(--fit,1))] text-[27px] text-[#1f2d5c] font-semibold">{cert.title}</Box>
@@ -525,7 +554,7 @@ function CertificateCanvas({ cert }) {
         <Box
           as="p"
           ref={datesRef}
-          className="mt-[calc(12px*var(--fit,1))] -mx-[34px] leading-[1.5] text-slate-500"
+          className={`mt-[calc(12px*var(--fit,1))] -mx-[34px] leading-[1.5] ${INK_BLACK}`}
           style={{ fontFamily: "Arial, sans-serif", fontSize: DATES_FONT }}
         >
           which took place {dateText}, via {delivery}.
@@ -560,21 +589,21 @@ function CertificateCanvas({ cert }) {
       {/* Footer — printed identifiers (left) */}
       <Box className="absolute left-[92px] bottom-[56px] flex gap-[46px]" style={{ fontFamily: "Arial, sans-serif" }}>
         <Box>
-          <Box as="p" className="text-[17px] font-bold text-[#16224e] tracking-wide">{cert.training_id || "—"}</Box>
-          <Box as="p" className="text-[11px] text-slate-400 mt-1">Training ID</Box>
+          <Box as="p" className={`text-[17px] font-bold tracking-wide ${INK_NAVY}`}>{cert.training_id || "—"}</Box>
+          <Box as="p" className={`text-[12.5px] mt-1 ${INK_BLACK}`}>Training ID</Box>
         </Box>
         <Box>
-          <Box as="p" className="text-[17px] font-bold text-[#16224e] tracking-wide">{cert.certificate_id || "—"}</Box>
-          <Box as="p" className="text-[11px] text-slate-400 mt-1">Certificate ID</Box>
+          <Box as="p" className={`text-[17px] font-bold tracking-wide ${INK_NAVY}`}>{cert.certificate_id || "—"}</Box>
+          <Box as="p" className={`text-[12.5px] mt-1 ${INK_BLACK}`}>Certificate ID</Box>
         </Box>
         <Box>
-          <Box as="p" className="text-[17px] font-bold text-[#16224e] tracking-wide">{cert.course_identifier || "—"}</Box>
-          <Box as="p" className="text-[11px] text-slate-400 mt-1">Course Identifier</Box>
+          <Box as="p" className={`text-[17px] font-bold tracking-wide ${INK_NAVY}`}>{cert.course_identifier || "—"}</Box>
+          <Box as="p" className={`text-[12.5px] mt-1 ${INK_BLACK}`}>Course Identifier</Box>
         </Box>
         {cert.pdu_claim_code && (
           <Box>
-            <Box as="p" className="text-[17px] font-bold text-[#16224e] tracking-wide">{cert.pdu_claim_code}</Box>
-            <Box as="p" className="text-[11px] text-slate-400 mt-1">PDU Claim Code</Box>
+            <Box as="p" className={`text-[17px] font-bold tracking-wide ${INK_NAVY}`}>{cert.pdu_claim_code}</Box>
+            <Box as="p" className={`text-[12.5px] mt-1 ${INK_BLACK}`}>PDU Claim Code</Box>
           </Box>
         )}
       </Box>
@@ -589,7 +618,6 @@ function CertificateCanvas({ cert }) {
           <Box className="mx-auto h-[104px] w-[104px] bg-slate-100" />
         )}
         <Box as="p" className="text-[11px] font-semibold text-[#16224e] mt-2">Scan to verify</Box>
-        <Box as="p" className="text-[10px] text-slate-400">{verifyDisplayHost()}</Box>
       </Box>
     </Box>
   );

@@ -388,9 +388,13 @@ export async function setTrainingPdus({ token, trainingRef, pdus, pduClaimCode, 
   return apiClient(`/admin/certificates/trainings/${trainingRef}/pdus`, {
     method: "PUT",
     token,
+    /* All three are optional on the certificate. An empty field is sent as
+       `null`, which clears a stored value, rather than being omitted — the
+       admin blanking a claim code means "remove it", not "leave it as it was".
+       A key only disappears when the caller didn't supply it at all. */
     body: {
-      pdus,
-      pdu_claim_code: pduClaimCode,
+      ...(pdus !== undefined ? { pdus: pdus === "" || pdus === null ? null : Number(pdus) } : {}),
+      ...(pduClaimCode !== undefined ? { pdu_claim_code: pduClaimCode?.trim() || null } : {}),
       ...(certificateMode !== undefined ? { certificate_mode: certificateMode || null } : {}),
     },
   });

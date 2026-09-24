@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -18,12 +20,16 @@ import { PhoneInput, splitPhone, isPhoneValid } from "@/components/ui/phone-inpu
 import {
   User, Briefcase, GraduationCap, Shield, Camera, Mail,
   Building2, Link2, BookOpen, CheckCircle2, Award, Lock, Bell, ShieldCheck,
+  ChevronRight,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfileCompletion } from "@/providers/profile-completion-provider";
 import { fetchMyProfile, updateMyProfile, getAvatarUploadUrl, uploadAvatarFile } from "@/services/api/me";
+import { fetchMyTrainings } from "@/services/api/learner/learner-api";
+import { classifyTrainings, isCompletedTraining } from "@/lib/training-groups";
 
 // A fixed list rather than free text: trainers see the industry in place of the
 // employer name on their roster, so it only groups usefully if it's consistent.
@@ -69,12 +75,25 @@ function validateMobile(v) {
   if (!national) return "Mobile number is required.";
   return isPhoneValid(country, national) ? null : "Enter a valid mobile number for the selected country.";
 }
-const validateCompany = (v) => (v.trim() ? null : "Company name is required.");
-const validateIndustry = (v) => (v.trim() ? null : "Industry is required.");
-const validateJobTitle = (v) => (v.trim() ? null : "Job title is required.");
-const validateDepartment = (v) => (v.trim() ? null : "Department is required.");
-function validateExperience(v) {
-  if (!v.trim()) return "Years of experience is required.";
+/* Employment-dependent fields.
+   A learner who isn't employed has no employer, sector, title or department to
+   give, and asking for them anyway leaves the profile permanently incomplete —
+   which is what gates the completion prompt. `employed` is passed in so the
+   same validator serves both states; when it's false the field is simply
+   skipped, but anything the learner DID type is still range-checked. */
+const EMPLOYED = "employed";
+const NOT_EMPLOYED = "not_employed";
+
+const requiredWhenEmployed = (msg) => (v, employed) =>
+  !employed || v.trim() ? null : msg;
+
+const validateCompany = requiredWhenEmployed("Company name is required.");
+const validateIndustry = requiredWhenEmployed("Industry is required.");
+const validateJobTitle = requiredWhenEmployed("Job title is required.");
+const validateDepartment = requiredWhenEmployed("Department is required.");
+
+function validateExperience(v, employed) {
+  if (!v.trim()) return employed ? "Years of experience is required." : null;
   const n = Number(v);
   if (Number.isNaN(n) || n < 0) return "Enter a valid number of years.";
   if (n > 80) return "Enter 80 years or fewer.";
@@ -93,9 +112,9 @@ function validateLinkedin(v) {
 
 // Only clears an existing error once the field becomes valid — never adds a
 // new one while typing, so red marks don't flash up mid-edit.
-function clearErrorIfValid(setErrors, field, validate, value) {
+function clearErrorIfValid(setErrors, field, validate, value, ...rest) {
   setErrors((prev) => {
-    if (!prev[field] || validate(value)) return prev;
+    if (!prev[field] || validate(value, ...rest)) return prev;
     const { [field]: _omit, ...rest } = prev;
     return rest;
   });
@@ -144,6 +163,50 @@ function FieldRow({ label, htmlFor, error, children }) {
   );
 }
 
+/* A count on the Training tab.
+   Rendered as a compact tile rather than a label/value row: the number is the
+   point, so it leads, and the three read as a set at a glance. Where the count
+   has somewhere to go the whole tile is a link — a learner who reads "4
+   certificates" here almost always wants to open them, and making them hunt
+   for the sidebar is a wasted step. `n` is undefined while the request is in
+   flight, so the tile shows a dash rather than a zero that would briefly claim
+   the learner has nothing. */
+function TrainingCount({ icon: Icon, label, n, unit, href, tone }) {
+  const loading = n == null;
+  const value = loading ? "—" : String(n);
+  const caption = loading ? "Loading…" : n === 1 ? unit : `${unit}s`;
+
+  const inner = (
+    <>
+      <Box className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", tone)}>
+        <Icon className="h-4 w-4" />
+      </Box>
+      <Box className="min-w-0 flex-1">
+        <Box className="flex items-baseline gap-1.5">
+          <Text as="p" className="text-xl font-bold leading-none text-slate-800">{value}</Text>
+          <Text as="span" className="text-[11px] font-medium text-slate-400">{caption}</Text>
+        </Box>
+        <Text as="p" className="mt-1 truncate text-xs font-semibold text-slate-600">{label}</Text>
+      </Box>
+      {href && !loading && n > 0 && (
+        <ChevronRight className="h-4 w-4 shrink-0 text-slate-300 transition-colors group-hover/count:text-violet-500" />
+      )}
+    </>
+  );
+
+  const shell =
+    "group/count flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-3";
+
+  // Only linked when there is something to look at; an empty count links nowhere.
+  return href && !loading && n > 0 ? (
+    <Link href={href} className={cn(shell, "transition-colors hover:border-violet-200 hover:bg-violet-50/40")}>
+      {inner}
+    </Link>
+  ) : (
+    <Box className={shell}>{inner}</Box>
+  );
+}
+
 function ProfileSkeleton() {
   return (
     <Box className="space-y-5">
@@ -165,6 +228,11 @@ function ProfileSkeleton() {
 
 export function LearnerProfileSettings() {
   const { user, sponsor, token, updateUser } = useAuth();
+  /* The Training tab used to render three dashed boxes that always read "none",
+     whatever the learner actually had. One call fills them, and the same
+     grouping the My Trainings page uses keeps the two consistent. null = still
+     loading, so the field shows a dash rather than a wrong zero. */
+  const [trainingCounts, setTrainingCounts] = useState(null);
   const completion = useProfileCompletion();
   const { first, last } = splitName(user?.name);
 
@@ -195,6 +263,7 @@ export function LearnerProfileSettings() {
 
   /* ── 2. Professional information ── */
   const [company, setCompany] = useState("");
+  const [employment, setEmployment] = useState(EMPLOYED);
   const [industry, setIndustry] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [department, setDepartment] = useState("");
@@ -260,6 +329,18 @@ export function LearnerProfileSettings() {
 
   useEffect(() => {
     if (!token) return;
+    fetchMyTrainings({ token })
+      .then((d) => {
+        const list = d?.trainings ?? [];
+        const { upcoming, ongoing } = classifyTrainings(list);
+        setTrainingCounts({
+          upcoming: upcoming.length + ongoing.length,
+          completed: list.filter(isCompletedTraining).length,
+          certificates: list.filter((t) => t.certificate_issued).length,
+        });
+      })
+      .catch(() => setTrainingCounts({ upcoming: 0, completed: 0, certificates: 0 }));
+
     fetchMyProfile({ token })
       .then(({ profile }) => {
         setFirstName(profile.first_name || first);
@@ -267,6 +348,7 @@ export function LearnerProfileSettings() {
         setMobile(profile.phone || "");
         setCountry(profile.country || "India");
         setCity(profile.city || "");
+        setEmployment(profile.employment_status === NOT_EMPLOYED ? NOT_EMPLOYED : EMPLOYED);
         setCompany(profile.company_name || "");
         setIndustry(profile.industry || "");
         setJobTitle(profile.job_title || "");
@@ -359,13 +441,16 @@ export function LearnerProfileSettings() {
     }
   }
 
+  const isEmployed = employment === EMPLOYED;
+
   async function saveProfessionalInfo() {
     const errors = {};
-    const companyError = validateCompany(company);
-    const industryError = validateIndustry(industry);
-    const jobTitleError = validateJobTitle(jobTitle);
-    const departmentError = validateDepartment(department);
-    const experienceError = validateExperience(experience);
+    const employed = employment === EMPLOYED;
+    const companyError = validateCompany(company, employed);
+    const industryError = validateIndustry(industry, employed);
+    const jobTitleError = validateJobTitle(jobTitle, employed);
+    const departmentError = validateDepartment(department, employed);
+    const experienceError = validateExperience(experience, employed);
     const linkedinError = validateLinkedin(linkedin);
     if (companyError) errors.company = companyError;
     if (industryError) errors.industry = industryError;
@@ -382,11 +467,29 @@ export function LearnerProfileSettings() {
       await updateMyProfile({
         token,
         data: {
-          company_name: company.trim(),
-          industry: industry.trim(),
-          job_title: jobTitle.trim(),
-          department: department.trim(),
-          years_experience: Number(experience),
+          employment_status: employment,
+          /* Industry and department are asked in both states, so they are sent
+             either way — blank clears them. */
+          industry: industry.trim() || null,
+          department: department.trim() || null,
+          /* The three employer-bound fields are CLEARED when not employed, not
+             merely hidden. Leaving the old values behind would keep a former
+             employer on record with no way for the learner to see or remove it.
+             What is stored matches what the form displays. */
+          ...(isEmployed
+            ? {
+                company_name: company.trim(),
+                job_title: jobTitle.trim(),
+                /* Empty stays empty rather than becoming 0 — `Number("")` is 0,
+                   which would record "0 years of experience" for someone who
+                   simply left it blank. The API takes null to clear a field. */
+                years_experience: experience.trim() === "" ? null : Number(experience),
+              }
+            : {
+                company_name: null,
+                job_title: null,
+                years_experience: null,
+              }),
           // The API requires a fully-qualified URL; the form accepts the bare
           // `linkedin.com/in/...` form people paste, so normalise on the way out.
           linkedin_url: withScheme(linkedin.trim()),
@@ -569,26 +672,77 @@ export function LearnerProfileSettings() {
       {/* 2. Professional Information */}
       <TabsContent value="professional" className="mt-5">
         <SectionCard icon={Briefcase} title="Professional Information" description="Helps tailor recommendations and certificates.">
+          {/* Employment status gates the five fields below. Switching to
+              "Not employed" clears their errors immediately — leaving a stale
+              "Company name is required." under a field that is no longer
+              required would be the form contradicting itself. */}
+          <Box className="mb-5 rounded-xl border border-slate-200/80 bg-slate-50/60 px-4 py-3.5">
+            <Text as="p" className="text-xs font-semibold text-slate-600">Are you currently employed?</Text>
+            <RadioGroup
+              value={employment}
+              onValueChange={(v) => {
+                setEmployment(v);
+                if (v === NOT_EMPLOYED) {
+                  setProfessionalErrors((prev) => {
+                    const { company, industry, jobTitle, department, experience, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
+              className="mt-2.5 flex flex-row gap-6"
+            >
+              {[
+                { value: EMPLOYED, label: "Employed" },
+                { value: NOT_EMPLOYED, label: "Not employed" },
+              ].map((o) => (
+                <Label key={o.value} htmlFor={`employment-${o.value}`}
+                  className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                  <RadioGroupItem id={`employment-${o.value}`} value={o.value} />
+                  {o.label}
+                </Label>
+              ))}
+            </RadioGroup>
+            {employment === NOT_EMPLOYED && (
+              <Text as="p" className="mt-2 text-[11px] text-slate-500">
+                Industry and department are optional — fill them in if they apply.
+              </Text>
+            )}
+          </Box>
+
           <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <FieldRow label="Company Name" htmlFor="company" error={professionalErrors.company}>
-              <Box className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  id="company" value={company}
-                  onChange={(e) => {
-                    setCompany(e.target.value);
-                    clearErrorIfValid(setProfessionalErrors, "company", validateCompany, e.target.value);
-                  }}
-                  aria-invalid={!!professionalErrors.company} className={`${inputCls} pl-9`}
-                />
-              </Box>
-            </FieldRow>
-            <FieldRow label="Industry" htmlFor="industry" error={professionalErrors.industry}>
+            {/* Employment-dependent. Hidden outright rather than shown as
+                optional: a learner who is not employed has nothing to put in
+                any of them, and five empty boxes are just noise. LinkedIn
+                stays — it is not tied to employment. */}
+            {/* Company, job title and years of experience exist only with an
+                employer, so they are hidden outright when there is none —
+                five empty boxes would be noise. Industry and department are
+                asked either way (a learner between roles still has a field and
+                a discipline, and trainers read the industry off the roster),
+                so those stay visible and simply stop being required.
+                Interleaved rather than grouped so the order an employed
+                learner sees is unchanged. */}
+            {isEmployed && (
+              <FieldRow label="Company Name" htmlFor="company" error={professionalErrors.company}>
+                <Box className="relative">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    id="company" value={company}
+                    onChange={(e) => {
+                      setCompany(e.target.value);
+                      clearErrorIfValid(setProfessionalErrors, "company", validateCompany, e.target.value, isEmployed);
+                    }}
+                    aria-invalid={!!professionalErrors.company} className={`${inputCls} pl-9`}
+                  />
+                </Box>
+              </FieldRow>
+            )}
+            <FieldRow label={`Industry${isEmployed ? "" : " (optional)"}`} htmlFor="industry" error={professionalErrors.industry}>
               <Select
                 value={industry}
                 onValueChange={(v) => {
                   setIndustry(v);
-                  clearErrorIfValid(setProfessionalErrors, "industry", validateIndustry, v);
+                  clearErrorIfValid(setProfessionalErrors, "industry", validateIndustry, v, isEmployed);
                 }}
               >
                 <SelectTrigger id="industry" aria-invalid={!!professionalErrors.industry} className={inputCls}>
@@ -599,36 +753,40 @@ export function LearnerProfileSettings() {
                 </SelectContent>
               </Select>
             </FieldRow>
-            <FieldRow label="Job Title" htmlFor="jobTitle" error={professionalErrors.jobTitle}>
-              <Input
-                id="jobTitle" value={jobTitle}
-                onChange={(e) => {
-                  setJobTitle(e.target.value);
-                  clearErrorIfValid(setProfessionalErrors, "jobTitle", validateJobTitle, e.target.value);
-                }}
-                aria-invalid={!!professionalErrors.jobTitle} className={inputCls}
-              />
-            </FieldRow>
-            <FieldRow label="Department" htmlFor="department" error={professionalErrors.department}>
+            {isEmployed && (
+              <FieldRow label="Job Title" htmlFor="jobTitle" error={professionalErrors.jobTitle}>
+                <Input
+                  id="jobTitle" value={jobTitle}
+                  onChange={(e) => {
+                    setJobTitle(e.target.value);
+                    clearErrorIfValid(setProfessionalErrors, "jobTitle", validateJobTitle, e.target.value, isEmployed);
+                  }}
+                  aria-invalid={!!professionalErrors.jobTitle} className={inputCls}
+                />
+              </FieldRow>
+            )}
+            <FieldRow label={`Department${isEmployed ? "" : " (optional)"}`} htmlFor="department" error={professionalErrors.department}>
               <Input
                 id="department" value={department}
                 onChange={(e) => {
                   setDepartment(e.target.value);
-                  clearErrorIfValid(setProfessionalErrors, "department", validateDepartment, e.target.value);
+                  clearErrorIfValid(setProfessionalErrors, "department", validateDepartment, e.target.value, isEmployed);
                 }}
                 aria-invalid={!!professionalErrors.department} className={inputCls}
               />
             </FieldRow>
-            <FieldRow label="Years of Experience" htmlFor="experience" error={professionalErrors.experience}>
-              <Input
-                id="experience" type="number" min="0" value={experience}
-                onChange={(e) => {
-                  setExperience(e.target.value);
-                  clearErrorIfValid(setProfessionalErrors, "experience", validateExperience, e.target.value);
-                }}
-                aria-invalid={!!professionalErrors.experience} className={inputCls}
-              />
-            </FieldRow>
+            {isEmployed && (
+              <FieldRow label="Years of Experience" htmlFor="experience" error={professionalErrors.experience}>
+                <Input
+                  id="experience" type="number" min="0" value={experience}
+                  onChange={(e) => {
+                    setExperience(e.target.value);
+                    clearErrorIfValid(setProfessionalErrors, "experience", validateExperience, e.target.value, isEmployed);
+                  }}
+                  aria-invalid={!!professionalErrors.experience} className={inputCls}
+                />
+              </FieldRow>
+            )}
             <FieldRow label="LinkedIn Profile" htmlFor="linkedin" error={professionalErrors.linkedin}>
               <Box className="relative">
                 <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -664,32 +822,13 @@ export function LearnerProfileSettings() {
             </FieldRow>
           </Box>
 
-          <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
-            <Box className="space-y-2">
-              <Text as="p" className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-                <BookOpen className="h-3.5 w-3.5 text-slate-400" /> Upcoming Trainings
-              </Text>
-              <Box className="rounded-xl border border-dashed border-slate-200 py-6 text-center">
-                <Text as="p" className="text-xs text-slate-400">No upcoming trainings yet.</Text>
-              </Box>
-            </Box>
-            <Box className="space-y-2">
-              <Text as="p" className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-slate-400" /> Completed Trainings
-              </Text>
-              <Box className="rounded-xl border border-dashed border-slate-200 py-6 text-center">
-                <Text as="p" className="text-xs text-slate-400">No completed trainings yet.</Text>
-              </Box>
-            </Box>
-          </Box>
-
-          <Box className="space-y-2">
-            <Text as="p" className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-              <Award className="h-3.5 w-3.5 text-slate-400" /> Certificates
-            </Text>
-            <Box className="rounded-xl border border-dashed border-slate-200 py-6 text-center">
-              <Text as="p" className="text-xs text-slate-400">No certificates issued yet.</Text>
-            </Box>
+          <Box className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <TrainingCount icon={BookOpen} label="Upcoming Trainings" unit="training"
+              n={trainingCounts?.upcoming} href="/my-courses" tone="bg-violet-50 text-violet-600" />
+            <TrainingCount icon={CheckCircle2} label="Completed Trainings" unit="training"
+              n={trainingCounts?.completed} href="/my-courses" tone="bg-emerald-50 text-emerald-600" />
+            <TrainingCount icon={Award} label="Certificates" unit="certificate"
+              n={trainingCounts?.certificates} href="/certificates" tone="bg-amber-50 text-amber-600" />
           </Box>
         </SectionCard>
       </TabsContent>

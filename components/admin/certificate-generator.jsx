@@ -332,18 +332,18 @@ export function CertificateGenerator() {
             <Box className="rounded-xl bg-slate-50 ring-1 ring-slate-200 px-4 py-3">
               <Box className="flex flex-wrap items-end gap-3">
                 <Box className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-600">PDUs</Label>
+                  <Label className="text-xs font-semibold text-slate-600">PDUs <Text as="span" className="font-normal text-slate-400">(optional)</Text></Label>
                   <select
                     value={pduForm.pdus}
                     onChange={(e) => setPduForm({ ...pduForm, pdus: e.target.value })}
                     className="h-9 w-28 rounded-lg border border-slate-300 bg-white px-2 text-sm outline-none focus:border-violet-400"
                   >
-                    <option value="">Select…</option>
+                    <option value="">None</option>
                     {PDU_OPTIONS.map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </Box>
                 <Box className="space-y-1.5 min-w-[180px]">
-                  <Label className="text-xs font-semibold text-slate-600">PDU claim code</Label>
+                  <Label className="text-xs font-semibold text-slate-600">PDU claim code <Text as="span" className="font-normal text-slate-400">(optional)</Text></Label>
                   <Input
                     value={pduForm.code}
                     onChange={(e) => setPduForm({ ...pduForm, code: e.target.value })}
@@ -368,11 +368,15 @@ export function CertificateGenerator() {
                   size="sm"
                   variant="outline"
                   className="h-9"
-                  disabled={!!busy || !pduForm.pdus || !pduForm.code.trim()}
+                  /* All three fields are optional — most trainings are not
+                     PMI-accredited and award no PDUs — so saving is never
+                     blocked on them. Blank values are sent as null, which is
+                     how a value entered by mistake gets removed. */
+                  disabled={!!busy}
                   onClick={() => run("pdu", () => setTrainingPdus({
                     token, trainingRef,
-                    pdus: Number(pduForm.pdus),
-                    pduClaimCode: pduForm.code.trim(),
+                    pdus: pduForm.pdus,
+                    pduClaimCode: pduForm.code,
                     certificateMode: pduForm.mode,
                   }))}
                 >

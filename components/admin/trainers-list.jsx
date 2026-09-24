@@ -12,10 +12,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
-  Search, UserPlus, GraduationCap, Pencil, Eye, MapPin, Target, Award,
+  Search, UserPlus, GraduationCap, Pencil, MapPin, Target, Award,
   Users, UserCheck, Wifi, X, Clock,
 } from "lucide-react";
 import Text from "@/components/ui/text";
@@ -24,8 +21,22 @@ import { useAuth } from "@/hooks/use-auth";
 import { ResendSetupButton } from "@/components/admin/resend-setup-button";
 import { fetchTrainers, resendTrainerSetupEmail } from "@/services/api/admin/admin-api";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
+import { FilterSelect } from "@/components/shared/filter-select";
+import { DataPagination } from "@/components/shared/data-pagination";
+import { pageCount } from "@/lib/pagination";
 
 const ALL = "__all__";
+
+/* Ten a page, matching User Management.
+
+   Paged in the browser rather than on the server, deliberately: the whole
+   trainer table is 15 rows and a few KB, and the six filters here (JSONB
+   specializations and certificates, a free-text experience string, a composed
+   location) already run over the loaded list. Splitting filtering and paging
+   across the client/server boundary is how a page ends up filtering ten rows
+   instead of all of them. Worth moving server-side if this ever reaches the
+   low thousands; `DataPagination` would not change. */
+const PAGE_LIMIT = 10;
 
 function initialsOf(name = "") {
   return name.trim().split(/\s+/).slice(0, 2).map((p) => p.charAt(0).toUpperCase()).join("") || "T";
@@ -71,32 +82,6 @@ function StatCard({ label, value, icon: Icon, bg, border, iconBg, iconCls, value
       </Box>
       <Text as="p" className={`text-xs ${labelCls} font-medium`}>{label}</Text>
     </Card>
-  );
-}
-
-/* ── Filter dropdown. base-ui's Select.Value renders the raw value by default, so
-   we pass a function child to resolve the value → its human label. ── */
-function FilterSelect({ icon: Icon, value, onChange, allLabel, options, width = "w-[184px]" }) {
-  const labelFor = (v) => {
-    if (v == null || v === ALL) return allLabel;
-    const found = options.find((o) => (o.value ?? o) === v);
-    return found ? (found.label ?? found) : v;
-  };
-  return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className={`h-11 ${width} bg-white border-slate-300/70 rounded-xl text-sm shadow-sm text-slate-700`}>
-        <Icon className="h-4 w-4 text-slate-400 shrink-0" />
-        <SelectValue placeholder={allLabel} className="truncate">
-          {(v) => labelFor(v)}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent className="max-h-[300px]">
-        <SelectItem value={ALL}>{allLabel}</SelectItem>
-        {options.map((o) => (
-          <SelectItem key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 }
 
@@ -148,7 +133,16 @@ function TrainerRow({ trainer, onEdit, onResendSetup }) {
           </Avatar>
           <Box className="min-w-0 flex-1">
             <Box className="flex items-center gap-2 flex-wrap">
-              <Text as="p" title={trainer.name} className="max-w-full truncate text-sm font-semibold text-slate-900 leading-tight">{trainer.name}</Text>
+              {/* The name is the way into the trainer — the View button that
+                  used to carry that job is gone, so this has to look and behave
+                  like a link, not just be clickable. */}
+              <Link
+                href={`/admin/trainers/${trainer.id}`}
+                title={`Open ${trainer.name}`}
+                className="max-w-full truncate rounded text-sm font-semibold leading-tight text-slate-900 underline-offset-2 transition-colors hover:text-violet-600 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+              >
+                {trainer.name}
+              </Link>
               <Badge className={`border-0 text-[10px] font-semibold px-2 py-0.5 ${active ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" : "bg-red-50 text-red-600 ring-1 ring-red-200"}`}>
                 {active ? "Active" : "Inactive"}
               </Badge>
@@ -163,7 +157,21 @@ function TrainerRow({ trainer, onEdit, onResendSetup }) {
                 </Badge>
               )}
             </Box>
-            <Text as="span" title={trainer.email} className="block truncate text-xs text-slate-400">{trainer.email}</Text>
+            {/* Styled as a link, so it is one — an address that looks
+                clickable but isn't is worse than a plain grey one. */}
+            {/* Opens the trainer, same as the name above it — the whole
+                identity block leads to one place, so it doesn't matter which
+                line gets clicked. Keeps the link colour because it behaves
+                like a link; it just isn't a mailto. */}
+            <Link
+              href={`/admin/trainers/${trainer.id}`}
+              title={`Open ${trainer.name}`}
+              tabIndex={-1}
+              aria-hidden="true"
+              className="block truncate text-xs text-sky-600 underline-offset-2 transition-colors hover:text-sky-700 hover:underline"
+            >
+              {trainer.email}
+            </Link>
           </Box>
         </Box>
       </TableCell>
@@ -206,10 +214,6 @@ function TrainerRow({ trainer, onEdit, onResendSetup }) {
           >
             <Pencil className="h-3.5 w-3.5 shrink-0" /> Edit
           </button>
-          <Link href={`/admin/trainers/${trainer.id}`}
-            className="inline-flex items-center gap-1.5 h-8 px-3.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors shrink-0 whitespace-nowrap">
-            <Eye className="h-3.5 w-3.5 shrink-0" /> <Text as="span" className="text-white leading-none">View</Text>
-          </Link>
         </Box>
       </TableCell>
     </TableRow>
@@ -231,6 +235,7 @@ export function TrainersList() {
   const [exp, setExp] = useState(ALL);
   const [status, setStatus] = useState(ALL);
   const [remoteOnly, setRemoteOnly] = useState(false);
+  const [page, setPage] = useState(1);
 
   const load = useCallback(() => {
     if (!token) return;
@@ -274,13 +279,30 @@ export function TrainersList() {
     });
   }, [all, search, spec, cert, loc, exp, remoteOnly, status]);
 
+  const totalPages = pageCount(rows.length, PAGE_LIMIT);
+
+  /* Any filter change can shrink the result set under the page being viewed —
+     narrowing to three trainers while on page 4 would otherwise show an empty
+     table. Snap back into range. */
+  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
+
+  const paged = useMemo(
+    () => rows.slice((page - 1) * PAGE_LIMIT, page * PAGE_LIMIT),
+    [rows, page]
+  );
+
   const activeCount = all.filter((t) => t.is_active !== false).length;
   const remoteCount = all.filter((t) => t.is_remote).length;
   const hasFilters = !!(search || spec !== ALL || cert !== ALL || loc !== ALL || exp !== ALL || status !== ALL || remoteOnly);
 
   function clearFilters() {
     setSearch(""); setSpec(ALL); setCert(ALL); setLoc(ALL); setExp(ALL); setStatus(ALL); setRemoteOnly(false);
+    setPage(1);
   }
+
+  /* Narrowing the list always returns to page 1 — what was asked for is on the
+     first page, not wherever the reader happened to be standing. */
+  const onFilter = (set) => (v) => { set(v); setPage(1); };
 
   if (error) {
     return (
@@ -310,11 +332,11 @@ export function TrainersList() {
             <Input
               placeholder="Search by name or email..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-10 pr-9 h-11 text-sm bg-slate-100/60 border-slate-300/70 rounded-xl focus-visible:ring-violet-400/50"
             />
             {search && (
-              <button onClick={() => setSearch("")}
+              <button onClick={() => { setSearch(""); setPage(1); }}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
                 <X className="h-4 w-4" />
               </button>
@@ -330,16 +352,16 @@ export function TrainersList() {
 
         {/* Filters */}
         <Box className="flex items-center gap-2.5 flex-wrap">
-          <FilterSelect icon={Target}    value={spec}   onChange={setSpec}   allLabel="All specializations" options={specOptions} width="w-[196px]" />
-          <FilterSelect icon={Award}     value={cert}   onChange={setCert}   allLabel="All certifications"  options={certOptions} width="w-[188px]" />
-          <FilterSelect icon={MapPin}    value={loc}    onChange={setLoc}    allLabel="All locations"       options={locOptions}  width="w-[180px]" />
-          <FilterSelect icon={Clock}     value={exp}    onChange={setExp}    allLabel="Any experience"      options={EXPERIENCE_RANGES} width="w-[172px]" />
-          <FilterSelect icon={UserCheck} value={status} onChange={setStatus} allLabel="Any status"
+          <FilterSelect icon={Target}    value={spec}   onChange={onFilter(setSpec)}   allLabel="All specializations" options={specOptions} width="w-[196px]" />
+          <FilterSelect icon={Award}     value={cert}   onChange={onFilter(setCert)}   allLabel="All certifications"  options={certOptions} width="w-[188px]" />
+          <FilterSelect icon={MapPin}    value={loc}    onChange={onFilter(setLoc)}    allLabel="All locations"       options={locOptions}  width="w-[180px]" />
+          <FilterSelect icon={Clock}     value={exp}    onChange={onFilter(setExp)}    allLabel="Any experience"      options={EXPERIENCE_RANGES} width="w-[172px]" />
+          <FilterSelect icon={UserCheck} value={status} onChange={onFilter(setStatus)} allLabel="Any status"
             options={[{ value: "active", label: "Active" }, { value: "inactive", label: "Inactive" }]} width="w-[152px]" />
 
           <button
             type="button"
-            onClick={() => setRemoteOnly((v) => !v)}
+            onClick={() => { setRemoteOnly((v) => !v); setPage(1); }}
             className={`inline-flex items-center gap-1.5 h-11 px-3.5 rounded-xl text-sm font-medium shadow-sm border transition-all shrink-0 ${
               remoteOnly
                 ? "bg-blue-600 text-white border-blue-600"
@@ -411,7 +433,7 @@ export function TrainersList() {
               The min-widths step with the breakpoints at which each column
               appears, so the table scrolls horizontally rather than cramping.
               `Table` supplies its own overflow-x-auto container. */}
-          <Table className="table-fixed min-w-[530px] sm:min-w-[730px] md:min-w-[880px] lg:min-w-[1120px] xl:min-w-[1320px]">
+          <Table className="table-fixed min-w-[450px] sm:min-w-[650px] md:min-w-[800px] lg:min-w-[1040px] xl:min-w-[1240px]">
             <TableHeader>
               <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-100">
                 <TableHead className={`${thBase} pl-5 w-[280px]`}>Trainer</TableHead>
@@ -419,11 +441,11 @@ export function TrainersList() {
                 <TableHead className={`${thBase} hidden xl:table-cell w-[200px]`}>Certifications</TableHead>
                 <TableHead className={`${thBase} hidden md:table-cell w-[150px]`}>Location</TableHead>
                 <TableHead className={`${thBase} hidden sm:table-cell w-[200px]`}>Experience</TableHead>
-                <TableHead className={`${thBase} pr-5 text-right w-[250px]`}>Actions</TableHead>
+                <TableHead className={`${thBase} pr-5 text-right w-[170px]`}>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((t) => (
+              {paged.map((t) => (
                 <TrainerRow
                   key={t.id}
                   trainer={t}
@@ -433,6 +455,13 @@ export function TrainersList() {
               ))}
             </TableBody>
           </Table>
+          <DataPagination
+            page={page}
+            perPage={PAGE_LIMIT}
+            total={rows.length}
+            onPageChange={setPage}
+            siblings={2}
+          />
         </Card>
       )}
 
