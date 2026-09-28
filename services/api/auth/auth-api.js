@@ -3,7 +3,7 @@ import { apiClient } from "@/lib/api-client";
 const TOKEN_COOKIE = "lms_token";
 const USER_COOKIE  = "lms_user";
 const META_COOKIE  = "lms_meta";        // capabilities + sponsor (client-readable)
-const TOKEN_MAX_AGE = 60 * 15;          // 15 min — matches server ACCESS_TOKEN_TTL
+const TOKEN_MAX_AGE = 60 * 60 * 24;     // 24h — cookie outlives the 15m access token so an idle user isn't bounced by middleware; api-client silently refreshes the expired token on the next call
 const USER_MAX_AGE  = 60 * 60 * 24 * 7; // 7 days
 
 /* ──────────────────────────────────────
