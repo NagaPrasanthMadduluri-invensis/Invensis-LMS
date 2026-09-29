@@ -361,6 +361,15 @@ export async function fetchTrainingCertificates({ token, trainingRef }) {
   return apiClient(`/admin/certificates/trainings/${trainingRef}`, { token });
 }
 
+/**
+ * Printable data for one certificate → { certificate }. Same shape the learner
+ * download uses, so the admin can render/download the identical PDF. Works for a
+ * generated certificate whether or not it's been released.
+ */
+export async function fetchAdminCertificatePrintable({ token, certificateId }) {
+  return apiClient(`/admin/certificates/${certificateId}/printable`, { token });
+}
+
 /** Create certificate rows for eligible seats missing one. Does NOT release. */
 export async function generateCertificates({ token, trainingRef, enrolmentIds }) {
   return apiClient(`/admin/certificates/trainings/${trainingRef}/generate`, {

@@ -37,7 +37,9 @@ import { formatDate, formatInstantDate } from "@/lib/datetime";
 import {
   fetchCertifiableTrainings, fetchTrainingCertificates, generateCertificates,
   releaseCertificates, revokeCertificate, updateCertificate, setTrainingPdus,
+  fetchAdminCertificatePrintable,
 } from "@/services/api/admin/admin-api";
+import { useCertificateDownload } from "@/components/shared/certificate-download";
 
 // PDUs are chosen, not typed: the business awards between 8 and 60 and a
 // mistyped figure on a certificate is a compliance problem.
@@ -197,6 +199,8 @@ export function CertificateGenerator() {
   const [selected, setSelected] = useState(() => new Set());
   const [editing, setEditing] = useState(null);
   const [pduForm, setPduForm] = useState({ pdus: "", code: "", mode: "", trademark: "" });
+  // Off-screen render → PDF flow, shared with the learner certificates view.
+  const { requestDownload, captureNode } = useCertificateDownload();
 
   useEffect(() => {
     if (!token) return;
@@ -242,6 +246,20 @@ export function CertificateGenerator() {
     try { await fn(); await loadDetail(trainingRef); }
     catch (e) { setError(e.message); }
     finally { setBusy(null); }
+  }
+
+  // Fetch the printable data for one certificate, then render + download it.
+  // Does not reload the detail (nothing changed) or touch the download count.
+  async function downloadCert(c) {
+    setBusy(`dl-${c.certificate_id}`); setError(null);
+    try {
+      const { certificate } = await fetchAdminCertificatePrintable({ token, certificateId: c.certificate_id });
+      requestDownload(certificate);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(null);
+    }
   }
 
   const ids = selected.size ? [...selected] : undefined;
@@ -496,6 +514,18 @@ export function CertificateGenerator() {
                               <Pencil className="h-3 w-3" /> Edit
                             </Button>
                           )}
+                          {c.generated && (
+                            <Button
+                              variant="outline" size="sm"
+                              className="h-8 px-2.5 gap-1 text-xs text-sky-700 border-sky-200 hover:bg-sky-50"
+                              disabled={busy === `dl-${c.certificate_id}`}
+                              onClick={() => downloadCert(c)}
+                            >
+                              {busy === `dl-${c.certificate_id}`
+                                ? <Loader2 className="h-3 w-3 animate-spin" />
+                                : <Download className="h-3 w-3" />} Download
+                            </Button>
+                          )}
                           {c.released && (
                             <Button
                               variant="outline" size="sm"
@@ -530,6 +560,8 @@ export function CertificateGenerator() {
         onClose={() => setEditing(null)}
         onSaved={() => loadDetail(trainingRef)}
       />
+
+      {captureNode}
     </Box>
   );
 }
