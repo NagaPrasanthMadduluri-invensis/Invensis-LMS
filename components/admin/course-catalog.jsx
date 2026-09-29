@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Library, RefreshCw, Search, ChevronRight, Award, Clock, AlertCircle, Inbox,
+  Library, RefreshCw, Search, ChevronRight, Award, Clock, AlertCircle, Inbox, Plus,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchCourses, syncCourses } from "@/services/api/admin/course-resources-api";
+import { CourseFormDialog } from "@/components/admin/course-form-dialog";
 import { instantValue } from "@/lib/datetime";
 
 // `last_synced_at` is a real instant — its age is measured against real "now".
@@ -34,6 +35,7 @@ export function CourseCatalog() {
   const [syncing, setSyncing] = useState(false);
   const [notice, setNotice] = useState(null);
   const [q, setQ] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -82,12 +84,28 @@ export function CourseCatalog() {
           <Input value={q} onChange={(e) => setQ(e.target.value)}
             placeholder="Search courses…" className="h-10 pl-9 text-sm" />
         </Box>
+        <Button onClick={() => setFormOpen(true)}
+          className="h-10 px-4 bg-white hover:bg-slate-50 text-violet-700 border border-violet-200 rounded-lg text-sm font-semibold">
+          <Plus className="h-4 w-4 mr-2" />
+          Add course
+        </Button>
         <Button onClick={handleSync} disabled={syncing}
           className="h-10 px-4 bg-violet-600 hover:bg-violet-700 text-white border-0 rounded-lg text-sm font-semibold">
           <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
           {syncing ? "Syncing…" : "Sync from CMS"}
         </Button>
       </Box>
+
+      <CourseFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        token={token}
+        mode="create"
+        onSaved={(c) => {
+          setNotice(c?.name ? `Created “${c.name}”.` : "Course created.");
+          load();
+        }}
+      />
 
       {notice && (
         <Box className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-100 px-4 py-2.5">

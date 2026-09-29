@@ -1,27 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Library, Award, Clock, Hash, AlertCircle } from "lucide-react";
+import { Library, Award, Clock, Hash, AlertCircle, PencilLine } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchCourse } from "@/services/api/admin/course-resources-api";
+import { CourseFormDialog } from "@/components/admin/course-form-dialog";
 import { ResourceManager } from "@/components/admin/resource-manager";
 
 export function CourseCatalogDetail({ slug }) {
   const { token } = useAuth();
   const [course, setCourse] = useState(null);
   const [error, setError] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!token || !slug) return;
     fetchCourse({ token, courseRef: slug })
       .then((d) => setCourse(d.course))
       .catch((e) => setError(e.message));
   }, [token, slug]);
+
+  useEffect(() => { load(); }, [load]);
 
   if (error) {
     return (
@@ -61,6 +66,12 @@ export function CourseCatalogDetail({ slug }) {
               <Text as="p" className="text-sm text-slate-600 mt-2 line-clamp-3">{course.description}</Text>
             )}
             <Box className="flex flex-wrap items-center gap-2 mt-3">
+              {course.cms_id == null && (
+                <Badge className="border-0 bg-emerald-50 text-emerald-700 text-[11px] font-medium">Locally defined</Badge>
+              )}
+              {!course.is_active && (
+                <Badge className="border-0 bg-slate-200 text-slate-600 text-[11px] font-medium">Inactive</Badge>
+              )}
               {course.category?.name && (
                 <Badge className="border-0 bg-slate-100 text-slate-600 text-[11px] font-medium">{course.category.name}</Badge>
               )}
@@ -79,8 +90,21 @@ export function CourseCatalogDetail({ slug }) {
               )}
             </Box>
           </Box>
+          <Button variant="outline" onClick={() => setEditOpen(true)}
+            className="shrink-0 h-9 px-3 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-violet-700 text-sm font-semibold">
+            <PencilLine className="h-4 w-4 mr-1.5" /> Edit
+          </Button>
         </Box>
       </Card>
+
+      <CourseFormDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        token={token}
+        mode="edit"
+        course={course}
+        onSaved={() => load()}
+      />
 
       {/* Predefined resources */}
       <ResourceManager

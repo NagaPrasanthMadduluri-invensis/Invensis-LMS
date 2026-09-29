@@ -28,6 +28,23 @@ export async function fetchCourse({ token, courseRef }) {
   return apiClient(`/courses/${courseRef}`, { token });
 }
 
+/**
+ * POST /courses → { course }. Create a locally-defined course (one that arrives
+ * via CRM orders but isn't in the CMS). `data.slug` is the join key and must
+ * match the slug the order carries. 409 if the slug already exists.
+ */
+export async function createCourse({ token, data }) {
+  return apiClient("/courses", { method: "POST", token, body: data });
+}
+
+/**
+ * PATCH /courses/:courseRef → { course }. Update a course's metadata. `slug` is
+ * immutable and must not be sent. `courseRef` = slug or UUID.
+ */
+export async function updateCourse({ token, courseRef, data }) {
+  return apiClient(`/courses/${courseRef}`, { method: "PATCH", token, body: data });
+}
+
 /* ── Predefined resources (per course) ── */
 
 export async function fetchCourseResources({ token, courseRef }) {
