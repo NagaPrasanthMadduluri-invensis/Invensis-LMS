@@ -37,8 +37,10 @@ import {
   fetchAdminTrainingDetail, fetchAdminTrainings, fetchTrainers, assignTrainer,
   addParticipant, updateMeeting, updateParticipant, cancelEnrolment, transferEnrolment,
   completeEnrolment, completeAllEnrolments, setTrainingStatus, rescheduleTraining,
+  fetchTrainingEmailRecipients, sendTrainingEmail,
 } from "@/services/api/admin/admin-api";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
+import { ComposeEmailDialog } from "@/components/admin/compose-email-dialog";
 import { TrainingSurveys } from "@/components/admin/training-surveys";
 import { TrainingAttendance } from "@/components/admin/training-attendance";
 import { ResourceManager } from "@/components/admin/resource-manager";
@@ -1280,6 +1282,7 @@ export function TrainingManagement({ trainingId }) {
   const [completeAllOpen, setCompleteAllOpen] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [statusAction, setStatusAction] = useState(null); // "completed" | "suspended" | "active"
+  const [emailOpen, setEmailOpen] = useState(false);
 
   const load = useCallback(() => {
     if (!token) return;
@@ -1327,6 +1330,16 @@ export function TrainingManagement({ trainingId }) {
 
   return (
     <Box className="space-y-5">
+      <ComposeEmailDialog
+        open={emailOpen}
+        onOpenChange={setEmailOpen}
+        title={`Email — ${detail.title}`}
+        fetchRecipients={async () =>
+          (await fetchTrainingEmailRecipients({ token, trainingRef: trainingId })).recipients}
+        onSend={({ subject, message, recipientIds }) =>
+          sendTrainingEmail({ token, trainingRef: trainingId, subject, message, recipientIds })}
+      />
+
       {/* ── Training info ── */}
       <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-white">
         <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
@@ -1349,9 +1362,15 @@ export function TrainingManagement({ trainingId }) {
               )}
               <Badge className={`border-0 text-[10px] font-semibold ${statusCfg.light}`}>{statusCfg.label}</Badge>
             </Box>
-            <Badge className="border-0 bg-violet-100 text-violet-700 text-[11px] font-medium">
-              {MODE_LABEL[detail.delivery_mode] || detail.delivery_mode}
-            </Badge>
+            <Box className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => setEmailOpen(true)}
+                className="h-8 px-3 border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">
+                <Mail className="h-3.5 w-3.5 mr-1" /> Email
+              </Button>
+              <Badge className="border-0 bg-violet-100 text-violet-700 text-[11px] font-medium">
+                {MODE_LABEL[detail.delivery_mode] || detail.delivery_mode}
+              </Badge>
+            </Box>
           </Box>
           <Text as="h2" className="text-xl font-bold text-slate-900 leading-tight">{detail.title}</Text>
         </Box>

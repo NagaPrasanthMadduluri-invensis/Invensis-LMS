@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CheckCircle2, Clock, PlayCircle, Award, XCircle, Mail,
@@ -15,8 +16,12 @@ import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate as fmtDate, formatInstantDate } from "@/lib/datetime";
 import { lastLoginLabel, lastLoginTitle, hasNeverLoggedIn } from "@/lib/last-login";
-import { fetchParticipantDetail, resendParticipantSetupEmail } from "@/services/api/admin/admin-api";
+import {
+  fetchParticipantDetail, resendParticipantSetupEmail,
+  fetchParticipantEmailRecipients, sendParticipantEmail,
+} from "@/services/api/admin/admin-api";
 import { ResendSetupButton } from "@/components/admin/resend-setup-button";
+import { ComposeEmailDialog } from "@/components/admin/compose-email-dialog";
 
 const AVATAR_COLORS = [
   "bg-violet-500", "bg-violet-500", "bg-teal-500", "bg-emerald-500",
@@ -174,6 +179,7 @@ export function ParticipantDetail({ userId }) {
   const { token } = useAuth();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [emailOpen, setEmailOpen] = useState(false);
 
   useEffect(() => {
     if (!token || !userId) return;
@@ -211,6 +217,16 @@ export function ParticipantDetail({ userId }) {
   return (
     <Box className="space-y-5">
 
+      <ComposeEmailDialog
+        open={emailOpen}
+        onOpenChange={setEmailOpen}
+        title={`Email ${p.name || "learner"}`}
+        fetchRecipients={async () =>
+          (await fetchParticipantEmailRecipients({ token, participantId: p.id })).recipients}
+        onSend={({ subject, message, recipientIds }) =>
+          sendParticipantEmail({ token, participantId: p.id, subject, message, recipientIds })}
+      />
+
       {/* Profile hero */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-7 py-7">
@@ -238,13 +254,19 @@ export function ParticipantDetail({ userId }) {
               </Box>
             </Box>
           </Box>
-          {/* Never followed their setup link — send it again */}
-          {setupPending && (
-            <ResendSetupButton
-              label="Resend setup email"
-              onResend={() => resendParticipantSetupEmail({ token, participantId: p.id })}
-            />
-          )}
+          <Box className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setEmailOpen(true)}
+              className="h-9 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-100">
+              <Mail className="h-4 w-4" /> Email
+            </Button>
+            {/* Never followed their setup link — send it again */}
+            {setupPending && (
+              <ResendSetupButton
+                label="Resend setup email"
+                onResend={() => resendParticipantSetupEmail({ token, participantId: p.id })}
+              />
+            )}
+          </Box>
           </Box>
         </Box>
 

@@ -16,8 +16,9 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate as fmtDate, formatInstantDate } from "@/lib/datetime";
-import { fetchTrainerDetail, resendTrainerSetupEmail } from "@/services/api/admin/admin-api";
+import { fetchTrainerDetail, resendTrainerSetupEmail, sendTrainerEmail } from "@/services/api/admin/admin-api";
 import { ResendSetupButton } from "@/components/admin/resend-setup-button";
+import { ComposeEmailDialog } from "@/components/admin/compose-email-dialog";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 
 function initialsOf(name = "") {
@@ -183,6 +184,7 @@ export function TrainerDetail({ trainerId }) {
   const [trainer, setTrainer] = useState(null);
   const [error, setError] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
 
   const load = useCallback(() => {
     if (!token) return;
@@ -220,6 +222,15 @@ export function TrainerDetail({ trainerId }) {
 
   return (
     <Box className="space-y-5">
+      <ComposeEmailDialog
+        open={emailOpen}
+        onOpenChange={setEmailOpen}
+        title={`Email ${trainer.name || "trainer"}`}
+        fixedRecipient={{ name: trainer.name, email: trainer.email }}
+        onSend={({ subject, message }) =>
+          sendTrainerEmail({ token, trainerId: trainer.id, subject, message })}
+      />
+
       {/* Profile hero */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-7 py-7">
@@ -260,6 +271,10 @@ export function TrainerDetail({ trainerId }) {
               </Box>
             </Box>
             <Box className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+              <Button variant="outline" onClick={() => setEmailOpen(true)}
+                className="border-slate-200 text-slate-700 hover:bg-slate-100 bg-white shrink-0">
+                <Mail className="h-3.5 w-3.5 mr-1.5" /> Email
+              </Button>
               {setupPending && (
                 <ResendSetupButton
                   label="Resend setup email"

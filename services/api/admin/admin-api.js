@@ -671,3 +671,39 @@ export async function fetchTrainingAttendance({ token, trainingRef }) {
 export async function downloadTrainingAttendanceCsv({ token, trainingRef }) {
   return apiClient(`/reports/attendance?format=csv&training_id=${encodeURIComponent(trainingRef)}`, { token });
 }
+
+/* ──────────────────────────────────────
+   ADMIN-COMPOSED EMAILS
+   Recipients are resolved server-side; the client sends opaque recipient_ids.
+   ────────────────────────────────────── */
+
+/** GET recipients (trainer + active learners + sponsors) for a training. */
+export async function fetchTrainingEmailRecipients({ token, trainingRef }) {
+  return apiClient(`/admin/trainings/${trainingRef}/email-recipients`, { token });
+}
+
+/** POST a composed email to selected training recipients. */
+export async function sendTrainingEmail({ token, trainingRef, subject, message, recipientIds }) {
+  return apiClient(`/admin/trainings/${trainingRef}/email`, {
+    method: "POST", token, body: { subject, message, recipient_ids: recipientIds },
+  });
+}
+
+/** GET recipients (the learner + their sponsor(s)) for a participant. */
+export async function fetchParticipantEmailRecipients({ token, participantId }) {
+  return apiClient(`/admin/participants/${participantId}/email-recipients`, { token });
+}
+
+/** POST a composed email to selected participant recipients. */
+export async function sendParticipantEmail({ token, participantId, subject, message, recipientIds }) {
+  return apiClient(`/admin/participants/${participantId}/email`, {
+    method: "POST", token, body: { subject, message, recipient_ids: recipientIds },
+  });
+}
+
+/** POST a composed email to a trainer (the only recipient). */
+export async function sendTrainerEmail({ token, trainerId, subject, message }) {
+  return apiClient(`/admin/trainers/${trainerId}/email`, {
+    method: "POST", token, body: { subject, message },
+  });
+}
