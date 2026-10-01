@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CheckCircle2, Clock, PlayCircle, Award, XCircle, Mail,
   Briefcase, MapPin, Calendar, Hash, Video, Users2, Phone, GraduationCap,
-  Building2, Layers, Clock3, Link2, ExternalLink, LogIn,
+  Building2, Layers, Clock3, Link2, ExternalLink, LogIn, UserCheck,
 } from "lucide-react";
 import Link from "next/link";
 import Text from "@/components/ui/text";
@@ -274,6 +274,7 @@ export function ParticipantDetail({ userId }) {
           <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <Fact icon={Briefcase} label="Job Title" value={p.job_title || "—"} />
             <Fact icon={Building2} label="Company" value={p.company_name || "—"} />
+            <Fact icon={UserCheck} label="Agent" value={p.agent || "—"} />
             <Fact icon={Layers} label="Department" value={p.department || "—"} />
             <Fact
               icon={Clock3}

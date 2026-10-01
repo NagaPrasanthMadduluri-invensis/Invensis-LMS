@@ -265,6 +265,7 @@ export function UsersTable() {
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 w-[150px]">Last Login</TableHead>
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 text-center w-[120px]">Enrolments</TableHead>
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 hidden xl:table-cell w-[200px]">Sponsor</TableHead>
+                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 hidden xl:table-cell w-[160px]">Agent</TableHead>
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 hidden xl:table-cell w-[140px]">Joined</TableHead>
                   <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 w-[150px]">Status</TableHead>
                   <TableHead className="py-3 pr-5 w-[150px]" />
@@ -343,6 +344,19 @@ export function UsersTable() {
                             <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                             <Text as="span" title={u.sponsor_email || u.sponsor_name}
                               className="min-w-0 truncate text-sm text-slate-600">{u.sponsor_name}</Text>
+                          </Box>
+                        ) : (
+                          <Text as="span" className="text-sm text-slate-300">&nbsp;</Text>
+                        )}
+                      </TableCell>
+
+                      {/* Agent — the CRM sales agent on the learner's order. */}
+                      <TableCell className="py-4 hidden xl:table-cell">
+                        {u.agent ? (
+                          <Box className="flex items-center gap-1.5">
+                            <UserCheck className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                            <Text as="span" title={u.agent}
+                              className="min-w-0 truncate text-sm text-slate-600">{u.agent}</Text>
                           </Box>
                         ) : (
                           <Text as="span" className="text-sm text-slate-300">&nbsp;</Text>
