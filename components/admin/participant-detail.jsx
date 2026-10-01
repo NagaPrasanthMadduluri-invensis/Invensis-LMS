@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CheckCircle2, Clock, PlayCircle, Award, XCircle, Mail,
   Briefcase, MapPin, Calendar, Hash, Video, Users2, Phone, GraduationCap,
-  Building2, Layers, Clock3, Link2, ExternalLink, LogIn, UserCheck,
+  Building2, Layers, Clock3, Link2, ExternalLink, LogIn, UserCheck, UserCog, AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import Text from "@/components/ui/text";
@@ -18,10 +18,14 @@ import { formatDate as fmtDate, formatInstantDate } from "@/lib/datetime";
 import { lastLoginLabel, lastLoginTitle, hasNeverLoggedIn } from "@/lib/last-login";
 import {
   fetchParticipantDetail, resendParticipantSetupEmail,
-  fetchParticipantEmailRecipients, sendParticipantEmail,
+  fetchParticipantEmailRecipients, sendParticipantEmail, changeParticipantRole,
 } from "@/services/api/admin/admin-api";
 import { ResendSetupButton } from "@/components/admin/resend-setup-button";
 import { ComposeEmailDialog } from "@/components/admin/compose-email-dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AVATAR_COLORS = [
   "bg-violet-500", "bg-violet-500", "bg-teal-500", "bg-emerald-500",
@@ -180,14 +184,19 @@ export function ParticipantDetail({ userId }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [emailOpen, setEmailOpen] = useState(false);
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [roleSwitching, setRoleSwitching] = useState(false);
+  const [roleError, setRoleError] = useState(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!token || !userId) return;
     setError(null);
     fetchParticipantDetail({ token, participantId: userId })
       .then(setData)
       .catch((e) => setError(e.message));
   }, [token, userId]);
+
+  useEffect(() => { load(); }, [load]);
 
   if (error) {
     return (
@@ -213,6 +222,21 @@ export function ParticipantDetail({ userId }) {
   const summary = data.summary || {};
   const enrolments = data.enrolments || [];
   const setupPending = p.account_active && !p.has_password;
+  // Only a learner-role account with a linked user can be switched to sponsor.
+  const canSwitchToSponsor = p.role === "learner" && !!p.user_id;
+
+  async function switchToSponsor() {
+    setRoleSwitching(true); setRoleError(null);
+    try {
+      await changeParticipantRole({ token, participantId: p.id, role: "sponsor" });
+      setRoleDialogOpen(false);
+      load();
+    } catch (e) {
+      setRoleError(e.message);
+    } finally {
+      setRoleSwitching(false);
+    }
+  }
 
   return (
     <Box className="space-y-5">
@@ -226,6 +250,34 @@ export function ParticipantDetail({ userId }) {
         onSend={({ subject, message, recipientIds }) =>
           sendParticipantEmail({ token, participantId: p.id, subject, message, recipientIds })}
       />
+
+      <AlertDialog open={roleDialogOpen} onOpenChange={(v) => !roleSwitching && setRoleDialogOpen(v)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Switch {p.name || "this learner"} to sponsor?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This changes their default portal to the sponsor dashboard and signs them out of any
+              active session (they&apos;ll sign back in to the sponsor view). It does not remove any
+              learner access they already have through their enrolments.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {roleError && (
+            <Box className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
+              <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+              <Text as="p" className="text-xs text-red-700">{roleError}</Text>
+            </Box>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={roleSwitching}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); switchToSponsor(); }}
+              disabled={roleSwitching}
+              className="bg-violet-600 hover:bg-violet-700">
+              {roleSwitching ? "Switching…" : "Switch to sponsor"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Profile hero */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
@@ -255,6 +307,12 @@ export function ParticipantDetail({ userId }) {
             </Box>
           </Box>
           <Box className="flex items-center gap-2">
+            {canSwitchToSponsor && (
+              <Button variant="outline" onClick={() => { setRoleError(null); setRoleDialogOpen(true); }}
+                className="h-9 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-100">
+                <UserCog className="h-4 w-4" /> Switch to sponsor
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setEmailOpen(true)}
               className="h-9 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-100">
               <Mail className="h-4 w-4" /> Email

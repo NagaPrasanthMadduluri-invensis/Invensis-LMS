@@ -707,3 +707,10 @@ export async function sendTrainerEmail({ token, trainerId, subject, message }) {
     method: "POST", token, body: { subject, message },
   });
 }
+
+/** PATCH a learner/sponsor account's landing role (learner <-> sponsor). */
+export async function changeParticipantRole({ token, participantId, role }) {
+  return apiClient(`/admin/participants/${participantId}/role`, {
+    method: "PATCH", token, body: { role },
+  });
+}
