@@ -714,3 +714,17 @@ export async function changeParticipantRole({ token, participantId, role }) {
     method: "PATCH", token, body: { role },
   });
 }
+
+/* ──────────────────────────────────────
+   EMAIL TIMELINE — live operations-mailbox view (read-only, on demand)
+   ────────────────────────────────────── */
+
+/** GET a learner's operations@ email timeline → { email, messages }. */
+export async function fetchParticipantEmails({ token, participantId }) {
+  return apiClient(`/admin/participants/${participantId}/emails`, { token });
+}
+
+/** GET a trainer's operations@ email timeline → { email, messages }. */
+export async function fetchTrainerEmails({ token, trainerId }) {
+  return apiClient(`/admin/trainers/${trainerId}/emails`, { token });
+}

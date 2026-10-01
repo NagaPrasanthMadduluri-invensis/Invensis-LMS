@@ -16,9 +16,11 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDate as fmtDate, formatInstantDate } from "@/lib/datetime";
-import { fetchTrainerDetail, resendTrainerSetupEmail, sendTrainerEmail } from "@/services/api/admin/admin-api";
+import { fetchTrainerDetail, resendTrainerSetupEmail, sendTrainerEmail, fetchTrainerEmails } from "@/services/api/admin/admin-api";
 import { ResendSetupButton } from "@/components/admin/resend-setup-button";
 import { ComposeEmailDialog } from "@/components/admin/compose-email-dialog";
+import { EmailTimeline } from "@/components/admin/email-timeline";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 
 function initialsOf(name = "") {
@@ -231,6 +233,14 @@ export function TrainerDetail({ trainerId }) {
           sendTrainerEmail({ token, trainerId: trainer.id, subject, message })}
       />
 
+      <Tabs defaultValue="profile" className="space-y-5">
+        <TabsList>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile" className="space-y-5 mt-0">
+
       {/* Profile hero */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-7 py-7">
@@ -403,6 +413,12 @@ export function TrainerDetail({ trainerId }) {
           </Box>
         )}
       </Card>
+        </TabsContent>
+
+        <TabsContent value="timeline" className="mt-0">
+          <EmailTimeline fetchEmails={() => fetchTrainerEmails({ token, trainerId: trainer.id })} />
+        </TabsContent>
+      </Tabs>
 
       <TrainerFormDialog open={editOpen} onOpenChange={setEditOpen} token={token} mode="edit" trainer={trainer} onSaved={load} />
     </Box>

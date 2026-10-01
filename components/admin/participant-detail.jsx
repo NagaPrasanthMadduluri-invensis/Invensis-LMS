@@ -19,9 +19,12 @@ import { lastLoginLabel, lastLoginTitle, hasNeverLoggedIn } from "@/lib/last-log
 import {
   fetchParticipantDetail, resendParticipantSetupEmail,
   fetchParticipantEmailRecipients, sendParticipantEmail, changeParticipantRole,
+  fetchParticipantEmails,
 } from "@/services/api/admin/admin-api";
 import { ResendSetupButton } from "@/components/admin/resend-setup-button";
 import { ComposeEmailDialog } from "@/components/admin/compose-email-dialog";
+import { EmailTimeline } from "@/components/admin/email-timeline";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -279,6 +282,14 @@ export function ParticipantDetail({ userId }) {
         </AlertDialogContent>
       </AlertDialog>
 
+      <Tabs defaultValue="profile" className="space-y-5">
+        <TabsList>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile" className="space-y-5 mt-0">
+
       {/* Profile hero */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-7 py-7">
@@ -403,6 +414,12 @@ export function ParticipantDetail({ userId }) {
           </Box>
         )}
       </Card>
+        </TabsContent>
+
+        <TabsContent value="timeline" className="mt-0">
+          <EmailTimeline fetchEmails={() => fetchParticipantEmails({ token, participantId: p.id })} />
+        </TabsContent>
+      </Tabs>
     </Box>
   );
 }
