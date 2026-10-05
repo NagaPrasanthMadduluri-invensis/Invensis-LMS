@@ -20,6 +20,7 @@ import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { formatInstantDate } from "@/lib/datetime";
 import { fetchParticipants, resendParticipantSetupEmail } from "@/services/api/admin/admin-api";
+import { SponsorLink } from "@/components/admin/entity-links";
 import { ResendSetupButton } from "@/components/admin/resend-setup-button";
 import { DataPagination } from "@/components/shared/data-pagination";
 import { pageCount } from "@/lib/pagination";
@@ -342,8 +343,9 @@ export function UsersTable() {
                         {u.sponsor_name ? (
                           <Box className="flex items-center gap-1.5">
                             <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                            <Text as="span" title={u.sponsor_email || u.sponsor_name}
-                              className="min-w-0 truncate text-sm text-slate-600">{u.sponsor_name}</Text>
+                            <SponsorLink userId={u.sponsor_user_id} className="min-w-0 truncate text-sm text-slate-600">
+                              <Box as="span" title={u.sponsor_email || u.sponsor_name} className="truncate">{u.sponsor_name}</Box>
+                            </SponsorLink>
                           </Box>
                         ) : (
                           <Text as="span" className="text-sm text-slate-300">&nbsp;</Text>

@@ -10,6 +10,7 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { ParticipantLink } from "@/components/admin/entity-links";
 import { fetchTrainingAttendance, downloadTrainingAttendanceCsv } from "@/services/api/admin/admin-api";
 import { formatDate } from "@/lib/datetime";
 
@@ -145,8 +146,12 @@ export function TrainingAttendance({ trainingRef }) {
                   {data.participants.map((p, i) => (
                     <Box as="tr" key={p.participant_id} className={cn("border-b border-slate-50", i % 2 ? "bg-slate-50/40" : "bg-white")}>
                       <Box as="td" className="sticky left-0 z-10 bg-inherit px-4 py-2.5">
-                        <Text as="p" className="text-sm font-medium text-slate-800">{p.name}</Text>
-                        {p.email && <Text as="span" className="text-[11px] text-slate-400">{p.email}</Text>}
+                        <Text as="p" className="text-sm font-medium text-slate-800">
+                          <ParticipantLink id={p.participant_id}>{p.name}</ParticipantLink>
+                        </Text>
+                        {p.email && (
+                          <ParticipantLink id={p.participant_id} className="text-[11px] text-slate-400">{p.email}</ParticipantLink>
+                        )}
                       </Box>
                       {data.sessions.map((s) => {
                         const st = p.attendance?.[s.id] ?? null;

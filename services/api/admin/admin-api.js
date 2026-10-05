@@ -728,3 +728,8 @@ export async function fetchParticipantEmails({ token, participantId }) {
 export async function fetchTrainerEmails({ token, trainerId }) {
   return apiClient(`/admin/trainers/${trainerId}/emails`, { token });
 }
+
+/** GET a sponsor's admin detail → { sponsor, summary, learners }. */
+export async function fetchSponsorDetail({ token, userId }) {
+  return apiClient(`/admin/sponsors/${userId}`, { token });
+}

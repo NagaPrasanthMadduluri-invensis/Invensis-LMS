@@ -41,6 +41,7 @@ import {
 } from "@/services/api/admin/admin-api";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 import { ComposeEmailDialog } from "@/components/admin/compose-email-dialog";
+import { ParticipantLink, TrainerLink } from "@/components/admin/entity-links";
 import { TrainingSurveys } from "@/components/admin/training-surveys";
 import { TrainingAttendance } from "@/components/admin/training-attendance";
 import { ResourceManager } from "@/components/admin/resource-manager";
@@ -1483,9 +1484,11 @@ export function TrainingManagement({ trainingId }) {
                   </Text>
                 </Box>
                 <Box className="min-w-0">
-                  <Text as="p" className="text-sm font-bold text-slate-800">{detail.trainer.name}</Text>
+                  <Text as="p" className="text-sm font-bold text-slate-800">
+                    <TrainerLink id={detail.trainer.id}>{detail.trainer.name}</TrainerLink>
+                  </Text>
                   <Text as="p" className="text-xs text-slate-500 truncate">
-                    {detail.trainer.email}{detail.trainer.experience ? ` · ${detail.trainer.experience}` : ""}
+                    <TrainerLink id={detail.trainer.id}>{detail.trainer.email}</TrainerLink>{detail.trainer.experience ? ` · ${detail.trainer.experience}` : ""}
                   </Text>
                 </Box>
                 <UserCheck className="h-4 w-4 text-emerald-500 shrink-0 ml-auto" />
@@ -1612,8 +1615,8 @@ export function TrainingManagement({ trainingId }) {
               <TableBody>
                 {detail.participants.map((p) => (
                   <TableRow key={p.enrolment_id} className="hover:bg-slate-50/70 transition-colors border-b border-slate-100/80 last:border-0">
-                    <TableCell className="py-3.5 font-semibold text-slate-800 text-sm">{p.name}</TableCell>
-                    <TableCell className="py-3.5 text-slate-500 text-sm">{p.email}</TableCell>
+                    <TableCell className="py-3.5 font-semibold text-slate-800 text-sm"><ParticipantLink id={p.participant_id}>{p.name}</ParticipantLink></TableCell>
+                    <TableCell className="py-3.5 text-slate-500 text-sm"><ParticipantLink id={p.participant_id}>{p.email}</ParticipantLink></TableCell>
                     <TableCell className="py-3.5 text-slate-500 text-sm">{p.phone || "—"}</TableCell>
                     <TableCell className="py-3.5 text-slate-500 text-sm">{p.job_title || "—"}</TableCell>
                     <TableCell className="py-3.5 text-slate-500 text-sm">{p.location || "—"}</TableCell>

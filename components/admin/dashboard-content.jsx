@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { TrainingLink } from "@/components/admin/entity-links";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -406,7 +407,7 @@ function RecentCompletedTable({ rows = [] }) {
               return (
                 <TableRow key={t.id} className="border-slate-100">
                   <TableCell className="py-2.5">
-                    <Text as="span" className="block max-w-[200px] truncate text-xs font-semibold text-slate-800">{t.title}</Text>
+                    <TrainingLink id={t.id} className="block max-w-[200px] truncate text-xs font-semibold text-slate-800">{t.title}</TrainingLink>
                     <Text as="span" className="font-mono text-[10px] text-slate-400">{t.code}</Text>
                   </TableCell>
                   <TableCell className="py-2.5">
