@@ -244,7 +244,7 @@ export function TrainingsList() {
   const router = useRouter();
   const [trainings, setTrainings] = useState(null);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("active");
   const [dueOnly, setDueOnly] = useState(false);
   const [error, setError] = useState(null);
 
