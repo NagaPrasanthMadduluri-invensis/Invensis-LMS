@@ -117,7 +117,7 @@ export function RaiseTicket() {
           category,
           subject: subject.trim(),
           description: description.trim(),
-          ...(needsTraining ? { training_id: trainingId } : {}),
+          ...(trainingId ? { training_id: trainingId } : {}),
         },
       });
       router.push("/tickets");
@@ -176,49 +176,65 @@ export function RaiseTicket() {
             </Box>
           </Box>
 
-          {/* Step 2 — training (conditional) */}
-          {needsTraining && (
-            <Box className="space-y-3">
-              <Box className="flex items-center gap-2">
-                <StepBadge n={2} />
-                <Text as="label" className="text-sm font-bold text-slate-700">Which training?</Text>
+          {/* Step 2 — training: required for training categories, optional otherwise
+              (a ticket is ultimately about a training, so any category may link one). */}
+          <Box className="space-y-3">
+            <Box className="flex items-center gap-2">
+              <StepBadge n={2} />
+              <Text as="label" className="text-sm font-bold text-slate-700">Which training?</Text>
+              {needsTraining ? (
                 <Badge className="border-0 bg-rose-50 text-rose-600 text-[10px] font-semibold">Required</Badge>
-              </Box>
-              {trainings === null ? (
-                <Box className="h-11 rounded-xl bg-slate-100 animate-pulse" />
-              ) : trainings.length === 0 ? (
-                <Box className="flex items-center gap-2 rounded-xl bg-amber-50 ring-1 ring-amber-200 px-3.5 py-3">
-                  <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />
-                  <Text as="span" className="text-xs text-amber-700">You have no enrolments yet, so this category isn&apos;t available.</Text>
-                </Box>
               ) : (
-                <>
-                  <Select value={trainingId} onValueChange={setTrainingId}>
-                    <SelectTrigger className="h-11 bg-white border-slate-200 rounded-xl text-sm">
-                      <SelectValue placeholder="Select your training ID / course" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {trainings.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>{t.code} · {t.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {selectedTraining && (
-                    <Box className="flex items-center gap-2.5 rounded-xl bg-violet-50/60 ring-1 ring-violet-100 px-3.5 py-2.5">
+                <Badge className="border-0 bg-slate-100 text-slate-500 text-[10px] font-semibold">Optional</Badge>
+              )}
+            </Box>
+            {!needsTraining && (
+              <Text as="p" className="text-xs text-slate-400 -mt-1.5">Link the training this ticket relates to, if any.</Text>
+            )}
+            {trainings === null ? (
+              <Box className="h-11 rounded-xl bg-slate-100 animate-pulse" />
+            ) : trainings.length === 0 ? (
+              <Box className="flex items-center gap-2 rounded-xl bg-amber-50 ring-1 ring-amber-200 px-3.5 py-3">
+                <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />
+                <Text as="span" className="text-xs text-amber-700">
+                  {needsTraining
+                    ? "You have no enrolments yet, so this category isn't available."
+                    : "You have no enrolments to link — you can still submit without one."}
+                </Text>
+              </Box>
+            ) : (
+              <>
+                <Select value={trainingId} onValueChange={setTrainingId}>
+                  <SelectTrigger className="h-11 bg-white border-slate-200 rounded-xl text-sm">
+                    <SelectValue placeholder="Select your training ID / course" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {trainings.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>{t.code} · {t.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedTraining && (
+                  <Box className="flex items-center justify-between gap-2.5 rounded-xl bg-violet-50/60 ring-1 ring-violet-100 px-3.5 py-2.5">
+                    <Box className="flex items-center gap-2.5 min-w-0">
                       <BookOpen className="h-4 w-4 text-violet-500 shrink-0" />
                       <Text as="span" className="text-xs font-mono font-bold text-violet-700">{selectedTraining.code}</Text>
                       <Text as="span" className="text-xs text-slate-600 truncate">{selectedTraining.title}</Text>
                     </Box>
-                  )}
-                </>
-              )}
-            </Box>
-          )}
+                    {!needsTraining && (
+                      <button type="button" onClick={() => setTrainingId("")}
+                        className="shrink-0 text-[11px] font-semibold text-slate-400 hover:text-slate-600">Clear</button>
+                    )}
+                  </Box>
+                )}
+              </>
+            )}
+          </Box>
 
           {/* Step 3 — details */}
           <Box className="space-y-4">
             <Box className="flex items-center gap-2">
-              <StepBadge n={needsTraining ? 3 : 2} />
+              <StepBadge n={3} />
               <Text as="label" className="text-sm font-bold text-slate-700">Describe your request</Text>
             </Box>
 
