@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
   FileText, Video, FileArchive, FileSpreadsheet, Presentation, Image as ImageIcon,
-  Link2, File, Plus, Trash2, Download, UploadCloud, X, AlertCircle, FolderOpen,
+  Link2, File, Plus, Trash2, Download, UploadCloud, X, AlertCircle, FolderOpen, Pencil,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -22,6 +23,7 @@ import {
   fetchCourseResources,
   fetchTrainingResources,
   deleteResource,
+  updateResource,
   uploadFileResource,
   createLinkResource,
   inferType,
@@ -176,7 +178,106 @@ function AddResourceDialog({ open, scope, refId, onClose, onSaved }) {
   );
 }
 
-function ResourceRow({ r, onDelete, deleting }) {
+function EditResourceDialog({ open, resource, onClose, onSaved }) {
+  const { token } = useAuth();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [url, setUrl] = useState("");
+  const [active, setActive] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+  const isLink = !!resource?.is_link;
+
+  useEffect(() => {
+    if (open && resource) {
+      setTitle(resource.title || "");
+      setDescription(resource.description || "");
+      setUrl(resource.external_url || "");
+      setActive(resource.is_active !== false);
+      setErr("");
+    }
+  }, [open, resource]);
+
+  async function save() {
+    if (!title.trim()) { setErr("Title is required."); return; }
+    if (isLink && !url.trim()) { setErr("Enter a URL."); return; }
+    setSaving(true); setErr("");
+    try {
+      const data = { title: title.trim(), description, is_active: active };
+      if (isLink) data.external_url = url.trim();
+      await updateResource({ token, resourceId: resource.id, data });
+      onSaved();
+      onClose();
+    } catch (e) {
+      setErr(e.message || "Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-base">Edit Resource</DialogTitle>
+        </DialogHeader>
+
+        <Box className="space-y-4 py-1">
+          <Box className="space-y-1.5">
+            <Label className="text-xs">Title *</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Participant Workbook" className="h-9 text-sm" />
+          </Box>
+
+          {isLink && (
+            <Box className="space-y-1.5">
+              <Label className="text-xs">URL *</Label>
+              <Input value={url} onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://…" className="h-9 text-sm" />
+            </Box>
+          )}
+
+          <Box className="space-y-1.5">
+            <Label className="text-xs">Description</Label>
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)}
+              rows={2} placeholder="Optional note" className="text-sm" />
+          </Box>
+
+          <Box className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5">
+            <Box>
+              <Text as="p" className="text-sm font-medium text-slate-700">Active</Text>
+              <Text as="p" className="text-[11px] text-slate-400">Inactive resources are hidden from enrolled learners.</Text>
+            </Box>
+            <Switch checked={active} onCheckedChange={setActive} />
+          </Box>
+
+          {!isLink && (
+            <Text as="p" className="text-[11px] text-slate-400">
+              To replace the file itself, delete this resource and upload a new one.
+            </Text>
+          )}
+
+          {err && (
+            <Box className="flex items-center gap-1.5 text-red-600">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              <Text as="span" className="text-xs">{err}</Text>
+            </Box>
+          )}
+        </Box>
+
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button size="sm" onClick={save} disabled={saving}
+            className="bg-violet-600 hover:bg-violet-700 text-white">
+            {saving ? "Saving…" : "Save changes"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ResourceRow({ r, onEdit, onDelete, deleting }) {
   const Icon = TYPE_ICON[r.type] || File;
   return (
     <Box className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-slate-50 group">
@@ -188,6 +289,7 @@ function ResourceRow({ r, onDelete, deleting }) {
           <Text as="p" className="text-sm font-medium text-slate-800 truncate">{r.title}</Text>
           <Badge className={`text-[9px] border-0 shrink-0 capitalize ${TYPE_BADGE[r.type] || TYPE_BADGE.other}`}>{r.type}</Badge>
           {r.is_link && <Badge className="text-[9px] border-0 shrink-0 bg-slate-100 text-slate-500">link</Badge>}
+          {r.is_active === false && <Badge className="text-[9px] border-0 shrink-0 bg-slate-200 text-slate-600">inactive</Badge>}
         </Box>
         <Box className="flex items-center gap-2 mt-0.5">
           {r.file_name && <Text as="span" className="text-[11px] text-slate-400 truncate">{r.file_name}</Text>}
@@ -203,6 +305,10 @@ function ResourceRow({ r, onDelete, deleting }) {
             {r.is_link ? <Link2 className="h-4 w-4" /> : <Download className="h-4 w-4" />}
           </Button>
         )}
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-violet-600"
+          onClick={() => onEdit(r)} title="Edit">
+          <Pencil className="h-4 w-4" />
+        </Button>
         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600"
           onClick={() => onDelete(r)} disabled={deleting === r.id} title="Delete">
           <Trash2 className="h-4 w-4" />
@@ -221,6 +327,7 @@ export function ResourceManager({ scope, refId, heading, subheading }) {
   const [resources, setResources] = useState(null);
   const [error, setError] = useState(null);
   const [dialog, setDialog] = useState(false);
+  const [editing, setEditing] = useState(null);
   const [deleting, setDeleting] = useState(null);
 
   const load = useCallback(async () => {
@@ -293,7 +400,7 @@ export function ResourceManager({ scope, refId, heading, subheading }) {
         ) : (
           <Box className="divide-y divide-slate-100">
             {resources.map((r) => (
-              <ResourceRow key={r.id} r={r} onDelete={handleDelete} deleting={deleting} />
+              <ResourceRow key={r.id} r={r} onEdit={setEditing} onDelete={handleDelete} deleting={deleting} />
             ))}
           </Box>
         )}
@@ -302,6 +409,10 @@ export function ResourceManager({ scope, refId, heading, subheading }) {
       <AddResourceDialog
         open={dialog} scope={scope} refId={refId}
         onClose={() => setDialog(false)} onSaved={load}
+      />
+      <EditResourceDialog
+        open={!!editing} resource={editing}
+        onClose={() => setEditing(null)} onSaved={load}
       />
     </Card>
   );
