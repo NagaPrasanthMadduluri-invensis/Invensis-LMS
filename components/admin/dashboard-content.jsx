@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { TrainingLink } from "@/components/admin/entity-links";
+import { TrainingLink, ParticipantLink, SponsorLink, TrainerLink } from "@/components/admin/entity-links";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -330,10 +330,10 @@ function RecentEnrolmentsTable({ rows = [] }) {
                         <Box className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${avatarColor(e.participant_email)}`}>
                           {getInitials(e.participant_name)}
                         </Box>
-                        <Text as="span" className="whitespace-nowrap text-xs font-semibold text-slate-800">{e.participant_name}</Text>
+                        <ParticipantLink id={e.participant_id} className="whitespace-nowrap text-xs font-semibold text-slate-800">{e.participant_name}</ParticipantLink>
                       </Box>
                     </TableCell>
-                    <TableCell className="py-2.5"><Text as="span" className="text-[11px] text-slate-500">{e.participant_email}</Text></TableCell>
+                    <TableCell className="py-2.5"><ParticipantLink id={e.participant_id} className="text-[11px] text-slate-500">{e.participant_email}</ParticipantLink></TableCell>
                     <TableCell className="py-2.5">
                       <Text as="span" title={lastLoginTitle(e.last_login_at)}
                         className={`whitespace-nowrap text-[11px] ${hasNeverLoggedIn(e.last_login_at) ? "italic text-slate-400" : "text-slate-600"}`}>
@@ -344,9 +344,9 @@ function RecentEnrolmentsTable({ rows = [] }) {
                         dash, which would read as data we failed to fetch. */}
                     <TableCell className="py-2.5">
                       {e.sponsor_name ? (
-                        <Text as="span" title={e.sponsor_name} className="block max-w-[150px] truncate text-[11px] text-slate-600">
-                          {e.sponsor_name}
-                        </Text>
+                        <SponsorLink userId={e.sponsor_user_id} className="block max-w-[150px] truncate text-[11px] text-slate-600">
+                          <Box as="span" title={e.sponsor_name} className="truncate">{e.sponsor_name}</Box>
+                        </SponsorLink>
                       ) : (
                         <Text as="span" className="text-[11px] text-slate-300">&nbsp;</Text>
                       )}
@@ -355,7 +355,7 @@ function RecentEnrolmentsTable({ rows = [] }) {
                       <Box className="flex items-center gap-1 whitespace-nowrap text-[11px] text-slate-600"><MapPin className="h-3 w-3 text-slate-400" />{location}</Box>
                     </TableCell>
                     <TableCell className="py-2.5">
-                      <Text as="span" className="block max-w-[200px] truncate text-xs text-slate-700">{e.training_title}</Text>
+                      <TrainingLink id={e.training_id} className="block max-w-[200px] truncate text-xs text-slate-700">{e.training_title}</TrainingLink>
                       <Text as="span" className="font-mono text-[10px] text-slate-400">{e.training_code}</Text>
                     </TableCell>
                     <TableCell className="py-2.5"><Text as="span" className="whitespace-nowrap text-[11px] text-slate-600">{formatDate(scheduled)}</Text></TableCell>
@@ -413,7 +413,7 @@ function RecentCompletedTable({ rows = [] }) {
                   <TableCell className="py-2.5">
                     <Box className="flex items-center gap-2">
                       <Box className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${avatarColor(trainer)}`}>{getInitials(trainer)}</Box>
-                      <Text as="span" className="whitespace-nowrap text-[11px] text-slate-700">{trainer}</Text>
+                      <TrainerLink id={t.trainer_id} className="whitespace-nowrap text-[11px] text-slate-700">{trainer}</TrainerLink>
                     </Box>
                   </TableCell>
                   <TableCell className="py-2.5 text-center"><Text as="span" className="text-xs font-medium text-slate-700">{learners}</Text></TableCell>

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { TrainerLink } from "@/components/admin/entity-links";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -160,7 +161,7 @@ function TrainingCard({ training, onClick }) {
               </Box>
               <Box className="min-w-0 flex-1">
                 <Text as="p" className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest leading-none mb-0.5">Trainer</Text>
-                <Text as="p" className="text-sm font-semibold text-emerald-900 truncate">{training.trainer_name}</Text>
+                <TrainerLink id={training.trainer_id} className="block text-sm font-semibold text-emerald-900 truncate">{training.trainer_name}</TrainerLink>
               </Box>
               <UserCheck className="h-4 w-4 text-emerald-500 shrink-0" />
             </Box>

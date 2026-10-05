@@ -40,6 +40,7 @@ import {
   fetchAdminCertificatePrintable,
 } from "@/services/api/admin/admin-api";
 import { useCertificateDownload } from "@/components/shared/certificate-download";
+import { ParticipantLink, TrainingLink } from "@/components/admin/entity-links";
 
 // PDUs are chosen, not typed: the business awards between 8 and 60 and a
 // mistyped figure on a certificate is a compliance problem.
@@ -327,7 +328,7 @@ export function CertificateGenerator() {
             <Box className="flex flex-wrap items-start justify-between gap-3">
               <Box className="min-w-0">
                 <Box className="flex flex-wrap items-center gap-2">
-                  <Text as="span" className="font-mono text-[11px] font-bold text-violet-600">{detail.training.code}</Text>
+                  <TrainingLink id={detail.training.code} className="font-mono text-[11px] font-bold text-violet-600">{detail.training.code}</TrainingLink>
                   <CertificationBadge courseType={detail.training.course_type} />
                 </Box>
                 <Text as="h2" className="text-base font-bold text-slate-800 mt-1">{detail.training.title}</Text>
@@ -467,8 +468,8 @@ export function CertificateGenerator() {
                         <Checkbox checked={selected.has(c.enrolment_id)} onCheckedChange={() => toggle(c.enrolment_id)} />
                       </Box>
                       <Box as="td" className="px-4 py-3">
-                        <Text as="p" className="font-medium text-slate-800">{c.learner_name}</Text>
-                        <Text as="span" className="text-[11px] text-slate-400">{c.email}</Text>
+                        <ParticipantLink id={c.participant_id} className="block font-medium text-slate-800">{c.learner_name}</ParticipantLink>
+                        <ParticipantLink id={c.participant_id} className="text-[11px] text-slate-400">{c.email}</ParticipantLink>
                       </Box>
                       <Box as="td" className="px-4 py-3">
                         {c.generated

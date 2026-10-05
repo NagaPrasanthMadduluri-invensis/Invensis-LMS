@@ -26,6 +26,7 @@ import { markTicketSeen } from "@/lib/ticket-unread";
 import { fetchAdminTickets, fetchAdminTicket, updateTicketStatus, replyToAdminTicket } from "@/services/api/admin/admin-api";
 import { STATUS_META, PRIORITY_META, categoryLabel, TICKET_CATEGORIES } from "@/lib/ticket-meta";
 import { TicketThread } from "@/components/shared/ticket-thread";
+import { ParticipantLink, TrainingLink } from "@/components/admin/entity-links";
 
 const AVATAR_COLORS = [
   "bg-violet-100 text-violet-700", "bg-violet-100 text-violet-700", "bg-teal-100 text-teal-700",
@@ -128,10 +129,10 @@ function TicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }) {
               {initialsOf(t.learner?.name)}
             </Box>
             <Box className="min-w-0">
-              <Text as="p" className="text-sm font-semibold text-slate-800">{t.learner?.name}</Text>
+              <ParticipantLink id={t.learner?.id} className="text-sm font-semibold text-slate-800">{t.learner?.name}</ParticipantLink>
               <Box className="flex items-center gap-1.5">
                 <Mail className="h-3 w-3 text-slate-400 shrink-0" />
-                <Text as="span" className="text-xs text-slate-500 truncate">{t.learner?.email}</Text>
+                <ParticipantLink id={t.learner?.id} className="text-xs text-slate-500 truncate">{t.learner?.email}</ParticipantLink>
               </Box>
             </Box>
           </Box>
@@ -141,7 +142,7 @@ function TicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }) {
               <Text as="p" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Related training</Text>
               <Box className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-violet-500 shrink-0" />
-                <Text as="span" className="text-sm font-semibold text-slate-700 font-mono">{t.training.code}</Text>
+                <TrainingLink id={t.training.id} className="text-sm font-semibold text-slate-700 font-mono">{t.training.code}</TrainingLink>
                 <Text as="span" className="text-sm text-slate-500 truncate">· {t.training.title}</Text>
               </Box>
             </Box>
@@ -351,8 +352,8 @@ export function TicketsTable() {
                             {initialsOf(t.learner?.name)}
                           </Box>
                           <Box className="min-w-0">
-                            <Text as="p" className="text-sm font-semibold text-slate-700 leading-tight truncate">{t.learner?.name}</Text>
-                            <Text as="span" className="text-xs text-slate-400 truncate block">{t.learner?.email}</Text>
+                            <ParticipantLink id={t.learner?.id} className="block text-sm font-semibold text-slate-700 leading-tight truncate">{t.learner?.name}</ParticipantLink>
+                            <ParticipantLink id={t.learner?.id} className="text-xs text-slate-400 truncate block">{t.learner?.email}</ParticipantLink>
                           </Box>
                         </Box>
                       </TableCell>
@@ -362,9 +363,9 @@ export function TicketsTable() {
                       <TableCell className="py-4">
                         {t.training ? (
                           <Box className="min-w-0">
-                            <Text as="span" className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-1.5 py-0.5 rounded-md">
+                            <TrainingLink id={t.training.id} className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-1.5 py-0.5 rounded-md">
                               <Hash className="h-2.5 w-2.5" />{t.training.code}
-                            </Text>
+                            </TrainingLink>
                             <Text as="p" className="text-[11px] text-slate-400 leading-tight mt-1 max-w-[180px] truncate">{t.training.title}</Text>
                           </Box>
                         ) : (

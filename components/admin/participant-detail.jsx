@@ -118,7 +118,8 @@ function TrainingCard({ e }) {
   const meta = CATEGORY_META[e.category] || CATEGORY_META.upcoming;
   const StatusIcon = meta.icon;
   return (
-    <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:border-violet-200 hover:shadow-md transition-all">
+    <Link href={`/admin/courses/${e.training_id}`} className="block">
+    <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:border-violet-200 hover:shadow-md transition-all cursor-pointer">
       <Box className="flex items-start justify-between gap-3">
         <Box className="min-w-0">
           <Text as="p" className="text-sm font-semibold text-slate-800 leading-snug">{e.title}</Text>
@@ -132,14 +133,12 @@ function TrainingCard({ e }) {
             <StatusIcon className="h-3 w-3 mr-1" />
             {meta.label}
           </Badge>
-          <Link
-            href={`/admin/courses/${e.training_id}`}
-            title="Open training detail"
-            aria-label="Open training detail"
-            className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-violet-600 hover:border-violet-300 hover:bg-violet-50 transition-colors"
+          <Box
+            aria-hidden="true"
+            className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 transition-colors"
           >
             <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
+          </Box>
         </Box>
       </Box>
 
@@ -179,6 +178,7 @@ function TrainingCard({ e }) {
         </Box>
       )}
     </Card>
+    </Link>
   );
 }
 

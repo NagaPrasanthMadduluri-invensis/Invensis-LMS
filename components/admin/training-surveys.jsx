@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
+import { ParticipantLink } from "@/components/admin/entity-links";
 import { cn } from "@/lib/utils";
 import {
   createTrainingSurvey, fetchTrainingSurveys, fetchSurveyResponses,
@@ -306,8 +307,8 @@ function ResponsesDialog({ survey, onOpenChange, token }) {
                               </Text>
                             </Box>
                             <Box className="min-w-0">
-                              <Text as="p" className="text-sm font-semibold text-slate-800">{r.name || "—"}</Text>
-                              <Text as="p" className="text-xs text-slate-500 break-all">{r.email || "—"}</Text>
+                              <ParticipantLink id={r.participant_id} className="block text-sm font-semibold text-slate-800">{r.name || "—"}</ParticipantLink>
+                              <ParticipantLink id={r.participant_id} className="text-xs text-slate-500 break-all">{r.email || "—"}</ParticipantLink>
                             </Box>
                           </Box>
                         </TableCell>
