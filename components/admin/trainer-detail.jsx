@@ -416,7 +416,7 @@ export function TrainerDetail({ trainerId }) {
         </TabsContent>
 
         <TabsContent value="timeline" className="mt-0">
-          <EmailTimeline fetchEmails={() => fetchTrainerEmails({ token, trainerId: trainer.id })} />
+          <EmailTimeline cacheKey={`trainer:${trainer.id}`} fetchEmails={() => fetchTrainerEmails({ token, trainerId: trainer.id })} />
         </TabsContent>
       </Tabs>
 
