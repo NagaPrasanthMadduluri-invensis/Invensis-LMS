@@ -1567,6 +1567,14 @@ export function TrainingManagement({ trainingId }) {
             <Users className="h-4 w-4 text-slate-400" />
             <Text as="h3" className="text-sm font-semibold text-slate-700">Participants</Text>
             <Badge className="border-0 bg-slate-100 text-slate-600 text-[11px]">{detail.participants.length}</Badge>
+            {detail.participants.some((p) => p.setup_pending) && (
+              <Badge
+                className="border-0 bg-amber-50 text-amber-700 ring-1 ring-amber-200 text-[11px]"
+                title="Enrolled learners who haven't set up their account yet"
+              >
+                {detail.participants.filter((p) => p.setup_pending).length} not registered
+              </Badge>
+            )}
           </Box>
           <Box className="flex items-center gap-2">
             {confirmedCount > 0 && (
@@ -1608,6 +1616,7 @@ export function TrainingManagement({ trainingId }) {
                     <Box className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Location</Box>
                   </TableHead>
                   <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Status</TableHead>
+                  <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Account</TableHead>
                   <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Source</TableHead>
                   <TableHead className="text-right text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Actions</TableHead>
                 </TableRow>
@@ -1625,6 +1634,15 @@ export function TrainingManagement({ trainingId }) {
                         const cfg = ENROLMENT_STATUS[p.status] || { label: p.status, className: "bg-slate-100 text-slate-600" };
                         return <Badge className={`border-0 text-[10px] font-medium ${cfg.className}`}>{cfg.label}</Badge>;
                       })()}
+                    </TableCell>
+                    <TableCell className="py-3.5">
+                      {p.setup_pending ? (
+                        <Badge className="border-0 text-[10px] font-medium bg-amber-50 text-amber-700 ring-1 ring-amber-200">Setup pending</Badge>
+                      ) : !p.account_active ? (
+                        <Badge className="border-0 text-[10px] font-medium bg-slate-100 text-slate-500">Inactive</Badge>
+                      ) : (
+                        <Badge className="border-0 text-[10px] font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">Registered</Badge>
+                      )}
                     </TableCell>
                     <TableCell className="py-3.5">
                       <Badge className={`border-0 text-[10px] font-medium ${p.added_manually ? "bg-violet-50 text-violet-700 ring-1 ring-violet-200/80" : "bg-blue-50 text-blue-700 ring-1 ring-blue-200/80"}`}>
