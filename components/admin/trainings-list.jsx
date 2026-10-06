@@ -149,6 +149,15 @@ function TrainingCard({ training, onClick }) {
             <Users className="h-3.5 w-3.5 text-slate-400 shrink-0" />
             <Text as="span" className="text-xs font-medium text-slate-600 leading-none">{training.enrolled_count}/{training.capacity} seats</Text>
           </Box>
+          {training.setup_pending_count > 0 && (
+            <Box
+              className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2"
+              title="Enrolled learners who haven't set up their account yet"
+            >
+              <UserX className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              <Text as="span" className="text-xs font-medium text-amber-700 leading-none">{training.setup_pending_count} setup pending</Text>
+            </Box>
+          )}
         </Box>
 
         {/* Info blocks — trainer + meeting link */}
@@ -229,7 +238,7 @@ function TrainingCard({ training, onClick }) {
         <Box className="pt-3 border-t border-slate-100">
           <Button
             size="sm"
-            className="w-full h-9 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold border-0 rounded-xl gap-1.5"
+            className="w-full h-9 bg-white border border-violet-600 text-violet-600 hover:bg-violet-50 text-xs font-semibold rounded-xl gap-1.5"
           >
             Manage Training <ChevronRight className="h-3.5 w-3.5" />
           </Button>
