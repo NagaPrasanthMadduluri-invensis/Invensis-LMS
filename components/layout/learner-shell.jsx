@@ -7,6 +7,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { ProfileCompletionProvider } from "@/providers/profile-completion-provider";
 import { ProfileCompletionModal } from "@/components/layout/profile-completion-modal";
 import { SessionLiveIndicator } from "@/components/learner/session-live-indicator";
+import { HelpWidget } from "@/components/layout/help-widget";
 import Box from "@/components/ui/box";
 
 export function LearnerShell({ children }) {
@@ -26,6 +27,7 @@ export function LearnerShell({ children }) {
             </Box>
           </Box>
           <ProfileCompletionModal />
+          <HelpWidget />
         </SidebarProvider>
       </ProfileCompletionProvider>
     </AuthProvider>

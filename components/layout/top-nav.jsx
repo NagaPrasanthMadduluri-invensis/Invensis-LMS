@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
-import { HelpMenu } from "@/components/layout/help-menu";
 import { useProfileCompletion } from "@/providers/profile-completion-provider";
 
 /**
@@ -47,9 +46,6 @@ export function TopNav({ portalLabel = "Invensis Learning", statusSlot = null })
 
       <Box className="flex items-center gap-3">
         {statusSlot}
-
-        {/* Need-help menu — shown for trainer / sponsor / learner (not admin). */}
-        <HelpMenu />
 
         <Box
           className={`flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 ${profileIncomplete ? "border-red-300 bg-red-50" : "border-border"}`}

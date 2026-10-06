@@ -4,6 +4,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { TopNav } from "@/components/layout/top-nav";
 import { SponsorSidebar } from "@/components/layout/sponsor-sidebar";
 import { AuthProvider } from "@/providers/auth-provider";
+import { HelpWidget } from "@/components/layout/help-widget";
 import Box from "@/components/ui/box";
 
 export function SponsorShell({ children }) {
@@ -19,6 +20,7 @@ export function SponsorShell({ children }) {
             </Box>
           </Box>
         </Box>
+        <HelpWidget />
       </SidebarProvider>
     </AuthProvider>
   );

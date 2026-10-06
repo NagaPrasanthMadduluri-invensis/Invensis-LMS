@@ -6,6 +6,7 @@ import { TrainerSidebar } from "@/components/layout/trainer-sidebar";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ProfileCompletionProvider } from "@/providers/profile-completion-provider";
 import { ProfileCompletionModal } from "@/components/layout/profile-completion-modal";
+import { HelpWidget } from "@/components/layout/help-widget";
 import Box from "@/components/ui/box";
 
 export function TrainerShell({ children }) {
@@ -23,6 +24,7 @@ export function TrainerShell({ children }) {
             </Box>
           </Box>
           <ProfileCompletionModal />
+          <HelpWidget />
         </SidebarProvider>
       </ProfileCompletionProvider>
     </AuthProvider>
