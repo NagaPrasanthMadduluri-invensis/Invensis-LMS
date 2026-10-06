@@ -11,14 +11,15 @@ import { Input } from "@/components/ui/input";
 import {
   Search, Calendar, Users, Clock, UserCheck, UserX, UserPlus,
   ChevronRight, BookOpen, LayoutGrid, Link2, LinkIcon, X, SlidersHorizontal,
-  AlertCircle, UploadCloud,
+  AlertCircle, UploadCloud, Globe, Timer, CalendarClock,
 } from "lucide-react";
 import { ImportResourcesDialog } from "@/components/admin/import-resources-dialog";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
-import { formatDate as fmtDate } from "@/lib/datetime";
+import { formatDate as fmtDate, toDateInput } from "@/lib/datetime";
 import { fetchAdminTrainings } from "@/services/api/admin/admin-api";
+import { regionForTimezone, REGION_OPTIONS } from "@/lib/region";
 
 const STATUS_CONFIG = {
   pending:   { label: "Pending",   badge: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",   accent: "bg-amber-400" },
@@ -149,6 +150,21 @@ function TrainingCard({ training, onClick }) {
             <Users className="h-3.5 w-3.5 text-slate-400 shrink-0" />
             <Text as="span" className="text-xs font-medium text-slate-600 leading-none">{training.enrolled_count}/{training.capacity} seats</Text>
           </Box>
+          {training.hours_per_day != null && (
+            <Box className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2" title="Session length per day">
+              <Timer className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
+              <Text as="span" className="text-xs font-medium text-indigo-700 leading-none">{training.hours_per_day}hrs</Text>
+            </Box>
+          )}
+          {(() => {
+            const region = regionForTimezone(training.timezone);
+            return region ? (
+              <Box className="flex items-center gap-2 bg-sky-50 border border-sky-200 rounded-xl px-3 py-2" title={`Region · ${training.timezone}`}>
+                <Globe className="h-3.5 w-3.5 text-sky-500 shrink-0" />
+                <Text as="span" className="text-xs font-medium text-sky-700 leading-none">{region.label}</Text>
+              </Box>
+            ) : null;
+          })()}
           {training.setup_pending_count > 0 && (
             <Box
               className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2"
@@ -257,6 +273,11 @@ export function TrainingsList() {
   const [statusFilter, setStatusFilter] = useState("active");
   const [importOpen, setImportOpen] = useState(false);
   const [dueOnly, setDueOnly] = useState(false);
+  const [upcomingOnly, setUpcomingOnly] = useState(false);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [regionFilter, setRegionFilter] = useState("");     // region key
+  const [durationFilter, setDurationFilter] = useState(""); // hours_per_day
   const [error, setError] = useState(null);
 
   const pathname = usePathname();
@@ -312,16 +333,28 @@ export function TrainingsList() {
     // "Due for update" = ended but never marked completed. The single most
     // actionable subset in this list, so it gets its own toggle.
     if (dueOnly && !t.due_for_update) return false;
+    // Upcoming = starts today or later (start_date is a wall-clock YYYY-MM-DD).
+    if (upcomingOnly && !(t.start_date && t.start_date >= today)) return false;
+    if (dateFrom && (!t.start_date || t.start_date < dateFrom)) return false;
+    if (dateTo && (!t.start_date || t.start_date > dateTo)) return false;
+    if (regionFilter && regionForTimezone(t.timezone)?.key !== regionFilter) return false;
+    if (durationFilter && String(t.hours_per_day) !== durationFilter) return false;
     return true;
   });
 
-  const hasFilters = !!search || statusFilter !== "all" || dueOnly;
+  const hasFilters = !!search || statusFilter !== "all" || dueOnly || upcomingOnly
+    || !!dateFrom || !!dateTo || !!regionFilter || !!durationFilter;
 
   function clearFilters() {
-    setSearch(""); setStatusFilter("all"); setDueOnly(false);
+    setSearch(""); setStatusFilter("all"); setDueOnly(false); setUpcomingOnly(false);
+    setDateFrom(""); setDateTo(""); setRegionFilter(""); setDurationFilter("");
   }
 
   const dueCount = trainings.filter((t) => t.due_for_update).length;
+  const today = toDateInput();
+  const upcomingCount = trainings.filter((t) => t.start_date && t.start_date >= today).length;
+  // Only offer the per-day durations actually present, smallest first.
+  const durationOptions = [...new Set(trainings.map((t) => t.hours_per_day).filter((v) => v != null))].sort((a, b) => a - b);
 
   /* Tabs come from the statuses present in the response. `statusCounts` is
      already derived from `trainings`, so this needs no second pass over the
@@ -436,6 +469,22 @@ export function TrainingsList() {
               }`}>{dueCount}</Text>
             </button>
 
+            <button
+              type="button"
+              onClick={() => setUpcomingOnly((v) => !v)}
+              aria-pressed={upcomingOnly}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
+                upcomingOnly
+                  ? "bg-violet-600 border-violet-600 text-white shadow-sm"
+                  : "bg-white border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600"
+              }`}
+            >
+              <CalendarClock className="h-3.5 w-3.5" /> Upcoming
+              <Text as="span" className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
+                upcomingOnly ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+              }`}>{upcomingCount}</Text>
+            </button>
+
             {hasFilters && (
               <button
                 type="button"
@@ -449,6 +498,63 @@ export function TrainingsList() {
           <Text as="p" className="ml-auto text-xs text-slate-400 shrink-0 tabular-nums">
             Showing {filtered.length} of {trainings.length}
           </Text>
+        </Box>
+
+        <Box className="h-px bg-slate-100" />
+
+        {/* Region / duration / start-date range filters */}
+        <Box className="flex items-center gap-2.5 flex-wrap">
+          {/* Region */}
+          <Box className="flex items-center gap-1.5 h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <Globe className="h-4 w-4 text-slate-400 shrink-0" />
+            <select
+              value={regionFilter}
+              onChange={(e) => setRegionFilter(e.target.value)}
+              className="h-8 bg-transparent text-xs font-medium text-slate-600 focus:outline-none"
+            >
+              <option value="">All regions</option>
+              {REGION_OPTIONS.map((r) => (
+                <option key={r.key} value={r.key}>{r.label}</option>
+              ))}
+            </select>
+          </Box>
+
+          {/* Per-day duration */}
+          <Box className="flex items-center gap-1.5 h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <Timer className="h-4 w-4 text-slate-400 shrink-0" />
+            <select
+              value={durationFilter}
+              onChange={(e) => setDurationFilter(e.target.value)}
+              className="h-8 bg-transparent text-xs font-medium text-slate-600 focus:outline-none"
+            >
+              <option value="">Any duration</option>
+              {durationOptions.map((h) => (
+                <option key={h} value={String(h)}>{h}hrs</option>
+              ))}
+            </select>
+          </Box>
+
+          {/* Start-date range */}
+          <Box className="flex items-center gap-1.5 h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
+            <input
+              type="date"
+              value={dateFrom}
+              max={dateTo || undefined}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="h-8 bg-transparent text-xs font-medium text-slate-600 focus:outline-none"
+              title="Start date from"
+            />
+            <Text as="span" className="text-slate-400 text-xs">–</Text>
+            <input
+              type="date"
+              value={dateTo}
+              min={dateFrom || undefined}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="h-8 bg-transparent text-xs font-medium text-slate-600 focus:outline-none"
+              title="Start date to"
+            />
+          </Box>
         </Box>
       </Card>
 
