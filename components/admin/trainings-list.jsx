@@ -11,8 +11,9 @@ import { Input } from "@/components/ui/input";
 import {
   Search, Calendar, Users, Clock, UserCheck, UserX, UserPlus,
   ChevronRight, BookOpen, LayoutGrid, Link2, LinkIcon, X, SlidersHorizontal,
-  AlertCircle,
+  AlertCircle, UploadCloud,
 } from "lucide-react";
+import { ImportResourcesDialog } from "@/components/admin/import-resources-dialog";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
@@ -245,6 +246,7 @@ export function TrainingsList() {
   const [trainings, setTrainings] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
+  const [importOpen, setImportOpen] = useState(false);
   const [dueOnly, setDueOnly] = useState(false);
   const [error, setError] = useState(null);
 
@@ -329,6 +331,15 @@ export function TrainingsList() {
 
   return (
     <Box className="space-y-6">
+      {/* Bulk actions */}
+      <Box className="flex justify-end">
+        <Button variant="outline" onClick={() => setImportOpen(true)}
+          className="h-9 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-100">
+          <UploadCloud className="h-4 w-4" /> Import resources (CSV)
+        </Button>
+      </Box>
+      <ImportResourcesDialog open={importOpen} onOpenChange={setImportOpen} />
+
       {/* Stat cards */}
       <Box className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="Total Trainings"   value={trainings.length}              icon={LayoutGrid}

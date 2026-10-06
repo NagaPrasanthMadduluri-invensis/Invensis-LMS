@@ -733,3 +733,8 @@ export async function fetchTrainerEmails({ token, trainerId }) {
 export async function fetchSponsorDetail({ token, userId }) {
   return apiClient(`/admin/sponsors/${userId}`, { token });
 }
+
+/** Bulk-import supplementary link resources across trainings → { created, failed }. */
+export async function bulkImportResources({ token, resources }) {
+  return apiClient("/courses/resources/bulk", { method: "POST", token, body: { resources } });
+}
