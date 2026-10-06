@@ -36,11 +36,14 @@ export async function fetchTrainers({ token, includeInactive = false } = {}) {
  * Paginated list of all participants (learners), searchable by name/email and
  * filterable by location and job title.
  */
-export async function fetchParticipants({ token, search = "", location = "", jobTitle = "", page = 1, limit = 20 }) {
+export async function fetchParticipants({ token, search = "", location = "", jobTitle = "", status = "", joinedFrom = "", joinedTo = "", page = 1, limit = 20 }) {
   const params = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (search) params.set("search", search);
   if (location) params.set("location", location);
   if (jobTitle) params.set("job_title", jobTitle);
+  if (status) params.set("status", status);
+  if (joinedFrom) params.set("joined_from", joinedFrom);
+  if (joinedTo) params.set("joined_to", joinedTo);
   return apiClient(`/admin/participants?${params.toString()}`, { token });
 }
 

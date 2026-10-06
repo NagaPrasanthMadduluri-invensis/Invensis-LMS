@@ -64,9 +64,14 @@ function StatCard({ label, value, icon: Icon, bg, border, iconBg, iconCls, value
   );
 }
 
-// Ten rows a page: enough to scan without scrolling, and the page a deep link
-// or a jump lands on stays cheap to fetch.
-const PAGE_LIMIT = 10;
+// Fifty rows a page — a denser working set for the admin directory.
+const PAGE_LIMIT = 50;
+
+const STATUS_LABEL = {
+  active: "Active",
+  inactive: "Inactive",
+  setup_pending: "Setup pending",
+};
 
 export function UsersTable() {
   const { token } = useAuth();
@@ -74,6 +79,9 @@ export function UsersTable() {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [jobTitle, setJobTitle] = useState("");
+  const [status, setStatus] = useState("");       // "" | active | inactive | setup_pending
+  const [joinedFrom, setJoinedFrom] = useState("");
+  const [joinedTo, setJoinedTo] = useState("");
   const [page, setPage] = useState(1);
   const [data, setData] = useState(null);
   // Filter dropdown options persist across reloads (backend returns the full
@@ -87,7 +95,7 @@ export function UsersTable() {
     setLoading(true);
     setError(null);
     const handle = setTimeout(() => {
-      fetchParticipants({ token, search, location, jobTitle, page, limit: PAGE_LIMIT })
+      fetchParticipants({ token, search, location, jobTitle, status, joinedFrom, joinedTo, page, limit: PAGE_LIMIT })
         .then((res) => {
           setData(res);
           if (res?.filters) setFilterOptions(res.filters);
@@ -96,9 +104,9 @@ export function UsersTable() {
         .finally(() => setLoading(false));
     }, 300);
     return () => clearTimeout(handle);
-  }, [token, search, location, jobTitle, page]);
+  }, [token, search, location, jobTitle, status, joinedFrom, joinedTo, page]);
 
-  const hasFilters = !!(search || location || jobTitle);
+  const hasFilters = !!(search || location || jobTitle || status || joinedFrom || joinedTo);
   const users = data?.participants || [];
   const total = data?.total || 0;
   const totalPages = pageCount(total, PAGE_LIMIT);
@@ -195,10 +203,51 @@ export function UsersTable() {
           </SelectContent>
         </Select>
 
+        {/* Account status filter (covers active / inactive / setup pending) */}
+        <Select
+          value={status || "__all__"}
+          onValueChange={(v) => { setStatus(v === "__all__" ? "" : v); setPage(1); }}
+        >
+          <SelectTrigger className="h-11 w-[180px] bg-slate-100/60 border-slate-300/70 rounded-xl text-sm text-slate-700">
+            <UserCheck className="h-4 w-4 text-slate-400 shrink-0" />
+            <SelectValue placeholder="All statuses" className="truncate">
+              {(v) => (!v || v === "__all__" ? "All statuses" : STATUS_LABEL[v] || v)}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All statuses</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="setup_pending">Setup pending</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Joined (account-creation) date range */}
+        <Box className="flex items-center gap-1.5 h-11 px-3 bg-slate-100/60 border border-slate-300/70 rounded-xl">
+          <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
+          <Input
+            type="date"
+            value={joinedFrom}
+            max={joinedTo || undefined}
+            onChange={(e) => { setJoinedFrom(e.target.value); setPage(1); }}
+            className="h-8 w-[140px] border-0 bg-transparent p-0 text-sm text-slate-700 focus-visible:ring-0"
+            title="Joined from"
+          />
+          <Text as="span" className="text-slate-400 text-xs">–</Text>
+          <Input
+            type="date"
+            value={joinedTo}
+            min={joinedFrom || undefined}
+            onChange={(e) => { setJoinedTo(e.target.value); setPage(1); }}
+            className="h-8 w-[140px] border-0 bg-transparent p-0 text-sm text-slate-700 focus-visible:ring-0"
+            title="Joined to"
+          />
+        </Box>
+
         {hasFilters && (
           <Button
             variant="ghost" size="sm"
-            onClick={() => { setSearch(""); setLocation(""); setJobTitle(""); setPage(1); }}
+            onClick={() => { setSearch(""); setLocation(""); setJobTitle(""); setStatus(""); setJoinedFrom(""); setJoinedTo(""); setPage(1); }}
             className="h-11 px-3 text-xs text-slate-500 hover:text-slate-700 shrink-0"
           >
             <X className="h-3.5 w-3.5 mr-1" /> Clear
