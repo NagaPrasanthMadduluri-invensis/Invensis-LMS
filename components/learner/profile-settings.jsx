@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -131,6 +130,19 @@ function mapFieldErrors(apiErrors, keyMap) {
 }
 
 const inputCls = "h-10 w-full text-sm bg-background border border-slate-300 focus-visible:border-violet-400 focus-visible:ring-violet-400";
+
+// Profile is a single scrollable page; the nav scrolls to each section instead
+// of switching panels.
+const PROFILE_SECTIONS = [
+  { id: "personal", label: "Personal", icon: User },
+  { id: "professional", label: "Professional", icon: Briefcase },
+  { id: "training", label: "Training", icon: GraduationCap },
+  { id: "account", label: "Account", icon: Shield },
+];
+
+function scrollToProfileSection(id) {
+  document.getElementById(`profile-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 function SectionCard({ icon: Icon, title, description, children }) {
   return (
@@ -543,24 +555,24 @@ export function LearnerProfileSettings() {
   }
 
   return (
-    <Tabs defaultValue="personal">
-      <TabsList className="h-auto w-full sm:w-fit flex-wrap gap-1 rounded-full bg-slate-200 p-1.5">
-        <TabsTrigger value="personal" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-violet-200 data-active:text-violet-800 data-active:ring-1 data-active:ring-violet-300 data-active:shadow-sm">
-          <User className="h-4 w-4" /> Personal
-        </TabsTrigger>
-        <TabsTrigger value="professional" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-violet-200 data-active:text-violet-800 data-active:ring-1 data-active:ring-violet-300 data-active:shadow-sm">
-          <Briefcase className="h-4 w-4" /> Professional
-        </TabsTrigger>
-        <TabsTrigger value="training" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-violet-200 data-active:text-violet-800 data-active:ring-1 data-active:ring-violet-300 data-active:shadow-sm">
-          <GraduationCap className="h-4 w-4" /> Training
-        </TabsTrigger>
-        <TabsTrigger value="account" className="gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 data-active:bg-violet-200 data-active:text-violet-800 data-active:ring-1 data-active:ring-violet-300 data-active:shadow-sm">
-          <Shield className="h-4 w-4" /> Account
-        </TabsTrigger>
-      </TabsList>
+    <Box className="space-y-5">
+      <Box className="sticky top-0 z-10 -mx-1 px-1 py-1.5 bg-background/80 backdrop-blur">
+        <Box className="h-auto w-full sm:w-fit flex flex-wrap gap-1 rounded-full bg-slate-200 p-1.5">
+          {PROFILE_SECTIONS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => scrollToProfileSection(id)}
+              className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-violet-100 hover:text-violet-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+            >
+              <Icon className="h-4 w-4" /> {label}
+            </button>
+          ))}
+        </Box>
+      </Box>
 
       {/* 1. Personal Information */}
-      <TabsContent value="personal" className="mt-5">
+      <Box id="profile-personal" className="scroll-mt-20">
         <SectionCard icon={User} title="Personal Information" description="Your basic profile details.">
           <Box className="flex items-center gap-4">
             <Avatar size="lg">
@@ -667,10 +679,10 @@ export function LearnerProfileSettings() {
             {personalSaving ? "Saving..." : personalSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>
-      </TabsContent>
+      </Box>
 
       {/* 2. Professional Information */}
-      <TabsContent value="professional" className="mt-5">
+      <Box id="profile-professional" className="scroll-mt-20">
         <SectionCard icon={Briefcase} title="Professional Information" description="Helps tailor recommendations and certificates.">
           {/* Employment status gates the five fields below. Switching to
               "Not employed" clears their errors immediately — leaving a stale
@@ -806,10 +818,10 @@ export function LearnerProfileSettings() {
             {professionalSaving ? "Saving..." : professionalSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>
-      </TabsContent>
+      </Box>
 
       {/* 3. Training Information (read-only) */}
-      <TabsContent value="training" className="mt-5">
+      <Box id="profile-training" className="scroll-mt-20">
         <SectionCard icon={GraduationCap} title="Training Information" description="Read-only — managed by your enrolments and organisation.">
           <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <FieldRow label="Purchase Type">
@@ -831,10 +843,10 @@ export function LearnerProfileSettings() {
               n={trainingCounts?.certificates} href="/certificates" tone="bg-amber-50 text-amber-600" />
           </Box>
         </SectionCard>
-      </TabsContent>
+      </Box>
 
       {/* 4. Account Settings */}
-      <TabsContent value="account" className="mt-5 space-y-5">
+      <Box id="profile-account" className="scroll-mt-20 space-y-5">
         <SectionCard icon={Lock} title="Change Password">
           <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <FieldRow label="Current Password" htmlFor="currentPassword">
@@ -882,7 +894,7 @@ export function LearnerProfileSettings() {
             {preferencesSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>
-      </TabsContent>
-    </Tabs>
+      </Box>
+    </Box>
   );
 }
