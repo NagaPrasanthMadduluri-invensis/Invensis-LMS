@@ -266,6 +266,7 @@ export function LearnerProfileSettings() {
   const [firstName, setFirstName] = useState(first);
   const [lastName, setLastName] = useState(last);
   const [mobile, setMobile] = useState("");
+  const [communicationEmail, setCommunicationEmail] = useState("");
   const [country, setCountry] = useState("India");
   const [city, setCity] = useState("");
   const [personalSaving, setPersonalSaving] = useState(false);
@@ -354,7 +355,8 @@ export function LearnerProfileSettings() {
       .catch(() => setTrainingCounts({ upcoming: 0, completed: 0, certificates: 0 }));
 
     fetchMyProfile({ token })
-      .then(({ profile }) => {
+      .then(({ user, profile }) => {
+        setCommunicationEmail(user?.communication_email || "");
         setFirstName(profile.first_name || first);
         setLastName(profile.last_name || last);
         setMobile(profile.phone || "");
@@ -419,11 +421,16 @@ export function LearnerProfileSettings() {
     const mobileError = validateMobile(mobile);
     const countryError = validateCountry(country);
     const cityError = validateCity(city);
+    const commEmailError =
+      communicationEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(communicationEmail.trim())
+        ? "Enter a valid email address."
+        : null;
     if (firstNameError) errors.firstName = firstNameError;
     if (lastNameError) errors.lastName = lastNameError;
     if (mobileError) errors.mobile = mobileError;
     if (countryError) errors.country = countryError;
     if (cityError) errors.city = cityError;
+    if (commEmailError) errors.communicationEmail = commEmailError;
     setPersonalErrors(errors);
     setPersonalError("");
     if (Object.keys(errors).length) return;
@@ -433,6 +440,7 @@ export function LearnerProfileSettings() {
       await updateMyProfile({
         token,
         data: {
+          communication_email: communicationEmail.trim(),
           first_name: firstName.trim(),
           last_name: lastName.trim(),
           phone: mobile.trim(),
@@ -627,6 +635,35 @@ export function LearnerProfileSettings() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input id="email" value={user?.email || ""} disabled className={`${inputCls} pl-9 text-slate-500`} />
               </Box>
+            </FieldRow>
+            <FieldRow
+              label="Communication Email"
+              htmlFor="communication_email"
+              error={personalErrors.communicationEmail}
+            >
+              <Box className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  id="communication_email"
+                  type="email"
+                  placeholder="Where should we send your emails?"
+                  value={communicationEmail}
+                  onChange={(e) => {
+                    setCommunicationEmail(e.target.value);
+                    clearErrorIfValid(
+                      setPersonalErrors,
+                      "communicationEmail",
+                      (v) => (!v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? null : "invalid"),
+                      e.target.value,
+                    );
+                  }}
+                  aria-invalid={!!personalErrors.communicationEmail}
+                  className={`${inputCls} pl-9`}
+                />
+              </Box>
+              <Text as="p" className="mt-1 text-[11px] text-slate-400">
+                All emails go here when set; leave blank to use your login email ({user?.email || "—"}).
+              </Text>
             </FieldRow>
             <FieldRow label="Mobile Number" htmlFor="mobile" error={personalErrors.mobile}>
               <PhoneInput
