@@ -320,6 +320,9 @@ export function TrainingsList() {
     acc[t.status] = (acc[t.status] || 0) + 1;
     return acc;
   }, {});
+  // Declared before `filtered` — the filter reads `today`, and a const used
+  // before its declaration is a temporal-dead-zone error.
+  const today = toDateInput();
   const filtered = trainings.filter((t) => {
     const q = search.toLowerCase();
     // The event code is searchable too — an admin arriving from the CMS has
@@ -351,7 +354,6 @@ export function TrainingsList() {
   }
 
   const dueCount = trainings.filter((t) => t.due_for_update).length;
-  const today = toDateInput();
   const upcomingCount = trainings.filter((t) => t.start_date && t.start_date >= today).length;
   // Only offer the per-day durations actually present, smallest first.
   const durationOptions = [...new Set(trainings.map((t) => t.hours_per_day).filter((v) => v != null))].sort((a, b) => a - b);
