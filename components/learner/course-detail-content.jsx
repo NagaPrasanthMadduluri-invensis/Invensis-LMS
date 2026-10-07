@@ -52,8 +52,8 @@ const STATUS_ICON = {
 };
 
 const STATUS_COLOR = {
-  completed: "text-emerald-500",
-  in_progress: "text-violet-500",
+  completed: "text-success",
+  in_progress: "text-primary",
   not_started: "text-muted-foreground/40",
 };
 
@@ -91,7 +91,7 @@ export function CourseDetailContent({ courseId }) {
   if (error) {
     return (
       <Card className="p-6">
-        <Text as="p" className="text-red-600">Failed to load course: {error}</Text>
+        <Text as="p" className="text-error">Failed to load course: {error}</Text>
       </Card>
     );
   }
@@ -134,7 +134,7 @@ export function CourseDetailContent({ courseId }) {
                 </Box>
                 {enrollment && (
                   <Badge
-                    className={`text-[10px] border-0 ${enrollment.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-200 text-gray-600"}`}
+                    className={`text-[10px] border-0 ${enrollment.status === "active" ? "bg-success-subtle text-success-subtle-foreground" : "bg-surface-muted text-foreground-muted"}`}
                   >
                     {enrollment.status}
                   </Badge>
@@ -146,7 +146,7 @@ export function CourseDetailContent({ courseId }) {
             {enrollment && (
               <Box className="flex items-center gap-4 shrink-0">
                 <Box className="text-center">
-                  <Text as="h2" className="text-3xl text-violet-600">
+                  <Text as="h2" className="text-3xl text-primary">
                     {Math.round(progress)}%
                   </Text>
                   <Text as="span" className="text-[11px] text-muted-foreground">
@@ -160,9 +160,9 @@ export function CourseDetailContent({ courseId }) {
           {/* Overall progress bar */}
           {enrollment && (
             <Box className="mt-4">
-              <Box className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <Box className="h-2 bg-surface-muted rounded-full overflow-hidden">
                 <Box
-                  className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-600 transition-all duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-[#0466c8] to-[#023e7d] transition-all duration-500"
                   role="progressbar"
                   aria-valuenow={progress}
                   style={{ width: `${progress}%` }}
@@ -177,8 +177,8 @@ export function CourseDetailContent({ courseId }) {
       <Box className="grid grid-cols-3 gap-3">
         <Card className="p-4">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <Box className="w-9 h-9 rounded-lg bg-success-subtle flex items-center justify-center shrink-0">
+              <CheckCircle2 className="h-4 w-4 text-success" />
             </Box>
             <Box>
               <Text as="h3" className="text-lg leading-none">{completedLessons}</Text>
@@ -188,8 +188,8 @@ export function CourseDetailContent({ courseId }) {
         </Card>
         <Card className="p-4">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
-              <Loader2 className="h-4 w-4 text-violet-600" />
+            <Box className="w-9 h-9 rounded-lg bg-primary-subtle flex items-center justify-center shrink-0">
+              <Loader2 className="h-4 w-4 text-primary" />
             </Box>
             <Box>
               <Text as="h3" className="text-lg leading-none">
@@ -201,8 +201,8 @@ export function CourseDetailContent({ courseId }) {
         </Card>
         <Card className="p-4">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-              <BarChart3 className="h-4 w-4 text-gray-500" />
+            <Box className="w-9 h-9 rounded-lg bg-surface-muted flex items-center justify-center shrink-0">
+              <BarChart3 className="h-4 w-4 text-foreground-muted" />
             </Box>
             <Box>
               <Text as="h3" className="text-lg leading-none">{totalLessons - completedLessons}</Text>
@@ -245,9 +245,9 @@ export function CourseDetailContent({ courseId }) {
                           </Text>
                         </Box>
                         {/* Module mini progress */}
-                        <Box className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden shrink-0 mr-2">
+                        <Box className="w-16 h-1.5 bg-surface-muted rounded-full overflow-hidden shrink-0 mr-2">
                           <Box
-                            className="h-full rounded-full bg-emerald-500"
+                            className="h-full rounded-full bg-success"
                             style={{ width: `${modProgress}%` }}
                           />
                         </Box>
@@ -295,10 +295,10 @@ export function CourseDetailContent({ courseId }) {
                                 variant="secondary"
                                 className={`text-[9px] shrink-0 ${
                                   lesson.progress_status === "completed"
-                                    ? "bg-emerald-100 text-emerald-700"
+                                    ? "bg-success-subtle text-success-subtle-foreground"
                                     : lesson.progress_status === "in_progress"
-                                    ? "bg-violet-100 text-violet-700"
-                                    : "bg-gray-100 text-gray-500"
+                                    ? "bg-primary-subtle text-primary"
+                                    : "bg-surface-muted text-foreground-muted"
                                 }`}
                               >
                                 {STATUS_LABEL[lesson.progress_status]}

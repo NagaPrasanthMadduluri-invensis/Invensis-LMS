@@ -16,18 +16,18 @@ import { formatDate } from "@/lib/datetime";
 
 /* Per-session cell states. `null` = unmarked. */
 const CELL = {
-  present: { short: "P", cls: "bg-emerald-100 text-emerald-700 ring-emerald-200" },
-  absent: { short: "A", cls: "bg-rose-100 text-rose-700 ring-rose-200" },
-  late: { short: "L", cls: "bg-amber-100 text-amber-700 ring-amber-200" },
-  excused: { short: "E", cls: "bg-sky-100 text-sky-700 ring-sky-200" },
+  present: { short: "P", cls: "bg-success-subtle text-success-subtle-foreground ring-success-border" },
+  absent: { short: "A", cls: "bg-error-subtle text-error-subtle-foreground ring-error-border" },
+  late: { short: "L", cls: "bg-warning-subtle text-warning-subtle-foreground ring-warning-border" },
+  excused: { short: "E", cls: "bg-info-subtle text-info-subtle-foreground ring-info-border" },
 };
-const UNMARKED = "bg-slate-50 text-slate-300 ring-slate-200";
+const UNMARKED = "bg-surface-hover text-foreground-subtle ring-border";
 
 /* Rolled-up overall status per participant. */
 const OVERALL = {
-  present: "bg-emerald-100 text-emerald-700",
-  partial: "bg-amber-100 text-amber-700",
-  absent: "bg-rose-100 text-rose-600",
+  present: "bg-success-subtle text-success-subtle-foreground",
+  partial: "bg-warning-subtle text-warning-subtle-foreground",
+  absent: "bg-error-subtle text-error",
 };
 
 // Session dates print exactly as sent — see `lib/datetime`.
@@ -77,19 +77,19 @@ export function TrainingAttendance({ trainingRef }) {
 
   return (
     <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
-      <Box className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+      <Box className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
         <Box className="flex items-center gap-2">
-          <ClipboardCheck className="h-4 w-4 text-slate-400" />
-          <Text as="h3" className="text-sm font-semibold text-slate-800">Attendance</Text>
+          <ClipboardCheck className="h-4 w-4 text-foreground-subtle" />
+          <Text as="h3" className="text-sm font-semibold text-foreground">Attendance</Text>
         </Box>
         <Box className="flex items-center gap-2">
-          {dlError && <Text as="span" className="text-xs text-rose-600">{dlError}</Text>}
+          {dlError && <Text as="span" className="text-xs text-error">{dlError}</Text>}
           <Button
             size="sm"
             variant="outline"
             onClick={handleDownload}
             disabled={downloading || !data || (data.participants?.length ?? 0) === 0}
-            className="gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+            className="gap-1.5 border-border text-foreground hover:bg-surface-hover disabled:opacity-40"
           >
             {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
             Download CSV
@@ -99,7 +99,7 @@ export function TrainingAttendance({ trainingRef }) {
 
       <Box className="p-5">
         {error ? (
-          <Box className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
+          <Box className="flex items-center gap-2 rounded-xl border border-error-border bg-error-subtle px-4 py-3 text-error-subtle-foreground">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <Text as="p" className="text-sm">{error}</Text>
             <Button size="sm" variant="outline" className="ml-auto" onClick={load}>Retry</Button>
@@ -110,15 +110,15 @@ export function TrainingAttendance({ trainingRef }) {
           </Box>
         ) : (data.participants?.length ?? 0) === 0 || (data.sessions?.length ?? 0) === 0 ? (
           <Box className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-            <Inbox className="h-8 w-8 text-slate-300" />
-            <Text as="p" className="text-sm text-slate-500">
+            <Inbox className="h-8 w-8 text-foreground-subtle" />
+            <Text as="p" className="text-sm text-foreground-muted">
               {(data.participants?.length ?? 0) === 0 ? "No participants enrolled." : "No sessions scheduled yet."}
             </Text>
           </Box>
         ) : (
           <>
             {/* Legend */}
-            <Box className="mb-3 flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
+            <Box className="mb-3 flex flex-wrap items-center gap-3 text-[11px] text-foreground-muted">
               {Object.entries(CELL).map(([k, v]) => (
                 <span key={k} className="inline-flex items-center gap-1">
                   <span className={cn("flex h-4 w-4 items-center justify-center rounded text-[9px] font-bold ring-1", v.cls)}>{v.short}</span>
@@ -130,27 +130,27 @@ export function TrainingAttendance({ trainingRef }) {
             <Box className="overflow-x-auto">
               <Box as="table" className="w-full border-collapse text-sm">
                 <Box as="thead">
-                  <Box as="tr" className="border-b border-slate-100">
-                    <Box as="th" className="sticky left-0 z-10 bg-white px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500">Participant</Box>
+                  <Box as="tr" className="border-b border-border">
+                    <Box as="th" className="sticky left-0 z-10 bg-surface px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-foreground-muted">Participant</Box>
                     {data.sessions.map((s) => (
                       <Box as="th" key={s.id} className="px-2 py-3 text-center">
-                        <Text as="span" className="block text-[11px] font-semibold text-slate-700">Day {s.day_number}</Text>
-                        <Text as="span" className="block text-[10px] text-slate-400">{fmtDate(s.start_time)}</Text>
+                        <Text as="span" className="block text-[11px] font-semibold text-foreground">Day {s.day_number}</Text>
+                        <Text as="span" className="block text-[10px] text-foreground-subtle">{fmtDate(s.start_time)}</Text>
                       </Box>
                     ))}
-                    <Box as="th" className="px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-slate-500">Overall</Box>
-                    <Box as="th" className="px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-slate-500">Attended</Box>
+                    <Box as="th" className="px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-foreground-muted">Overall</Box>
+                    <Box as="th" className="px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-foreground-muted">Attended</Box>
                   </Box>
                 </Box>
                 <Box as="tbody">
                   {data.participants.map((p, i) => (
-                    <Box as="tr" key={p.participant_id} className={cn("border-b border-slate-50", i % 2 ? "bg-slate-50/40" : "bg-white")}>
+                    <Box as="tr" key={p.participant_id} className={cn("border-b border-border", i % 2 ? "bg-slate-50/40" : "bg-surface")}>
                       <Box as="td" className="sticky left-0 z-10 bg-inherit px-4 py-2.5">
-                        <Text as="p" className="text-sm font-medium text-slate-800">
+                        <Text as="p" className="text-sm font-medium text-foreground">
                           <ParticipantLink id={p.participant_id}>{p.name}</ParticipantLink>
                         </Text>
                         {p.email && (
-                          <ParticipantLink id={p.participant_id} className="text-[11px] text-slate-400">{p.email}</ParticipantLink>
+                          <ParticipantLink id={p.participant_id} className="text-[11px] text-foreground-subtle">{p.email}</ParticipantLink>
                         )}
                       </Box>
                       {data.sessions.map((s) => {
@@ -168,12 +168,12 @@ export function TrainingAttendance({ trainingRef }) {
                         );
                       })}
                       <Box as="td" className="px-3 py-2.5 text-center">
-                        <Badge className={cn("border-0 text-[10px] font-semibold capitalize", OVERALL[p.overall_status] || "bg-slate-100 text-slate-600")}>
+                        <Badge className={cn("border-0 text-[10px] font-semibold capitalize", OVERALL[p.overall_status] || "bg-surface-muted text-foreground-muted")}>
                           {p.overall_status || "—"}
                         </Badge>
                       </Box>
                       <Box as="td" className="px-3 py-2.5 text-center">
-                        <Text as="span" className="text-xs font-semibold text-slate-600">{p.attended ?? 0}/{p.total_sessions ?? data.sessions.length}</Text>
+                        <Text as="span" className="text-xs font-semibold text-foreground-muted">{p.attended ?? 0}/{p.total_sessions ?? data.sessions.length}</Text>
                       </Box>
                     </Box>
                   ))}

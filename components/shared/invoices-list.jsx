@@ -22,16 +22,16 @@ import { fetchInvoices } from "@/services/api/invoices/invoices-api";
 
 /* Status → badge style. Finance app sends: draft, pending, partial, paid, overdue. */
 const STATUS_STYLE = {
-  paid: "bg-emerald-100 text-emerald-700",
-  pending: "bg-amber-100 text-amber-700",
-  partial: "bg-sky-100 text-sky-700",
-  overdue: "bg-rose-100 text-rose-700",
-  draft: "bg-slate-100 text-slate-600",
+  paid: "bg-success-subtle text-success-subtle-foreground",
+  pending: "bg-warning-subtle text-warning-subtle-foreground",
+  partial: "bg-info-subtle text-info-subtle-foreground",
+  overdue: "bg-error-subtle text-error-subtle-foreground",
+  draft: "bg-surface-muted text-foreground-muted",
 };
 
 const DOC_STYLE = {
-  invoice: "bg-violet-100 text-violet-700",
-  proforma: "bg-slate-100 text-slate-600",
+  invoice: "bg-primary-subtle text-primary",
+  proforma: "bg-surface-muted text-foreground-muted",
 };
 
 function cap(s = "") {
@@ -86,8 +86,8 @@ export function InvoicesList() {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <Box className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-rose-100">
-            <AlertCircle className="h-6 w-6 text-rose-600" />
+          <Box className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-error-subtle">
+            <AlertCircle className="h-6 w-6 text-error" />
           </Box>
           <Text as="h3" className="text-sm font-semibold">Couldn&apos;t load invoices</Text>
           <Text as="p" className="mt-1 max-w-sm text-xs text-muted-foreground">{error}</Text>
@@ -107,8 +107,8 @@ export function InvoicesList() {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <Box className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100">
-            <Receipt className="h-6 w-6 text-violet-600" />
+          <Box className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-subtle">
+            <Receipt className="h-6 w-6 text-primary" />
           </Box>
           <Text as="h3" className="text-sm font-semibold">No invoices yet</Text>
           <Text as="p" className="mt-1 max-w-sm text-xs text-muted-foreground">
@@ -123,12 +123,12 @@ export function InvoicesList() {
     <Card>
       <CardContent className="p-0">
         {data.client && (
-          <Box className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-5 py-3">
+          <Box className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3">
             <Box>
               <Text as="span" className="text-[11px] uppercase tracking-wide text-muted-foreground">Billed to</Text>
-              <Text as="p" className="text-sm font-semibold text-slate-800">
+              <Text as="p" className="text-sm font-semibold text-foreground">
                 {data.client.name}
-                {data.client.company ? <span className="font-normal text-slate-500"> · {data.client.company}</span> : null}
+                {data.client.company ? <span className="font-normal text-foreground-muted"> · {data.client.company}</span> : null}
               </Text>
             </Box>
             <Text as="span" className="text-xs text-muted-foreground">
@@ -155,10 +155,10 @@ export function InvoicesList() {
                   <TableRow key={inv.id}>
                     <TableCell>
                       <Box className="flex items-center gap-2">
-                        <Text as="p" className="font-mono text-sm font-medium text-slate-800">
+                        <Text as="p" className="font-mono text-sm font-medium text-foreground">
                           {inv.number || inv.invoice_number || inv.proforma_number || `#${inv.id}`}
                         </Text>
-                        <Badge className={`border-0 text-[10px] font-semibold ${DOC_STYLE[inv.document_type] || "bg-slate-100 text-slate-600"}`}>
+                        <Badge className={`border-0 text-[10px] font-semibold ${DOC_STYLE[inv.document_type] || "bg-surface-muted text-foreground-muted"}`}>
                           {inv.document_type === "proforma" ? "Proforma" : "Invoice"}
                         </Badge>
                       </Box>
@@ -168,21 +168,21 @@ export function InvoicesList() {
                       </Text>
                     </TableCell>
 
-                    <TableCell className="text-sm text-slate-700">{inv.program_name || "—"}</TableCell>
+                    <TableCell className="text-sm text-foreground">{inv.program_name || "—"}</TableCell>
 
                     <TableCell>
-                      <Text as="p" className="text-sm font-semibold text-slate-800">
+                      <Text as="p" className="text-sm font-semibold text-foreground">
                         {money(inv.total_amount, inv.currency)}
                       </Text>
                       {hasBalance && (
-                        <Text as="span" className="text-[11px] font-medium text-amber-600">
+                        <Text as="span" className="text-[11px] font-medium text-warning">
                           {money(inv.balance_due, inv.currency)} due
                         </Text>
                       )}
                     </TableCell>
 
                     <TableCell>
-                      <Badge className={`border-0 text-[10px] font-semibold ${STATUS_STYLE[inv.status] || "bg-slate-100 text-slate-600"}`}>
+                      <Badge className={`border-0 text-[10px] font-semibold ${STATUS_STYLE[inv.status] || "bg-surface-muted text-foreground-muted"}`}>
                         {cap(inv.status)}
                       </Badge>
                     </TableCell>
@@ -194,7 +194,7 @@ export function InvoicesList() {
                             href={inv.payment_link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex h-7 items-center gap-1 rounded-lg bg-violet-600 px-2.5 text-xs font-semibold text-white transition-colors hover:bg-violet-700"
+                            className="inline-flex h-7 items-center gap-1 rounded-lg bg-primary px-2.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
                           >
                             <CreditCard className="h-3.5 w-3.5" /> Pay now
                           </a>
@@ -204,12 +204,12 @@ export function InvoicesList() {
                             href={inv.pdf_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex h-7 items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                            className="inline-flex h-7 items-center gap-1 rounded-lg border border-border px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-surface-hover"
                           >
                             <FileText className="h-3.5 w-3.5" /> PDF
                           </a>
                         ) : (
-                          <span className="inline-flex h-7 cursor-not-allowed items-center gap-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-300">
+                          <span className="inline-flex h-7 cursor-not-allowed items-center gap-1 rounded-lg border border-border px-2.5 text-xs font-medium text-foreground-subtle">
                             <FileText className="h-3.5 w-3.5" /> PDF
                           </span>
                         )}

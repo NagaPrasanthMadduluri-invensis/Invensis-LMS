@@ -36,7 +36,7 @@ function jump(enabled, to, onPageChange) {
   };
 }
 
-const EDGE = "h-8 w-8 p-0 text-slate-500 hover:text-slate-800";
+const EDGE = "h-8 w-8 p-0 text-foreground-muted hover:text-foreground";
 
 export function DataPagination({
   page,
@@ -67,10 +67,10 @@ export function DataPagination({
 
   return (
     <Box className={cn(
-      "flex flex-col gap-3 border-t border-slate-100 px-5 py-3 sm:flex-row sm:items-center sm:justify-between",
+      "flex flex-col gap-3 border-t border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between",
       className
     )}>
-      <Text as="span" className="shrink-0 text-xs text-slate-500">
+      <Text as="span" className="shrink-0 text-xs text-foreground-muted">
         {pageRangeLabel(current, perPage, total)}
       </Text>
 
@@ -95,14 +95,14 @@ export function DataPagination({
                 href="#"
                 aria-disabled={!hasPrev}
                 onClick={jump(hasPrev, current - 1, onPageChange)}
-                className={cn("h-8 text-slate-600", !hasPrev && "pointer-events-none opacity-40")}
+                className={cn("h-8 text-foreground-muted", !hasPrev && "pointer-events-none opacity-40")}
               />
             </PaginationItem>
 
             {window.map((p, i) =>
               p === "ellipsis" ? (
                 <PaginationItem key={`gap-${i}`}>
-                  <PaginationEllipsis className="text-slate-400" />
+                  <PaginationEllipsis className="text-foreground-subtle" />
                 </PaginationItem>
               ) : (
                 <PaginationItem key={p}>
@@ -114,8 +114,8 @@ export function DataPagination({
                     className={cn(
                       "h-8 w-8 p-0 text-xs font-semibold",
                       p === current
-                        ? "border-violet-200 bg-violet-50 text-violet-700"
-                        : "text-slate-600"
+                        ? "border-primary-border bg-primary-subtle text-primary"
+                        : "text-foreground-muted"
                     )}
                   >
                     {p}
@@ -129,7 +129,7 @@ export function DataPagination({
                 href="#"
                 aria-disabled={!hasNext}
                 onClick={jump(hasNext, current + 1, onPageChange)}
-                className={cn("h-8 text-slate-600", !hasNext && "pointer-events-none opacity-40")}
+                className={cn("h-8 text-foreground-muted", !hasNext && "pointer-events-none opacity-40")}
               />
             </PaginationItem>
 
@@ -151,7 +151,7 @@ export function DataPagination({
             place once the window can actually hide something. */}
         {totalPages > 7 && (
           <form onSubmit={submitGoto} className="flex items-center gap-1.5">
-            <Text as="span" className="text-xs text-slate-400">Go to</Text>
+            <Text as="span" className="text-xs text-foreground-subtle">Go to</Text>
             <input
               type="text"
               inputMode="numeric"
@@ -159,9 +159,9 @@ export function DataPagination({
               onChange={(e) => setGoto(e.target.value.replace(/[^0-9]/g, ""))}
               placeholder={String(current)}
               aria-label={`Go to page, 1 to ${totalPages}`}
-              className="h-8 w-14 rounded-lg border border-slate-300/70 bg-white px-2 text-center text-xs text-slate-700 focus-visible:border-violet-400 focus-visible:outline-none"
+              className="h-8 w-14 rounded-lg border border-slate-300/70 bg-surface px-2 text-center text-xs text-foreground focus-visible:border-primary-border focus-visible:outline-none"
             />
-            <Text as="span" className="text-xs text-slate-400">/ {totalPages}</Text>
+            <Text as="span" className="text-xs text-foreground-subtle">/ {totalPages}</Text>
           </form>
         )}
       </Box>

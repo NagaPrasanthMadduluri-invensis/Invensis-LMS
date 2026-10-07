@@ -18,10 +18,10 @@ export function sessionDatesOf(training) {
 }
 
 const ACCENT = {
-  violet: "border border-violet-100 bg-violet-50 text-violet-600",
-  teal: "border border-teal-100 bg-teal-50 text-teal-700",
-  amber: "border border-amber-100 bg-amber-50 text-amber-700",
-  slate: "border border-slate-200 bg-slate-50 text-slate-600",
+  violet: "border border-primary-border bg-primary-subtle text-primary",
+  teal: "border border-info-border bg-info-subtle text-info-subtle-foreground",
+  amber: "border border-warning-border bg-warning-subtle text-warning-subtle-foreground",
+  slate: "border border-border bg-surface-hover text-foreground-muted",
 };
 
 /**

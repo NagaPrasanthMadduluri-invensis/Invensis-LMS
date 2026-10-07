@@ -45,17 +45,17 @@ function TicketRow({ t, onClick }) {
   return (
     <Card
       onClick={onClick}
-      className="group rounded-2xl border border-slate-200/80 shadow-sm p-5 cursor-pointer hover:border-violet-300 hover:shadow-md transition-all"
+      className="group rounded-2xl border border-slate-200/80 shadow-sm p-5 cursor-pointer hover:border-primary-border hover:shadow-md transition-all"
     >
       <Box className="flex items-start justify-between gap-3">
         <Box className="min-w-0">
           <Box className="flex items-center gap-2 flex-wrap">
-            <Text as="span" className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-2 py-0.5 rounded-md">
+            <Text as="span" className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-primary bg-primary-subtle ring-1 ring-primary-border px-2 py-0.5 rounded-md">
               <Hash className="h-3 w-3" />{t.code}
             </Text>
-            <Badge className="border-0 bg-slate-100 text-slate-600 text-[11px] font-semibold">{categoryLabel(t.category)}</Badge>
+            <Badge className="border-0 bg-surface-muted text-foreground-muted text-[11px] font-semibold">{categoryLabel(t.category)}</Badge>
           </Box>
-          <Text as="h3" className="text-sm font-bold text-slate-800 leading-snug mt-2 break-words">{t.subject}</Text>
+          <Text as="h3" className="text-sm font-bold text-foreground leading-snug mt-2 break-words">{t.subject}</Text>
         </Box>
         <Box className="flex flex-col items-end gap-1.5 shrink-0">
           <Badge className={`border-0 text-[11px] font-semibold ${status.badge}`}>{status.label}</Badge>
@@ -64,29 +64,29 @@ function TicketRow({ t, onClick }) {
       </Box>
 
       {t.description && (
-        <Text as="p" className="text-xs text-slate-500 leading-relaxed mt-2.5 line-clamp-2 break-words">{t.description}</Text>
+        <Text as="p" className="text-xs text-foreground-muted leading-relaxed mt-2.5 line-clamp-2 break-words">{t.description}</Text>
       )}
 
-      <Box className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-slate-100">
+      <Box className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-border">
         {t.training && (
           <Box className="flex items-center gap-1.5 min-w-0">
-            <BookOpen className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs text-slate-600 truncate">
+            <BookOpen className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs text-foreground-muted truncate">
               {t.training.code} · {t.training.title}
             </Text>
           </Box>
         )}
         <Box className="flex items-center gap-3 ml-auto shrink-0">
           {t.message_count > 0 && (
-            <Box className="flex items-center gap-1 text-xs text-violet-500 font-semibold">
+            <Box className="flex items-center gap-1 text-xs text-primary font-semibold">
               <MessageSquare className="h-3.5 w-3.5" />{t.message_count}
             </Box>
           )}
           <Box className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5 text-slate-400" />
-            <Text as="span" className="text-xs text-slate-500">{formatDate(t.created_at)}</Text>
+            <Calendar className="h-3.5 w-3.5 text-foreground-subtle" />
+            <Text as="span" className="text-xs text-foreground-muted">{formatDate(t.created_at)}</Text>
           </Box>
-          <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-violet-500 transition-colors" />
+          <ChevronRight className="h-4 w-4 text-foreground-subtle group-hover:text-primary transition-colors" />
         </Box>
       </Box>
     </Card>
@@ -140,49 +140,49 @@ function LearnerTicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="!max-w-none w-full sm:!max-w-lg p-0 gap-0 flex flex-col">
-        <SheetHeader className="p-5 border-b border-slate-100 shrink-0">
+        <SheetHeader className="p-5 border-b border-border shrink-0">
           <Box className="flex items-center gap-2 flex-wrap">
-            <Text as="span" className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-2 py-0.5 rounded-md">
+            <Text as="span" className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-primary bg-primary-subtle ring-1 ring-primary-border px-2 py-0.5 rounded-md">
               <Hash className="h-3 w-3" />{t.code}
             </Text>
             <Badge className={`border-0 text-[11px] font-semibold ${status.badge}`}>{status.label}</Badge>
           </Box>
-          <SheetTitle className="text-base font-bold text-slate-800 mt-2">{t.subject}</SheetTitle>
-          <SheetDescription className="text-xs text-slate-400">{categoryLabel(t.category)} · Raised {formatDateTime(t.created_at)}</SheetDescription>
+          <SheetTitle className="text-base font-bold text-foreground mt-2">{t.subject}</SheetTitle>
+          <SheetDescription className="text-xs text-foreground-subtle">{categoryLabel(t.category)} · Raised {formatDateTime(t.created_at)}</SheetDescription>
         </SheetHeader>
 
-        <Box className="px-5 py-4 border-b border-slate-100 space-y-3 shrink-0 max-h-[38%] overflow-y-auto">
+        <Box className="px-5 py-4 border-b border-border space-y-3 shrink-0 max-h-[38%] overflow-y-auto">
           {t.training && (
-            <Box className="rounded-xl bg-slate-50 ring-1 ring-slate-200 px-4 py-2.5">
-              <Text as="p" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Related training</Text>
+            <Box className="rounded-xl bg-surface-hover ring-1 ring-border px-4 py-2.5">
+              <Text as="p" className="text-[10px] font-bold text-foreground-subtle uppercase tracking-widest mb-1">Related training</Text>
               <Box className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-violet-500 shrink-0" />
-                <Text as="span" className="text-sm font-semibold text-slate-700 font-mono">{t.training.code}</Text>
-                <Text as="span" className="text-sm text-slate-500 truncate">· {t.training.title}</Text>
+                <BookOpen className="h-4 w-4 text-primary shrink-0" />
+                <Text as="span" className="text-sm font-semibold text-foreground font-mono">{t.training.code}</Text>
+                <Text as="span" className="text-sm text-foreground-muted truncate">· {t.training.title}</Text>
               </Box>
             </Box>
           )}
           <Box>
-            <Text as="p" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Your request</Text>
-            <Text as="p" className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words">{t.description}</Text>
+            <Text as="p" className="text-[10px] font-bold text-foreground-subtle uppercase tracking-widest mb-1.5">Your request</Text>
+            <Text as="p" className="text-sm text-foreground-muted leading-relaxed whitespace-pre-wrap break-words">{t.description}</Text>
           </Box>
         </Box>
 
         <Box className="flex-1 min-h-0 flex flex-col px-5 py-4">
           <Box className="flex items-center gap-2 mb-3 shrink-0">
-            <MessageSquare className="h-4 w-4 text-slate-400" />
-            <Text as="h4" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Conversation</Text>
+            <MessageSquare className="h-4 w-4 text-foreground-subtle" />
+            <Text as="h4" className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Conversation</Text>
             {detail?.messages?.length > 0 && (
-              <Badge className="border-0 bg-slate-100 text-slate-500 text-[10px] font-semibold">{detail.messages.length}</Badge>
+              <Badge className="border-0 bg-surface-muted text-foreground-muted text-[10px] font-semibold">{detail.messages.length}</Badge>
             )}
           </Box>
           {loading ? (
             <Box className="flex-1 flex items-center justify-center py-10">
-              <Text as="span" className="text-xs text-slate-400">Loading conversation…</Text>
+              <Text as="span" className="text-xs text-foreground-subtle">Loading conversation…</Text>
             </Box>
           ) : loadError ? (
-            <Box className="rounded-xl bg-red-50 ring-1 ring-red-100 px-3.5 py-3">
-              <Text as="span" className="text-xs text-red-600">Couldn&apos;t load the conversation: {loadError}</Text>
+            <Box className="rounded-xl bg-error-subtle ring-1 ring-error-border px-3.5 py-3">
+              <Text as="span" className="text-xs text-error">Couldn&apos;t load the conversation: {loadError}</Text>
             </Box>
           ) : (
             <TicketThread
@@ -224,8 +224,8 @@ export function TicketsContent() {
 
   if (error) {
     return (
-      <Card className="p-6 rounded-2xl border-0 bg-red-50 shadow-sm">
-        <Text as="p" className="text-red-600 text-sm">Failed to load tickets: {error}</Text>
+      <Card className="p-6 rounded-2xl border-0 bg-error-subtle shadow-sm">
+        <Text as="p" className="text-error text-sm">Failed to load tickets: {error}</Text>
       </Card>
     );
   }
@@ -247,29 +247,29 @@ export function TicketsContent() {
     <Box className="space-y-5">
       {/* Summary + raise button */}
       <Box className="flex items-center justify-between gap-3 flex-wrap">
-        <Text as="h2" className="text-base font-bold text-slate-800">Your tickets</Text>
-        <Button render={<Link href="/tickets/new" />} className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl gap-1.5 h-10 px-4">
+        <Text as="h2" className="text-base font-bold text-foreground">Your tickets</Text>
+        <Button render={<Link href="/tickets/new" />} className="bg-primary hover:bg-primary-hover text-primary-foreground rounded-xl gap-1.5 h-10 px-4">
           <Plus className="h-4 w-4" /> Raise a ticket
         </Button>
       </Box>
 
       <Box className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatChip icon={Ticket}       value={summary.total}       label="Total"       cls="bg-slate-50 text-slate-700" />
-        <StatChip icon={Clock}        value={summary.open}        label="Open"        cls="bg-red-50 text-red-600" />
-        <StatChip icon={Loader2}      value={summary.in_progress} label="In Progress" cls="bg-amber-50 text-amber-700" />
-        <StatChip icon={CheckCircle2} value={summary.resolved}    label="Resolved"    cls="bg-emerald-50 text-emerald-700" />
+        <StatChip icon={Ticket}       value={summary.total}       label="Total"       cls="bg-surface-hover text-foreground" />
+        <StatChip icon={Clock}        value={summary.open}        label="Open"        cls="bg-error-subtle text-error" />
+        <StatChip icon={Loader2}      value={summary.in_progress} label="In Progress" cls="bg-warning-subtle text-warning-subtle-foreground" />
+        <StatChip icon={CheckCircle2} value={summary.resolved}    label="Resolved"    cls="bg-success-subtle text-success-subtle-foreground" />
       </Box>
 
       {tickets.length === 0 ? (
-        <Card className="p-14 text-center rounded-2xl border border-slate-200/80 shadow-sm bg-white">
-          <Box className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center mx-auto mb-4">
-            <LifeBuoy className="h-7 w-7 text-violet-400" />
+        <Card className="p-14 text-center rounded-2xl border border-slate-200/80 shadow-sm bg-surface">
+          <Box className="w-14 h-14 rounded-2xl bg-primary-subtle flex items-center justify-center mx-auto mb-4">
+            <LifeBuoy className="h-7 w-7 text-primary" />
           </Box>
-          <Text as="p" className="text-sm font-semibold text-slate-700">No tickets yet</Text>
-          <Text as="p" className="text-xs text-slate-400 mt-1 mb-5">
+          <Text as="p" className="text-sm font-semibold text-foreground">No tickets yet</Text>
+          <Text as="p" className="text-xs text-foreground-subtle mt-1 mb-5">
             Have a question about a training, certificate, or your account? Raise a ticket and we&apos;ll help.
           </Text>
-          <Button render={<Link href="/tickets/new" />} className="bg-violet-600 hover:bg-violet-700 text-white rounded-xl gap-1.5 h-10 px-4 mx-auto">
+          <Button render={<Link href="/tickets/new" />} className="bg-primary hover:bg-primary-hover text-primary-foreground rounded-xl gap-1.5 h-10 px-4 mx-auto">
             <Plus className="h-4 w-4" /> Raise a ticket
           </Button>
         </Card>

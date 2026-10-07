@@ -21,26 +21,26 @@ const LEVEL_CONFIG = {
   basic: {
     label:     "Basic",
     icon:      TrendingUp,
-    badge:     "bg-emerald-100 text-emerald-700",
-    border:    "border-emerald-200",
-    iconBg:    "bg-emerald-100 text-emerald-600",
-    headerBg:  "bg-emerald-50",
+    badge:     "bg-success-subtle text-success-subtle-foreground",
+    border:    "border-success-border",
+    iconBg:    "bg-success-subtle text-success",
+    headerBg:  "bg-success-subtle",
   },
   moderate: {
     label:     "Moderate",
     icon:      Target,
-    badge:     "bg-amber-100 text-amber-700",
-    border:    "border-amber-200",
-    iconBg:    "bg-amber-100 text-amber-600",
-    headerBg:  "bg-amber-50",
+    badge:     "bg-warning-subtle text-warning-subtle-foreground",
+    border:    "border-warning-border",
+    iconBg:    "bg-warning-subtle text-warning",
+    headerBg:  "bg-warning-subtle",
   },
   difficult: {
     label:     "Difficult",
     icon:      Zap,
-    badge:     "bg-red-100 text-red-700",
-    border:    "border-red-200",
-    iconBg:    "bg-red-100 text-red-600",
-    headerBg:  "bg-red-50",
+    badge:     "bg-error-subtle text-error-subtle-foreground",
+    border:    "border-error-border",
+    iconBg:    "bg-error-subtle text-error",
+    headerBg:  "bg-error-subtle",
   },
 };
 
@@ -77,7 +77,7 @@ function AssessmentCard({ assessment }) {
         </Box>
         <Badge
           variant="secondary"
-          className={`text-[10px] shrink-0 ${assessment.is_active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}`}
+          className={`text-[10px] shrink-0 ${assessment.is_active ? "bg-success-subtle text-success-subtle-foreground" : "bg-surface-muted text-foreground-muted"}`}
         >
           {assessment.is_active ? "Active" : "Inactive"}
         </Badge>
@@ -145,7 +145,7 @@ export function CourseAssessments({ courseId }) {
   if (error) {
     return (
       <Card className="p-6">
-        <Text as="p" className="text-red-600 text-sm">Failed to load assessments: {error}</Text>
+        <Text as="p" className="text-error text-sm">Failed to load assessments: {error}</Text>
       </Card>
     );
   }

@@ -22,7 +22,7 @@ const TYPE_BADGE = {
   video: "bg-purple-100 text-purple-700", pdf: "bg-red-100 text-red-700",
   zip: "bg-amber-100 text-amber-700", word: "bg-blue-100 text-blue-700",
   excel: "bg-emerald-100 text-emerald-700", ppt: "bg-orange-100 text-orange-700",
-  image: "bg-pink-100 text-pink-700", link: "bg-slate-100 text-slate-600",
+  image: "bg-pink-100 text-pink-700", link: "bg-surface-muted text-foreground-muted",
   other: "bg-violet-100 text-violet-700",
 };
 
@@ -37,22 +37,22 @@ function formatBytes(n) {
 function ResourceRow({ r }) {
   const Icon = TYPE_ICON[r.type] || File;
   return (
-    <Box className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-slate-50">
-      <Box className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-        <Icon className="h-4 w-4 text-violet-600" />
+    <Box className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-surface-hover">
+      <Box className="w-9 h-9 rounded-lg bg-primary-subtle flex items-center justify-center shrink-0">
+        <Icon className="h-4 w-4 text-primary" />
       </Box>
       <Box className="flex-1 min-w-0">
         <Box className="flex items-center gap-2">
-          <Text as="p" className="text-sm font-medium text-slate-800 truncate">{r.title}</Text>
+          <Text as="p" className="text-sm font-medium text-foreground truncate">{r.title}</Text>
           <Badge className={`text-[9px] border-0 shrink-0 capitalize ${TYPE_BADGE[r.type] || TYPE_BADGE.other}`}>{r.type}</Badge>
         </Box>
         {(r.description || r.file_name || r.file_size != null) && (
           <Box className="flex items-center gap-2 mt-0.5">
             {r.description
-              ? <Text as="span" className="text-[11px] text-slate-400 truncate">{r.description}</Text>
+              ? <Text as="span" className="text-[11px] text-foreground-subtle truncate">{r.description}</Text>
               : <>
-                  {r.file_name && <Text as="span" className="text-[11px] text-slate-400 truncate">{r.file_name}</Text>}
-                  {r.file_size != null && <Text as="span" className="text-[11px] text-slate-400 shrink-0">· {formatBytes(r.file_size)}</Text>}
+                  {r.file_name && <Text as="span" className="text-[11px] text-foreground-subtle truncate">{r.file_name}</Text>}
+                  {r.file_size != null && <Text as="span" className="text-[11px] text-foreground-subtle shrink-0">· {formatBytes(r.file_size)}</Text>}
                 </>}
           </Box>
         )}
@@ -60,7 +60,7 @@ function ResourceRow({ r }) {
       {r.url && (
         <Button size="sm" variant="outline"
           render={<a href={r.url} target="_blank" rel="noopener noreferrer" />}
-          className="h-8 px-3 border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600 rounded-lg text-xs shrink-0">
+          className="h-8 px-3 border-border text-foreground-muted hover:border-primary-border hover:text-primary rounded-lg text-xs shrink-0">
           {r.is_link ? <Link2 className="h-3.5 w-3.5 mr-1" /> : <Download className="h-3.5 w-3.5 mr-1" />}
           {r.is_link ? "Open" : "Download"}
         </Button>
@@ -73,8 +73,8 @@ function Group({ label, items }) {
   if (!items.length) return null;
   return (
     <Box className="space-y-1">
-      <Text as="p" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold px-3 pt-1">{label}</Text>
-      <Box className="divide-y divide-slate-100">
+      <Text as="p" className="text-[11px] uppercase tracking-wider text-foreground-subtle font-semibold px-3 pt-1">{label}</Text>
+      <Box className="divide-y divide-border">
         {items.map((r) => <ResourceRow key={r.id} r={r} />)}
       </Box>
     </Box>
@@ -112,26 +112,26 @@ export function TrainingResources({ trainingRef }) {
 
   return (
     <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
-      <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
-        <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-          <FolderOpen className="h-4 w-4 text-violet-500" />
+      <Box className="px-5 py-4 border-b border-border flex items-center gap-2.5">
+        <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+          <FolderOpen className="h-4 w-4 text-primary" />
         </Box>
-        <Text as="h3" className="text-sm font-bold text-slate-800">Resources</Text>
-        <Badge className="border-0 bg-violet-50 text-violet-600 text-[11px] font-semibold">{total}</Badge>
+        <Text as="h3" className="text-sm font-bold text-foreground">Resources</Text>
+        <Badge className="border-0 bg-primary-subtle text-primary text-[11px] font-semibold">{total}</Badge>
       </Box>
       <Box className="p-4">
         {error ? (
-          <Box className="flex items-center gap-1.5 text-red-600 px-2 py-2">
+          <Box className="flex items-center gap-1.5 text-error px-2 py-2">
             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
             <Text as="span" className="text-xs">Couldn&apos;t load resources: {error.message}</Text>
           </Box>
         ) : total === 0 ? (
-          <Box className="rounded-xl border border-dashed border-slate-200 py-10 text-center">
-            <Box className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-              <FolderOpen className="h-5 w-5 text-slate-400" />
+          <Box className="rounded-xl border border-dashed border-border py-10 text-center">
+            <Box className="w-10 h-10 rounded-xl bg-surface-muted flex items-center justify-center mx-auto mb-3">
+              <FolderOpen className="h-5 w-5 text-foreground-subtle" />
             </Box>
-            <Text as="p" className="text-sm font-medium text-slate-500">No resources shared yet</Text>
-            <Text as="p" className="text-xs text-slate-400 mt-1">Your trainer or admin will add courseware here.</Text>
+            <Text as="p" className="text-sm font-medium text-foreground-muted">No resources shared yet</Text>
+            <Text as="p" className="text-xs text-foreground-subtle mt-1">Your trainer or admin will add courseware here.</Text>
           </Box>
         ) : (
           <Box className="space-y-4">

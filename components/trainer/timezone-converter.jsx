@@ -264,14 +264,14 @@ export function SessionTimezoneConverter({ sessions = [], sourceZoneCode, source
   }, [sessions, sourceZone, targetZone]);
 
   return (
-    <Box className="rounded-2xl border border-violet-200 bg-violet-50/50 overflow-hidden">
-      <Box className="flex items-center gap-2.5 px-5 py-3.5 border-b border-violet-100">
-        <Box className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
-          <Globe2 className="h-4 w-4 text-violet-600" />
+    <Box className="rounded-2xl border border-primary-border bg-violet-50/50 overflow-hidden">
+      <Box className="flex items-center gap-2.5 px-5 py-3.5 border-b border-primary-border">
+        <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center shrink-0">
+          <Globe2 className="h-4 w-4 text-primary" />
         </Box>
         <Box className="min-w-0">
-          <Text as="p" className="text-sm font-bold text-slate-800 leading-tight">Check your timezone to join the meeting</Text>
-          <Text as="p" className="text-xs text-slate-500 mt-0.5">
+          <Text as="p" className="text-sm font-bold text-foreground leading-tight">Check your timezone to join the meeting</Text>
+          <Text as="p" className="text-xs text-foreground-muted mt-0.5">
             Sessions are scheduled in {sourceZoneCode || "the training timezone"}. Pick your country to see your local start time.
           </Text>
         </Box>
@@ -279,7 +279,7 @@ export function SessionTimezoneConverter({ sessions = [], sourceZoneCode, source
 
       <Box className="p-5 space-y-4">
         <Box className="flex items-center gap-2 max-w-sm">
-          <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
+          <MapPin className="h-4 w-4 text-foreground-subtle shrink-0" />
           <Box className="flex-1">
             <Combobox
               value={targetZone}
@@ -293,8 +293,8 @@ export function SessionTimezoneConverter({ sessions = [], sourceZoneCode, source
         </Box>
 
         {!sourceZone ? (
-          <Box className="rounded-xl border border-dashed border-amber-200 bg-amber-50 px-4 py-3">
-            <Text as="p" className="text-xs text-amber-700">
+          <Box className="rounded-xl border border-dashed border-warning-border bg-warning-subtle px-4 py-3">
+            <Text as="p" className="text-xs text-warning-subtle-foreground">
               {reason === "ambiguous" ? (
                 <>
                   &ldquo;{sourceZoneCode}&rdquo; is used by more than one country, so we can&apos;t
@@ -310,21 +310,21 @@ export function SessionTimezoneConverter({ sessions = [], sourceZoneCode, source
             </Text>
           </Box>
         ) : rows.length === 0 ? (
-          <Text as="p" className="text-xs text-slate-400">Session times haven&apos;t been set yet.</Text>
+          <Text as="p" className="text-xs text-foreground-subtle">Session times haven&apos;t been set yet.</Text>
         ) : (
           <Box className="space-y-2">
             {rows.map((r) => (
-              <Box key={r.day} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-white ring-1 ring-slate-200 px-4 py-2.5">
-                <Box className="inline-flex items-center justify-center rounded-md bg-violet-100 text-violet-700 text-[11px] font-bold px-2 py-0.5 shrink-0">
+              <Box key={r.day} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-surface ring-1 ring-border px-4 py-2.5">
+                <Box className="inline-flex items-center justify-center rounded-md bg-primary-subtle text-primary text-[11px] font-bold px-2 py-0.5 shrink-0">
                   Day {r.day}
                 </Box>
-                <Text as="span" className="text-xs text-slate-500 min-w-[92px]">{r.date}</Text>
+                <Text as="span" className="text-xs text-foreground-muted min-w-[92px]">{r.date}</Text>
                 <Box className="flex items-center gap-1.5 ml-auto">
-                  <Clock className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                  <Text as="span" className="text-sm font-semibold text-slate-800">
+                  <Clock className="h-3.5 w-3.5 text-success shrink-0" />
+                  <Text as="span" className="text-sm font-semibold text-foreground">
                     {r.start}{r.end ? ` – ${r.end}` : ""}
                   </Text>
-                  <Text as="span" className="text-[11px] font-medium text-slate-400">{r.abbr}</Text>
+                  <Text as="span" className="text-[11px] font-medium text-foreground-subtle">{r.abbr}</Text>
                 </Box>
               </Box>
             ))}

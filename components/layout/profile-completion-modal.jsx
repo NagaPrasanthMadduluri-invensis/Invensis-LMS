@@ -35,8 +35,8 @@ export function ProfileCompletionModal() {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <Box className="flex items-center gap-3">
-            <Box className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-100">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+            <Box className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-error-subtle">
+              <AlertTriangle className="h-5 w-5 text-error" />
             </Box>
             <Box>
               <DialogTitle className="text-base">Complete your profile</DialogTitle>
@@ -48,12 +48,12 @@ export function ProfileCompletionModal() {
         </DialogHeader>
 
         <Box className="px-6 py-2">
-          <Text as="p" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">
+          <Text as="p" className="text-[11px] uppercase tracking-wider text-foreground-subtle font-semibold mb-2">
             Still needed
           </Text>
           <Box className="flex flex-wrap gap-1.5">
             {ctx.missing.map((f) => (
-              <Badge key={f.key} className="border-0 bg-red-50 text-red-700 text-[11px] font-medium">{f.label}</Badge>
+              <Badge key={f.key} className="border-0 bg-error-subtle text-error-subtle-foreground text-[11px] font-medium">{f.label}</Badge>
             ))}
           </Box>
         </Box>
@@ -62,7 +62,7 @@ export function ProfileCompletionModal() {
           <Button variant="outline" size="sm" onClick={() => ctx.dismissPrompt()}>Later</Button>
           <Button
             size="sm"
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-error hover:bg-error text-error-foreground"
             onClick={() => ctx.dismissPrompt()}
             render={<Link href={href} />}
           >

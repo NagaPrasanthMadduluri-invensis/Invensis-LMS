@@ -62,7 +62,7 @@ export function SponsoredLearners() {
   if (error) {
     return (
       <Card className="p-6">
-        <Text as="p" className="text-red-600">Failed to load learners: {error}</Text>
+        <Text as="p" className="text-error">Failed to load learners: {error}</Text>
       </Card>
     );
   }
@@ -75,8 +75,8 @@ export function SponsoredLearners() {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <Box className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mb-3">
-            <Users className="h-6 w-6 text-amber-600" />
+          <Box className="w-12 h-12 rounded-full bg-warning-subtle flex items-center justify-center mb-3">
+            <Users className="h-6 w-6 text-warning" />
           </Box>
           <Text as="h3" className="text-sm font-semibold">No sponsored learners yet</Text>
           <Text as="p" className="text-xs text-muted-foreground mt-1 max-w-sm">
@@ -108,7 +108,7 @@ export function SponsoredLearners() {
                 <TableCell>
                   <Box className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-amber-100 text-amber-700 text-xs">
+                      <AvatarFallback className="bg-warning-subtle text-warning-subtle-foreground text-xs">
                         {initialsOf(l.name)}
                       </AvatarFallback>
                     </Avatar>
@@ -141,8 +141,8 @@ export function SponsoredLearners() {
                   <Badge
                     variant="secondary"
                     className={l.status === "confirmed" || l.status === "active"
-                      ? "bg-emerald-100 text-emerald-700 text-[10px]"
-                      : "bg-gray-200 text-gray-600 text-[10px]"}
+                      ? "bg-success-subtle text-success-subtle-foreground text-[10px]"
+                      : "bg-surface-muted text-foreground-muted text-[10px]"}
                   >
                     {l.status || "—"}
                   </Badge>

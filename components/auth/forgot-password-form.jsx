@@ -82,7 +82,7 @@ export function ForgotPasswordForm() {
 
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
+            className="w-full bg-gradient-to-r from-[#0466c8] to-[#023e7d] hover:from-[#0582ca] hover:to-[#001233] text-white"
             disabled={loading}
           >
             {loading ? "Sending..." : "Send reset link"}

@@ -41,10 +41,10 @@ export function ResendSetupButton({ onResend, label = "Resend setup email", clas
   }
 
   const cfg = {
-    idle:    { icon: Mail,     text: label,     cls: "bg-amber-100 hover:bg-amber-200 text-amber-800" },
-    sending: { icon: Loader2,  text: "Sending…", cls: "bg-amber-100 text-amber-800 cursor-wait" },
-    sent:    { icon: Check,    text: "Email sent", cls: "bg-emerald-100 text-emerald-700" },
-    error:   { icon: AlertCircle, text: "Retry",  cls: "bg-red-100 hover:bg-red-200 text-red-700" },
+    idle:    { icon: Mail,     text: label,     cls: "bg-warning-subtle hover:bg-warning/15 text-warning-subtle-foreground" },
+    sending: { icon: Loader2,  text: "Sending…", cls: "bg-warning-subtle text-warning-subtle-foreground cursor-wait" },
+    sent:    { icon: Check,    text: "Email sent", cls: "bg-success-subtle text-success-subtle-foreground" },
+    error:   { icon: AlertCircle, text: "Retry",  cls: "bg-error-subtle hover:bg-error/15 text-error-subtle-foreground" },
   }[state];
   const Icon = cfg.icon;
 
@@ -65,7 +65,7 @@ export function ResendSetupButton({ onResend, label = "Resend setup email", clas
         {cfg.text}
       </button>
       {state === "error" && error && (
-        <Text as="span" className="text-[10px] text-red-600 max-w-[15rem] text-right leading-tight">{error}</Text>
+        <Text as="span" className="text-[10px] text-error max-w-[15rem] text-right leading-tight">{error}</Text>
       )}
     </Box>
   );

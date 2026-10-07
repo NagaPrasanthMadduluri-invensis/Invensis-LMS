@@ -16,8 +16,8 @@ export function SidebarBrandHeader({ icon: Icon, title, subtitle }) {
   return (
     <SidebarHeader className="border-b border-sidebar-border px-4 py-3 group-data-[collapsible=icon]:px-2">
       <Box className="flex items-center gap-2.5">
-        <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white">
-          <Icon className="h-5 w-5 text-violet-500" />
+        <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface">
+          <Icon className="h-5 w-5 text-primary" />
         </Box>
         <Box className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
           <Text as="span" className="block text-sm font-bold leading-none text-sidebar-foreground">

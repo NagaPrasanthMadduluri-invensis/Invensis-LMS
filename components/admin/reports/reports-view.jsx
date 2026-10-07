@@ -33,7 +33,7 @@ import { printSalesReport } from "./report-pdf";
 import { formatDate, formatInstantDateTime, toDateInput } from "@/lib/datetime";
 
 const ALL = "all";
-const CARD = "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm";
+const CARD = "rounded-2xl border border-border bg-surface p-5 shadow-sm";
 
 const RANGE_OPTIONS = [
   { value: "6m", label: "Last 6 months" },
@@ -102,9 +102,9 @@ const GENERATED_AT_FMT = {
 /* ── Section eyebrow that separates the three report zones ── */
 function SectionTitle({ children, hint }) {
   return (
-    <Box className="flex items-baseline gap-3 border-b border-slate-200 pb-2 pt-1">
-      <Text as="h2" className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">{children}</Text>
-      {hint && <Text as="span" className="text-[11px] text-slate-400">{hint}</Text>}
+    <Box className="flex items-baseline gap-3 border-b border-border pb-2 pt-1">
+      <Text as="h2" className="text-xs font-bold uppercase tracking-[0.12em] text-foreground-muted">{children}</Text>
+      {hint && <Text as="span" className="text-[11px] text-foreground-subtle">{hint}</Text>}
     </Box>
   );
 }
@@ -113,13 +113,13 @@ function SectionTitle({ children, hint }) {
 function SectionHead({ icon: Icon, title, subtitle, danger, count }) {
   return (
     <Box className="mb-3 flex items-center gap-2">
-      <Box className={`flex h-7 w-7 items-center justify-center rounded-lg ${danger ? "bg-rose-50 text-rose-500" : "bg-violet-50 text-violet-500"}`}>
+      <Box className={`flex h-7 w-7 items-center justify-center rounded-lg ${danger ? "bg-error-subtle text-error" : "bg-primary-subtle text-primary"}`}>
         <Icon className="h-4 w-4" />
       </Box>
-      <Text as="h3" className="text-sm font-bold text-slate-800">{title}</Text>
-      {subtitle && <Text as="span" className="truncate text-[11px] text-slate-400">· {subtitle}</Text>}
+      <Text as="h3" className="text-sm font-bold text-foreground">{title}</Text>
+      {subtitle && <Text as="span" className="truncate text-[11px] text-foreground-subtle">· {subtitle}</Text>}
       {count != null && (
-        <Text as="span" className="ml-auto rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-500">{count}</Text>
+        <Text as="span" className="ml-auto rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold tabular-nums text-foreground-muted">{count}</Text>
       )}
     </Box>
   );
@@ -127,11 +127,11 @@ function SectionHead({ icon: Icon, title, subtitle, danger, count }) {
 
 /* ── Period-over-period delta (arrow + %) ── */
 function Delta({ pct }) {
-  if (pct == null) return <Text as="span" className="text-xs font-semibold text-slate-400">n/a</Text>;
+  if (pct == null) return <Text as="span" className="text-xs font-semibold text-foreground-subtle">n/a</Text>;
   const up = pct >= 0;
   const Icon = up ? TrendingUp : TrendingDown;
   return (
-    <Box as="span" className={`inline-flex items-center gap-0.5 text-xs font-bold ${up ? "text-emerald-600" : "text-rose-600"}`}>
+    <Box as="span" className={`inline-flex items-center gap-0.5 text-xs font-bold ${up ? "text-success" : "text-error"}`}>
       <Icon className="h-3.5 w-3.5" />{up ? "+" : ""}{pct}%
     </Box>
   );
@@ -139,21 +139,21 @@ function Delta({ pct }) {
 
 /* ── KPI card ── */
 const KPI_THEMES = {
-  emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  indigo: "border-violet-200 bg-violet-50 text-violet-700",
-  sky: "border-sky-200 bg-sky-50 text-sky-700",
-  violet: "border-violet-200 bg-violet-50 text-violet-700",
-  amber: "border-amber-200 bg-amber-50 text-amber-700",
+  emerald: "border-success-border bg-emerald-50 text-emerald-700",
+  indigo: "border-primary-border bg-violet-50 text-violet-700",
+  sky: "border-info-border bg-sky-50 text-sky-700",
+  violet: "border-primary-border bg-violet-50 text-violet-700",
+  amber: "border-warning-border bg-amber-50 text-amber-700",
 };
 function KpiCard({ icon: Icon, label, value, sub, theme }) {
   return (
-    <Card className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <Card className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
       <Box className={`flex h-9 w-9 items-center justify-center rounded-xl border ${KPI_THEMES[theme]}`}>
         <Icon className="h-5 w-5" />
       </Box>
-      <Text as="span" className="mt-3 block text-2xl font-extrabold leading-none text-slate-800 tabular-nums">{value}</Text>
-      <Text as="span" className="mt-1 block text-xs font-semibold text-slate-600">{label}</Text>
-      {sub && <Text as="span" className="mt-0.5 block text-[11px] text-slate-400">{sub}</Text>}
+      <Text as="span" className="mt-3 block text-2xl font-extrabold leading-none text-foreground tabular-nums">{value}</Text>
+      <Text as="span" className="mt-1 block text-xs font-semibold text-foreground-muted">{label}</Text>
+      {sub && <Text as="span" className="mt-0.5 block text-[11px] text-foreground-subtle">{sub}</Text>}
     </Card>
   );
 }
@@ -163,7 +163,7 @@ function FilterSelect({ value, onChange, placeholder, options, allLabel }) {
   const items = { [ALL]: allLabel, ...Object.fromEntries(options.map((o) => [o.value, o.label])) };
   return (
     <Select value={value} onValueChange={onChange} items={items}>
-      <SelectTrigger className="h-9 w-full min-w-0 bg-white text-xs sm:w-[150px]">
+      <SelectTrigger className="h-9 w-full min-w-0 bg-surface text-xs sm:w-[150px]">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
@@ -185,12 +185,12 @@ function SalesTable({ icon: Icon, title, subtitle, rows = [], nameKey, nameLabel
     <Card className={CARD}>
       <SectionHead icon={Icon} title={title} subtitle={subtitle} danger={danger} count={rows.length || null} />
       {rows.length === 0 ? (
-        <Text as="p" className="py-8 text-center text-xs italic text-slate-400">No sales in this period.</Text>
+        <Text as="p" className="py-8 text-center text-xs italic text-foreground-subtle">No sales in this period.</Text>
       ) : (
         <Box className="overflow-x-auto">
           <Box as="table" className="w-full border-collapse text-xs">
             <Box as="thead">
-              <Box as="tr" className="border-b border-slate-200 text-[10px] uppercase tracking-wide text-slate-400">
+              <Box as="tr" className="border-b border-border text-[10px] uppercase tracking-wide text-foreground-subtle">
                 {rank && <Box as="th" className="w-7 py-2 pr-1 text-left font-semibold">#</Box>}
                 <Box as="th" className="py-2 pr-2 text-left font-semibold">{nameLabel}</Box>
                 <Box as="th" className="py-2 px-2 text-right font-semibold">Revenue</Box>
@@ -203,17 +203,17 @@ function SalesTable({ icon: Icon, title, subtitle, rows = [], nameKey, nameLabel
                 const share = totalRev > 0 ? ((r.revenue ?? 0) / totalRev) * 100 : 0;
                 const name = formatName ? formatName(r[nameKey]) : r[nameKey];
                 return (
-                  <Box as="tr" key={`${r[nameKey]}-${i}`} className="border-b border-slate-50 odd:bg-white even:bg-slate-50/40 hover:bg-slate-50">
-                    {rank && <Box as="td" className="py-2 pr-1 text-left font-semibold tabular-nums text-slate-300">{i + 1}</Box>}
-                    <Box as="td" className="max-w-[180px] truncate py-2 pr-2 font-medium text-slate-700" title={name}>{name}</Box>
-                    <Box as="td" className="py-2 px-2 text-right font-bold tabular-nums text-slate-800">{money(r.revenue, currency)}</Box>
-                    <Box as="td" className="py-2 px-2 text-right tabular-nums text-slate-500">{(r.enrolments ?? 0).toLocaleString()}</Box>
+                  <Box as="tr" key={`${r[nameKey]}-${i}`} className="border-b border-border odd:bg-surface even:bg-slate-50/40 hover:bg-surface-hover">
+                    {rank && <Box as="td" className="py-2 pr-1 text-left font-semibold tabular-nums text-foreground-subtle">{i + 1}</Box>}
+                    <Box as="td" className="max-w-[180px] truncate py-2 pr-2 font-medium text-foreground" title={name}>{name}</Box>
+                    <Box as="td" className="py-2 px-2 text-right font-bold tabular-nums text-foreground">{money(r.revenue, currency)}</Box>
+                    <Box as="td" className="py-2 px-2 text-right tabular-nums text-foreground-muted">{(r.enrolments ?? 0).toLocaleString()}</Box>
                     <Box as="td" className="py-2 pl-2">
                       <Box className="flex items-center justify-end gap-2">
-                        <Box className="h-1.5 w-12 overflow-hidden rounded-full bg-slate-100">
+                        <Box className="h-1.5 w-12 overflow-hidden rounded-full bg-surface-muted">
                           <Box className={`h-full rounded-full ${danger ? "bg-rose-400" : "bg-violet-400"}`} style={{ width: `${Math.round(share)}%` }} />
                         </Box>
-                        <Text as="span" className="w-8 text-right tabular-nums text-[11px] text-slate-400">{share.toFixed(0)}%</Text>
+                        <Text as="span" className="w-8 text-right tabular-nums text-[11px] text-foreground-subtle">{share.toFixed(0)}%</Text>
                       </Box>
                     </Box>
                   </Box>
@@ -222,12 +222,12 @@ function SalesTable({ icon: Icon, title, subtitle, rows = [], nameKey, nameLabel
             </Box>
             {rows.length > 1 && (
               <Box as="tfoot">
-                <Box as="tr" className="border-t-2 border-slate-200">
+                <Box as="tr" className="border-t-2 border-border">
                   {rank && <Box as="td" className="py-2" />}
-                  <Box as="td" className="py-2 pr-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">Total</Box>
-                  <Box as="td" className="py-2 px-2 text-right font-extrabold tabular-nums text-slate-900">{money(totalRev, currency)}</Box>
-                  <Box as="td" className="py-2 px-2 text-right font-bold tabular-nums text-slate-600">{totalEnr.toLocaleString()}</Box>
-                  <Box as="td" className="py-2 pl-2 text-right text-[11px] font-semibold tabular-nums text-slate-400">100%</Box>
+                  <Box as="td" className="py-2 pr-2 text-[11px] font-bold uppercase tracking-wide text-foreground-muted">Total</Box>
+                  <Box as="td" className="py-2 px-2 text-right font-extrabold tabular-nums text-foreground">{money(totalRev, currency)}</Box>
+                  <Box as="td" className="py-2 px-2 text-right font-bold tabular-nums text-foreground-muted">{totalEnr.toLocaleString()}</Box>
+                  <Box as="td" className="py-2 pl-2 text-right text-[11px] font-semibold tabular-nums text-foreground-subtle">100%</Box>
                 </Box>
               </Box>
             )}
@@ -251,19 +251,19 @@ function MomentumCard({ comparison, summary, currency }) {
     <Card className={CARD}>
       <SectionHead icon={TrendingUp} title="Momentum" subtitle={`vs previous period (${fmtD(previous_period.from)} – ${fmtD(previous_period.to)})`} />
       {noPrior && (
-        <Text as="p" className="mb-3 rounded-lg bg-amber-50 px-3 py-1.5 text-[11px] font-medium text-amber-700">
+        <Text as="p" className="mb-3 rounded-lg bg-warning-subtle px-3 py-1.5 text-[11px] font-medium text-warning-subtle-foreground">
           No sales in the previous period — nothing to compare yet.
         </Text>
       )}
       <Box className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {items.map((it) => (
-          <Box key={it.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-            <Text as="span" className="block text-xs font-semibold text-slate-500">{it.label}</Text>
+          <Box key={it.label} className="rounded-xl border border-border bg-slate-50/60 p-3">
+            <Text as="span" className="block text-xs font-semibold text-foreground-muted">{it.label}</Text>
             <Box className="mt-1 flex items-baseline gap-2">
-              <Text as="span" className="text-xl font-extrabold tabular-nums text-slate-800">{it.value}</Text>
-              {noPrior ? <Text as="span" className="text-[11px] font-semibold text-violet-500">new</Text> : <Delta pct={it.pct} />}
+              <Text as="span" className="text-xl font-extrabold tabular-nums text-foreground">{it.value}</Text>
+              {noPrior ? <Text as="span" className="text-[11px] font-semibold text-primary">new</Text> : <Delta pct={it.pct} />}
             </Box>
-            <Text as="span" className="mt-0.5 block text-[11px] text-slate-400">{noPrior ? "no prior-period data" : `was ${it.prev}`}</Text>
+            <Text as="span" className="mt-0.5 block text-[11px] text-foreground-subtle">{noPrior ? "no prior-period data" : `was ${it.prev}`}</Text>
           </Box>
         ))}
       </Box>
@@ -278,18 +278,18 @@ function RetentionCard({ retention }) {
     <Card className={CARD}>
       <SectionHead icon={Repeat} title="Learner retention" subtitle="in period" />
       <Box className="flex items-stretch gap-3">
-        <Box className="flex w-28 flex-col items-center justify-center rounded-xl border border-emerald-100 bg-emerald-50 p-3">
-          <Text as="span" className="text-2xl font-extrabold tabular-nums text-emerald-700">{r.repeat_rate ?? 0}%</Text>
-          <Text as="span" className="text-[11px] font-semibold text-emerald-700">Repeat rate</Text>
+        <Box className="flex w-28 flex-col items-center justify-center rounded-xl border border-success-border bg-success-subtle p-3">
+          <Text as="span" className="text-2xl font-extrabold tabular-nums text-success-subtle-foreground">{r.repeat_rate ?? 0}%</Text>
+          <Text as="span" className="text-[11px] font-semibold text-success-subtle-foreground">Repeat rate</Text>
         </Box>
         <Box className="flex flex-1 flex-col justify-center gap-2">
-          <Box className="flex items-center justify-between border-b border-slate-50 pb-2 text-sm">
-            <Text as="span" className="flex items-center gap-1.5 text-slate-600"><UserPlus className="h-3.5 w-3.5" /> New learners</Text>
-            <Text as="span" className="font-bold tabular-nums text-slate-800">{(r.new_learners ?? 0).toLocaleString()}</Text>
+          <Box className="flex items-center justify-between border-b border-border pb-2 text-sm">
+            <Text as="span" className="flex items-center gap-1.5 text-foreground-muted"><UserPlus className="h-3.5 w-3.5" /> New learners</Text>
+            <Text as="span" className="font-bold tabular-nums text-foreground">{(r.new_learners ?? 0).toLocaleString()}</Text>
           </Box>
           <Box className="flex items-center justify-between text-sm">
-            <Text as="span" className="flex items-center gap-1.5 text-slate-600"><Users className="h-3.5 w-3.5" /> Returning learners</Text>
-            <Text as="span" className="font-bold tabular-nums text-slate-800">{(r.returning_learners ?? 0).toLocaleString()}</Text>
+            <Text as="span" className="flex items-center gap-1.5 text-foreground-muted"><Users className="h-3.5 w-3.5" /> Returning learners</Text>
+            <Text as="span" className="font-bold tabular-nums text-foreground">{(r.returning_learners ?? 0).toLocaleString()}</Text>
           </Box>
         </Box>
       </Box>
@@ -310,9 +310,9 @@ function TrainersCard({ trainers, topTrainers = [], currency }) {
       <SectionHead icon={GraduationCap} title="Trainer utilization" subtitle="in period" />
       <Box className="grid grid-cols-3 gap-2">
         {tiles.map((x) => (
-          <Box key={x.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3 text-center">
-            <Text as="span" className="block text-lg font-extrabold tabular-nums text-slate-800">{x.value}</Text>
-            <Text as="span" className="text-[10px] font-semibold uppercase text-slate-500">{x.label}</Text>
+          <Box key={x.label} className="rounded-xl border border-border bg-slate-50/60 p-3 text-center">
+            <Text as="span" className="block text-lg font-extrabold tabular-nums text-foreground">{x.value}</Text>
+            <Text as="span" className="text-[10px] font-semibold uppercase text-foreground-muted">{x.label}</Text>
           </Box>
         ))}
       </Box>
@@ -320,7 +320,7 @@ function TrainersCard({ trainers, topTrainers = [], currency }) {
         <Box className="mt-4 overflow-x-auto">
           <Box as="table" className="w-full border-collapse text-xs">
             <Box as="thead">
-              <Box as="tr" className="border-b border-slate-200 text-[10px] uppercase tracking-wide text-slate-400">
+              <Box as="tr" className="border-b border-border text-[10px] uppercase tracking-wide text-foreground-subtle">
                 <Box as="th" className="py-2 pr-2 text-left font-semibold">Top trainers by load</Box>
                 <Box as="th" className="py-2 px-2 text-right font-semibold">Trainings</Box>
                 <Box as="th" className="py-2 pl-2 text-right font-semibold">Learners</Box>
@@ -328,10 +328,10 @@ function TrainersCard({ trainers, topTrainers = [], currency }) {
             </Box>
             <Box as="tbody">
               {topTrainers.map((tt, i) => (
-                <Box as="tr" key={`${tt.name}-${i}`} className="border-b border-slate-50 odd:bg-white even:bg-slate-50/40 hover:bg-slate-50">
-                  <Box as="td" className="max-w-[180px] truncate py-2 pr-2 font-medium text-slate-700" title={tt.name}>{tt.name}</Box>
-                  <Box as="td" className="py-2 px-2 text-right tabular-nums text-slate-600">{(tt.trainings ?? 0).toLocaleString()}</Box>
-                  <Box as="td" className="py-2 pl-2 text-right tabular-nums text-slate-600">{(tt.participants ?? 0).toLocaleString()}</Box>
+                <Box as="tr" key={`${tt.name}-${i}`} className="border-b border-border odd:bg-surface even:bg-slate-50/40 hover:bg-surface-hover">
+                  <Box as="td" className="max-w-[180px] truncate py-2 pr-2 font-medium text-foreground" title={tt.name}>{tt.name}</Box>
+                  <Box as="td" className="py-2 px-2 text-right tabular-nums text-foreground-muted">{(tt.trainings ?? 0).toLocaleString()}</Box>
+                  <Box as="td" className="py-2 pl-2 text-right tabular-nums text-foreground-muted">{(tt.participants ?? 0).toLocaleString()}</Box>
                 </Box>
               ))}
             </Box>
@@ -432,9 +432,9 @@ export function ReportsView() {
   return (
     <Box className="space-y-6">
       {/* Filter bar */}
-      <Card className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <Card className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
         <Box className="flex flex-wrap items-center gap-2">
-          <Box className="mr-1 flex items-center gap-1.5 text-slate-500">
+          <Box className="mr-1 flex items-center gap-1.5 text-foreground-muted">
             <Filter className="h-4 w-4" />
             <Text as="span" className="text-xs font-semibold">Filters</Text>
           </Box>
@@ -442,10 +442,10 @@ export function ReportsView() {
           <FilterSelect value={range} onChange={setRange} placeholder="Period" allLabel="All time" options={RANGE_OPTIONS.filter((o) => o.value !== ALL)} />
           {isCustom && (
             <Box className="flex items-center gap-1.5">
-              <CalendarRange className="h-4 w-4 text-slate-400" />
-              <Input type="date" value={customFrom} max={customTo || undefined} onChange={(e) => setCustomFrom(e.target.value)} className="h-9 w-[145px] bg-white text-xs" />
-              <Text as="span" className="text-xs text-slate-400">to</Text>
-              <Input type="date" value={customTo} min={customFrom || undefined} onChange={(e) => setCustomTo(e.target.value)} className="h-9 w-[145px] bg-white text-xs" />
+              <CalendarRange className="h-4 w-4 text-foreground-subtle" />
+              <Input type="date" value={customFrom} max={customTo || undefined} onChange={(e) => setCustomFrom(e.target.value)} className="h-9 w-[145px] bg-surface text-xs" />
+              <Text as="span" className="text-xs text-foreground-subtle">to</Text>
+              <Input type="date" value={customTo} min={customFrom || undefined} onChange={(e) => setCustomTo(e.target.value)} className="h-9 w-[145px] bg-surface text-xs" />
             </Box>
           )}
 
@@ -461,7 +461,7 @@ export function ReportsView() {
           )}
 
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={resetFilters} className="h-9 text-xs text-slate-500">
+            <Button variant="ghost" size="sm" onClick={resetFilters} className="h-9 text-xs text-foreground-muted">
               <X className="h-3.5 w-3.5" /> Reset
             </Button>
           )}
@@ -476,12 +476,12 @@ export function ReportsView() {
           </Box>
         </Box>
         {customIncomplete && (
-          <Text as="p" className="mt-2 text-[11px] text-amber-600">Pick both a start and end date to run the custom range.</Text>
+          <Text as="p" className="mt-2 text-[11px] text-warning">Pick both a start and end date to run the custom range.</Text>
         )}
       </Card>
 
       {error && (
-        <Card className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</Card>
+        <Card className="rounded-2xl border border-error-border bg-error-subtle p-4 text-sm text-error-subtle-foreground">{error}</Card>
       )}
 
       {loading || !data ? (
@@ -533,7 +533,7 @@ export function ReportsView() {
           </Box>
           <TrainersCard trainers={data.trainers} topTrainers={data.top_trainers} currency={cur} />
 
-          <Text as="p" className="pt-1 text-center text-[11px] text-slate-400">
+          <Text as="p" className="pt-1 text-center text-[11px] text-foreground-subtle">
             Generated {formatInstantDateTime(data.generated_at, GENERATED_AT_FMT)} · figures count confirmed + completed enrolments
           </Text>
         </>

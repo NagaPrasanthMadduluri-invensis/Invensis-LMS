@@ -112,23 +112,23 @@ export function ImportResourcesDialog({ open, onOpenChange, onImported }) {
 
         {result ? (
           <Box className="space-y-3 py-1">
-            <Box className="flex items-center gap-2.5 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-              <Text as="p" className="text-sm text-emerald-800 font-semibold">
+            <Box className="flex items-center gap-2.5 rounded-xl bg-success-subtle border border-success-border px-4 py-3">
+              <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
+              <Text as="p" className="text-sm text-success-subtle-foreground font-semibold">
                 Imported {result.created} resource{result.created === 1 ? "" : "s"}.
               </Text>
             </Box>
             {result.failed?.length > 0 && (
-              <Box className="rounded-xl border border-amber-200 overflow-hidden">
-                <Box className="bg-amber-50 px-4 py-2 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
-                  <Text as="p" className="text-xs font-semibold text-amber-800">{result.failed.length} row(s) skipped</Text>
+              <Box className="rounded-xl border border-warning-border overflow-hidden">
+                <Box className="bg-warning-subtle px-4 py-2 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-warning shrink-0" />
+                  <Text as="p" className="text-xs font-semibold text-warning-subtle-foreground">{result.failed.length} row(s) skipped</Text>
                 </Box>
-                <Box className="max-h-56 overflow-y-auto divide-y divide-slate-100">
+                <Box className="max-h-56 overflow-y-auto divide-y divide-border">
                   {result.failed.map((f, i) => (
                     <Box key={i} className="px-4 py-2 flex items-center justify-between gap-3 text-xs">
-                      <Text as="span" className="text-slate-600 truncate">Row {f.row}: {f.title || f.training_code || "—"}</Text>
-                      <Text as="span" className="text-rose-600 shrink-0">{f.error}</Text>
+                      <Text as="span" className="text-foreground-muted truncate">Row {f.row}: {f.title || f.training_code || "—"}</Text>
+                      <Text as="span" className="text-error shrink-0">{f.error}</Text>
                     </Box>
                   ))}
                 </Box>
@@ -138,27 +138,27 @@ export function ImportResourcesDialog({ open, onOpenChange, onImported }) {
         ) : (
           <Box className="space-y-4 py-1">
             {!rows ? (
-              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-xl py-8 cursor-pointer hover:bg-slate-50 transition-colors">
-                <UploadCloud className="h-7 w-7 text-slate-400" />
-                <Text as="span" className="text-sm text-slate-600">Click to choose a .csv file</Text>
-                <Text as="span" className="text-[11px] text-slate-400">Up to 500 rows</Text>
+              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-xl py-8 cursor-pointer hover:bg-surface-hover transition-colors">
+                <UploadCloud className="h-7 w-7 text-foreground-subtle" />
+                <Text as="span" className="text-sm text-foreground-muted">Click to choose a .csv file</Text>
+                <Text as="span" className="text-[11px] text-foreground-subtle">Up to 500 rows</Text>
                 <input ref={inputRef} type="file" accept=".csv,text/csv" className="hidden"
                   onChange={(e) => pickFile(e.target.files?.[0])} />
               </label>
             ) : (
               <Box className="space-y-3">
-                <Box className="flex items-center gap-2 px-3 py-2 border rounded-lg bg-slate-50">
-                  <FileText className="h-4 w-4 text-slate-400 shrink-0" />
-                  <Text as="span" className="text-xs text-slate-700 flex-1 truncate">{fileName}</Text>
-                  <Badge className="border-0 bg-violet-50 text-violet-700 text-[11px]">{rows.length} rows</Badge>
-                  {invalidCount > 0 && <Badge className="border-0 bg-amber-50 text-amber-700 text-[11px]">{invalidCount} need attention</Badge>}
-                  <button type="button" onClick={reset} className="text-slate-400 hover:text-slate-600 shrink-0"><X className="h-3.5 w-3.5" /></button>
+                <Box className="flex items-center gap-2 px-3 py-2 border rounded-lg bg-surface-hover">
+                  <FileText className="h-4 w-4 text-foreground-subtle shrink-0" />
+                  <Text as="span" className="text-xs text-foreground flex-1 truncate">{fileName}</Text>
+                  <Badge className="border-0 bg-primary-subtle text-primary text-[11px]">{rows.length} rows</Badge>
+                  {invalidCount > 0 && <Badge className="border-0 bg-warning-subtle text-warning-subtle-foreground text-[11px]">{invalidCount} need attention</Badge>}
+                  <button type="button" onClick={reset} className="text-foreground-subtle hover:text-foreground-muted shrink-0"><X className="h-3.5 w-3.5" /></button>
                 </Box>
                 {/* Preview (first 8) */}
-                <Box className="rounded-xl border border-slate-200 overflow-hidden">
+                <Box className="rounded-xl border border-border overflow-hidden">
                   <Box as="table" className="w-full text-xs">
                     <Box as="thead">
-                      <Box as="tr" className="bg-slate-50 text-slate-500">
+                      <Box as="tr" className="bg-surface-hover text-foreground-muted">
                         {["Training", "Title", "URL", ""].map((h) => (
                           <Box as="th" key={h} className="text-left font-semibold px-3 py-2">{h}</Box>
                         ))}
@@ -166,31 +166,31 @@ export function ImportResourcesDialog({ open, onOpenChange, onImported }) {
                     </Box>
                     <Box as="tbody">
                       {rows.slice(0, 8).map((r) => (
-                        <Box as="tr" key={r._row} className="border-t border-slate-100">
-                          <Box as="td" className="px-3 py-1.5 font-mono text-slate-700">{r.training_code || "—"}</Box>
-                          <Box as="td" className="px-3 py-1.5 text-slate-700 max-w-[180px] truncate">{r.title || "—"}</Box>
-                          <Box as="td" className="px-3 py-1.5 text-slate-500 max-w-[200px] truncate">{r.url || "—"}</Box>
+                        <Box as="tr" key={r._row} className="border-t border-border">
+                          <Box as="td" className="px-3 py-1.5 font-mono text-foreground">{r.training_code || "—"}</Box>
+                          <Box as="td" className="px-3 py-1.5 text-foreground max-w-[180px] truncate">{r.title || "—"}</Box>
+                          <Box as="td" className="px-3 py-1.5 text-foreground-muted max-w-[200px] truncate">{r.url || "—"}</Box>
                           <Box as="td" className="px-3 py-1.5">
                             {r._ok
-                              ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                              : <AlertCircle className="h-3.5 w-3.5 text-amber-500" />}
+                              ? <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                              : <AlertCircle className="h-3.5 w-3.5 text-warning" />}
                           </Box>
                         </Box>
                       ))}
                     </Box>
                   </Box>
                   {rows.length > 8 && (
-                    <Box className="px-3 py-1.5 bg-slate-50 text-[11px] text-slate-400">+ {rows.length - 8} more…</Box>
+                    <Box className="px-3 py-1.5 bg-surface-hover text-[11px] text-foreground-subtle">+ {rows.length - 8} more…</Box>
                   )}
                 </Box>
-                <Text as="p" className="text-[11px] text-slate-400">
+                <Text as="p" className="text-[11px] text-foreground-subtle">
                   Rows flagged with a warning (missing training code/title or an invalid URL) are reported and skipped; the rest import.
                 </Text>
               </Box>
             )}
 
             {parseError && (
-              <Box className="flex items-center gap-1.5 text-red-600">
+              <Box className="flex items-center gap-1.5 text-error">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 <Text as="span" className="text-xs">{parseError}</Text>
               </Box>
@@ -199,7 +199,7 @@ export function ImportResourcesDialog({ open, onOpenChange, onImported }) {
         )}
 
         <DialogFooter className="gap-2 sm:justify-between">
-          <Button variant="ghost" size="sm" onClick={downloadTemplate} className="text-slate-500 hover:text-slate-700">
+          <Button variant="ghost" size="sm" onClick={downloadTemplate} className="text-foreground-muted hover:text-foreground">
             <Download className="h-3.5 w-3.5 mr-1.5" /> Download template
           </Button>
           <Box className="flex items-center gap-2">
@@ -208,7 +208,7 @@ export function ImportResourcesDialog({ open, onOpenChange, onImported }) {
             </Button>
             {!result && (
               <Button size="sm" onClick={submit} disabled={submitting || !rows?.length}
-                className="bg-violet-600 hover:bg-violet-700 text-white">
+                className="bg-primary hover:bg-primary-hover text-primary-foreground">
                 {submitting ? "Importing…" : `Import ${rows ? rows.length : ""}`.trim()}
               </Button>
             )}

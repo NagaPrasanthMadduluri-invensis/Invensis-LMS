@@ -149,18 +149,18 @@ function ResourceFormDialog({ open, resource, onClose, onSave }) {
             <Box className="space-y-1.5">
               <Label className="text-xs">File *</Label>
               {file ? (
-                <Box className="flex items-center gap-2 px-3 py-2 border rounded-md bg-slate-50">
-                  <FileText className="h-4 w-4 text-slate-400 shrink-0" />
-                  <Text as="span" className="text-xs text-slate-700 flex-1 truncate">{file.name}</Text>
-                  <button onClick={() => { setFile(null); set("url", ""); }} className="text-slate-400 hover:text-slate-600 shrink-0">
+                <Box className="flex items-center gap-2 px-3 py-2 border rounded-md bg-surface-hover">
+                  <FileText className="h-4 w-4 text-foreground-subtle shrink-0" />
+                  <Text as="span" className="text-xs text-foreground flex-1 truncate">{file.name}</Text>
+                  <button onClick={() => { setFile(null); set("url", ""); }} className="text-foreground-subtle hover:text-foreground-muted shrink-0">
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </Box>
               ) : (
-                <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-lg py-5 cursor-pointer hover:bg-slate-50 transition-colors">
-                  <UploadCloud className="h-6 w-6 text-slate-400" />
-                  <Text as="span" className="text-xs text-slate-500">Click to upload or drag & drop</Text>
-                  <Text as="span" className="text-[11px] text-slate-400">{ACCEPT_MAP[form.type] || "Any file"}</Text>
+                <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-lg py-5 cursor-pointer hover:bg-surface-hover transition-colors">
+                  <UploadCloud className="h-6 w-6 text-foreground-subtle" />
+                  <Text as="span" className="text-xs text-foreground-muted">Click to upload or drag & drop</Text>
+                  <Text as="span" className="text-[11px] text-foreground-subtle">{ACCEPT_MAP[form.type] || "Any file"}</Text>
                   <input
                     type="file"
                     className="hidden"
@@ -173,7 +173,7 @@ function ResourceFormDialog({ open, resource, onClose, onSave }) {
                 </label>
               )}
               {form.url && !file && (
-                <Text as="span" className="text-[11px] text-slate-400">Current: {form.url}</Text>
+                <Text as="span" className="text-[11px] text-foreground-subtle">Current: {form.url}</Text>
               )}
             </Box>
           )}
@@ -192,7 +192,7 @@ function ResourceFormDialog({ open, resource, onClose, onSave }) {
           </Box>
 
           {err && (
-            <Box className="flex items-center gap-1.5 text-red-600">
+            <Box className="flex items-center gap-1.5 text-error">
               <AlertCircle className="h-3.5 w-3.5" />
               <Text as="span" className="text-xs">{err}</Text>
             </Box>
@@ -241,7 +241,7 @@ function ResourceRow({ resource, onEdit, onDelete }) {
         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(resource)}>
           <Pencil className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600"
+        <Button variant="ghost" size="icon" className="h-7 w-7 text-error hover:text-error"
           onClick={() => onDelete(resource)}>
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
@@ -302,8 +302,8 @@ function EnrollmentAssignments({ courseId, resources, token }) {
           <Box key={enrollment.id} className="border rounded-lg overflow-hidden">
             {/* User header */}
             <Box className="flex items-center gap-3 px-4 py-2.5 bg-muted/40">
-              <Box className="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center shrink-0">
-                <Text as="span" className="text-xs font-semibold text-violet-600">
+              <Box className="w-7 h-7 rounded-full bg-primary-subtle flex items-center justify-center shrink-0">
+                <Text as="span" className="text-xs font-semibold text-primary">
                   {enrollment.user.name[0]}
                 </Text>
               </Box>
@@ -311,7 +311,7 @@ function EnrollmentAssignments({ courseId, resources, token }) {
                 <Text as="p" className="text-sm font-medium truncate">{enrollment.user.name}</Text>
                 <Text as="span" className="text-[11px] text-muted-foreground">{enrollment.user.email}</Text>
               </Box>
-              <Badge className={`text-[10px] border-0 ${enrollment.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}`}>
+              <Badge className={`text-[10px] border-0 ${enrollment.status === "active" ? "bg-success-subtle text-success-subtle-foreground" : "bg-surface-muted text-foreground-muted"}`}>
                 {enrollment.status}
               </Badge>
             </Box>
@@ -333,12 +333,12 @@ function EnrollmentAssignments({ courseId, resources, token }) {
                       className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 cursor-pointer transition-colors"
                       onClick={() => !busy && toggle(enrollment.id, r.id, assigned)}>
                       {assigned
-                        ? <CheckSquare className={`h-4 w-4 shrink-0 text-violet-500 ${busy ? "opacity-40" : ""}`} />
+                        ? <CheckSquare className={`h-4 w-4 shrink-0 text-primary ${busy ? "opacity-40" : ""}`} />
                         : <Square     className={`h-4 w-4 shrink-0 text-muted-foreground/40 ${busy ? "opacity-40" : ""}`} />
                       }
                       <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                       <Text as="p" className="text-xs flex-1 truncate">{r.title}</Text>
-                      <Badge className={`text-[9px] border-0 shrink-0 ${assigned ? "bg-violet-100 text-violet-700" : "bg-gray-100 text-gray-400"}`}>
+                      <Badge className={`text-[9px] border-0 shrink-0 ${assigned ? "bg-primary-subtle text-primary" : "bg-surface-muted text-foreground-subtle"}`}>
                         {assigned ? "Assigned" : "Unassigned"}
                       </Badge>
                     </Box>

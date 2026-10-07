@@ -93,7 +93,7 @@ export function StatStrip({ stats = {}, myCourses = {}, journey = [], generatedA
           label="Completed"
           value={stats.completed ?? 0}
           footnote={newlyCompleted > 0 ? `+${newlyCompleted} this month` : "All time"}
-          footnoteClass={newlyCompleted > 0 ? "font-semibold text-emerald-600" : "text-muted-foreground"}
+          footnoteClass={newlyCompleted > 0 ? "font-semibold text-success" : "text-muted-foreground"}
         />
 
         <Stat

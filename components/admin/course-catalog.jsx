@@ -80,17 +80,17 @@ export function CourseCatalog() {
       {/* Toolbar */}
       <Box className="flex flex-wrap items-center gap-3">
         <Box className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
           <Input value={q} onChange={(e) => setQ(e.target.value)}
             placeholder="Search courses…" className="h-10 pl-9 text-sm" />
         </Box>
         <Button onClick={() => setFormOpen(true)}
-          className="h-10 px-4 bg-white hover:bg-slate-50 text-violet-700 border border-violet-200 rounded-lg text-sm font-semibold">
+          className="h-10 px-4 bg-surface hover:bg-surface-hover text-primary border border-primary-border rounded-lg text-sm font-semibold">
           <Plus className="h-4 w-4 mr-2" />
           Add course
         </Button>
         <Button onClick={handleSync} disabled={syncing}
-          className="h-10 px-4 bg-violet-600 hover:bg-violet-700 text-white border-0 rounded-lg text-sm font-semibold">
+          className="h-10 px-4 bg-primary hover:bg-primary-hover text-primary-foreground border-0 rounded-lg text-sm font-semibold">
           <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
           {syncing ? "Syncing…" : "Sync from CMS"}
         </Button>
@@ -108,14 +108,14 @@ export function CourseCatalog() {
       />
 
       {notice && (
-        <Box className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-100 px-4 py-2.5">
-          <Text as="p" className="text-xs text-emerald-700">{notice}</Text>
+        <Box className="flex items-center gap-2 rounded-lg bg-success-subtle border border-success-border px-4 py-2.5">
+          <Text as="p" className="text-xs text-success-subtle-foreground">{notice}</Text>
         </Box>
       )}
       {error && (
-        <Box className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-100 px-4 py-2.5">
-          <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
-          <Text as="p" className="text-xs text-red-600">{error}</Text>
+        <Box className="flex items-center gap-2 rounded-lg bg-error-subtle border border-error-border px-4 py-2.5">
+          <AlertCircle className="h-4 w-4 text-error shrink-0" />
+          <Text as="p" className="text-xs text-error">{error}</Text>
         </Box>
       )}
 
@@ -125,11 +125,11 @@ export function CourseCatalog() {
         </Box>
       ) : courses.length === 0 ? (
         <Card className="flex flex-col items-center justify-center px-6 py-14 text-center rounded-2xl border border-slate-200/80 shadow-sm">
-          <Box className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100">
-            <Inbox className="h-7 w-7 text-violet-600" />
+          <Box className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-subtle">
+            <Inbox className="h-7 w-7 text-primary" />
           </Box>
-          <Text as="h2" className="mt-4 text-lg font-bold text-slate-800">No courses yet</Text>
-          <Text as="p" className="mt-1.5 max-w-md text-sm text-slate-500">
+          <Text as="h2" className="mt-4 text-lg font-bold text-foreground">No courses yet</Text>
+          <Text as="p" className="mt-1.5 max-w-md text-sm text-foreground-muted">
             Click <b>Sync from CMS</b> to import the course catalogue. You can then upload predefined resources per course.
           </Text>
         </Card>
@@ -138,28 +138,28 @@ export function CourseCatalog() {
           {filtered.map((c) => (
             <Link key={c.id} href={`/admin/course-catalog/${c.slug}`} className="block">
             <Card
-              className="group h-full p-0 overflow-hidden cursor-pointer rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-violet-200 transition-all">
+              className="group h-full p-0 overflow-hidden cursor-pointer rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-primary-border transition-all">
               <Box className="p-4 space-y-3">
                 <Box className="flex items-start justify-between gap-2">
-                  <Box className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center shrink-0">
-                    <Library className="h-5 w-5 text-violet-600" />
+                  <Box className="w-10 h-10 rounded-xl bg-primary-subtle flex items-center justify-center shrink-0">
+                    <Library className="h-5 w-5 text-primary" />
                   </Box>
-                  <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-violet-500 transition-colors" />
+                  <ChevronRight className="h-4 w-4 text-foreground-subtle group-hover:text-primary transition-colors" />
                 </Box>
                 <Box>
-                  <Text as="h3" className="text-sm font-bold text-slate-900 leading-snug line-clamp-2">{c.name}</Text>
+                  <Text as="h3" className="text-sm font-bold text-foreground leading-snug line-clamp-2">{c.name}</Text>
                   {c.category?.name && (
-                    <Text as="span" className="text-[11px] text-slate-400">{c.category.name}</Text>
+                    <Text as="span" className="text-[11px] text-foreground-subtle">{c.category.name}</Text>
                   )}
                 </Box>
                 <Box className="flex flex-wrap items-center gap-2">
                   {c.certification_included && (
-                    <Badge className="border-0 bg-amber-50 text-amber-700 text-[10px] font-medium">
+                    <Badge className="border-0 bg-warning-subtle text-warning-subtle-foreground text-[10px] font-medium">
                       <Award className="h-3 w-3 mr-1" /> Certification
                     </Badge>
                   )}
                   {c.duration_hours != null && (
-                    <Badge className="border-0 bg-slate-100 text-slate-600 text-[10px] font-medium">
+                    <Badge className="border-0 bg-surface-muted text-foreground-muted text-[10px] font-medium">
                       <Clock className="h-3 w-3 mr-1" /> {c.duration_hours}h
                     </Badge>
                   )}
@@ -172,7 +172,7 @@ export function CourseCatalog() {
       )}
 
       {courses?.length > 0 && (
-        <Text as="p" className="text-[11px] text-slate-400">
+        <Text as="p" className="text-[11px] text-foreground-subtle">
           {filtered.length} of {courses.length} courses · last synced {timeAgo(courses[0]?.last_synced_at)}
         </Text>
       )}

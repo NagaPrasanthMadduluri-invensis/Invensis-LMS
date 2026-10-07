@@ -440,7 +440,7 @@ function AttendanceLetterCanvas({ cert }) {
             /* eslint-disable-next-line @next/next/no-img-element */
             <img src={qrUrl} alt={`Scan to verify ${cert.certificate_id}`} width={104} height={104} className="block" />
           ) : (
-            <Box className="h-[104px] w-[104px] bg-slate-100" />
+            <Box className="h-[104px] w-[104px] bg-surface-muted" />
           )}
           <Box as="p" className="mt-2 text-[12px] font-bold text-[#1a2b45]">Scan to verify</Box>
         </Box>
@@ -455,7 +455,7 @@ function AttendanceLetterCanvas({ cert }) {
             {trademarkLine(cert.trademark_name)}
           </Box>
         )}
-        <Box as="p" className={`text-[8px] leading-[1.4] text-slate-400 ${cert.trademark_name ? "mt-5" : ""}`}>
+        <Box as="p" className={`text-[8px] leading-[1.4] text-foreground-subtle ${cert.trademark_name ? "mt-5" : ""}`}>
           {DIGITAL_NOTICE}
         </Box>
       </Box>
@@ -631,10 +631,10 @@ function CertificateCanvas({ cert }) {
             onError={(e) => { e.currentTarget.style.display = "none"; }}
           />
           <Box>
-            <Box as="p" className="text-[12px] text-slate-600 leading-snug">
+            <Box as="p" className="text-[12px] text-foreground-muted leading-snug">
               PMP<sup>®</sup> is registered mark of
             </Box>
-            <Box as="p" className="text-[12px] text-slate-600 leading-snug">
+            <Box as="p" className="text-[12px] text-foreground-muted leading-snug">
               Project Management Institute. inc
             </Box>
           </Box>
@@ -670,7 +670,7 @@ function CertificateCanvas({ cert }) {
           /* eslint-disable-next-line @next/next/no-img-element */
           <img src={qrUrl} alt={`Scan to verify certificate ${cert.certificate_id}`} width={104} height={104} className="mx-auto block" />
         ) : (
-          <Box className="mx-auto h-[104px] w-[104px] bg-slate-100" />
+          <Box className="mx-auto h-[104px] w-[104px] bg-surface-muted" />
         )}
         <Box as="p" className="text-[11px] font-semibold text-[#16224e] mt-2">Scan to verify</Box>
       </Box>
@@ -680,7 +680,7 @@ function CertificateCanvas({ cert }) {
           the same way. No trademark line here: that attribution belongs to the
           attendance letter. */}
       <Box className="absolute inset-x-[92px] bottom-[20px] text-center">
-        <Box as="p" className="text-[8px] leading-[1.4] text-slate-400">{DIGITAL_NOTICE}</Box>
+        <Box as="p" className="text-[8px] leading-[1.4] text-foreground-subtle">{DIGITAL_NOTICE}</Box>
       </Box>
     </Box>
   );

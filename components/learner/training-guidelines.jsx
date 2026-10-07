@@ -102,8 +102,8 @@ const FLAT_DONTS = flatten(DONTS);
 const COLLAPSED_COUNT = 5;
 
 const THEME = {
-  dos: { label: "Do's", Icon: Check, iconColor: "text-teal-700" },
-  donts: { label: "Don'ts", Icon: X, iconColor: "text-red-800" },
+  dos: { label: "Do's", Icon: Check, iconColor: "text-info-subtle-foreground" },
+  donts: { label: "Don'ts", Icon: X, iconColor: "text-error-subtle-foreground" },
 };
 
 function GuidelineColumn({ theme, flat, expanded }) {
@@ -112,7 +112,7 @@ function GuidelineColumn({ theme, flat, expanded }) {
 
   return (
     <Box className="min-w-0">
-      <Text as="h3" className="text-base font-semibold text-slate-800 px-5 pt-5 pb-3">
+      <Text as="h3" className="text-base font-semibold text-foreground px-5 pt-5 pb-3">
         {theme.label}
       </Text>
       <Box className="px-5 pb-5">
@@ -124,7 +124,7 @@ function GuidelineColumn({ theme, flat, expanded }) {
               {showGroup && (
                 <Text
                   as="p"
-                  className={`text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5 ${
+                  className={`text-[11px] font-semibold uppercase tracking-wider text-foreground-subtle mb-2.5 ${
                     i > 0 ? "mt-5" : ""
                   }`}
                 >
@@ -133,8 +133,8 @@ function GuidelineColumn({ theme, flat, expanded }) {
               )}
               <Box className="flex items-start gap-2.5 mb-4 last:mb-0">
                 <theme.Icon className={`h-4 w-4 mt-0.5 shrink-0 ${theme.iconColor}`} strokeWidth={2.25} />
-                <Text as="p" className="text-sm text-slate-500 leading-relaxed">
-                  <Text as="span" className="font-semibold text-slate-900">{row.lead}</Text>: {row.rest}
+                <Text as="p" className="text-sm text-foreground-muted leading-relaxed">
+                  <Text as="span" className="font-semibold text-foreground">{row.lead}</Text>: {row.rest}
                 </Text>
               </Box>
             </Box>
@@ -154,18 +154,18 @@ export function TrainingGuidelines() {
         <Box className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),0_2px_4px_rgba(0,0,0,0.2)] ring-1 ring-amber-500/40">
           <Info className="h-5 w-5 text-white drop-shadow-sm" strokeWidth={2.5} />
         </Box>
-        <Text as="h2" className="text-xl font-bold text-slate-900 leading-tight">Instructions</Text>
+        <Text as="h2" className="text-xl font-bold text-foreground leading-tight">Instructions</Text>
       </Box>
-      <Card className="p-0 overflow-hidden border border-slate-200 shadow-sm rounded-xl bg-white">
-        <Box className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+      <Card className="p-0 overflow-hidden border border-border shadow-sm rounded-xl bg-surface">
+        <Box className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
           <GuidelineColumn theme={THEME.dos} flat={FLAT_DOS} expanded={expanded} />
           <GuidelineColumn theme={THEME.donts} flat={FLAT_DONTS} expanded={expanded} />
         </Box>
-        <Box className="flex justify-center border-t border-slate-200 py-2.5">
+        <Box className="flex justify-center border-t border-border py-2.5">
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1 text-slate-600"
+            className="gap-1 text-foreground-muted"
             onClick={() => setExpanded((v) => !v)}
           >
             {expanded ? "Show less" : "Show more"}

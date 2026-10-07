@@ -40,17 +40,17 @@ function formatRange(start, end) {
 
 // Category → visual treatment. Keys match the `category` field the API returns.
 const CATEGORY_META = {
-  completed:   { label: "Completed",   badge: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200", icon: CheckCircle2 },
-  ongoing:     { label: "In progress", badge: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",          icon: PlayCircle },
-  upcoming:    { label: "Upcoming",    badge: "bg-violet-50 text-violet-700 ring-1 ring-violet-200",    icon: Clock },
-  cancelled:   { label: "Cancelled",   badge: "bg-slate-100 text-slate-600 ring-1 ring-slate-200",      icon: XCircle },
+  completed:   { label: "Completed",   badge: "bg-success-subtle text-success-subtle-foreground ring-1 ring-success-border", icon: CheckCircle2 },
+  ongoing:     { label: "In progress", badge: "bg-info-subtle text-info-subtle-foreground ring-1 ring-info-border",          icon: PlayCircle },
+  upcoming:    { label: "Upcoming",    badge: "bg-primary-subtle text-primary ring-1 ring-primary-border",    icon: Clock },
+  cancelled:   { label: "Cancelled",   badge: "bg-surface-muted text-foreground-muted ring-1 ring-border",      icon: XCircle },
 };
 
 const SECTIONS = [
-  { key: "completed", title: "Completed trainings", accent: "text-emerald-500", cats: ["completed"] },
-  { key: "ongoing",   title: "In progress",         accent: "text-blue-500",    cats: ["ongoing"] },
-  { key: "upcoming",  title: "Upcoming trainings",  accent: "text-violet-500",  cats: ["upcoming"] },
-  { key: "cancelled", title: "Cancelled",           accent: "text-slate-400",   cats: ["cancelled"] },
+  { key: "completed", title: "Completed trainings", accent: "text-success", cats: ["completed"] },
+  { key: "ongoing",   title: "In progress",         accent: "text-info",    cats: ["ongoing"] },
+  { key: "upcoming",  title: "Upcoming trainings",  accent: "text-primary",  cats: ["upcoming"] },
+  { key: "cancelled", title: "Cancelled",           accent: "text-foreground-subtle",   cats: ["cancelled"] },
 ];
 
 /* ── Read-only star rating ── */
@@ -70,12 +70,12 @@ function StarRating({ value = 0, size = "h-4 w-4" }) {
 function Fact({ icon: Icon, label, value }) {
   return (
     <Box className="flex items-start gap-3">
-      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50">
-        <Icon className="h-4 w-4 text-violet-500" />
+      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-subtle">
+        <Icon className="h-4 w-4 text-primary" />
       </Box>
       <Box className="min-w-0">
-        <Text as="p" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">{label}</Text>
-        <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5 break-words">{value}</Text>
+        <Text as="p" className="text-[11px] uppercase tracking-wider text-foreground-subtle font-semibold">{label}</Text>
+        <Text as="p" className="text-sm font-semibold text-foreground leading-tight mt-0.5 break-words">{value}</Text>
       </Box>
     </Box>
   );
@@ -98,10 +98,10 @@ function StatCard({ icon: Icon, value, label, bg, border, iconBg, iconCls, value
 function RatingMetric({ label, value }) {
   return (
     <Box className="flex-1 min-w-[120px]">
-      <Text as="p" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">{label}</Text>
+      <Text as="p" className="text-[11px] uppercase tracking-wider text-foreground-subtle font-semibold">{label}</Text>
       <Box className="flex items-center gap-2 mt-1">
         <StarRating value={value || 0} size="h-3.5 w-3.5" />
-        <Text as="span" className="text-sm font-bold text-slate-800">{value != null ? value.toFixed(1) : "—"}</Text>
+        <Text as="span" className="text-sm font-bold text-foreground">{value != null ? value.toFixed(1) : "—"}</Text>
       </Box>
     </Box>
   );
@@ -111,13 +111,13 @@ function TrainingCard({ a }) {
   const meta = CATEGORY_META[a.category] || CATEGORY_META.upcoming;
   const StatusIcon = meta.icon;
   return (
-    <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:border-violet-200 hover:shadow-md transition-all">
+    <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:border-primary-border hover:shadow-md transition-all">
       <Box className="flex items-start justify-between gap-3">
         <Box className="min-w-0">
-          <Text as="p" className="text-sm font-semibold text-slate-800 leading-snug">{a.title}</Text>
+          <Text as="p" className="text-sm font-semibold text-foreground leading-snug">{a.title}</Text>
           <Box className="flex items-center gap-1.5 mt-1">
-            <Hash className="h-3 w-3 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs text-slate-500 font-mono">{a.code}</Text>
+            <Hash className="h-3 w-3 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs text-foreground-muted font-mono">{a.code}</Text>
           </Box>
         </Box>
         <Box className="flex items-center gap-2 shrink-0">
@@ -129,7 +129,7 @@ function TrainingCard({ a }) {
             href={`/admin/courses/${a.training_id}`}
             title="Open training detail"
             aria-label="Open training detail"
-            className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-violet-600 hover:border-violet-300 hover:bg-violet-50 transition-colors"
+            className="w-7 h-7 rounded-lg border border-border flex items-center justify-center text-foreground-subtle hover:text-primary hover:border-primary-border hover:bg-primary-subtle transition-colors"
           >
             <ExternalLink className="h-3.5 w-3.5" />
           </Link>
@@ -138,41 +138,41 @@ function TrainingCard({ a }) {
 
       <Box className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3">
         <Box className="flex items-center gap-1.5">
-          <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-          <Text as="span" className="text-xs text-slate-600">{formatRange(a.start_date, a.end_date)}</Text>
+          <Calendar className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+          <Text as="span" className="text-xs text-foreground-muted">{formatRange(a.start_date, a.end_date)}</Text>
         </Box>
         {a.delivery_mode && (
           <Box className="flex items-center gap-1.5">
-            <Video className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs text-slate-600 capitalize">{a.delivery_mode.replace(/_/g, " ")}</Text>
+            <Video className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs text-foreground-muted capitalize">{a.delivery_mode.replace(/_/g, " ")}</Text>
           </Box>
         )}
         {a.bucket && (
           <Box className="flex items-center gap-1.5">
-            <BookOpen className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs text-slate-600 uppercase">{a.bucket}</Text>
+            <BookOpen className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs text-foreground-muted uppercase">{a.bucket}</Text>
           </Box>
         )}
         <Box className="flex items-center gap-1.5">
-          <Users2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-          <Text as="span" className="text-xs text-slate-600">
+          <Users2 className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+          <Text as="span" className="text-xs text-foreground-muted">
             {a.enrolled_count ?? 0}{a.capacity ? ` / ${a.capacity}` : ""} seats
           </Text>
         </Box>
       </Box>
 
-      <Box className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+      <Box className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border">
         {a.reviews > 0 ? (
-          <Box className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-amber-200">
-            <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+          <Box className="inline-flex items-center gap-1.5 bg-warning-subtle text-warning-subtle-foreground text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-warning-border">
+            <Star className="h-3 w-3 fill-amber-500 text-warning" />
             {a.trainer_rating != null ? a.trainer_rating.toFixed(1) : "—"}
             <Text as="span" className="font-normal opacity-70">· {a.reviews} review{a.reviews !== 1 ? "s" : ""}</Text>
           </Box>
         ) : (
-          <Text as="span" className="text-[11px] text-slate-400">No feedback yet</Text>
+          <Text as="span" className="text-[11px] text-foreground-subtle">No feedback yet</Text>
         )}
         {!a.active && (
-          <Box className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-500 text-[11px] font-medium px-2 py-0.5 rounded-lg ring-1 ring-slate-200">
+          <Box className="inline-flex items-center gap-1.5 bg-surface-hover text-foreground-muted text-[11px] font-medium px-2 py-0.5 rounded-lg ring-1 ring-border">
             Unassigned {a.removed_at ? `· ${formatStamp(a.removed_at)}` : ""}
           </Box>
         )}
@@ -197,8 +197,8 @@ export function TrainerDetail({ trainerId }) {
 
   if (error) {
     return (
-      <Card className="p-6 rounded-2xl border-0 bg-red-50">
-        <Text as="p" className="text-red-600 text-sm">Failed to load trainer: {error}</Text>
+      <Card className="p-6 rounded-2xl border-0 bg-error-subtle">
+        <Text as="p" className="text-error text-sm">Failed to load trainer: {error}</Text>
       </Card>
     );
   }
@@ -243,38 +243,38 @@ export function TrainerDetail({ trainerId }) {
 
       {/* Profile hero */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-7 py-7">
+        <Box className="bg-[#d7e3fc] border-b border-primary-border px-7 py-7">
           <Box className="flex items-start justify-between gap-4 flex-wrap">
             <Box className="flex items-center gap-5">
-              <Avatar className="h-16 w-16 ring-2 ring-violet-200 shrink-0">
-                <AvatarFallback className="bg-violet-600 text-white font-bold text-2xl">
+              <Avatar className="h-16 w-16 ring-2 ring-primary-border shrink-0">
+                <AvatarFallback className="bg-primary text-primary-foreground font-bold text-2xl">
                   {initialsOf(trainer.name)}
                 </AvatarFallback>
               </Avatar>
               <Box>
                 <Box className="flex items-center gap-2.5 flex-wrap">
-                  <Text as="h2" className="text-xl font-bold text-slate-900">{trainer.name}</Text>
-                  <Badge className={`border-0 text-[11px] font-semibold px-2.5 py-0.5 ${trainer.is_active ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200" : "bg-red-100 text-red-600 ring-1 ring-red-200"}`}>
+                  <Text as="h2" className="text-xl font-bold text-foreground">{trainer.name}</Text>
+                  <Badge className={`border-0 text-[11px] font-semibold px-2.5 py-0.5 ${trainer.is_active ? "bg-success-subtle text-success-subtle-foreground ring-1 ring-success-border" : "bg-error-subtle text-error ring-1 ring-error-border"}`}>
                     {trainer.is_active ? "● Active" : "● Inactive"}
                   </Badge>
                   {setupPending && (
-                    <Badge className="border-0 text-[11px] font-semibold px-2.5 py-0.5 bg-amber-50 text-amber-700 ring-1 ring-amber-200">
+                    <Badge className="border-0 text-[11px] font-semibold px-2.5 py-0.5 bg-warning-subtle text-warning-subtle-foreground ring-1 ring-warning-border">
                       ● Setup pending
                     </Badge>
                   )}
                 </Box>
-                <Text as="p" className="text-sm text-slate-500 mt-1">{trainer.email}</Text>
+                <Text as="p" className="text-sm text-foreground-muted mt-1">{trainer.email}</Text>
                 {/* Overall rating inline */}
                 <Box className="flex items-center gap-2 mt-2">
                   {hasRatings ? (
                     <>
                       <StarRating value={rating.trainer_rating || 0} />
-                      <Text as="span" className="text-sm font-bold text-slate-800">{(rating.trainer_rating ?? 0).toFixed(1)}</Text>
-                      <Text as="span" className="text-xs text-slate-400">· {rating.reviews} review{rating.reviews !== 1 ? "s" : ""}</Text>
+                      <Text as="span" className="text-sm font-bold text-foreground">{(rating.trainer_rating ?? 0).toFixed(1)}</Text>
+                      <Text as="span" className="text-xs text-foreground-subtle">· {rating.reviews} review{rating.reviews !== 1 ? "s" : ""}</Text>
                     </>
                   ) : (
-                    <Text as="span" className="text-xs text-slate-400 inline-flex items-center gap-1.5">
-                      <Star className="h-3.5 w-3.5 text-slate-300 fill-slate-200" /> No ratings yet
+                    <Text as="span" className="text-xs text-foreground-subtle inline-flex items-center gap-1.5">
+                      <Star className="h-3.5 w-3.5 text-foreground-subtle fill-slate-200" /> No ratings yet
                     </Text>
                   )}
                 </Box>
@@ -282,7 +282,7 @@ export function TrainerDetail({ trainerId }) {
             </Box>
             <Box className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
               <Button variant="outline" onClick={() => setEmailOpen(true)}
-                className="border-slate-200 text-slate-700 hover:bg-slate-100 bg-white shrink-0">
+                className="border-border text-foreground hover:bg-surface-muted bg-surface shrink-0">
                 <Mail className="h-3.5 w-3.5 mr-1.5" /> Email
               </Button>
               {setupPending && (
@@ -293,7 +293,7 @@ export function TrainerDetail({ trainerId }) {
               )}
               <Button
                 variant="outline"
-                className="border-violet-200 text-violet-700 hover:bg-violet-100 bg-white shrink-0"
+                className="border-primary-border text-primary hover:bg-primary-subtle bg-surface shrink-0"
                 onClick={() => setEditOpen(true)}
               >
                 <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit Profile
@@ -312,19 +312,19 @@ export function TrainerDetail({ trainerId }) {
           <Separator className="my-5" />
           <Box>
             <Box className="flex items-center gap-1.5 mb-2.5">
-              <Target className="h-3.5 w-3.5 text-violet-500" />
-              <Text as="p" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Subject Excellence</Text>
+              <Target className="h-3.5 w-3.5 text-primary" />
+              <Text as="p" className="text-[11px] uppercase tracking-wider text-foreground-subtle font-semibold">Subject Excellence</Text>
             </Box>
             {Array.isArray(trainer.specializations) && trainer.specializations.length > 0 ? (
               <Box className="flex flex-wrap gap-1.5">
                 {trainer.specializations.map((s) => (
-                  <Badge key={s} className="border-0 bg-violet-50 text-violet-700 ring-1 ring-violet-200 text-xs font-semibold px-2.5 py-1">
+                  <Badge key={s} className="border-0 bg-primary-subtle text-primary ring-1 ring-primary-border text-xs font-semibold px-2.5 py-1">
                     {s}
                   </Badge>
                 ))}
               </Box>
             ) : (
-              <Text as="p" className="text-sm text-slate-400">No specializations set.</Text>
+              <Text as="p" className="text-sm text-foreground-subtle">No specializations set.</Text>
             )}
           </Box>
 
@@ -332,8 +332,8 @@ export function TrainerDetail({ trainerId }) {
             <>
               <Separator className="my-5" />
               <Box>
-                <Text as="p" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">About</Text>
-                <Text as="p" className="text-sm text-slate-600 leading-relaxed">{trainer.bio}</Text>
+                <Text as="p" className="text-[11px] uppercase tracking-wider text-foreground-subtle font-semibold mb-2">About</Text>
+                <Text as="p" className="text-sm text-foreground-muted leading-relaxed">{trainer.bio}</Text>
               </Box>
             </>
           )}
@@ -342,22 +342,22 @@ export function TrainerDetail({ trainerId }) {
 
       {/* Summary stats */}
       <Box className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <StatCard icon={GraduationCap} value={summary.total ?? 0}              label="Total Trainings" bg="bg-slate-50"    border="border border-slate-200"   iconBg="bg-slate-100"   iconCls="text-slate-500"   valueCls="text-slate-800"   labelCls="text-slate-500" />
-        <StatCard icon={CheckCircle2}  value={summary.completed ?? 0}          label="Completed"       bg="bg-emerald-50"  border="border border-emerald-100" iconBg="bg-emerald-100" iconCls="text-emerald-600" valueCls="text-emerald-900" labelCls="text-emerald-600" />
-        <StatCard icon={Clock}         value={summary.upcoming ?? 0}           label="Upcoming"        bg="bg-violet-50"   border="border border-violet-100"  iconBg="bg-violet-100"  iconCls="text-violet-600"  valueCls="text-violet-900"  labelCls="text-violet-500" />
-        <StatCard icon={PlayCircle}    value={summary.ongoing ?? 0}            label="In Progress"     bg="bg-blue-50"     border="border border-blue-100"    iconBg="bg-blue-100"    iconCls="text-blue-600"    valueCls="text-blue-900"    labelCls="text-blue-500" />
-        <StatCard icon={Users2}        value={summary.total_participants ?? 0} label="Participants"    bg="bg-violet-50"   border="border border-violet-100"  iconBg="bg-violet-100"  iconCls="text-violet-600"  valueCls="text-violet-900"  labelCls="text-violet-500" />
+        <StatCard icon={GraduationCap} value={summary.total ?? 0}              label="Total Trainings" bg="bg-surface-hover"    border="border border-border"   iconBg="bg-surface-muted"   iconCls="text-foreground-muted"   valueCls="text-foreground"   labelCls="text-foreground-muted" />
+        <StatCard icon={CheckCircle2}  value={summary.completed ?? 0}          label="Completed"       bg="bg-success-subtle"  border="border border-success-border" iconBg="bg-success-subtle" iconCls="text-success" valueCls="text-success-subtle-foreground" labelCls="text-success" />
+        <StatCard icon={Clock}         value={summary.upcoming ?? 0}           label="Upcoming"        bg="bg-primary-subtle"   border="border border-primary-border"  iconBg="bg-primary-subtle"  iconCls="text-primary"  valueCls="text-primary"  labelCls="text-primary" />
+        <StatCard icon={PlayCircle}    value={summary.ongoing ?? 0}            label="In Progress"     bg="bg-info-subtle"     border="border border-info-border"    iconBg="bg-info-subtle"    iconCls="text-info"    valueCls="text-blue-900"    labelCls="text-info" />
+        <StatCard icon={Users2}        value={summary.total_participants ?? 0} label="Participants"    bg="bg-primary-subtle"   border="border border-primary-border"  iconBg="bg-primary-subtle"  iconCls="text-primary"  valueCls="text-primary"  labelCls="text-primary" />
       </Box>
 
       {/* Ratings & feedback */}
       {hasRatings && (
         <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-          <Box className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
-            <Box className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-              <Star className="h-4 w-4 text-amber-500 fill-amber-400" />
+          <Box className="px-6 py-4 border-b border-border flex items-center gap-2.5">
+            <Box className="w-8 h-8 rounded-lg bg-warning-subtle flex items-center justify-center">
+              <Star className="h-4 w-4 text-warning fill-amber-400" />
             </Box>
-            <Text as="h3" className="text-sm font-bold text-slate-800">Ratings &amp; Feedback</Text>
-            <Badge className="border-0 bg-amber-50 text-amber-600 text-[11px] font-semibold ml-1">{rating.reviews} review{rating.reviews !== 1 ? "s" : ""}</Badge>
+            <Text as="h3" className="text-sm font-bold text-foreground">Ratings &amp; Feedback</Text>
+            <Badge className="border-0 bg-warning-subtle text-warning text-[11px] font-semibold ml-1">{rating.reviews} review{rating.reviews !== 1 ? "s" : ""}</Badge>
           </Box>
           <Box className="p-6 flex flex-wrap gap-6 items-center">
             <RatingMetric label="Trainer" value={rating.trainer_rating} />
@@ -365,10 +365,10 @@ export function TrainerDetail({ trainerId }) {
             <RatingMetric label="Content" value={rating.content_rating} />
             {rating.recommend_pct != null && (
               <Box className="flex-1 min-w-[120px]">
-                <Text as="p" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Would Recommend</Text>
+                <Text as="p" className="text-[11px] uppercase tracking-wider text-foreground-subtle font-semibold">Would Recommend</Text>
                 <Box className="flex items-center gap-1.5 mt-1">
-                  <ThumbsUp className="h-3.5 w-3.5 text-emerald-500" />
-                  <Text as="span" className="text-sm font-bold text-slate-800">{rating.recommend_pct}%</Text>
+                  <ThumbsUp className="h-3.5 w-3.5 text-success" />
+                  <Text as="span" className="text-sm font-bold text-foreground">{rating.recommend_pct}%</Text>
                 </Box>
               </Box>
             )}
@@ -378,20 +378,20 @@ export function TrainerDetail({ trainerId }) {
 
       {/* Trainings */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <Box className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-            <GraduationCap className="h-4 w-4 text-violet-500" />
+        <Box className="px-6 py-4 border-b border-border flex items-center gap-2.5">
+          <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+            <GraduationCap className="h-4 w-4 text-primary" />
           </Box>
-          <Text as="h3" className="text-sm font-bold text-slate-800">Trainings</Text>
-          <Badge className="border-0 bg-violet-50 text-violet-600 text-[11px] font-semibold ml-1">{assignments.length}</Badge>
+          <Text as="h3" className="text-sm font-bold text-foreground">Trainings</Text>
+          <Badge className="border-0 bg-primary-subtle text-primary text-[11px] font-semibold ml-1">{assignments.length}</Badge>
         </Box>
 
         {assignments.length === 0 ? (
           <Box className="py-20 text-center">
-            <Box className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-              <GraduationCap className="h-6 w-6 text-slate-400" />
+            <Box className="w-12 h-12 rounded-2xl bg-surface-muted flex items-center justify-center mx-auto mb-3">
+              <GraduationCap className="h-6 w-6 text-foreground-subtle" />
             </Box>
-            <Text as="p" className="text-sm font-medium text-slate-500">No trainings assigned yet.</Text>
+            <Text as="p" className="text-sm font-medium text-foreground-muted">No trainings assigned yet.</Text>
           </Box>
         ) : (
           <Box className="p-6 space-y-6">
@@ -402,7 +402,7 @@ export function TrainerDetail({ trainerId }) {
                 <Box key={section.key} className="space-y-3">
                   <Box className="flex items-center gap-2">
                     <Text as="h4" className={`text-[11px] font-bold uppercase tracking-wider ${section.accent}`}>{section.title}</Text>
-                    <Badge className="border-0 bg-slate-100 text-slate-500 text-[10px] font-semibold">{items.length}</Badge>
+                    <Badge className="border-0 bg-surface-muted text-foreground-muted text-[10px] font-semibold">{items.length}</Badge>
                   </Box>
                   <Box className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                     {items.map((a, i) => <TrainingCard key={`${a.training_id}-${i}`} a={a} />)}

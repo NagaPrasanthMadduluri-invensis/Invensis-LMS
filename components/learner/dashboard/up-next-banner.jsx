@@ -38,7 +38,7 @@ export function UpNextBanner({ course, detail, session, generatedAt }) {
         <Box className="min-w-[260px] flex-1">
           <Box className="inline-flex items-center gap-1.5 rounded-full bg-white/12 px-2.5 py-1">
             <Box
-              className={`h-1.5 w-1.5 rounded-full ${live ? "animate-pulse bg-emerald-400" : "bg-brand-violet-soft"}`}
+              className={`h-1.5 w-1.5 rounded-full ${live ? "animate-pulse bg-success" : "bg-brand-violet-soft"}`}
             />
             <Text as="span" className="text-[10px] font-bold tracking-[0.12em] text-white/85">
               UP NEXT{live ? " · LIVE" : ""}
@@ -73,7 +73,7 @@ export function UpNextBanner({ course, detail, session, generatedAt }) {
             <Button
               render={<a href={meetingUrl} target="_blank" rel="noopener noreferrer" />}
               size="lg"
-              className="h-11 gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-brand-hero hover:bg-white/90"
+              className="h-11 gap-2 rounded-xl bg-surface px-5 text-sm font-semibold text-brand-hero hover:bg-white/90"
             >
               <Video className="h-4 w-4" />
               Join session

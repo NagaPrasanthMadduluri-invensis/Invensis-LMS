@@ -68,7 +68,7 @@ function CourseCard({ course, onClick }) {
           <Badge className={`text-[10px] border-0 ${typeCfg.color}`}>{typeCfg.label}</Badge>
         </Box>
         <Box className="absolute top-2 right-2">
-          <Badge className={`text-[10px] border-0 ${course.is_active ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"}`}>
+          <Badge className={`text-[10px] border-0 ${course.is_active ? "bg-success-subtle text-success-subtle-foreground" : "bg-error-subtle text-error"}`}>
             {course.is_active ? "Active" : "Inactive"}
           </Badge>
         </Box>
@@ -79,12 +79,12 @@ function CourseCard({ course, onClick }) {
         <Box>
           <Text
             as="h3"
-            className="text-sm font-semibold text-slate-900 leading-snug group-hover:text-violet-600 transition-colors line-clamp-2"
+            className="text-sm font-semibold text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-2"
           >
             {course.name}
           </Text>
           {course.category && (
-            <Text as="p" className="text-[11px] text-slate-400 mt-0.5">
+            <Text as="p" className="text-[11px] text-foreground-subtle mt-0.5">
               {course.category}
             </Text>
           )}
@@ -93,28 +93,28 @@ function CourseCard({ course, onClick }) {
         {/* Stats 2×2 */}
         <Box className="grid grid-cols-2 gap-x-3 gap-y-1.5">
           <Box className="flex items-center gap-1.5">
-            <Layers className="w-3 h-3 text-slate-400 shrink-0" />
-            <Text as="span" className="text-[11px] text-slate-500">{course.modules_count ?? 0} Modules</Text>
+            <Layers className="w-3 h-3 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-[11px] text-foreground-muted">{course.modules_count ?? 0} Modules</Text>
           </Box>
           <Box className="flex items-center gap-1.5">
-            <FileText className="w-3 h-3 text-slate-400 shrink-0" />
-            <Text as="span" className="text-[11px] text-slate-500">{course.lessons_count ?? 0} Lessons</Text>
+            <FileText className="w-3 h-3 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-[11px] text-foreground-muted">{course.lessons_count ?? 0} Lessons</Text>
           </Box>
           <Box className="flex items-center gap-1.5">
-            <HelpCircle className="w-3 h-3 text-slate-400 shrink-0" />
-            <Text as="span" className="text-[11px] text-slate-500">{course.assessments_count ?? 0} Assessments</Text>
+            <HelpCircle className="w-3 h-3 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-[11px] text-foreground-muted">{course.assessments_count ?? 0} Assessments</Text>
           </Box>
           <Box className="flex items-center gap-1.5">
-            <Users className="w-3 h-3 text-slate-400 shrink-0" />
-            <Text as="span" className="text-[11px] text-slate-500">{course.enrollments_count ?? 0} Enrolled</Text>
+            <Users className="w-3 h-3 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-[11px] text-foreground-muted">{course.enrollments_count ?? 0} Enrolled</Text>
           </Box>
         </Box>
 
         {/* Footer */}
-        <Box className="flex items-center justify-between pt-2 border-t border-slate-100">
+        <Box className="flex items-center justify-between pt-2 border-t border-border">
           <Box className="flex items-center gap-1">
-            <Clock className="w-3 h-3 text-slate-400" />
-            <Text as="span" className="text-[11px] text-slate-400">
+            <Clock className="w-3 h-3 text-foreground-subtle" />
+            <Text as="span" className="text-[11px] text-foreground-subtle">
               {course.duration_hours ?? 0}-Hour · {course.duration_days ?? 0} Days
             </Text>
           </Box>
@@ -151,8 +151,8 @@ export function CourseSelector() {
 
   if (error) {
     return (
-      <Card className="p-6 border-red-100 bg-red-50">
-        <Text as="p" className="text-red-600 text-sm">Failed to load courses: {error}</Text>
+      <Card className="p-6 border-error-border bg-error-subtle">
+        <Text as="p" className="text-error text-sm">Failed to load courses: {error}</Text>
       </Card>
     );
   }
@@ -193,7 +193,7 @@ export function CourseSelector() {
           <Card key={s.label} className={`p-4 border-0 shadow-sm rounded-xl ${s.bg}`}>
             <Box className="flex items-start justify-between">
               <Box>
-                <Text as="span" className="text-[11px] font-medium text-slate-500 block">{s.label}</Text>
+                <Text as="span" className="text-[11px] font-medium text-foreground-muted block">{s.label}</Text>
                 <Text as="h3" className={`text-3xl font-bold leading-none mt-1 ${s.val}`}>{s.value}</Text>
               </Box>
               <Box className={`p-2 rounded-xl shrink-0 ${s.icon}`}>
@@ -220,7 +220,7 @@ export function CourseSelector() {
           ${
             activeFilter === f.key
               ? "border-primary text-primary"
-              : "border-transparent text-slate-500 hover:text-slate-900"
+              : "border-transparent text-foreground-muted hover:text-foreground"
           }
         `}
       >
@@ -232,7 +232,7 @@ export function CourseSelector() {
             ${
               activeFilter === f.key
                 ? "bg-primary/10 text-primary"
-                : "bg-slate-100 text-slate-500"
+                : "bg-surface-muted text-foreground-muted"
             }
           `}
         >
@@ -247,34 +247,34 @@ export function CourseSelector() {
 
       {/* ── Search ── */}
       <Box className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
         <Input
           placeholder="Search by course name or category..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 pr-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-violet-400"
+          className="pl-9 pr-9 h-10 text-sm bg-surface border-border-strong focus-visible:ring-focus"
         />
         {search && (
-          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-subtle hover:text-foreground-muted">
             <X className="h-4 w-4" />
           </button>
         )}
       </Box>
 
-      <Text as="p" className="text-xs text-slate-400">
+      <Text as="p" className="text-xs text-foreground-subtle">
         Showing {filtered.length} of {courses.length} course{courses.length !== 1 ? "s" : ""}
       </Text>
 
       {/* ── Course Grid ── */}
       {filtered.length === 0 ? (
-        <Card className="p-10 text-center border-0 shadow-sm bg-white rounded-xl">
-          <Box className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <BookOpen className="h-6 w-6 text-slate-400" />
+        <Card className="p-10 text-center border-0 shadow-sm bg-surface rounded-xl">
+          <Box className="w-12 h-12 bg-surface-muted rounded-full flex items-center justify-center mx-auto mb-3">
+            <BookOpen className="h-6 w-6 text-foreground-subtle" />
           </Box>
-          <Text as="p" className="text-sm font-medium text-slate-600 mb-1">
+          <Text as="p" className="text-sm font-medium text-foreground-muted mb-1">
             {search ? "No courses match your search" : "No courses available"}
           </Text>
-          {search && <Text as="p" className="text-xs text-slate-400">Try a different keyword</Text>}
+          {search && <Text as="p" className="text-xs text-foreground-subtle">Try a different keyword</Text>}
         </Card>
       ) : (
         // <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

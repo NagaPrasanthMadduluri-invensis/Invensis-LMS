@@ -58,22 +58,22 @@ import {
 } from "@/lib/datetime";
 
 const STATUS_CONFIG = {
-  pending:   { label: "Pending",   dark: "bg-amber-400/90 text-amber-950",    light: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80" },
-  active:    { label: "Active",    dark: "bg-emerald-400/90 text-emerald-950", light: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80" },
-  ongoing:   { label: "Ongoing",   dark: "bg-blue-400/90 text-blue-950",      light: "bg-blue-50 text-blue-700 ring-1 ring-blue-200/80" },
-  completed: { label: "Completed", dark: "bg-white/20 text-white/90",          light: "bg-slate-100 text-slate-600" },
-  cancelled: { label: "Cancelled", dark: "bg-red-400/90 text-red-950",         light: "bg-red-50 text-red-600 ring-1 ring-red-200/80" },
-  postponed: { label: "Postponed", dark: "bg-orange-400/90 text-orange-950",   light: "bg-orange-50 text-orange-700 ring-1 ring-orange-200/80" },
-  suspended: { label: "Suspended", dark: "bg-rose-400/90 text-rose-950",       light: "bg-rose-50 text-rose-700 ring-1 ring-rose-200/80" },
+  pending:   { label: "Pending",   dark: "bg-amber-400/90 text-warning-subtle-foreground",    light: "bg-warning-subtle text-warning-subtle-foreground ring-1 ring-amber-200/80" },
+  active:    { label: "Active",    dark: "bg-emerald-400/90 text-success-subtle-foreground", light: "bg-success-subtle text-success-subtle-foreground ring-1 ring-emerald-200/80" },
+  ongoing:   { label: "Ongoing",   dark: "bg-blue-400/90 text-info-subtle-foreground",      light: "bg-info-subtle text-info-subtle-foreground ring-1 ring-blue-200/80" },
+  completed: { label: "Completed", dark: "bg-white/20 text-white/90",          light: "bg-surface-muted text-foreground-muted" },
+  cancelled: { label: "Cancelled", dark: "bg-red-400/90 text-error-subtle-foreground",         light: "bg-error-subtle text-error ring-1 ring-red-200/80" },
+  postponed: { label: "Postponed", dark: "bg-orange-400/90 text-warning-subtle-foreground",   light: "bg-warning-subtle text-warning-subtle-foreground ring-1 ring-orange-200/80" },
+  suspended: { label: "Suspended", dark: "bg-rose-400/90 text-error-subtle-foreground",       light: "bg-error-subtle text-error-subtle-foreground ring-1 ring-rose-200/80" },
 };
 
 // Per-participant enrolment status → badge style + label.
 const ENROLMENT_STATUS = {
-  confirmed:   { label: "Confirmed",   className: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80" },
-  completed:   { label: "Completed",   className: "bg-violet-50 text-violet-700 ring-1 ring-violet-200/80" },
-  cancelled:   { label: "Cancelled",   className: "bg-red-50 text-red-600 ring-1 ring-red-200/80" },
-  transferred: { label: "Transferred", className: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80" },
-  failed:      { label: "Failed",      className: "bg-slate-100 text-slate-500 ring-1 ring-slate-200/80" },
+  confirmed:   { label: "Confirmed",   className: "bg-success-subtle text-success-subtle-foreground ring-1 ring-emerald-200/80" },
+  completed:   { label: "Completed",   className: "bg-primary-subtle text-primary ring-1 ring-violet-200/80" },
+  cancelled:   { label: "Cancelled",   className: "bg-error-subtle text-error ring-1 ring-red-200/80" },
+  transferred: { label: "Transferred", className: "bg-warning-subtle text-warning-subtle-foreground ring-1 ring-amber-200/80" },
+  failed:      { label: "Failed",      className: "bg-surface-muted text-foreground-muted ring-1 ring-slate-200/80" },
 };
 
 const MODE_LABEL = { virtual: "Live Virtual", in_person: "In Person", hybrid: "Hybrid", one_to_one: "1-to-1 Coaching" };
@@ -93,36 +93,36 @@ function formatSessionDateTime(iso, tz) {
 /* ── Shared form helpers ── */
 function FInput({ icon: Icon, accentColor = "indigo", textarea, rows, ...props }) {
   const focusRing = accentColor === "red"
-    ? "focus-within:border-red-400 focus-within:shadow-[0_0_0_3px_rgba(252,165,165,0.35)]"
+    ? "focus-within:border-error-border focus-within:shadow-[0_0_0_3px_rgba(252,165,165,0.35)]"
     : accentColor === "blue"
     ? "focus-within:border-blue-400 focus-within:shadow-[0_0_0_3px_rgba(147,197,253,0.35)]"
-    : "focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)]";
+    : "focus-within:border-primary-border focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)]";
 
   if (textarea) {
     return (
-      <Box className={`rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 ${focusRing} transition-all duration-150`}>
+      <Box className={`rounded-xl border border-border bg-surface shadow-sm hover:border-border-strong ${focusRing} transition-all duration-150`}>
         <textarea rows={rows || 3} {...props}
-          className="w-full bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400 resize-none px-3.5 py-3" />
+          className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder:text-foreground-subtle resize-none px-3.5 py-3" />
       </Box>
     );
   }
   return (
-    <Box className={`group flex items-center gap-3 h-12 rounded-xl border border-slate-200 bg-white px-3.5 shadow-sm hover:border-slate-300 ${focusRing} transition-all duration-150`}>
-      {Icon && <Icon className="h-4 w-4 text-slate-400 shrink-0 group-focus-within:text-violet-500 transition-colors" />}
+    <Box className={`group flex items-center gap-3 h-12 rounded-xl border border-border bg-surface px-3.5 shadow-sm hover:border-border-strong ${focusRing} transition-all duration-150`}>
+      {Icon && <Icon className="h-4 w-4 text-foreground-subtle shrink-0 group-focus-within:text-primary transition-colors" />}
       <input {...props}
-        className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed" />
+        className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-foreground-subtle disabled:opacity-50 disabled:cursor-not-allowed" />
     </Box>
   );
 }
 
 function Section({ label, children }) {
   return (
-    <Box className="rounded-xl border border-slate-200 overflow-hidden">
-      <Box className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+    <Box className="rounded-xl border border-border overflow-hidden">
+      <Box className="flex items-center gap-2 px-4 py-2.5 bg-surface-hover border-b border-border">
         <Box className="w-1 h-4 rounded-full bg-violet-500" />
-        <Text as="p" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</Text>
+        <Text as="p" className="text-[10px] font-bold uppercase tracking-widest text-foreground-subtle">{label}</Text>
       </Box>
-      <Box className="p-5 bg-white space-y-4">{children}</Box>
+      <Box className="p-5 bg-surface space-y-4">{children}</Box>
     </Box>
   );
 }
@@ -130,8 +130,8 @@ function Section({ label, children }) {
 function Field({ label, required, children }) {
   return (
     <Box className="space-y-1.5">
-      <Text as="p" className="text-xs font-semibold text-slate-600">
-        {label}{required && <Text as="span" className="text-red-500 ml-0.5">*</Text>}
+      <Text as="p" className="text-xs font-semibold text-foreground-muted">
+        {label}{required && <Text as="span" className="text-error ml-0.5">*</Text>}
       </Text>
       {children}
     </Box>
@@ -141,12 +141,12 @@ function Field({ label, required, children }) {
 function FormError({ error, fieldErrors }) {
   if (!error && !fieldErrors) return null;
   return (
-    <Box className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3">
-      <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+    <Box className="flex items-start gap-2.5 rounded-xl border border-error-border bg-error-subtle px-3.5 py-3">
+      <AlertCircle className="h-4 w-4 text-error shrink-0 mt-0.5" />
       <Box>
-        {error && <Text as="p" className="text-xs text-red-700 font-medium">{error}</Text>}
+        {error && <Text as="p" className="text-xs text-error-subtle-foreground font-medium">{error}</Text>}
         {fieldErrors && Object.entries(fieldErrors).map(([k, msgs]) => (
-          <Text as="p" key={k} className="text-xs text-red-600 mt-0.5">
+          <Text as="p" key={k} className="text-xs text-error mt-0.5">
             {k}: {Array.isArray(msgs) ? msgs.join(", ") : String(msgs)}
           </Text>
         ))}
@@ -157,18 +157,18 @@ function FormError({ error, fieldErrors }) {
 
 function FSelect({ value, onChange, disabled, placeholder, children }) {
   return (
-    <Box className="relative rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all duration-150">
+    <Box className="relative rounded-xl border border-border bg-surface shadow-sm hover:border-border-strong focus-within:border-primary-border focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all duration-150">
       <select
         value={value}
         onChange={onChange}
         disabled={disabled}
-        className="w-full h-12 bg-transparent border-none outline-none text-sm text-slate-800 px-3.5 pr-9 appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-12 bg-transparent border-none outline-none text-sm text-foreground px-3.5 pr-9 appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {placeholder && <option value="" disabled>{placeholder}</option>}
         {children}
       </select>
       <Box className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2">
-        <ChevronDown className="h-4 w-4 text-slate-400" />
+        <ChevronDown className="h-4 w-4 text-foreground-subtle" />
       </Box>
     </Box>
   );
@@ -178,13 +178,13 @@ function FSelect({ value, onChange, disabled, placeholder, children }) {
 function Fact({ icon: Icon, label, value, hint }) {
   return (
     <Box className="flex items-start gap-3">
-      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-        <Icon className="h-4 w-4 text-slate-500" />
+      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
+        <Icon className="h-4 w-4 text-foreground-muted" />
       </Box>
       <Box className="min-w-0">
-        <Text as="p" className="text-[11px] uppercase tracking-wide text-slate-400 font-medium">{label}</Text>
-        <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5">{value}</Text>
-        {hint && <Text as="p" className="text-[11px] text-slate-400 mt-0.5">{hint}</Text>}
+        <Text as="p" className="text-[11px] uppercase tracking-wide text-foreground-subtle font-medium">{label}</Text>
+        <Text as="p" className="text-sm font-semibold text-foreground leading-tight mt-0.5">{value}</Text>
+        {hint && <Text as="p" className="text-[11px] text-foreground-subtle mt-0.5">{hint}</Text>}
       </Box>
     </Box>
   );
@@ -208,12 +208,12 @@ function SessionTopicsCard({ sessions, timezone }) {
   const anyTopics = list.some((s) => s.planned_topics?.trim());
 
   return (
-    <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-white">
-      <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-        <BookText className="h-4 w-4 text-slate-400" />
-        <Text as="h3" className="text-sm font-semibold text-slate-700">Day-wise Topics</Text>
+    <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-surface">
+      <Box className="px-5 py-4 border-b border-border flex items-center gap-2">
+        <BookText className="h-4 w-4 text-foreground-subtle" />
+        <Text as="h3" className="text-sm font-semibold text-foreground">Day-wise Topics</Text>
         {list.length > 0 && (
-          <Badge className="border-0 bg-slate-100 text-slate-600 text-[11px] ml-1">
+          <Badge className="border-0 bg-surface-muted text-foreground-muted text-[11px] ml-1">
             {list.length} day{list.length !== 1 ? "s" : ""}
           </Badge>
         )}
@@ -221,12 +221,12 @@ function SessionTopicsCard({ sessions, timezone }) {
 
       <Box className="p-5">
         {list.length === 0 ? (
-          <Box className="rounded-xl border border-dashed border-slate-200 py-10 text-center">
-            <Text as="p" className="text-sm text-slate-400">Topics are set by the assigned trainer and aren&apos;t available on this view.</Text>
+          <Box className="rounded-xl border border-dashed border-border py-10 text-center">
+            <Text as="p" className="text-sm text-foreground-subtle">Topics are set by the assigned trainer and aren&apos;t available on this view.</Text>
           </Box>
         ) : !anyTopics ? (
-          <Box className="rounded-xl border border-dashed border-slate-200 py-10 text-center">
-            <Text as="p" className="text-sm text-slate-400">The trainer hasn&apos;t published any topics yet.</Text>
+          <Box className="rounded-xl border border-dashed border-border py-10 text-center">
+            <Text as="p" className="text-sm text-foreground-subtle">The trainer hasn&apos;t published any topics yet.</Text>
           </Box>
         ) : (
           <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -236,22 +236,22 @@ function SessionTopicsCard({ sessions, timezone }) {
               return (
                 <Box key={s.day_number} className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
                   <Box className="flex items-center gap-2.5">
-                    <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50">
-                      <Calendar className="h-4 w-4 text-violet-600" />
+                    <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-subtle">
+                      <Calendar className="h-4 w-4 text-primary" />
                     </Box>
                     <Box className="min-w-0">
-                      <Text as="p" className="text-sm font-semibold leading-tight text-slate-800">Day {s.day_number}</Text>
-                      {when && <Text as="span" className="text-[11px] text-slate-400">{when}</Text>}
+                      <Text as="p" className="text-sm font-semibold leading-tight text-foreground">Day {s.day_number}</Text>
+                      {when && <Text as="span" className="text-[11px] text-foreground-subtle">{when}</Text>}
                     </Box>
                   </Box>
                   {hasTopics ? (
-                    <Text as="p" className="mt-3 text-sm whitespace-pre-wrap text-slate-600">
+                    <Text as="p" className="mt-3 text-sm whitespace-pre-wrap text-foreground-muted">
                       {s.planned_topics}
                     </Text>
                   ) : (
-                    <Box className="mt-3 flex items-center gap-1.5 rounded-lg border border-dashed border-slate-200 px-2.5 py-2">
-                      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-slate-300" />
-                      <Text as="p" className="text-xs text-slate-400">Topics not added yet</Text>
+                    <Box className="mt-3 flex items-center gap-1.5 rounded-lg border border-dashed border-border px-2.5 py-2">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-foreground-subtle" />
+                      <Text as="p" className="text-xs text-foreground-subtle">Topics not added yet</Text>
                     </Box>
                   )}
                 </Box>
@@ -293,14 +293,14 @@ function AssignTrainerDialog({ open, onOpenChange, token, trainingRef, currentTr
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px] overflow-hidden" style={{padding:0,gap:0}}>
-          <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
+          <Box className="bg-[#d7e3fc] border-b border-primary-border px-6 py-5">
             <Box className="flex items-center gap-3">
-              <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
-                <UserCheck className="w-4 h-4 text-white" />
+              <Box className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0">
+                <UserCheck className="w-4 h-4 text-primary-foreground" />
               </Box>
               <Box>
-                <DialogTitle className="text-base font-semibold text-slate-800">Assign Trainer</DialogTitle>
-                <DialogDescription className="text-xs text-slate-500 mt-0.5">Select an active trainer for this training.</DialogDescription>
+                <DialogTitle className="text-base font-semibold text-foreground">Assign Trainer</DialogTitle>
+                <DialogDescription className="text-xs text-foreground-muted mt-0.5">Select an active trainer for this training.</DialogDescription>
               </Box>
             </Box>
           </Box>
@@ -320,16 +320,16 @@ function AssignTrainerDialog({ open, onOpenChange, token, trainingRef, currentTr
                 </FSelect>
               </Field>
               <Button variant="ghost" size="sm"
-                className="h-9 px-3 text-violet-600 hover:text-violet-700 hover:bg-violet-50 rounded-xl border border-violet-100 w-full justify-center text-xs font-semibold"
+                className="h-9 px-3 text-primary hover:text-primary hover:bg-primary-subtle rounded-xl border border-primary-border w-full justify-center text-xs font-semibold"
                 onClick={() => setCreateOpen(true)}>
                 <Plus className="h-3.5 w-3.5 mr-1.5" /> Onboard a new trainer
               </Button>
             </Section>
             <FormError error={error} />
           </Box>
-          <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-            <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
+          <DialogFooter className="px-6 pt-4 pb-6 border-t border-border bg-slate-50/50">
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-border text-foreground-muted hover:bg-surface-muted">Cancel</Button>
+            <Button onClick={submit} disabled={submitting} className="bg-primary hover:bg-primary-hover text-primary-foreground border-0 shadow-sm">
               {submitting ? "Assigning..." : "Assign"}
             </Button>
           </DialogFooter>
@@ -363,14 +363,14 @@ function AddParticipantDialog({ open, onOpenChange, token, trainingRef, onAdded 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[620px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
+        <Box className="bg-[#d7e3fc] border-b border-primary-border px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
-              <UserPlus className="w-4 h-4 text-white" />
+            <Box className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0">
+              <UserPlus className="w-4 h-4 text-primary-foreground" />
             </Box>
             <Box>
-              <DialogTitle className="text-base font-semibold text-slate-800">Add Participant</DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 mt-0.5">Manually enrol a participant in this training.</DialogDescription>
+              <DialogTitle className="text-base font-semibold text-foreground">Add Participant</DialogTitle>
+              <DialogDescription className="text-xs text-foreground-muted mt-0.5">Manually enrol a participant in this training.</DialogDescription>
             </Box>
           </Box>
         </Box>
@@ -393,9 +393,9 @@ function AddParticipantDialog({ open, onOpenChange, token, trainingRef, onAdded 
           </Section>
           <FormError error={error} />
         </Box>
-        <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
+        <DialogFooter className="px-6 pt-4 pb-6 border-t border-border bg-slate-50/50">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-border text-foreground-muted hover:bg-surface-muted">Cancel</Button>
+          <Button onClick={submit} disabled={submitting} className="bg-primary hover:bg-primary-hover text-primary-foreground border-0 shadow-sm">
             {submitting ? "Adding..." : "Add Participant"}
           </Button>
         </DialogFooter>
@@ -431,14 +431,14 @@ function EditParticipantDialog({ participant, onOpenChange, token, onSaved }) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onOpenChange(false)}>
       <DialogContent className="sm:max-w-[620px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
+        <Box className="bg-[#d7e3fc] border-b border-primary-border px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
-              <Pencil className="w-4 h-4 text-white" />
+            <Box className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0">
+              <Pencil className="w-4 h-4 text-primary-foreground" />
             </Box>
             <Box>
-              <DialogTitle className="text-base font-semibold text-slate-800">Edit Participant</DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 mt-0.5">Email is the login identity and cannot be changed here.</DialogDescription>
+              <DialogTitle className="text-base font-semibold text-foreground">Edit Participant</DialogTitle>
+              <DialogDescription className="text-xs text-foreground-muted mt-0.5">Email is the login identity and cannot be changed here.</DialogDescription>
             </Box>
           </Box>
         </Box>
@@ -458,9 +458,9 @@ function EditParticipantDialog({ participant, onOpenChange, token, onSaved }) {
           </Section>
           <FormError error={error} />
         </Box>
-        <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
+        <DialogFooter className="px-6 pt-4 pb-6 border-t border-border bg-slate-50/50">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-border text-foreground-muted hover:bg-surface-muted">Cancel</Button>
+          <Button onClick={submit} disabled={submitting} className="bg-primary hover:bg-primary-hover text-primary-foreground border-0 shadow-sm">
             {submitting ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>
@@ -490,14 +490,14 @@ function CancelEnrolmentDialog({ participant, onOpenChange, token, onDone }) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onOpenChange(false)}>
       <DialogContent className="sm:max-w-[600px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-red-50 via-rose-50 to-pink-50 border-b border-red-100 px-6 py-5">
+        <Box className="bg-gradient-to-r from-red-50 via-rose-50 to-pink-50 border-b border-error-border px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-xl bg-red-500 flex items-center justify-center shrink-0">
-              <XCircle className="w-4 h-4 text-white" />
+            <Box className="w-9 h-9 rounded-xl bg-error flex items-center justify-center shrink-0">
+              <XCircle className="w-4 h-4 text-error-foreground" />
             </Box>
             <Box>
-              <DialogTitle className="text-base font-semibold text-slate-800">Cancel Enrolment</DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 mt-0.5">
+              <DialogTitle className="text-base font-semibold text-foreground">Cancel Enrolment</DialogTitle>
+              <DialogDescription className="text-xs text-foreground-muted mt-0.5">
                 This frees the seat for {participant?.name}. The reason is recorded for audit.
               </DialogDescription>
             </Box>
@@ -505,13 +505,13 @@ function CancelEnrolmentDialog({ participant, onOpenChange, token, onDone }) {
         </Box>
         <Box className="px-6 py-5 space-y-4">
           {participant && (
-            <Box className="flex items-center gap-3 rounded-xl bg-red-50 border border-red-100 px-4 py-3">
-              <Box className="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                <User className="h-4 w-4 text-red-500" />
+            <Box className="flex items-center gap-3 rounded-xl bg-error-subtle border border-error-border px-4 py-3">
+              <Box className="w-9 h-9 rounded-full bg-error-subtle flex items-center justify-center shrink-0">
+                <User className="h-4 w-4 text-error" />
               </Box>
               <Box>
-                <Text as="p" className="text-sm font-semibold text-slate-800">{participant.name}</Text>
-                <Text as="p" className="text-xs text-slate-500">{participant.email}</Text>
+                <Text as="p" className="text-sm font-semibold text-foreground">{participant.name}</Text>
+                <Text as="p" className="text-xs text-foreground-muted">{participant.email}</Text>
               </Box>
             </Box>
           )}
@@ -522,8 +522,8 @@ function CancelEnrolmentDialog({ participant, onOpenChange, token, onDone }) {
           </Field>
           <FormError error={error} />
         </Box>
-        <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Back</Button>
+        <DialogFooter className="px-6 pt-4 pb-6 border-t border-border bg-slate-50/50">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-border text-foreground-muted hover:bg-surface-muted">Back</Button>
           <Button variant="destructive" onClick={submit} disabled={submitting} className="shadow-sm">
             {submitting ? "Cancelling..." : "Cancel Enrolment"}
           </Button>
@@ -563,14 +563,14 @@ function TransferDialog({ participant, onOpenChange, token, currentTrainingId, o
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onOpenChange(false)}>
       <DialogContent className="sm:max-w-[620px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
+        <Box className="bg-[#d7e3fc] border-b border-primary-border px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
-              <ArrowLeftRight className="w-4 h-4 text-white" />
+            <Box className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0">
+              <ArrowLeftRight className="w-4 h-4 text-primary-foreground" />
             </Box>
             <Box>
-              <DialogTitle className="text-base font-semibold text-slate-800">Transfer Participant</DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 mt-0.5">
+              <DialogTitle className="text-base font-semibold text-foreground">Transfer Participant</DialogTitle>
+              <DialogDescription className="text-xs text-foreground-muted mt-0.5">
                 Move {participant?.name} to another training. Their sponsor/order link is preserved.
               </DialogDescription>
             </Box>
@@ -597,9 +597,9 @@ function TransferDialog({ participant, onOpenChange, token, currentTrainingId, o
           </Section>
           <FormError error={error} />
         </Box>
-        <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
+        <DialogFooter className="px-6 pt-4 pb-6 border-t border-border bg-slate-50/50">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-border text-foreground-muted hover:bg-surface-muted">Cancel</Button>
+          <Button onClick={submit} disabled={submitting} className="bg-primary hover:bg-primary-hover text-primary-foreground border-0 shadow-sm">
             {submitting ? "Transferring..." : "Transfer"}
           </Button>
         </DialogFooter>
@@ -640,14 +640,14 @@ function MeetingDialog({ open, onOpenChange, token, trainingRef, meeting, canRel
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[620px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-blue-50 via-violet-50 to-violet-50 border-b border-blue-100 px-6 py-5">
+        <Box className="bg-[#d7e3fc] border-b border-info-border px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
-              <Video className="w-4 h-4 text-white" />
+            <Box className="w-9 h-9 rounded-xl bg-info flex items-center justify-center shrink-0">
+              <Video className="w-4 h-4 text-info-foreground" />
             </Box>
             <Box>
-              <DialogTitle className="text-base font-semibold text-slate-800">Meeting Link</DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 mt-0.5">Set the virtual meeting link and release it to enrolled participants.</DialogDescription>
+              <DialogTitle className="text-base font-semibold text-foreground">Meeting Link</DialogTitle>
+              <DialogDescription className="text-xs text-foreground-muted mt-0.5">Set the virtual meeting link and release it to enrolled participants.</DialogDescription>
             </Box>
           </Box>
         </Box>
@@ -670,26 +670,26 @@ function MeetingDialog({ open, onOpenChange, token, trainingRef, meeting, canRel
               </Select>
             </Field>
           </Section>
-          <Box className="flex items-center justify-between rounded-xl border border-slate-200 bg-white shadow-sm px-4 py-3.5">
+          <Box className="flex items-center justify-between rounded-xl border border-border bg-surface shadow-sm px-4 py-3.5">
             <Box>
-              <Text as="p" className="text-sm font-semibold text-slate-800">Release to participants</Text>
-              <Text as="p" className="text-xs text-slate-500 mt-0.5">
+              <Text as="p" className="text-sm font-semibold text-foreground">Release to participants</Text>
+              <Text as="p" className="text-xs text-foreground-muted mt-0.5">
                 {canRelease ? "Min-seats requirement met." : "Below min-seats — override needed to release."}
               </Text>
             </Box>
             <Switch checked={released} onCheckedChange={setReleased} />
           </Box>
           {released && !canRelease && (
-            <Box className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
-              <Text as="p" className="text-xs font-semibold text-amber-800">Override the min-seats rule</Text>
+            <Box className="flex items-center justify-between rounded-xl border border-warning-border bg-warning-subtle px-4 py-3.5">
+              <Text as="p" className="text-xs font-semibold text-warning-subtle-foreground">Override the min-seats rule</Text>
               <Switch checked={override} onCheckedChange={setOverride} />
             </Box>
           )}
           <FormError error={error} />
         </Box>
-        <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
+        <DialogFooter className="px-6 pt-4 pb-6 border-t border-border bg-slate-50/50">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-border text-foreground-muted hover:bg-surface-muted">Cancel</Button>
+          <Button onClick={submit} disabled={submitting} className="bg-primary hover:bg-primary-hover text-primary-foreground border-0 shadow-sm">
             {submitting ? "Saving..." : "Save"}
           </Button>
         </DialogFooter>
@@ -721,16 +721,16 @@ function CompleteConfirmDialog({ open, onOpenChange, token, mode, participant, t
   return (
     <Dialog open={open} onOpenChange={(v) => !submitting && onOpenChange(v)}>
       <DialogContent className="sm:max-w-[560px] overflow-hidden" style={{padding:0,gap:0}}>
-        <Box className="bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border-b border-emerald-100 px-6 py-5">
+        <Box className="bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border-b border-success-border px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0">
-              <GraduationCap className="w-4 h-4 text-white" />
+            <Box className="w-9 h-9 rounded-xl bg-success flex items-center justify-center shrink-0">
+              <GraduationCap className="w-4 h-4 text-success-foreground" />
             </Box>
             <Box>
-              <DialogTitle className="text-base font-semibold text-slate-800">
+              <DialogTitle className="text-base font-semibold text-foreground">
                 {isBulk ? "Mark All Completed" : "Mark as Completed"}
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 mt-0.5">
+              <DialogDescription className="text-xs text-foreground-muted mt-0.5">
                 Confirming completion makes {isBulk ? "these learners" : "this learner"} eligible for the certificate. This can&apos;t be undone.
               </DialogDescription>
             </Box>
@@ -738,37 +738,37 @@ function CompleteConfirmDialog({ open, onOpenChange, token, mode, participant, t
         </Box>
         <Box className="px-6 py-5 space-y-4">
           {isBulk ? (
-            <Box className="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3.5">
-              <Box className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                <Users className="h-4 w-4 text-emerald-600" />
+            <Box className="flex items-center gap-3 rounded-xl bg-success-subtle border border-success-border px-4 py-3.5">
+              <Box className="w-9 h-9 rounded-full bg-success-subtle flex items-center justify-center shrink-0">
+                <Users className="h-4 w-4 text-success" />
               </Box>
               <Box>
-                <Text as="p" className="text-sm font-semibold text-slate-800">
+                <Text as="p" className="text-sm font-semibold text-foreground">
                   {confirmedCount} confirmed participant{confirmedCount !== 1 ? "s" : ""}
                 </Text>
-                <Text as="p" className="text-xs text-slate-500">
+                <Text as="p" className="text-xs text-foreground-muted">
                   Only confirmed enrolments are affected — already-completed, cancelled or transferred ones are skipped.
                 </Text>
               </Box>
             </Box>
           ) : (
             participant && (
-              <Box className="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3">
-                <Box className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                  <User className="h-4 w-4 text-emerald-600" />
+              <Box className="flex items-center gap-3 rounded-xl bg-success-subtle border border-success-border px-4 py-3">
+                <Box className="w-9 h-9 rounded-full bg-success-subtle flex items-center justify-center shrink-0">
+                  <User className="h-4 w-4 text-success" />
                 </Box>
                 <Box>
-                  <Text as="p" className="text-sm font-semibold text-slate-800">{participant.name}</Text>
-                  <Text as="p" className="text-xs text-slate-500">{participant.email}</Text>
+                  <Text as="p" className="text-sm font-semibold text-foreground">{participant.name}</Text>
+                  <Text as="p" className="text-xs text-foreground-muted">{participant.email}</Text>
                 </Box>
               </Box>
             )
           )}
           <FormError error={error} />
         </Box>
-        <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting || (isBulk && confirmedCount === 0)} className="bg-emerald-600 hover:bg-emerald-700 text-white border-0 shadow-sm">
+        <DialogFooter className="px-6 pt-4 pb-6 border-t border-border bg-slate-50/50">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-border text-foreground-muted hover:bg-surface-muted">Cancel</Button>
+          <Button onClick={submit} disabled={submitting || (isBulk && confirmedCount === 0)} className="bg-success hover:bg-success text-success-foreground border-0 shadow-sm">
             {submitting ? (
               <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> {isBulk ? "Completing..." : "Marking..."}</>
             ) : (
@@ -808,15 +808,15 @@ function durationLabel(mins) {
 /** One figure in the preview strip. */
 function PreviewStat({ icon: Icon, label, value, tone = "slate" }) {
   const tones = {
-    slate: "text-slate-800",
-    orange: "text-orange-700",
-    violet: "text-violet-700",
+    slate: "text-foreground",
+    orange: "text-warning-subtle-foreground",
+    violet: "text-primary",
   };
   return (
     <Box className="min-w-0">
       <Box className="flex items-center gap-1.5">
-        <Icon className="h-3 w-3 text-slate-400 shrink-0" />
-        <Text as="span" className="text-[10px] font-medium uppercase tracking-wide text-slate-400">{label}</Text>
+        <Icon className="h-3 w-3 text-foreground-subtle shrink-0" />
+        <Text as="span" className="text-[10px] font-medium uppercase tracking-wide text-foreground-subtle">{label}</Text>
       </Box>
       <Text as="p" className={`mt-0.5 truncate text-sm font-bold ${tones[tone]}`}>{value}</Text>
     </Box>
@@ -959,9 +959,9 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
       <DialogContent className="sm:max-w-3xl max-h-[92vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-base flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-orange-500" /> Reschedule Training
+            <CalendarClock className="h-4 w-4 text-warning" /> Reschedule Training
           </DialogTitle>
-          <DialogDescription className="text-xs text-slate-500 mt-0.5">
+          <DialogDescription className="text-xs text-foreground-muted mt-0.5">
             Set the window, then pick the exact days this training runs on — they don&apos;t have to be
             consecutive. Saving marks the training <b>Postponed</b>; trainer, learners and sponsor all see
             the new schedule immediately.
@@ -972,7 +972,7 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
           {/* ── 1. The window ── */}
           <Box className="space-y-2.5">
             <Box className="flex items-center gap-2">
-              <Text as="span" className="text-xs font-bold text-slate-700">1 · Reschedule window</Text>
+              <Text as="span" className="text-xs font-bold text-foreground">1 · Reschedule window</Text>
               <Separator className="flex-1" />
             </Box>
             <Box className="grid grid-cols-2 gap-3">
@@ -998,7 +998,7 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
               </Box>
             </Box>
             {!windowValid && (windowStart || windowEnd) && (
-              <Text as="p" className="text-[11px] text-amber-600">
+              <Text as="p" className="text-[11px] text-warning">
                 Set both dates — the end date must be on or after the start date.
               </Text>
             )}
@@ -1007,21 +1007,21 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
           {/* ── 2. The session dates ── */}
           <Box className="space-y-2.5">
             <Box className="flex items-center gap-2">
-              <Text as="span" className="text-xs font-bold text-slate-700">2 · Training days</Text>
+              <Text as="span" className="text-xs font-bold text-foreground">2 · Training days</Text>
               <Separator className="flex-1" />
               {originalCount > 0 && (
-                <Text as="span" className="text-[10px] text-slate-400 shrink-0">was {originalCount} day{originalCount === 1 ? "" : "s"}</Text>
+                <Text as="span" className="text-[10px] text-foreground-subtle shrink-0">was {originalCount} day{originalCount === 1 ? "" : "s"}</Text>
               )}
             </Box>
 
             {!windowValid ? (
-              <Box className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center">
-                <Text as="p" className="text-xs text-slate-400">Pick the window above to choose the training days.</Text>
+              <Box className="rounded-xl border border-dashed border-border bg-surface-hover px-4 py-6 text-center">
+                <Text as="p" className="text-xs text-foreground-subtle">Pick the window above to choose the training days.</Text>
               </Box>
             ) : (
               <>
                 <Box className="flex flex-wrap items-center gap-2">
-                  <Badge className="border-0 bg-orange-100 text-orange-700 text-[11px] font-bold">
+                  <Badge className="border-0 bg-warning-subtle text-warning-subtle-foreground text-[11px] font-bold">
                     {dayCount} of {windowDays.length} day{windowDays.length === 1 ? "" : "s"} selected
                   </Badge>
                   <Box className="ml-auto flex flex-wrap items-center gap-1.5">
@@ -1031,13 +1031,13 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
                     <Button type="button" variant="outline" size="sm" onClick={selectAll} className="h-7 text-[11px] px-2.5">
                       All days
                     </Button>
-                    <Button type="button" variant="ghost" size="sm" onClick={clearAll} className="h-7 text-[11px] px-2.5 text-slate-500">
+                    <Button type="button" variant="ghost" size="sm" onClick={clearAll} className="h-7 text-[11px] px-2.5 text-foreground-muted">
                       Clear
                     </Button>
                   </Box>
                 </Box>
 
-                <Box className="rounded-xl border border-slate-200 bg-white p-2 flex justify-center overflow-x-auto">
+                <Box className="rounded-xl border border-border bg-surface p-2 flex justify-center overflow-x-auto">
                   <DatePicker
                     mode="multiple"
                     numberOfMonths={months}
@@ -1063,7 +1063,7 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
           {/* ── 3. The daily window ── */}
           <Box className="space-y-2.5">
             <Box className="flex items-center gap-2">
-              <Text as="span" className="text-xs font-bold text-slate-700">3 · Daily timing</Text>
+              <Text as="span" className="text-xs font-bold text-foreground">3 · Daily timing</Text>
               <Separator className="flex-1" />
             </Box>
             <Box className="grid grid-cols-3 gap-3">
@@ -1096,13 +1096,13 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
               </Box>
             </Box>
             {startMins != null && endMins != null && perDayMins == null && (
-              <Text as="p" className="text-[11px] text-amber-600">The end time must be after the start time.</Text>
+              <Text as="p" className="text-[11px] text-warning">The end time must be after the start time.</Text>
             )}
           </Box>
 
           {/* ── Live preview of everything that will be saved ── */}
-          <Box className="rounded-xl border border-violet-200 bg-violet-50/60 px-4 py-3.5">
-            <Text as="p" className="text-[10px] font-bold uppercase tracking-wide text-violet-500 mb-2.5">
+          <Box className="rounded-xl border border-primary-border bg-violet-50/60 px-4 py-3.5">
+            <Text as="p" className="text-[10px] font-bold uppercase tracking-wide text-primary mb-2.5">
               New schedule preview
             </Text>
             <Box className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
@@ -1128,13 +1128,13 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
 
           {/* What rescheduling does to days that have already been delivered. */}
           {deliveredDays.length > 0 && dayCount > 0 && (
-            <Box className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5">
-              <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
+            <Box className="flex items-start gap-2 rounded-xl border border-warning-border bg-warning-subtle px-3.5 py-2.5">
+              <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
               <Box className="space-y-1">
-                <Text as="p" className="text-[11px] font-semibold text-amber-800">
+                <Text as="p" className="text-[11px] font-semibold text-warning-subtle-foreground">
                   {deliveredDays.length} day{deliveredDays.length === 1 ? " is" : "s are"} already under way or completed
                 </Text>
-                <Text as="p" className="text-[11px] text-amber-700">
+                <Text as="p" className="text-[11px] text-warning-subtle-foreground">
                   Day{deliveredDays.length === 1 ? "" : "s"} {deliveredDays.map((sn) => sn.day_number).join(", ")} will
                   move to the new date{deliveredDays.length === 1 ? "" : "s"} and go back to <b>Scheduled</b>; any
                   attendance already marked is kept.
@@ -1159,7 +1159,7 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
           </Box>
 
           {error && (
-            <Box className="flex items-center gap-1.5 text-red-600">
+            <Box className="flex items-center gap-1.5 text-error">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               <Text as="span" className="text-xs">{error}</Text>
             </Box>
@@ -1168,7 +1168,7 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
 
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={submitting}>Cancel</Button>
-          <Button size="sm" onClick={submit} disabled={!canSubmit} className="bg-orange-600 hover:bg-orange-700 text-white">
+          <Button size="sm" onClick={submit} disabled={!canSubmit} className="bg-warning hover:bg-warning text-warning-foreground">
             {submitting
               ? "Rescheduling…"
               : `Reschedule ${dayCount || 0} day${dayCount === 1 ? "" : "s"} & Postpone`}
@@ -1181,9 +1181,9 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
 
 /* ── Status change (Complete / Suspend / Reactivate) dialog ── */
 const STATUS_ACTION = {
-  completed: { title: "Mark as Completed", verb: "Complete", icon: CheckCircle2, tone: "bg-emerald-600 hover:bg-emerald-700", desc: "Marks the training finished. This is final and can't be changed afterwards." },
-  suspended: { title: "Suspend Training", verb: "Suspend", icon: Ban, tone: "bg-rose-600 hover:bg-rose-700", desc: "Puts the training on hold indefinitely. You can reactivate it later." },
-  active: { title: "Reactivate Training", verb: "Reactivate", icon: PlayCircle, tone: "bg-violet-600 hover:bg-violet-700", desc: "Returns the training to Active. Clears any postponed/suspended flag." },
+  completed: { title: "Mark as Completed", verb: "Complete", icon: CheckCircle2, tone: "bg-success hover:bg-success", desc: "Marks the training finished. This is final and can't be changed afterwards." },
+  suspended: { title: "Suspend Training", verb: "Suspend", icon: Ban, tone: "bg-error hover:bg-error", desc: "Puts the training on hold indefinitely. You can reactivate it later." },
+  active: { title: "Reactivate Training", verb: "Reactivate", icon: PlayCircle, tone: "bg-primary hover:bg-primary-hover", desc: "Returns the training to Active. Clears any postponed/suspended flag." },
 };
 function StatusChangeDialog({ status, onOpenChange, token, trainingRef, onDone }) {
   const [note, setNote] = useState("");
@@ -1226,7 +1226,7 @@ function StatusChangeDialog({ status, onOpenChange, token, trainingRef, onDone }
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-base flex items-center gap-2"><Icon className="h-4 w-4" /> {cfg.title}</DialogTitle>
-          <DialogDescription className="text-xs text-slate-500 mt-0.5">{cfg.desc}</DialogDescription>
+          <DialogDescription className="text-xs text-foreground-muted mt-0.5">{cfg.desc}</DialogDescription>
         </DialogHeader>
         <Box className="px-6 py-5 space-y-3">
           <Box className="space-y-1.5">
@@ -1234,12 +1234,12 @@ function StatusChangeDialog({ status, onOpenChange, token, trainingRef, onDone }
             <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Reason or context" className="text-sm" />
           </Box>
           {attendanceWarning && (
-            <Box className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 space-y-1">
+            <Box className="rounded-lg border border-warning-border bg-warning-subtle px-3 py-2.5 space-y-1">
               <Box className="flex items-start gap-1.5">
-                <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-600 mt-0.5" />
-                <Text as="span" className="text-xs text-amber-800 font-medium">Attendance not marked</Text>
+                <AlertCircle className="h-3.5 w-3.5 shrink-0 text-warning mt-0.5" />
+                <Text as="span" className="text-xs text-warning-subtle-foreground font-medium">Attendance not marked</Text>
               </Box>
-              <Text as="p" className="text-xs text-amber-700">
+              <Text as="p" className="text-xs text-warning-subtle-foreground">
                 {attendanceWarning.count} {attendanceWarning.count === 1 ? "learner has" : "learners have"} no
                 attendance recorded. Completing now marks {attendanceWarning.count === 1 ? "their seat" : "their seats"}{" "}
                 complete without it.
@@ -1247,13 +1247,13 @@ function StatusChangeDialog({ status, onOpenChange, token, trainingRef, onDone }
             </Box>
           )}
           {error && (
-            <Box className="flex items-center gap-1.5 text-red-600"><AlertCircle className="h-3.5 w-3.5 shrink-0" /><Text as="span" className="text-xs">{error}</Text></Box>
+            <Box className="flex items-center gap-1.5 text-error"><AlertCircle className="h-3.5 w-3.5 shrink-0" /><Text as="span" className="text-xs">{error}</Text></Box>
           )}
         </Box>
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => onOpenChange(null)} disabled={submitting}>Cancel</Button>
           {attendanceWarning ? (
-            <Button size="sm" onClick={() => submit({ force: true })} disabled={submitting} className="bg-amber-600 hover:bg-amber-700 text-white">
+            <Button size="sm" onClick={() => submit({ force: true })} disabled={submitting} className="bg-warning hover:bg-warning text-warning-foreground">
               {submitting ? "Saving…" : "Complete anyway"}
             </Button>
           ) : (
@@ -1301,8 +1301,8 @@ export function TrainingManagement({ trainingId }) {
 
   if (error) {
     return (
-      <Card className="p-6 border border-red-200/60 bg-red-50 rounded-xl">
-        <Text as="p" className="text-red-600 text-sm">Failed to load training: {error}</Text>
+      <Card className="p-6 border border-red-200/60 bg-error-subtle rounded-xl">
+        <Text as="p" className="text-error text-sm">Failed to load training: {error}</Text>
       </Card>
     );
   }
@@ -1342,12 +1342,12 @@ export function TrainingManagement({ trainingId }) {
       />
 
       {/* ── Training info ── */}
-      <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-white">
-        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
+      <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-surface">
+        <Box className="bg-[#d7e3fc] border-b border-primary-border px-6 py-5">
           <Box className="flex flex-wrap items-center justify-between gap-3 mb-2">
             <Box className="flex items-center gap-2 flex-wrap">
               <Hash className="h-4 w-4 text-violet-400" />
-              <Text as="span" className="text-sm font-mono font-semibold tracking-wide text-violet-700">{detail.training_id}</Text>
+              <Text as="span" className="text-sm font-mono font-semibold tracking-wide text-primary">{detail.training_id}</Text>
               {/* The CMS event code for this schedule, matching the card in the
                   list and the Course Identifier printed on the certificate.
                   Manually created schedules have none — the chip is then
@@ -1356,7 +1356,7 @@ export function TrainingManagement({ trainingId }) {
                 <Text
                   as="span"
                   title={`Schedule event code · ${detail.event_code}`}
-                  className="rounded-lg bg-white/70 px-2 py-0.5 text-sm font-mono font-semibold tracking-wide text-slate-500 ring-1 ring-slate-200"
+                  className="rounded-lg bg-white/70 px-2 py-0.5 text-sm font-mono font-semibold tracking-wide text-foreground-muted ring-1 ring-border"
                 >
                   {detail.event_code}
                 </Text>
@@ -1365,15 +1365,15 @@ export function TrainingManagement({ trainingId }) {
             </Box>
             <Box className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={() => setEmailOpen(true)}
-                className="h-8 px-3 border-slate-200 bg-white text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold">
+                className="h-8 px-3 border-border bg-surface text-foreground hover:bg-surface-hover rounded-lg text-xs font-semibold">
                 <Mail className="h-3.5 w-3.5 mr-1" /> Email
               </Button>
-              <Badge className="border-0 bg-violet-100 text-violet-700 text-[11px] font-medium">
+              <Badge className="border-0 bg-primary-subtle text-primary text-[11px] font-medium">
                 {MODE_LABEL[detail.delivery_mode] || detail.delivery_mode}
               </Badge>
             </Box>
           </Box>
-          <Text as="h2" className="text-xl font-bold text-slate-900 leading-tight">{detail.title}</Text>
+          <Text as="h2" className="text-xl font-bold text-foreground leading-tight">{detail.title}</Text>
         </Box>
         <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
           <Fact
@@ -1397,18 +1397,18 @@ export function TrainingManagement({ trainingId }) {
 
         {/* The individual training days behind the date range above */}
         {sessionDays.length > 0 && (
-          <Box className="border-t border-slate-100 px-6 py-4">
+          <Box className="border-t border-border px-6 py-4">
             <SessionDates dates={sessionDays} />
           </Box>
         )}
       </Card>
 
       {/* ── Status management ── */}
-      <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-white">
+      <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-surface">
         {detail.due_for_update && (
-          <Box className="flex items-start gap-2.5 bg-amber-50 border-b border-amber-200/70 px-6 py-3">
-            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-            <Text as="p" className="text-xs text-amber-800">
+          <Box className="flex items-start gap-2.5 bg-warning-subtle border-b border-amber-200/70 px-6 py-3">
+            <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+            <Text as="p" className="text-xs text-warning-subtle-foreground">
               <b>Due for update.</b> This training&apos;s end date has passed but it&apos;s still open. Mark it Completed, or Postpone/Suspend it.
             </Text>
           </Box>
@@ -1416,42 +1416,42 @@ export function TrainingManagement({ trainingId }) {
         <Box className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
           <Box className="min-w-0">
             <Box className="flex items-center gap-2">
-              <Text as="h3" className="text-sm font-bold text-slate-800">Status</Text>
+              <Text as="h3" className="text-sm font-bold text-foreground">Status</Text>
               <Badge className={`border-0 text-[10px] font-semibold ${statusCfg.light}`}>{statusCfg.label}</Badge>
             </Box>
             {detail.status === "postponed" && detail.postponed_at && (
-              <Text as="p" className="text-[11px] text-orange-600 mt-1">
+              <Text as="p" className="text-[11px] text-warning mt-1">
                 Postponed{detail.status_note ? ` — ${detail.status_note}` : ""}. Showing the new date above.
               </Text>
             )}
             {detail.status === "suspended" && (
-              <Text as="p" className="text-[11px] text-rose-600 mt-1">
+              <Text as="p" className="text-[11px] text-error mt-1">
                 On hold{detail.status_note ? ` — ${detail.status_note}` : ""}.
               </Text>
             )}
           </Box>
           {isTerminal ? (
-            <Text as="span" className="text-[11px] text-slate-400">This training is {detail.status} — status is final.</Text>
+            <Text as="span" className="text-[11px] text-foreground-subtle">This training is {detail.status} — status is final.</Text>
           ) : (
             <Box className="flex flex-wrap items-center gap-2">
               <Button size="sm" variant="outline" onClick={() => setRescheduleOpen(true)}
-                className="h-8 px-3 border-orange-200 text-orange-700 hover:bg-orange-50 rounded-lg text-xs font-semibold">
+                className="h-8 px-3 border-warning-border text-warning-subtle-foreground hover:bg-warning-subtle rounded-lg text-xs font-semibold">
                 <CalendarClock className="h-3.5 w-3.5 mr-1" /> {detail.status === "postponed" ? "Reschedule again" : "Postpone / Reschedule"}
               </Button>
               {(detail.status === "suspended" || detail.status === "postponed") && (
                 <Button size="sm" variant="outline" onClick={() => setStatusAction("active")}
-                  className="h-8 px-3 border-violet-200 text-violet-700 hover:bg-violet-50 rounded-lg text-xs font-semibold">
+                  className="h-8 px-3 border-primary-border text-primary hover:bg-primary-subtle rounded-lg text-xs font-semibold">
                   <PlayCircle className="h-3.5 w-3.5 mr-1" /> Set Active
                 </Button>
               )}
               {detail.status !== "suspended" && (
                 <Button size="sm" variant="outline" onClick={() => setStatusAction("suspended")}
-                  className="h-8 px-3 border-rose-200 text-rose-700 hover:bg-rose-50 rounded-lg text-xs font-semibold">
+                  className="h-8 px-3 border-error-border text-error-subtle-foreground hover:bg-error-subtle rounded-lg text-xs font-semibold">
                   <Ban className="h-3.5 w-3.5 mr-1" /> Suspend
                 </Button>
               )}
               <Button size="sm" onClick={() => setStatusAction("completed")}
-                className="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-white border-0 rounded-lg text-xs font-semibold">
+                className="h-8 px-3 bg-success hover:bg-success text-success-foreground border-0 rounded-lg text-xs font-semibold">
                 <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Mark Completed
               </Button>
             </Box>
@@ -1463,44 +1463,44 @@ export function TrainingManagement({ trainingId }) {
       <Box className={`grid grid-cols-1 gap-5 ${isVirtual ? "md:grid-cols-2" : ""}`}>
 
         {/* Trainer */}
-        <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-white flex flex-col">
-          <Box className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+        <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-surface flex flex-col">
+          <Box className="px-5 py-4 border-b border-border flex items-center justify-between gap-3">
             <Box className="flex items-center gap-2">
-              <UserCheck className="h-4 w-4 text-slate-400" />
-              <Text as="h3" className="text-sm font-semibold text-slate-700">Trainer</Text>
+              <UserCheck className="h-4 w-4 text-foreground-subtle" />
+              <Text as="h3" className="text-sm font-semibold text-foreground">Trainer</Text>
             </Box>
             <Button size="sm" variant={detail.trainer ? "outline" : "default"}
-              className={detail.trainer ? "h-8 px-3 border-slate-200 text-slate-700 hover:bg-slate-50" : "h-8 px-3 bg-violet-600 hover:bg-violet-700 text-white border-0"}
+              className={detail.trainer ? "h-8 px-3 border-border text-foreground hover:bg-surface-hover" : "h-8 px-3 bg-primary hover:bg-primary-hover text-primary-foreground border-0"}
               onClick={() => setAssignOpen(true)}>
               {detail.trainer ? "Reassign" : "Assign Trainer"}
             </Button>
           </Box>
           <Box className="p-5 flex-1 flex flex-col justify-center">
             {detail.trainer ? (
-              <Box className="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-200/60 px-4 py-4">
-                <Box className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
-                  <Text as="span" className="text-[13px] font-bold text-white leading-none">
+              <Box className="flex items-center gap-3 rounded-xl bg-success-subtle border border-emerald-200/60 px-4 py-4">
+                <Box className="w-10 h-10 rounded-full bg-success flex items-center justify-center shrink-0 shadow-sm">
+                  <Text as="span" className="text-[13px] font-bold text-success-foreground leading-none">
                     {detail.trainer.name.trim().split(/\s+/).slice(0,2).map(p=>p[0].toUpperCase()).join("")}
                   </Text>
                 </Box>
                 <Box className="min-w-0">
-                  <Text as="p" className="text-sm font-bold text-slate-800">
+                  <Text as="p" className="text-sm font-bold text-foreground">
                     <TrainerLink id={detail.trainer.id}>{detail.trainer.name}</TrainerLink>
                   </Text>
-                  <Text as="p" className="text-xs text-slate-500 truncate">
+                  <Text as="p" className="text-xs text-foreground-muted truncate">
                     <TrainerLink id={detail.trainer.id}>{detail.trainer.email}</TrainerLink>{detail.trainer.experience ? ` · ${detail.trainer.experience}` : ""}
                   </Text>
                 </Box>
-                <UserCheck className="h-4 w-4 text-emerald-500 shrink-0 ml-auto" />
+                <UserCheck className="h-4 w-4 text-success shrink-0 ml-auto" />
               </Box>
             ) : (
-              <Box className="flex items-center gap-3 rounded-xl bg-amber-50 border border-amber-200/60 px-4 py-4">
+              <Box className="flex items-center gap-3 rounded-xl bg-warning-subtle border border-amber-200/60 px-4 py-4">
                 <Box className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center shrink-0">
-                  <UserX className="h-5 w-5 text-amber-700" />
+                  <UserX className="h-5 w-5 text-warning-subtle-foreground" />
                 </Box>
                 <Box>
-                  <Text as="p" className="text-sm font-bold text-amber-800">No Trainer Assigned</Text>
-                  <Text as="p" className="text-xs text-amber-600 mt-0.5">Assign one to run this training.</Text>
+                  <Text as="p" className="text-sm font-bold text-warning-subtle-foreground">No Trainer Assigned</Text>
+                  <Text as="p" className="text-xs text-warning mt-0.5">Assign one to run this training.</Text>
                 </Box>
               </Box>
             )}
@@ -1509,14 +1509,14 @@ export function TrainingManagement({ trainingId }) {
 
         {/* Meeting link (virtual only) */}
         {isVirtual && (
-          <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-white flex flex-col">
-            <Box className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+          <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-surface flex flex-col">
+            <Box className="px-5 py-4 border-b border-border flex items-center justify-between gap-3">
               <Box className="flex items-center gap-2">
-                <Video className="h-4 w-4 text-slate-400" />
-                <Text as="h3" className="text-sm font-semibold text-slate-700">Meeting Link</Text>
+                <Video className="h-4 w-4 text-foreground-subtle" />
+                <Text as="h3" className="text-sm font-semibold text-foreground">Meeting Link</Text>
               </Box>
               <Button size="sm"
-                className={meeting?.url ? "h-8 px-3 border-slate-200 text-slate-700 hover:bg-slate-50 border" : "h-8 px-3 bg-violet-600 hover:bg-violet-700 text-white border-0"}
+                className={meeting?.url ? "h-8 px-3 border-border text-foreground hover:bg-surface-hover border" : "h-8 px-3 bg-primary hover:bg-primary-hover text-primary-foreground border-0"}
                 variant={meeting?.url ? "outline" : "default"}
                 onClick={() => setMeetingOpen(true)}>
                 {meeting?.url ? "Manage" : "Set Link"}
@@ -1524,30 +1524,30 @@ export function TrainingManagement({ trainingId }) {
             </Box>
             <Box className="p-5 flex-1 flex flex-col justify-center">
               {meeting?.url ? (
-                <Box className="rounded-xl bg-violet-50 border border-violet-200/60 px-4 py-4 space-y-3">
+                <Box className="rounded-xl bg-primary-subtle border border-violet-200/60 px-4 py-4 space-y-3">
                   <Box className="flex items-center gap-2 flex-wrap">
-                    <Badge className={`border-0 text-[10px] font-semibold ${meeting.released ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200" : "bg-amber-100 text-amber-700 ring-1 ring-amber-200"}`}>
+                    <Badge className={`border-0 text-[10px] font-semibold ${meeting.released ? "bg-success-subtle text-success-subtle-foreground ring-1 ring-success-border" : "bg-warning-subtle text-warning-subtle-foreground ring-1 ring-warning-border"}`}>
                       {meeting.released ? "● Released" : "● Not released"}
                     </Badge>
                     {meeting.platform && (
-                      <Badge className="border-0 bg-violet-100 text-violet-700 text-[10px]">{PLATFORM_LABEL[meeting.platform] || meeting.platform}</Badge>
+                      <Badge className="border-0 bg-primary-subtle text-primary text-[10px]">{PLATFORM_LABEL[meeting.platform] || meeting.platform}</Badge>
                     )}
                   </Box>
                   <a href={meeting.url} target="_blank" rel="noopener noreferrer"
-                    className="text-xs text-violet-600 hover:underline inline-flex items-center gap-1.5 break-all">
+                    className="text-xs text-primary hover:underline inline-flex items-center gap-1.5 break-all">
                     <ExternalLink className="h-3.5 w-3.5 shrink-0" />
                     {meeting.url}
                   </a>
                 </Box>
               ) : (
-                <Box className="flex items-center gap-3 rounded-xl bg-slate-50 border border-dashed border-slate-300 px-4 py-4">
-                  <Box className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                    <Video className="h-5 w-5 text-slate-400" />
+                <Box className="flex items-center gap-3 rounded-xl bg-surface-hover border border-dashed border-border-strong px-4 py-4">
+                  <Box className="w-10 h-10 rounded-full bg-surface-muted flex items-center justify-center shrink-0">
+                    <Video className="h-5 w-5 text-foreground-subtle" />
                   </Box>
                   <Box>
-                    <Text as="p" className="text-sm font-bold text-slate-500">No meeting link set</Text>
+                    <Text as="p" className="text-sm font-bold text-foreground-muted">No meeting link set</Text>
                     {!canRelease && (
-                      <Text as="p" className="text-xs text-slate-400 mt-0.5">
+                      <Text as="p" className="text-xs text-foreground-subtle mt-0.5">
                         Requires {detail.min_seats ?? 1} enrolment(s) to release.
                       </Text>
                     )}
@@ -1561,15 +1561,15 @@ export function TrainingManagement({ trainingId }) {
       </Box>
 
       {/* ── Participants ── */}
-      <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-white">
-        <Box className="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+      <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-xl bg-surface">
+        <Box className="px-5 py-4 border-b border-border flex items-center justify-between gap-3">
           <Box className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-slate-400" />
-            <Text as="h3" className="text-sm font-semibold text-slate-700">Participants</Text>
-            <Badge className="border-0 bg-slate-100 text-slate-600 text-[11px]">{detail.participants.length}</Badge>
+            <Users className="h-4 w-4 text-foreground-subtle" />
+            <Text as="h3" className="text-sm font-semibold text-foreground">Participants</Text>
+            <Badge className="border-0 bg-surface-muted text-foreground-muted text-[11px]">{detail.participants.length}</Badge>
             {detail.participants.some((p) => p.setup_pending) && (
               <Badge
-                className="border-0 bg-amber-50 text-amber-700 ring-1 ring-amber-200 text-[11px]"
+                className="border-0 bg-warning-subtle text-warning-subtle-foreground ring-1 ring-warning-border text-[11px]"
                 title="Enrolled learners who haven't set up their account yet"
               >
                 {detail.participants.filter((p) => p.setup_pending).length} not registered
@@ -1580,11 +1580,11 @@ export function TrainingManagement({ trainingId }) {
             {confirmedCount > 0 && (
               <Button size="sm" variant="outline"
                 onClick={() => setCompleteAllOpen(true)}
-                className="h-8 px-3 border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                className="h-8 px-3 border-success-border text-success-subtle-foreground hover:bg-success-subtle">
                 <GraduationCap className="h-3.5 w-3.5 mr-1.5" /> Mark all completed
               </Button>
             )}
-            <Button size="sm" onClick={() => setAddOpen(true)} className="h-8 px-3 bg-violet-600 hover:bg-violet-700 text-white border-0">
+            <Button size="sm" onClick={() => setAddOpen(true)} className="h-8 px-3 bg-primary hover:bg-primary-hover text-primary-foreground border-0">
               <UserPlus className="h-3.5 w-3.5 mr-1.5" /> Add Participant
             </Button>
           </Box>
@@ -1592,74 +1592,74 @@ export function TrainingManagement({ trainingId }) {
 
         {detail.participants.length === 0 ? (
           <Box className="py-14 text-center">
-            <Box className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-              <Users className="h-5 w-5 text-slate-400" />
+            <Box className="w-10 h-10 rounded-xl bg-surface-muted flex items-center justify-center mx-auto mb-3">
+              <Users className="h-5 w-5 text-foreground-subtle" />
             </Box>
-            <Text as="p" className="text-sm text-slate-400">No participants enrolled yet.</Text>
+            <Text as="p" className="text-sm text-foreground-subtle">No participants enrolled yet.</Text>
           </Box>
         ) : (
           <Box className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-slate-50/80 hover:bg-slate-50/80 border-b border-slate-200/60">
-                  <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Name</TableHead>
-                  <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Name</TableHead>
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                     <Box className="flex items-center gap-1"><Mail className="h-3 w-3" /> Email</Box>
                   </TableHead>
-                  <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                     <Box className="flex items-center gap-1"><Phone className="h-3 w-3" /> Phone</Box>
                   </TableHead>
-                  <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                     <Box className="flex items-center gap-1"><Briefcase className="h-3 w-3" /> Job Title</Box>
                   </TableHead>
-                  <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                     <Box className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Location</Box>
                   </TableHead>
-                  <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Status</TableHead>
-                  <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Account</TableHead>
-                  <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Source</TableHead>
-                  <TableHead className="text-right text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Actions</TableHead>
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Status</TableHead>
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Account</TableHead>
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Source</TableHead>
+                  <TableHead className="text-right text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {detail.participants.map((p) => (
                   <TableRow key={p.enrolment_id} className="hover:bg-slate-50/70 transition-colors border-b border-slate-100/80 last:border-0">
-                    <TableCell className="py-3.5 font-semibold text-slate-800 text-sm"><ParticipantLink id={p.participant_id}>{p.name}</ParticipantLink></TableCell>
-                    <TableCell className="py-3.5 text-slate-500 text-sm"><ParticipantLink id={p.participant_id}>{p.email}</ParticipantLink></TableCell>
-                    <TableCell className="py-3.5 text-slate-500 text-sm">{p.phone || "—"}</TableCell>
-                    <TableCell className="py-3.5 text-slate-500 text-sm">{p.job_title || "—"}</TableCell>
-                    <TableCell className="py-3.5 text-slate-500 text-sm">{p.location || "—"}</TableCell>
+                    <TableCell className="py-3.5 font-semibold text-foreground text-sm"><ParticipantLink id={p.participant_id}>{p.name}</ParticipantLink></TableCell>
+                    <TableCell className="py-3.5 text-foreground-muted text-sm"><ParticipantLink id={p.participant_id}>{p.email}</ParticipantLink></TableCell>
+                    <TableCell className="py-3.5 text-foreground-muted text-sm">{p.phone || "—"}</TableCell>
+                    <TableCell className="py-3.5 text-foreground-muted text-sm">{p.job_title || "—"}</TableCell>
+                    <TableCell className="py-3.5 text-foreground-muted text-sm">{p.location || "—"}</TableCell>
                     <TableCell className="py-3.5">
                       {(() => {
-                        const cfg = ENROLMENT_STATUS[p.status] || { label: p.status, className: "bg-slate-100 text-slate-600" };
+                        const cfg = ENROLMENT_STATUS[p.status] || { label: p.status, className: "bg-surface-muted text-foreground-muted" };
                         return <Badge className={`border-0 text-[10px] font-medium ${cfg.className}`}>{cfg.label}</Badge>;
                       })()}
                     </TableCell>
                     <TableCell className="py-3.5">
                       {p.setup_pending ? (
-                        <Badge className="border-0 text-[10px] font-medium bg-amber-50 text-amber-700 ring-1 ring-amber-200">Setup pending</Badge>
+                        <Badge className="border-0 text-[10px] font-medium bg-warning-subtle text-warning-subtle-foreground ring-1 ring-warning-border">Setup pending</Badge>
                       ) : !p.account_active ? (
-                        <Badge className="border-0 text-[10px] font-medium bg-slate-100 text-slate-500">Inactive</Badge>
+                        <Badge className="border-0 text-[10px] font-medium bg-surface-muted text-foreground-muted">Inactive</Badge>
                       ) : (
-                        <Badge className="border-0 text-[10px] font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">Registered</Badge>
+                        <Badge className="border-0 text-[10px] font-medium bg-success-subtle text-success-subtle-foreground ring-1 ring-success-border">Registered</Badge>
                       )}
                     </TableCell>
                     <TableCell className="py-3.5">
-                      <Badge className={`border-0 text-[10px] font-medium ${p.added_manually ? "bg-violet-50 text-violet-700 ring-1 ring-violet-200/80" : "bg-blue-50 text-blue-700 ring-1 ring-blue-200/80"}`}>
+                      <Badge className={`border-0 text-[10px] font-medium ${p.added_manually ? "bg-primary-subtle text-primary ring-1 ring-violet-200/80" : "bg-info-subtle text-info-subtle-foreground ring-1 ring-blue-200/80"}`}>
                         {p.added_manually ? "Manual" : "Order"}
                       </Badge>
                     </TableCell>
                     <TableCell className="py-3.5 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-foreground-subtle hover:text-foreground hover:bg-surface-muted">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
                           {p.status === "confirmed" && (
                             <>
-                              <DropdownMenuItem className="text-emerald-700 focus:text-emerald-700 focus:bg-emerald-50" onClick={() => setCompleteParticipant(p)}>
+                              <DropdownMenuItem className="text-success-subtle-foreground focus:text-success-subtle-foreground focus:bg-success-subtle" onClick={() => setCompleteParticipant(p)}>
                                 <GraduationCap className="mr-2 h-3.5 w-3.5" /> Mark completed
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
@@ -1676,7 +1676,7 @@ export function TrainingManagement({ trainingId }) {
                           {p.status !== "cancelled" && p.status !== "completed" && (
                             <>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50" onClick={() => setCancelParticipant(p)}>
+                              <DropdownMenuItem className="text-error focus:text-error focus:bg-error-subtle" onClick={() => setCancelParticipant(p)}>
                                 <XCircle className="mr-2 h-3.5 w-3.5" /> Cancel enrolment
                               </DropdownMenuItem>
                             </>

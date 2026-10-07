@@ -129,7 +129,7 @@ function mapFieldErrors(apiErrors, keyMap) {
   return mapped;
 }
 
-const inputCls = "h-10 w-full text-sm bg-background border border-slate-300 focus-visible:border-violet-400 focus-visible:ring-violet-400";
+const inputCls = "h-10 w-full text-sm bg-background border border-border-strong focus-visible:border-primary-border focus-visible:ring-focus";
 
 // Profile is a single scrollable page; the nav scrolls to each section instead
 // of switching panels.
@@ -147,14 +147,14 @@ function scrollToProfileSection(id) {
 function SectionCard({ icon: Icon, title, description, children }) {
   return (
     <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-      <CardHeader className="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+      <CardHeader className="px-6 py-4 border-b border-border bg-slate-50/60">
         <Box className="flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-            <Icon className="h-4 w-4 text-violet-500" />
+          <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center shrink-0">
+            <Icon className="h-4 w-4 text-primary" />
           </Box>
           <Box>
-            <CardTitle className="text-sm font-bold text-slate-800">{title}</CardTitle>
-            {description && <Text as="p" className="text-xs text-slate-400 mt-0.5">{description}</Text>}
+            <CardTitle className="text-sm font-bold text-foreground">{title}</CardTitle>
+            {description && <Text as="p" className="text-xs text-foreground-subtle mt-0.5">{description}</Text>}
           </Box>
         </Box>
       </CardHeader>
@@ -166,11 +166,11 @@ function SectionCard({ icon: Icon, title, description, children }) {
 function FieldRow({ label, htmlFor, error, children }) {
   return (
     <Box className="space-y-1.5">
-      <Label htmlFor={htmlFor} className="text-xs font-semibold text-slate-600">
+      <Label htmlFor={htmlFor} className="text-xs font-semibold text-foreground-muted">
         {label}
       </Label>
       {children}
-      {error && <Text as="p" className="text-xs text-red-600">{error}</Text>}
+      {error && <Text as="p" className="text-xs text-error">{error}</Text>}
     </Box>
   );
 }
@@ -195,23 +195,23 @@ function TrainingCount({ icon: Icon, label, n, unit, href, tone }) {
       </Box>
       <Box className="min-w-0 flex-1">
         <Box className="flex items-baseline gap-1.5">
-          <Text as="p" className="text-xl font-bold leading-none text-slate-800">{value}</Text>
-          <Text as="span" className="text-[11px] font-medium text-slate-400">{caption}</Text>
+          <Text as="p" className="text-xl font-bold leading-none text-foreground">{value}</Text>
+          <Text as="span" className="text-[11px] font-medium text-foreground-subtle">{caption}</Text>
         </Box>
-        <Text as="p" className="mt-1 truncate text-xs font-semibold text-slate-600">{label}</Text>
+        <Text as="p" className="mt-1 truncate text-xs font-semibold text-foreground-muted">{label}</Text>
       </Box>
       {href && !loading && n > 0 && (
-        <ChevronRight className="h-4 w-4 shrink-0 text-slate-300 transition-colors group-hover/count:text-violet-500" />
+        <ChevronRight className="h-4 w-4 shrink-0 text-foreground-subtle transition-colors group-hover/count:text-primary" />
       )}
     </>
   );
 
   const shell =
-    "group/count flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-3";
+    "group/count flex items-center gap-3 rounded-xl border border-slate-200/80 bg-surface px-3.5 py-3";
 
   // Only linked when there is something to look at; an empty count links nowhere.
   return href && !loading && n > 0 ? (
-    <Link href={href} className={cn(shell, "transition-colors hover:border-violet-200 hover:bg-violet-50/40")}>
+    <Link href={href} className={cn(shell, "transition-colors hover:border-primary-border hover:bg-violet-50/40")}>
       {inner}
     </Link>
   ) : (
@@ -224,7 +224,7 @@ function ProfileSkeleton() {
     <Box className="space-y-5">
       <Skeleton className="h-10 w-72 rounded-full" />
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <Box className="px-6 py-4 border-b border-slate-100">
+        <Box className="px-6 py-4 border-b border-border">
           <Skeleton className="h-5 w-40" />
         </Box>
         <Box className="p-6 space-y-5">
@@ -556,8 +556,8 @@ export function LearnerProfileSettings() {
 
   if (profileError) {
     return (
-      <Card className="p-6 rounded-2xl border-0 bg-red-50 shadow-sm">
-        <Text as="p" className="text-red-600 text-sm">Failed to load your profile: {profileError}</Text>
+      <Card className="p-6 rounded-2xl border-0 bg-error-subtle shadow-sm">
+        <Text as="p" className="text-error text-sm">Failed to load your profile: {profileError}</Text>
       </Card>
     );
   }
@@ -565,13 +565,13 @@ export function LearnerProfileSettings() {
   return (
     <Box className="space-y-5">
       <Box className="sticky top-0 z-10 -mx-1 px-1 py-1.5 bg-background/80 backdrop-blur">
-        <Box className="h-auto w-full sm:w-fit flex flex-wrap gap-1 rounded-full bg-slate-200 p-1.5">
+        <Box className="h-auto w-full sm:w-fit flex flex-wrap gap-1 rounded-full bg-surface-muted p-1.5">
           {PROFILE_SECTIONS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
               onClick={() => scrollToProfileSection(id)}
-              className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-violet-100 hover:text-violet-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+              className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-foreground-muted transition-colors hover:bg-primary-subtle hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               <Icon className="h-4 w-4" /> {label}
             </button>
@@ -585,7 +585,7 @@ export function LearnerProfileSettings() {
           <Box className="flex items-center gap-4">
             <Avatar size="lg">
               {(photoPreview || avatarUrl) && <AvatarImage src={photoPreview || avatarUrl} alt={user?.name} />}
-              <AvatarFallback className="bg-violet-100 text-violet-700 text-sm font-bold">
+              <AvatarFallback className="bg-primary-subtle text-primary text-sm font-bold">
                 {user?.initials || "U"}
               </AvatarFallback>
             </Avatar>
@@ -595,7 +595,7 @@ export function LearnerProfileSettings() {
                 size="sm"
                 nativeButton={false}
                 disabled={avatarUploading}
-                className="h-8 px-3 text-xs border-slate-200"
+                className="h-8 px-3 text-xs border-border"
                 render={<label htmlFor="profile-photo" className="cursor-pointer flex items-center gap-1.5" />}
               >
                 <Camera className="h-3.5 w-3.5" /> {avatarUploading ? "Uploading..." : "Change Photo"}
@@ -604,8 +604,8 @@ export function LearnerProfileSettings() {
                 id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp"
                 className="hidden" disabled={avatarUploading} onChange={handlePhotoChange}
               />
-              <Text as="p" className="text-[11px] text-slate-400 mt-1.5">JPG, PNG, or WEBP, up to 2MB.</Text>
-              {avatarError && <Text as="p" className="text-xs text-red-600 mt-1">{avatarError}</Text>}
+              <Text as="p" className="text-[11px] text-foreground-subtle mt-1.5">JPG, PNG, or WEBP, up to 2MB.</Text>
+              {avatarError && <Text as="p" className="text-xs text-error mt-1">{avatarError}</Text>}
             </Box>
           </Box>
 
@@ -632,8 +632,8 @@ export function LearnerProfileSettings() {
             </FieldRow>
             <FieldRow label="Email" htmlFor="email">
               <Box className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="email" value={user?.email || ""} disabled className={`${inputCls} pl-9 text-slate-500`} />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
+                <Input id="email" value={user?.email || ""} disabled className={`${inputCls} pl-9 text-foreground-muted`} />
               </Box>
             </FieldRow>
             <FieldRow
@@ -642,7 +642,7 @@ export function LearnerProfileSettings() {
               error={personalErrors.communicationEmail}
             >
               <Box className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
                 <Input
                   id="communication_email"
                   type="email"
@@ -661,7 +661,7 @@ export function LearnerProfileSettings() {
                   className={`${inputCls} pl-9`}
                 />
               </Box>
-              <Text as="p" className="mt-1 text-[11px] text-slate-400">
+              <Text as="p" className="mt-1 text-[11px] text-foreground-subtle">
                 All emails go here when set; leave blank to use your login email ({user?.email || "—"}).
               </Text>
             </FieldRow>
@@ -711,8 +711,8 @@ export function LearnerProfileSettings() {
             </FieldRow>
           </Box>
 
-          {personalError && <Text as="p" className="text-xs text-red-600">{personalError}</Text>}
-          <Button onClick={savePersonalInfo} disabled={personalSaving} className="h-10 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
+          {personalError && <Text as="p" className="text-xs text-error">{personalError}</Text>}
+          <Button onClick={savePersonalInfo} disabled={personalSaving} className="h-10 px-5 text-sm bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg">
             {personalSaving ? "Saving..." : personalSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>
@@ -726,7 +726,7 @@ export function LearnerProfileSettings() {
               "Company name is required." under a field that is no longer
               required would be the form contradicting itself. */}
           <Box className="mb-5 rounded-xl border border-slate-200/80 bg-slate-50/60 px-4 py-3.5">
-            <Text as="p" className="text-xs font-semibold text-slate-600">Are you currently employed?</Text>
+            <Text as="p" className="text-xs font-semibold text-foreground-muted">Are you currently employed?</Text>
             <RadioGroup
               value={employment}
               onValueChange={(v) => {
@@ -745,14 +745,14 @@ export function LearnerProfileSettings() {
                 { value: NOT_EMPLOYED, label: "Not employed" },
               ].map((o) => (
                 <Label key={o.value} htmlFor={`employment-${o.value}`}
-                  className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                  className="flex cursor-pointer items-center gap-2 text-sm font-medium text-foreground">
                   <RadioGroupItem id={`employment-${o.value}`} value={o.value} />
                   {o.label}
                 </Label>
               ))}
             </RadioGroup>
             {employment === NOT_EMPLOYED && (
-              <Text as="p" className="mt-2 text-[11px] text-slate-500">
+              <Text as="p" className="mt-2 text-[11px] text-foreground-muted">
                 Industry and department are optional — fill them in if they apply.
               </Text>
             )}
@@ -774,7 +774,7 @@ export function LearnerProfileSettings() {
             {isEmployed && (
               <FieldRow label="Company Name" htmlFor="company" error={professionalErrors.company}>
                 <Box className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
                   <Input
                     id="company" value={company}
                     onChange={(e) => {
@@ -838,7 +838,7 @@ export function LearnerProfileSettings() {
             )}
             <FieldRow label="LinkedIn Profile" htmlFor="linkedin" error={professionalErrors.linkedin}>
               <Box className="relative">
-                <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
                 <Input
                   id="linkedin" value={linkedin}
                   onChange={(e) => {
@@ -850,8 +850,8 @@ export function LearnerProfileSettings() {
               </Box>
             </FieldRow>
           </Box>
-          {professionalError && <Text as="p" className="text-xs text-red-600">{professionalError}</Text>}
-          <Button onClick={saveProfessionalInfo} disabled={professionalSaving} className="h-10 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
+          {professionalError && <Text as="p" className="text-xs text-error">{professionalError}</Text>}
+          <Button onClick={saveProfessionalInfo} disabled={professionalSaving} className="h-10 px-5 text-sm bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg">
             {professionalSaving ? "Saving..." : professionalSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>
@@ -862,22 +862,22 @@ export function LearnerProfileSettings() {
         <SectionCard icon={GraduationCap} title="Training Information" description="Read-only — managed by your enrolments and organisation.">
           <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <FieldRow label="Purchase Type">
-              <Badge className="border-0 bg-violet-50 text-violet-700 text-xs font-semibold w-fit">
+              <Badge className="border-0 bg-primary-subtle text-primary text-xs font-semibold w-fit">
                 {sponsor ? "Corporate" : "Self"}
               </Badge>
             </FieldRow>
             <FieldRow label="Sponsor / Organization">
-              <Text as="p" className="text-sm font-medium text-slate-700">{sponsor?.name || "Self-sponsored"}</Text>
+              <Text as="p" className="text-sm font-medium text-foreground">{sponsor?.name || "Self-sponsored"}</Text>
             </FieldRow>
           </Box>
 
           <Box className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <TrainingCount icon={BookOpen} label="Upcoming Trainings" unit="training"
-              n={trainingCounts?.upcoming} href="/my-courses" tone="bg-violet-50 text-violet-600" />
+              n={trainingCounts?.upcoming} href="/my-courses" tone="bg-primary-subtle text-primary" />
             <TrainingCount icon={CheckCircle2} label="Completed Trainings" unit="training"
-              n={trainingCounts?.completed} href="/my-courses" tone="bg-emerald-50 text-emerald-600" />
+              n={trainingCounts?.completed} href="/my-courses" tone="bg-success-subtle text-success" />
             <TrainingCount icon={Award} label="Certificates" unit="certificate"
-              n={trainingCounts?.certificates} href="/certificates" tone="bg-amber-50 text-amber-600" />
+              n={trainingCounts?.certificates} href="/certificates" tone="bg-warning-subtle text-warning" />
           </Box>
         </SectionCard>
       </Box>
@@ -897,8 +897,8 @@ export function LearnerProfileSettings() {
               <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={inputCls} />
             </FieldRow>
           </Box>
-          {passwordError && <Text as="p" className="text-xs text-red-600">{passwordError}</Text>}
-          <Button onClick={savePassword} className="h-10 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
+          {passwordError && <Text as="p" className="text-xs text-error">{passwordError}</Text>}
+          <Button onClick={savePassword} className="h-10 px-5 text-sm bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg">
             {passwordSaved ? "Password Updated ✓" : "Update Password"}
           </Button>
         </SectionCard>
@@ -906,28 +906,28 @@ export function LearnerProfileSettings() {
         <SectionCard icon={Bell} title="Notifications & Security">
           <Box className="flex items-center justify-between py-1">
             <Box>
-              <Text as="p" className="text-sm font-medium text-slate-700">Email Notifications</Text>
-              <Text as="p" className="text-xs text-slate-400">Course updates, reminders, and receipts.</Text>
+              <Text as="p" className="text-sm font-medium text-foreground">Email Notifications</Text>
+              <Text as="p" className="text-xs text-foreground-subtle">Course updates, reminders, and receipts.</Text>
             </Box>
             <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
           </Box>
           <Box className="flex items-center justify-between py-1">
             <Box>
-              <Text as="p" className="text-sm font-medium text-slate-700">SMS Notifications</Text>
-              <Text as="p" className="text-xs text-slate-400">Session reminders via text message.</Text>
+              <Text as="p" className="text-sm font-medium text-foreground">SMS Notifications</Text>
+              <Text as="p" className="text-xs text-foreground-subtle">Session reminders via text message.</Text>
             </Box>
             <Switch checked={smsNotifications} onCheckedChange={setSmsNotifications} />
           </Box>
           <Box className="flex items-center justify-between py-1">
             <Box>
-              <Text as="p" className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-slate-400" /> Two-Factor Authentication
+              <Text as="p" className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-foreground-subtle" /> Two-Factor Authentication
               </Text>
-              <Text as="p" className="text-xs text-slate-400">Optional — adds an extra step at login.</Text>
+              <Text as="p" className="text-xs text-foreground-subtle">Optional — adds an extra step at login.</Text>
             </Box>
             <Switch checked={twoFactorEnabled} onCheckedChange={setTwoFactorEnabled} />
           </Box>
-          <Button onClick={savePreferences} className="h-10 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
+          <Button onClick={savePreferences} className="h-10 px-5 text-sm bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg">
             {preferencesSaved ? "Saved ✓" : "Save Changes"}
           </Button>
         </SectionCard>

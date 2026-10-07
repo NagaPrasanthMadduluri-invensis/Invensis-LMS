@@ -86,7 +86,7 @@ export function TrainerSidebar() {
                   {item.title}
                 </Text>
                 {item.href === "/trainer/profile" && profileIncomplete && (
-                  <span className="ml-auto h-2 w-2 shrink-0 rounded-full bg-red-500" aria-label="Incomplete" />
+                  <span className="ml-auto h-2 w-2 shrink-0 rounded-full bg-error" aria-label="Incomplete" />
                 )}
               </SidebarMenuButton>
             </SidebarMenuItem>

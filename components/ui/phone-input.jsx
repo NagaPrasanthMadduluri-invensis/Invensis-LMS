@@ -116,7 +116,7 @@ export function PhoneInput({
         aria-invalid={invalid}
         onChange={(e) => emit(country, e.target.value.replace(/[^\d\s-]/g, ""))}
         placeholder="90000 00000"
-        className="h-10 w-full text-sm bg-background border border-slate-300 focus-visible:border-violet-400 focus-visible:ring-violet-400"
+        className="h-10 w-full text-sm bg-background border border-border-strong focus-visible:border-primary-border focus-visible:ring-focus"
       />
     </Box>
   );

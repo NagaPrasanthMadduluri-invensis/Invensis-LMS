@@ -48,21 +48,21 @@ export function TopNav({ portalLabel = "Invensis Learning", statusSlot = null })
         {statusSlot}
 
         <Box
-          className={`flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 ${profileIncomplete ? "border-red-300 bg-red-50" : "border-border"}`}
+          className={`flex items-center gap-2 rounded-full border py-1 pr-3 pl-1 ${profileIncomplete ? "border-error-border bg-error-subtle" : "border-border"}`}
           title={profileIncomplete ? "Your profile is incomplete" : undefined}
         >
           <Box className="relative">
-            <Avatar className={`h-8 w-8 ${profileIncomplete ? "ring-2 ring-red-500" : ""}`}>
+            <Avatar className={`h-8 w-8 ${profileIncomplete ? "ring-2 ring-error-border" : ""}`}>
               <AvatarImage src={user?.avatar || ""} alt={user?.name || "User"} />
-              <AvatarFallback className={`text-xs ${profileIncomplete ? "bg-red-500 text-white" : "bg-primary text-primary-foreground"}`}>
+              <AvatarFallback className={`text-xs ${profileIncomplete ? "bg-error text-error-foreground" : "bg-primary text-primary-foreground"}`}>
                 {user?.initials || "U"}
               </AvatarFallback>
             </Avatar>
             {profileIncomplete && (
-              <Box className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-card" />
+              <Box className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-error ring-2 ring-card" />
             )}
           </Box>
-          <Text as="span" className={`hidden text-sm font-medium sm:inline-block ${profileIncomplete ? "text-red-700" : "text-foreground"}`}>
+          <Text as="span" className={`hidden text-sm font-medium sm:inline-block ${profileIncomplete ? "text-error-subtle-foreground" : "text-foreground"}`}>
             {user?.name || "User"}
           </Text>
         </Box>

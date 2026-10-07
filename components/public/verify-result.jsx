@@ -67,8 +67,8 @@ function initialsOf(name) {
 function Detail({ label, value, mono = false, full = false }) {
   return (
     <Box className={full ? "sm:col-span-2" : ""}>
-      <Text as="p" className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</Text>
-      <Text as="p" className={`text-sm text-slate-800 mt-0.5 ${mono ? "font-mono" : ""}`}>{value || "—"}</Text>
+      <Text as="p" className="text-[11px] font-semibold uppercase tracking-wide text-foreground-muted">{label}</Text>
+      <Text as="p" className={`text-sm text-foreground mt-0.5 ${mono ? "font-mono" : ""}`}>{value || "—"}</Text>
     </Box>
   );
 }
@@ -76,19 +76,19 @@ function Detail({ label, value, mono = false, full = false }) {
 /* ── State 4 — nothing matched ── */
 export function VerifyNotFound({ query }) {
   return (
-    <Box className="rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center shadow-sm">
-      <Box className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
-        <XCircle className="h-7 w-7 text-red-600" />
+    <Box className="rounded-2xl border border-border bg-white px-6 py-10 text-center shadow-sm">
+      <Box className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-error-subtle">
+        <XCircle className="h-7 w-7 text-error" />
       </Box>
-      <Text as="h3" className="mt-4 text-lg font-bold text-slate-900">No certificate found</Text>
-      <Text as="p" className="mx-auto mt-2 max-w-xl text-sm text-slate-600">
+      <Text as="h3" className="mt-4 text-lg font-bold text-foreground">No certificate found</Text>
+      <Text as="p" className="mx-auto mt-2 max-w-xl text-sm text-foreground-muted">
         We couldn&apos;t locate a credential matching{" "}
-        <Text as="strong" className="font-semibold text-slate-800">{query || "that ID"}</Text>. Please
+        <Text as="strong" className="font-semibold text-foreground">{query || "that ID"}</Text>. Please
         double-check the ID printed on your certificate — a valid Certificate ID begins with{" "}
-        <Text as="strong" className="font-semibold text-slate-800">INVLJA</Text>, and a Training ID begins with{" "}
-        <Text as="strong" className="font-semibold text-slate-800">TRN</Text>.
+        <Text as="strong" className="font-semibold text-foreground">INVLJA</Text>, and a Training ID begins with{" "}
+        <Text as="strong" className="font-semibold text-foreground">TRN</Text>.
       </Text>
-      <Text as="p" className="mt-4 text-xs text-slate-500">
+      <Text as="p" className="mt-4 text-xs text-foreground-muted">
         Still can&apos;t verify? Email{" "}
         <Text as="a" href="mailto:support@invensislearning.com" className="font-medium text-[#1553a3] hover:underline">
           support@invensislearning.com
@@ -115,20 +115,20 @@ export function VerifiedCertificate({ certificate: c }) {
   }
 
   return (
-    <Box className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <Box className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
       {/* Banner — navy for a certificate, amber for an attendance letter, so the
           two are distinguishable before reading a word. */}
       <Box className={`flex flex-wrap items-start justify-between gap-4 px-6 py-5 ${isAttendance ? "bg-[#7a4a06]" : "bg-[#0b2e5c]"}`}>
         <Box className="min-w-0">
           <Box className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${
             isAttendance
-              ? "bg-amber-400/15 text-amber-200 ring-amber-300/30"
-              : "bg-emerald-500/15 text-emerald-300 ring-emerald-400/30"
+              ? "bg-amber-400/15 text-warning-subtle-foreground ring-amber-300/30"
+              : "bg-emerald-500/15 text-success-subtle-foreground ring-emerald-400/30"
           }`}>
             <CheckCircle2 className="h-3 w-3" /> Verified · {isAttendance ? "Letter of Course Attendance" : "Certificate of Training"}
           </Box>
           <Text as="h2" className="mt-2 text-xl font-bold text-white">{c.course_title}</Text>
-          <Text as="p" className="mt-0.5 text-xs text-slate-300">
+          <Text as="p" className="mt-0.5 text-xs text-foreground-subtle">
             {isAttendance ? (
               <>Training ID · <Text as="span" className="font-mono">{c.training_id}</Text></>
             ) : (
@@ -150,15 +150,15 @@ export function VerifiedCertificate({ certificate: c }) {
       </Box>
 
       {/* Holder */}
-      <Box className="flex items-center gap-4 border-b border-slate-100 px-6 py-5">
+      <Box className="flex items-center gap-4 border-b border-border px-6 py-5">
         <Box className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#1553a3] text-sm font-bold text-white">
           {initialsOf(c.holder_name)}
         </Box>
         <Box className="min-w-0">
-          <Text as="p" className="text-lg font-bold text-slate-900">{c.holder_name}</Text>
-          <Text as="p" className="text-sm text-slate-600">
+          <Text as="p" className="text-lg font-bold text-foreground">{c.holder_name}</Text>
+          <Text as="p" className="text-sm text-foreground-muted">
             {isAttendance ? "Attended" : "Successfully completed"}{" "}
-            <Text as="strong" className="font-semibold text-slate-800">{c.course_title}</Text>
+            <Text as="strong" className="font-semibold text-foreground">{c.course_title}</Text>
           </Text>
         </Box>
       </Box>
@@ -182,17 +182,17 @@ export function VerifiedCertificate({ certificate: c }) {
             accreditation there is exactly what the advisory below denies. */}
         {!isAttendance && (
         <Box className="sm:col-span-2">
-          <Text as="p" className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Accreditation</Text>
+          <Text as="p" className="text-[11px] font-semibold uppercase tracking-wide text-foreground-muted">Accreditation</Text>
           <Box className="mt-1 flex flex-wrap gap-1.5">
             {c.is_certification ? (
               <>
-                <Text as="span" className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">PMI®</Text>
+                <Text as="span" className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-semibold text-foreground">PMI®</Text>
                 {c.pdus != null && (
-                  <Text as="span" className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">{c.pdus} PDUs</Text>
+                  <Text as="span" className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-semibold text-foreground">{c.pdus} PDUs</Text>
                 )}
               </>
             ) : (
-              <Text as="span" className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+              <Text as="span" className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-semibold text-foreground">
                 Invensis Certified Learning
               </Text>
             )}
@@ -204,9 +204,9 @@ export function VerifiedCertificate({ certificate: c }) {
       {/* Advisory — required on an attendance letter. Says plainly what the
           document is not, so a reader cannot mistake it for a qualification. */}
       {isAttendance && (
-        <Box className="mx-6 mb-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-          <Text as="p" className="text-xs leading-relaxed text-amber-900">
+        <Box className="mx-6 mb-5 flex items-start gap-3 rounded-xl border border-warning-border bg-warning-subtle px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+          <Text as="p" className="text-xs leading-relaxed text-warning-subtle-foreground">
             This is a letter confirming <Text as="strong" className="font-semibold">course attendance only</Text> and is
             not a document demonstrating or certifying the achievement of any qualification in the subject matter of
             the training course.
@@ -215,20 +215,20 @@ export function VerifiedCertificate({ certificate: c }) {
       )}
 
       {/* Footer */}
-      <Box className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+      <Box className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-surface-hover px-6 py-4">
         <Box className="flex items-center gap-2.5">
-          <Box className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100">
-            <ShieldCheck className="h-4 w-4 text-emerald-700" />
+          <Box className="flex h-8 w-8 items-center justify-center rounded-full bg-success-subtle">
+            <ShieldCheck className="h-4 w-4 text-success-subtle-foreground" />
           </Box>
           <Box>
-            <Text as="p" className="text-sm font-semibold text-slate-800">Status: Active</Text>
-            <Text as="p" className="text-xs text-slate-500">Verified on {formatInstantDate(c.verified_at)}</Text>
+            <Text as="p" className="text-sm font-semibold text-foreground">Status: Active</Text>
+            <Text as="p" className="text-xs text-foreground-muted">Verified on {formatInstantDate(c.verified_at)}</Text>
           </Box>
         </Box>
         <button
           type="button"
           onClick={share}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border-strong bg-white px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface-hover"
         >
           {copied ? <Link2 className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
           {copied ? "Link copied" : "Share verification"}

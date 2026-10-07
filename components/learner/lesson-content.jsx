@@ -65,12 +65,12 @@ function ExternalContent({ url }) {
   if (!url) return null;
   return (
     <Card className="p-8 text-center">
-      <ExternalLink className="h-10 w-10 mx-auto text-violet-500 mb-3" />
+      <ExternalLink className="h-10 w-10 mx-auto text-primary mb-3" />
       <Text as="h3" className="text-base">External Content</Text>
       <Text as="p" className="text-sm text-muted-foreground mt-1 mb-4">
         This lesson opens in an external portal.
       </Text>
-      <Button asChild className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white">
+      <Button asChild className="bg-gradient-to-r from-[#0466c8] to-[#023e7d] hover:from-[#0582ca] hover:to-[#001233] text-white">
         <a href={url} target="_blank" rel="noopener noreferrer">
           Open External Portal
         </a>
@@ -82,7 +82,7 @@ function ExternalContent({ url }) {
 function QuizPlaceholder() {
   return (
     <Card className="p-8 text-center">
-      <HelpCircle className="h-10 w-10 mx-auto text-violet-500 mb-3" />
+      <HelpCircle className="h-10 w-10 mx-auto text-primary mb-3" />
       <Text as="h3" className="text-base">Quiz</Text>
       <Text as="p" className="text-sm text-muted-foreground mt-1">
         This lesson is a quiz. Head to the Assessments section to attempt it.
@@ -125,7 +125,7 @@ export function LessonContent({ courseId, lessonId }) {
   if (error) {
     return (
       <Card className="p-6">
-        <Text as="p" className="text-red-600">Failed to load lesson: {error}</Text>
+        <Text as="p" className="text-error">Failed to load lesson: {error}</Text>
       </Card>
     );
   }
@@ -161,15 +161,15 @@ export function LessonContent({ courseId, lessonId }) {
           <Box className="flex items-start justify-between gap-4 flex-wrap">
             <Box className="flex-1 min-w-0">
               <Box className="flex items-center gap-2 mb-1">
-                <ContentIcon className="h-4 w-4 text-violet-500 shrink-0" />
+                <ContentIcon className="h-4 w-4 text-primary shrink-0" />
                 <Badge
                   variant="secondary"
                   className={`text-[10px] ${
                     status === "completed"
-                      ? "bg-emerald-100 text-emerald-700"
+                      ? "bg-success-subtle text-success-subtle-foreground"
                       : status === "in_progress"
-                      ? "bg-violet-100 text-violet-700"
-                      : "bg-gray-100 text-gray-500"
+                      ? "bg-primary-subtle text-primary"
+                      : "bg-surface-muted text-foreground-muted"
                   }`}
                 >
                   {status === "completed"
@@ -200,14 +200,14 @@ export function LessonContent({ courseId, lessonId }) {
                 size="sm"
                 onClick={handleMarkComplete}
                 disabled={completing}
-                className="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="shrink-0 bg-success hover:bg-success text-success-foreground"
               >
                 <CheckCircle2 className="h-4 w-4 mr-1" />
                 {completing ? "Marking..." : "Mark Complete"}
               </Button>
             )}
             {status === "completed" && (
-              <Box className="flex items-center gap-1.5 text-emerald-600 shrink-0">
+              <Box className="flex items-center gap-1.5 text-success shrink-0">
                 <CheckCircle2 className="h-5 w-5" />
                 <Text as="span" className="text-sm font-semibold">Completed</Text>
               </Box>

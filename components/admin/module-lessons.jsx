@@ -185,7 +185,7 @@ export function ModuleLessons({ moduleId }) {
   };
 
   if (error && !lessons) {
-    return <Text as="p" className="text-xs text-red-600 py-2 px-2">{error}</Text>;
+    return <Text as="p" className="text-xs text-error py-2 px-2">{error}</Text>;
   }
 
   if (!lessons) {
@@ -200,7 +200,7 @@ export function ModuleLessons({ moduleId }) {
 
   return (
     <Box className="space-y-2 pt-1">
-      {error && <Text as="p" className="text-xs text-red-600">{error}</Text>}
+      {error && <Text as="p" className="text-xs text-error">{error}</Text>}
 
       {/* Lessons list */}
       {lessons.length === 0 ? (
@@ -228,13 +228,13 @@ export function ModuleLessons({ moduleId }) {
                       {typeCfg.label}
                     </Badge>
                     {lesson.is_preview && (
-                      <Badge variant="secondary" className="text-[9px] px-1 h-4 bg-amber-100 text-amber-700 shrink-0">
+                      <Badge variant="secondary" className="text-[9px] px-1 h-4 bg-warning-subtle text-warning-subtle-foreground shrink-0">
                         <Sparkles className="h-2.5 w-2.5 mr-0.5" />
                         Preview
                       </Badge>
                     )}
                     {!lesson.is_active && (
-                      <Badge variant="secondary" className="text-[9px] px-1 h-4 bg-gray-100 text-gray-500 shrink-0">
+                      <Badge variant="secondary" className="text-[9px] px-1 h-4 bg-surface-muted text-foreground-muted shrink-0">
                         Inactive
                       </Badge>
                     )}
@@ -252,12 +252,12 @@ export function ModuleLessons({ moduleId }) {
 
                 <Box className="flex items-center gap-0.5 shrink-0">
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleToggleActive(lesson)}>
-                    {lesson.is_active ? <Eye className="h-3.5 w-3.5 text-emerald-600" /> : <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />}
+                    {lesson.is_active ? <Eye className="h-3.5 w-3.5 text-success" /> : <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />}
                   </Button>
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(lesson)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => setDeleteTarget(lesson)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-error hover:text-error hover:bg-error-subtle" onClick={() => setDeleteTarget(lesson)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </Box>
@@ -292,7 +292,7 @@ export function ModuleLessons({ moduleId }) {
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               />
-              {formErrors.title && <Text as="p" className="text-xs text-red-600">{formErrors.title[0]}</Text>}
+              {formErrors.title && <Text as="p" className="text-xs text-error">{formErrors.title[0]}</Text>}
             </Box>
 
             <Box className="space-y-2">
@@ -323,7 +323,7 @@ export function ModuleLessons({ moduleId }) {
                     <SelectItem value="quiz">Quiz</SelectItem>
                   </SelectContent>
                 </Select>
-                {formErrors.content_type && <Text as="p" className="text-xs text-red-600">{formErrors.content_type[0]}</Text>}
+                {formErrors.content_type && <Text as="p" className="text-xs text-error">{formErrors.content_type[0]}</Text>}
               </Box>
 
               <Box className="space-y-2">
@@ -354,7 +354,7 @@ export function ModuleLessons({ moduleId }) {
                   value={form.content_url}
                   onChange={(e) => setForm((f) => ({ ...f, content_url: e.target.value }))}
                 />
-                {formErrors.content_url && <Text as="p" className="text-xs text-red-600">{formErrors.content_url[0]}</Text>}
+                {formErrors.content_url && <Text as="p" className="text-xs text-error">{formErrors.content_url[0]}</Text>}
               </Box>
             )}
 
@@ -391,7 +391,7 @@ export function ModuleLessons({ moduleId }) {
               </Box>
             </Box>
 
-            {formErrors._general && <Text as="p" className="text-sm text-red-600">{formErrors._general}</Text>}
+            {formErrors._general && <Text as="p" className="text-sm text-error">{formErrors._general}</Text>}
           </Box>
 
           <DialogFooter className="px-6 pt-4 pb-6">
@@ -418,7 +418,7 @@ export function ModuleLessons({ moduleId }) {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-error hover:bg-error text-error-foreground"
             >
               {deleting ? "Deleting..." : "Delete Lesson"}
             </AlertDialogAction>

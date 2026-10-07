@@ -51,19 +51,19 @@ function FInput({ icon: Icon, accentColor = "indigo", type, ...props }) {
   const [showPwd, setShowPwd] = useState(false);
   const isPassword = type === "password";
   const focusRing = accentColor === "red"
-    ? "focus-within:border-red-400 focus-within:shadow-[0_0_0_3px_rgba(252,165,165,0.35)]"
-    : "focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)]";
+    ? "focus-within:border-error-border focus-within:shadow-[0_0_0_3px_rgba(252,165,165,0.35)]"
+    : "focus-within:border-primary-border focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)]";
   return (
-    <Box className={`group flex items-center gap-3 h-12 rounded-xl border border-slate-200 bg-white px-3.5 shadow-sm hover:border-slate-300 ${focusRing} transition-all duration-150`}>
-      {Icon && <Icon className="h-4 w-4 text-slate-400 shrink-0 group-focus-within:text-violet-500 transition-colors" />}
+    <Box className={`group flex items-center gap-3 h-12 rounded-xl border border-border bg-surface px-3.5 shadow-sm hover:border-border-strong ${focusRing} transition-all duration-150`}>
+      {Icon && <Icon className="h-4 w-4 text-foreground-subtle shrink-0 group-focus-within:text-primary transition-colors" />}
       <input
         {...props}
         type={isPassword ? (showPwd ? "text" : "password") : type}
-        className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-foreground-subtle disabled:opacity-50 disabled:cursor-not-allowed"
       />
       {isPassword && (
         <button type="button" onClick={() => setShowPwd((v) => !v)}
-          className="shrink-0 text-slate-400 hover:text-violet-500 transition-colors">
+          className="shrink-0 text-foreground-subtle hover:text-primary transition-colors">
           {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       )}
@@ -73,11 +73,11 @@ function FInput({ icon: Icon, accentColor = "indigo", type, ...props }) {
 
 function FTextarea({ rows = 3, ...props }) {
   return (
-    <Box className="rounded-xl border border-slate-200 bg-white shadow-sm hover:border-slate-300 focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all duration-150">
+    <Box className="rounded-xl border border-border bg-surface shadow-sm hover:border-border-strong focus-within:border-primary-border focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all duration-150">
       <textarea
         rows={rows}
         {...props}
-        className="w-full bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400 resize-none px-3.5 py-3"
+        className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder:text-foreground-subtle resize-none px-3.5 py-3"
       />
     </Box>
   );
@@ -85,13 +85,13 @@ function FTextarea({ rows = 3, ...props }) {
 
 function Section({ label, icon: Icon, hint, children }) {
   return (
-    <Box className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-sm">
-      <Box className="flex items-center gap-2.5 px-4 py-3 bg-slate-50/80 border-b border-slate-200">
-        <Box className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
-          {Icon ? <Icon className="h-3.5 w-3.5 text-violet-600" /> : <Box className="w-1 h-4 rounded-full bg-violet-500" />}
+    <Box className="rounded-2xl border border-border overflow-hidden bg-surface shadow-sm">
+      <Box className="flex items-center gap-2.5 px-4 py-3 bg-slate-50/80 border-b border-border">
+        <Box className="w-7 h-7 rounded-lg bg-primary-subtle flex items-center justify-center shrink-0">
+          {Icon ? <Icon className="h-3.5 w-3.5 text-primary" /> : <Box className="w-1 h-4 rounded-full bg-violet-500" />}
         </Box>
-        <Text as="p" className="text-[11px] font-bold uppercase tracking-widest text-slate-500">{label}</Text>
-        {hint && <Text as="span" className="ml-auto text-[11px] text-slate-400 normal-case font-normal tracking-normal">{hint}</Text>}
+        <Text as="p" className="text-[11px] font-bold uppercase tracking-widest text-foreground-muted">{label}</Text>
+        {hint && <Text as="span" className="ml-auto text-[11px] text-foreground-subtle normal-case font-normal tracking-normal">{hint}</Text>}
       </Box>
       <Box className="p-5 space-y-4">{children}</Box>
     </Box>
@@ -102,10 +102,10 @@ function Field({ label, required, hint, children }) {
   return (
     <Box className="space-y-1.5">
       <Box className="flex items-center justify-between">
-        <Text as="p" className="text-xs font-semibold text-slate-600">
-          {label}{required && <Text as="span" className="text-red-500 ml-0.5">*</Text>}
+        <Text as="p" className="text-xs font-semibold text-foreground-muted">
+          {label}{required && <Text as="span" className="text-error ml-0.5">*</Text>}
         </Text>
-        {hint && <Text as="span" className="text-[10px] text-slate-400">{hint}</Text>}
+        {hint && <Text as="span" className="text-[10px] text-foreground-subtle">{hint}</Text>}
       </Box>
       {children}
     </Box>
@@ -142,10 +142,10 @@ function CertInput({ value, onChange }) {
       {value.length > 0 && (
         <Box className="flex flex-wrap gap-1.5">
           {value.map((cert) => (
-            <Box key={cert} className="inline-flex items-center gap-1 bg-violet-50 ring-1 ring-violet-200 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-lg">
+            <Box key={cert} className="inline-flex items-center gap-1 bg-primary-subtle ring-1 ring-primary-border text-primary text-xs font-semibold px-2.5 py-1 rounded-lg">
               <Award className="h-3 w-3 shrink-0" />
               {cert}
-              <button type="button" onClick={() => remove(cert)} className="ml-0.5 text-violet-400 hover:text-violet-700 transition-colors">
+              <button type="button" onClick={() => remove(cert)} className="ml-0.5 text-violet-400 hover:text-primary transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </Box>
@@ -154,18 +154,18 @@ function CertInput({ value, onChange }) {
       )}
 
       {/* Custom input */}
-      <Box className="group flex items-center gap-2 h-11 rounded-xl border border-slate-200 bg-white px-3 shadow-sm hover:border-slate-300 focus-within:border-violet-400 focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all duration-150">
-        <Award className="h-4 w-4 text-slate-400 shrink-0 group-focus-within:text-violet-500 transition-colors" />
+      <Box className="group flex items-center gap-2 h-11 rounded-xl border border-border bg-surface px-3 shadow-sm hover:border-border-strong focus-within:border-primary-border focus-within:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all duration-150">
+        <Award className="h-4 w-4 text-foreground-subtle shrink-0 group-focus-within:text-primary transition-colors" />
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder="Type a certification and press Enter…"
-          className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm text-slate-800 placeholder:text-slate-400"
+          className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-foreground-subtle"
         />
         {input.trim() && (
           <button type="button" onClick={() => add(input)}
-            className="flex items-center gap-1 text-[11px] font-semibold text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 px-2 py-1 rounded-md transition-colors shrink-0">
+            className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary bg-primary-subtle hover:bg-primary-subtle px-2 py-1 rounded-md transition-colors shrink-0">
             <Plus className="h-3 w-3" /> Add
           </button>
         )}
@@ -175,7 +175,7 @@ function CertInput({ value, onChange }) {
       <Box className="flex flex-wrap gap-1.5">
         {CERT_PRESETS.filter((c) => !value.includes(c)).map((cert) => (
           <button key={cert} type="button" onClick={() => add(cert)}
-            className="text-[11px] font-medium text-slate-500 hover:text-violet-600 bg-slate-100 hover:bg-violet-50 hover:ring-1 hover:ring-violet-200 px-2.5 py-1 rounded-lg transition-all">
+            className="text-[11px] font-medium text-foreground-muted hover:text-primary bg-surface-muted hover:bg-primary-subtle hover:ring-1 hover:ring-primary-border px-2.5 py-1 rounded-lg transition-all">
             + {cert}
           </button>
         ))}
@@ -193,10 +193,10 @@ function SpecializationInput({ value, onChange }) {
       {value.length > 0 && (
         <Box className="flex flex-wrap gap-1.5">
           {value.map((s) => (
-            <Box key={s} className="inline-flex items-center gap-1 bg-violet-50 ring-1 ring-violet-200 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-lg">
+            <Box key={s} className="inline-flex items-center gap-1 bg-primary-subtle ring-1 ring-primary-border text-primary text-xs font-semibold px-2.5 py-1 rounded-lg">
               <Target className="h-3 w-3 shrink-0" />
               {s}
-              <button type="button" onClick={() => toggle(s)} className="ml-0.5 text-violet-400 hover:text-violet-700 transition-colors">
+              <button type="button" onClick={() => toggle(s)} className="ml-0.5 text-violet-400 hover:text-primary transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </Box>
@@ -210,8 +210,8 @@ function SpecializationInput({ value, onChange }) {
             <button key={s} type="button" onClick={() => toggle(s)}
               className={`text-[11px] font-medium px-2.5 py-1 rounded-lg transition-all ${
                 active
-                  ? "bg-violet-600 text-white shadow-sm"
-                  : "text-slate-500 hover:text-violet-600 bg-slate-100 hover:bg-violet-50 hover:ring-1 hover:ring-violet-200"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-foreground-muted hover:text-primary bg-surface-muted hover:bg-primary-subtle hover:ring-1 hover:ring-primary-border"
               }`}>
               {active ? "✓ " : "+ "}{s}
             </button>
@@ -298,7 +298,7 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
       <DialogContent className={`${isEdit ? "sm:max-w-[960px]" : "sm:max-w-[540px]"} overflow-hidden`} style={{ padding: 0, gap: 0 }}>
 
         {/* ── Header ── identifies whose profile is being edited ── */}
-        <Box className="bg-gradient-to-r from-violet-600 to-indigo-600 px-7 py-5">
+        <Box className="bg-gradient-to-r from-[#023e7d] to-[#0466c8] px-7 py-5">
           {isEdit ? (
             <Box className="flex items-center gap-4">
               <Box className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shrink-0 shadow-md ring-2 ring-white/30 ${avatarColor(trainer?.id || form.name)}`}>
@@ -370,14 +370,14 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
                         <FInput icon={Globe2} value={form.country} onChange={set("country")} placeholder="India" />
                       </Field>
                     </Box>
-                    <Box className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3">
+                    <Box className="flex items-center justify-between rounded-xl border border-border bg-slate-50/70 px-4 py-3">
                       <Box className="flex items-center gap-3">
-                        <Box className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.is_remote ? "bg-blue-100" : "bg-slate-100"}`}>
-                          <Wifi className={`h-4 w-4 ${form.is_remote ? "text-blue-600" : "text-slate-400"}`} />
+                        <Box className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.is_remote ? "bg-info-subtle" : "bg-surface-muted"}`}>
+                          <Wifi className={`h-4 w-4 ${form.is_remote ? "text-info" : "text-foreground-subtle"}`} />
                         </Box>
                         <Box>
-                          <Text as="p" className="text-sm font-semibold text-slate-800">Delivers remotely</Text>
-                          <Text as="p" className="text-xs text-slate-500 mt-0.5">Can run sessions online.</Text>
+                          <Text as="p" className="text-sm font-semibold text-foreground">Delivers remotely</Text>
+                          <Text as="p" className="text-xs text-foreground-muted mt-0.5">Can run sessions online.</Text>
                         </Box>
                       </Box>
                       <Switch checked={form.is_remote} onCheckedChange={(v) => setForm((f) => ({ ...f, is_remote: v }))} />
@@ -399,12 +399,12 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
               <Section label="Account status" icon={CheckCircle2}>
                 <Box className="flex items-center justify-between">
                   <Box className="flex items-center gap-3">
-                    <Box className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.is_active ? "bg-emerald-100" : "bg-slate-100"}`}>
-                      <CheckCircle2 className={`h-4 w-4 ${form.is_active ? "text-emerald-600" : "text-slate-400"}`} />
+                    <Box className={`w-8 h-8 rounded-lg flex items-center justify-center ${form.is_active ? "bg-success-subtle" : "bg-surface-muted"}`}>
+                      <CheckCircle2 className={`h-4 w-4 ${form.is_active ? "text-success" : "text-foreground-subtle"}`} />
                     </Box>
                     <Box>
-                      <Text as="p" className="text-sm font-semibold text-slate-800">Active trainer</Text>
-                      <Text as="p" className="text-xs text-slate-500 mt-0.5">Inactive trainers can&apos;t be assigned to trainings.</Text>
+                      <Text as="p" className="text-sm font-semibold text-foreground">Active trainer</Text>
+                      <Text as="p" className="text-xs text-foreground-muted mt-0.5">Inactive trainers can&apos;t be assigned to trainings.</Text>
                     </Box>
                   </Box>
                   <Switch checked={form.is_active} onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))} />
@@ -422,11 +422,11 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
                 </Field>
               </Section>
 
-              <Box className="flex items-start gap-3 rounded-2xl border border-violet-100 bg-violet-50/70 px-4 py-3.5">
-                <Box className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
-                  <Sparkles className="h-4 w-4 text-violet-600" />
+              <Box className="flex items-start gap-3 rounded-2xl border border-primary-border bg-violet-50/70 px-4 py-3.5">
+                <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center shrink-0">
+                  <Sparkles className="h-4 w-4 text-primary" />
                 </Box>
-                <Text as="p" className="text-xs text-slate-600 leading-relaxed">
+                <Text as="p" className="text-xs text-foreground-muted leading-relaxed">
                   The trainer gets an email to set their password and fill in their bio, expertise, certifications, and resume. You can review or edit all of it later from this table.
                 </Text>
               </Box>
@@ -434,12 +434,12 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
           )}
 
           {(error || fieldErrors) && (
-            <Box className="mt-5 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3">
-              <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+            <Box className="mt-5 flex items-start gap-2.5 rounded-xl border border-error-border bg-error-subtle px-3.5 py-3">
+              <AlertCircle className="h-4 w-4 text-error shrink-0 mt-0.5" />
               <Box>
-                {error && <Text as="p" className="text-xs text-red-700 font-medium">{error}</Text>}
+                {error && <Text as="p" className="text-xs text-error-subtle-foreground font-medium">{error}</Text>}
                 {fieldErrors && Object.entries(fieldErrors).map(([k, msgs]) => (
-                  <Text as="p" key={k} className="text-xs text-red-600 mt-0.5">
+                  <Text as="p" key={k} className="text-xs text-error mt-0.5">
                     {k}: {Array.isArray(msgs) ? msgs.join(", ") : String(msgs)}
                   </Text>
                 ))}
@@ -448,9 +448,9 @@ export function TrainerFormDialog({ open, onOpenChange, token, mode = "create", 
           )}
         </Box>
 
-        <DialogFooter className="px-7 pt-4 pb-6 border-t border-slate-100 bg-white">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm px-6">
+        <DialogFooter className="px-7 pt-4 pb-6 border-t border-border bg-surface">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-border text-foreground-muted hover:bg-surface-muted">Cancel</Button>
+          <Button onClick={submit} disabled={submitting} className="bg-primary hover:bg-primary-hover text-primary-foreground border-0 shadow-sm px-6">
             {submitting ? "Saving…" : isEdit ? "Save changes" : "Add trainer"}
           </Button>
         </DialogFooter>

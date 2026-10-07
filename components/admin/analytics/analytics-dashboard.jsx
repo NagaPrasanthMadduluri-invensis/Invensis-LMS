@@ -100,34 +100,34 @@ function timeAgo(iso) {
 const cap = (s = "") => s.charAt(0).toUpperCase() + s.slice(1);
 
 const STATUS_BADGE = {
-  active: "bg-emerald-100 text-emerald-700",
-  ongoing: "bg-violet-100 text-violet-700",
-  pending: "bg-amber-100 text-amber-700",
-  completed: "bg-violet-100 text-violet-700",
-  cancelled: "bg-rose-100 text-rose-700",
+  active: "bg-success-subtle text-success-subtle-foreground",
+  ongoing: "bg-primary-subtle text-primary",
+  pending: "bg-warning-subtle text-warning-subtle-foreground",
+  completed: "bg-primary-subtle text-primary",
+  cancelled: "bg-error-subtle text-error-subtle-foreground",
 };
 
 /* ── KPI card ── */
 const KPI_THEMES = {
-  indigo: "border-violet-200 bg-violet-50 text-violet-700",
-  violet: "border-violet-200 bg-violet-50 text-violet-700",
-  sky: "border-sky-200 bg-sky-50 text-sky-700",
-  emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  amber: "border-amber-200 bg-amber-50 text-amber-700",
-  rose: "border-rose-200 bg-rose-50 text-rose-700",
+  indigo: "border-primary-border bg-violet-50 text-violet-700",
+  violet: "border-primary-border bg-violet-50 text-violet-700",
+  sky: "border-info-border bg-sky-50 text-sky-700",
+  emerald: "border-success-border bg-emerald-50 text-emerald-700",
+  amber: "border-warning-border bg-amber-50 text-amber-700",
+  rose: "border-error-border bg-rose-50 text-rose-700",
   teal: "border-teal-200 bg-teal-50 text-teal-700",
   fuchsia: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700",
 };
 
 function KpiCard({ icon: Icon, label, value, sub, theme }) {
   return (
-    <Card className="rounded-2xl border border-slate-200 p-4 shadow-sm">
+    <Card className="rounded-2xl border border-border p-4 shadow-sm">
       <Box className={`flex h-9 w-9 items-center justify-center rounded-xl border ${KPI_THEMES[theme]}`}>
         <Icon className="h-5 w-5" />
       </Box>
-      <Text as="span" className="mt-3 block text-2xl font-extrabold leading-none text-slate-800">{value}</Text>
-      <Text as="span" className="mt-1 block text-xs font-semibold text-slate-600">{label}</Text>
-      {sub && <Text as="span" className="mt-0.5 block text-[11px] text-slate-400">{sub}</Text>}
+      <Text as="span" className="mt-3 block text-2xl font-extrabold leading-none text-foreground">{value}</Text>
+      <Text as="span" className="mt-1 block text-xs font-semibold text-foreground-muted">{label}</Text>
+      {sub && <Text as="span" className="mt-0.5 block text-[11px] text-foreground-subtle">{sub}</Text>}
     </Card>
   );
 }
@@ -140,7 +140,7 @@ function FilterSelect({ value, onChange, placeholder, options, allLabel }) {
   const items = { [ALL]: allLabel, ...Object.fromEntries(options.map((o) => [o.value, o.label])) };
   return (
     <Select value={value} onValueChange={onChange} items={items}>
-      <SelectTrigger className="h-9 w-full min-w-0 bg-white text-xs sm:w-[150px]">
+      <SelectTrigger className="h-9 w-full min-w-0 bg-surface text-xs sm:w-[150px]">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
@@ -239,13 +239,13 @@ export function AnalyticsDashboard() {
 
   if (error) {
     return (
-      <Box className="flex items-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-5">
-        <AlertCircle className="h-5 w-5 shrink-0 text-rose-500" />
+      <Box className="flex items-center gap-3 rounded-2xl border border-error-border bg-error-subtle p-5">
+        <AlertCircle className="h-5 w-5 shrink-0 text-error" />
         <Box>
-          <Text as="p" className="text-sm font-semibold text-rose-700">Couldn&rsquo;t load analytics</Text>
-          <Text as="span" className="text-xs text-rose-600">{error}</Text>
+          <Text as="p" className="text-sm font-semibold text-error-subtle-foreground">Couldn&rsquo;t load analytics</Text>
+          <Text as="span" className="text-xs text-error">{error}</Text>
         </Box>
-        <Button size="sm" variant="outline" onClick={load} className="ml-auto border-rose-200 text-rose-700 hover:bg-rose-100">Retry</Button>
+        <Button size="sm" variant="outline" onClick={load} className="ml-auto border-error-border text-error-subtle-foreground hover:bg-error-subtle">Retry</Button>
       </Box>
     );
   }
@@ -273,13 +273,13 @@ export function AnalyticsDashboard() {
     <Box className={`space-y-6 transition-opacity ${loading ? "opacity-60" : "opacity-100"}`}>
 
       {/* ── Filter bar ── */}
-      <Card className="rounded-2xl border border-slate-200 p-4 shadow-sm">
+      <Card className="rounded-2xl border border-border p-4 shadow-sm">
         <Box className="flex flex-col gap-3">
-          <Box className="flex shrink-0 items-center gap-2 whitespace-nowrap text-slate-500">
+          <Box className="flex shrink-0 items-center gap-2 whitespace-nowrap text-foreground-muted">
             <Filter className="h-4 w-4 shrink-0" />
-            <Text as="span" className="text-xs font-semibold uppercase tracking-wide text-slate-500">Filters</Text>
-            <Box className="ml-1 flex items-center gap-1.5 text-[11px] text-slate-400">
-              <Box className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <Text as="span" className="text-xs font-semibold uppercase tracking-wide text-foreground-muted">Filters</Text>
+            <Box className="ml-1 flex items-center gap-1.5 text-[11px] text-foreground-subtle">
+              <Box className="h-1.5 w-1.5 rounded-full bg-success" />
               Updated {timeAgo(data.generated_at)}
             </Box>
           </Box>
@@ -304,7 +304,7 @@ export function AnalyticsDashboard() {
               options={trainerOptions.map((t) => ({ value: t.id, label: t.name }))} />
             <Button
               size="sm" variant="ghost" onClick={resetFilters} disabled={!hasActiveFilters}
-              className="h-9 gap-1.5 text-slate-500 hover:text-slate-800 disabled:opacity-40"
+              className="h-9 gap-1.5 text-foreground-muted hover:text-foreground disabled:opacity-40"
             >
               <X className="h-3.5 w-3.5" /> Reset
             </Button>
@@ -382,9 +382,9 @@ export function AnalyticsDashboard() {
 
       {/* ── Learner profile section header ── */}
       <Box className="flex items-center gap-2 pt-1">
-        <Briefcase className="h-4 w-4 text-slate-400" />
-        <Text as="h2" className="text-sm font-semibold uppercase tracking-wide text-slate-500">Learner Profile</Text>
-        <Box className="h-px flex-1 bg-slate-200" />
+        <Briefcase className="h-4 w-4 text-foreground-subtle" />
+        <Text as="h2" className="text-sm font-semibold uppercase tracking-wide text-foreground-muted">Learner Profile</Text>
+        <Box className="h-px flex-1 bg-surface-muted" />
       </Box>
 
       {/* ── Sponsorship + job title ── */}
@@ -411,7 +411,7 @@ export function AnalyticsDashboard() {
       </Box>
 
       <Box className="flex justify-end">
-        <Button size="sm" variant="ghost" onClick={load} disabled={loading} className="gap-1.5 text-slate-500 hover:text-slate-800">
+        <Button size="sm" variant="ghost" onClick={load} disabled={loading} className="gap-1.5 text-foreground-muted hover:text-foreground">
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
         </Button>
       </Box>

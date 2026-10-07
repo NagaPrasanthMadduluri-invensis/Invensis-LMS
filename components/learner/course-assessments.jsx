@@ -23,31 +23,31 @@ const LEVEL_CONFIG = {
   basic: {
     label:    "Basic",
     icon:     TrendingUp,
-    badge:    "bg-emerald-100 text-emerald-700",
-    border:   "border-emerald-200",
-    iconBg:   "bg-emerald-100 text-emerald-600",
-    headerBg: "bg-emerald-50",
-    btnClass: "bg-emerald-600 hover:bg-emerald-700 text-white",
+    badge:    "bg-success-subtle text-success-subtle-foreground",
+    border:   "border-success-border",
+    iconBg:   "bg-success-subtle text-success",
+    headerBg: "bg-success-subtle",
+    btnClass: "bg-success hover:bg-success text-success-foreground",
     desc:     "Start here to test your foundational knowledge.",
   },
   moderate: {
     label:    "Moderate",
     icon:     Target,
-    badge:    "bg-amber-100 text-amber-700",
-    border:   "border-amber-200",
-    iconBg:   "bg-amber-100 text-amber-600",
-    headerBg: "bg-amber-50",
-    btnClass: "bg-amber-500 hover:bg-amber-600 text-white",
+    badge:    "bg-warning-subtle text-warning-subtle-foreground",
+    border:   "border-warning-border",
+    iconBg:   "bg-warning-subtle text-warning",
+    headerBg: "bg-warning-subtle",
+    btnClass: "bg-warning hover:bg-warning text-warning-foreground",
     desc:     "Challenge yourself with intermediate-level questions.",
   },
   difficult: {
     label:    "Difficult",
     icon:     Zap,
-    badge:    "bg-red-100 text-red-700",
-    border:   "border-red-200",
-    iconBg:   "bg-red-100 text-red-600",
-    headerBg: "bg-red-50",
-    btnClass: "bg-red-600 hover:bg-red-700 text-white",
+    badge:    "bg-error-subtle text-error-subtle-foreground",
+    border:   "border-error-border",
+    iconBg:   "bg-error-subtle text-error",
+    headerBg: "bg-error-subtle",
+    btnClass: "bg-error hover:bg-error text-error-foreground",
     desc:     "Advanced questions to prepare for the real exam.",
   },
 };
@@ -157,7 +157,7 @@ export function LearnerCourseAssessments({ courseId }) {
   if (error) {
     return (
       <Card className="p-6">
-        <Text as="p" className="text-red-600 text-sm">Failed to load assessments: {error}</Text>
+        <Text as="p" className="text-error text-sm">Failed to load assessments: {error}</Text>
       </Card>
     );
   }

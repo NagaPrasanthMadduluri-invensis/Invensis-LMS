@@ -6,38 +6,11 @@
 
 @theme inline {
   --color-background: var(--background);
-  --color-dark-background: var(--dark-background);
-  --color-middark-background: var(--middark-background);
   --color-foreground: var(--foreground);
-  --color-text-default: var(--text-default);
-  --color-text-muted: var(--text-muted);
-  --color-text-dark: var(--text-dark);
-  --color-text-middark: var(--text-middark);
 
-  /* === Invensis Learning brand palette (utility colors) === */
-  --color-brand-deep: var(--il-purple-deep);
-  --color-brand-mid: var(--il-purple-mid);
-  --color-brand-near-black: var(--il-near-black);
-  --color-brand-violet: var(--il-violet);
+  /* Brand utility colours still referenced by components (bg-/text-brand-*) */
   --color-brand-violet-soft: var(--il-violet-soft);
-  --color-brand-lavender: var(--il-lavender);
-  --color-brand-accent: var(--il-accent-vivid);
-  --color-brand-tint: var(--il-purple-tint);
-  --color-brand-order: var(--il-order-purple);
-  --color-brand-cta-deep: var(--il-cta-deep);
-  --color-brand-cta-light: var(--il-cta-light);
-  --color-brand-gold: var(--il-gold);
-  --color-brand-gold-warm: var(--il-gold-warm);
-  --color-brand-gold-brand: var(--il-gold-brand);
   --color-brand-hero: var(--il-hero-deep);
-  --color-brand-hero-glow: var(--il-hero-glow);
-  --color-brand-card-dark: var(--il-card-dark);
-  --color-brand-card-hover: var(--il-card-hover);
-  --color-brand-stats-pill: var(--il-stats-pill);
-  --color-brand-text-primary: var(--il-text-primary);
-  --color-brand-text-secondary: var(--il-text-secondary);
-  --color-brand-text-muted: var(--il-text-muted);
-  --color-brand-text-dimmed: var(--il-text-dimmed);
 
   --font-sans: var(--font-inter);
   --font-mono: ui-monospace, monospace;
@@ -51,11 +24,6 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -72,6 +40,42 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* === Semantic design tokens → utilities (bg-*, text-*, border-*) === */
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-subtle-foreground: var(--primary-subtle-foreground);
+  --color-primary-border: var(--primary-border);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-subtle-foreground: var(--success-subtle-foreground);
+  --color-success-border: var(--success-border);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-subtle-foreground: var(--warning-subtle-foreground);
+  --color-warning-border: var(--warning-border);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-error-subtle: var(--error-subtle);
+  --color-error-subtle-foreground: var(--error-subtle-foreground);
+  --color-error-border: var(--error-border);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-subtle: var(--info-subtle);
+  --color-info-subtle-foreground: var(--info-subtle-foreground);
+  --color-info-border: var(--info-border);
+  --color-focus: var(--focus);
+  --color-disabled: var(--disabled);
+  --color-disabled-foreground: var(--disabled-foreground);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -82,127 +86,162 @@
 }
 
 :root {
-  /* === INVENSIS LEARNING BRAND — Purple palette (raw tokens) === */
-  /* Primary backgrounds */
-  --il-purple-deep: #4f2183;
-  --il-purple-mid: #63379f;
-  --il-near-black: #090909;
-  /* Accent purples */
-  --il-violet: #7c3aed;
-  --il-violet-soft: #a78bfa;
-  --il-lavender: #c4b5fd;
-  --il-accent-vivid: #c155ff;
-  --il-brand-violet: #7e2dd1;
-  /* "Up next" hero band — deep plum canvas with an off-centre violet glow */
-  --il-hero-deep: #2e0a4f;
-  --il-hero-glow: #4c1180;
-  /* Light tints */
-  --il-purple-tint: #f3efff;
-  --il-order-purple: #3b18a3;
-  /* CTA banner */
-  --il-cta-deep: #2d259e;
-  --il-cta-light: #6769d2;
-  /* Gold accents */
-  --il-gold: #efbd5f;
-  --il-gold-warm: #ec7d50;
-  --il-gold-brand: #f5a623;
-  /* Dark surfaces */
-  --il-card-dark: #1a1a1a;
-  --il-card-hover: #3b3b3b;
-  --il-stats-pill: #2a1256;
-  /* Text on dark */
-  --il-text-primary: #ffffff;
-  --il-text-secondary: #cbd5e1;
-  --il-text-muted: #d1d5db;
-  --il-text-dimmed: #e5e7eb;
-  /* Gradients */
-  --il-gradient-main: linear-gradient(270deg, #4f2183 -0.01%, #63379f 50.97%, #090909 112.8%);
-  --il-gradient-conic: conic-gradient(from -40deg at 50% 50%, #4f2183 0deg, #63379f 135deg, #090909 360deg);
-  --il-gradient-hero: conic-gradient(from 215deg at 90% 72%, #0e021b 0deg, #17023e 197.308deg, #4d0ea5 360deg);
-  --il-gradient-cta: linear-gradient(90deg, #2d259e 0%, #6769d2 100%);
-  --il-gradient-order: linear-gradient(135deg, #1a0b4d 0%, #3b18a3 100%);
+  /* === INVENSIS LEARNING BRAND — raw tokens still referenced === */
+  --il-violet-soft: #5b8fd6;  /* bg-brand-violet-soft (blue accent dot) */
+  --il-hero-deep: #001233;    /* text-/bg-brand-hero (navy) */
+  /* Gradients (used by the .bg-brand-gradient* / .bg-brand-up-next utilities) */
+  --il-gradient-main: linear-gradient(270deg, #03045e -0.01%, #023e7d 50.97%, #001233 112.8%);
+  --il-gradient-conic: conic-gradient(from -40deg at 50% 50%, #03045e 0deg, #023e7d 135deg, #001233 360deg);
+  --il-gradient-hero: conic-gradient(from 215deg at 90% 72%, #001233 0deg, #002855 197.308deg, #0466c8 360deg);
+  --il-gradient-cta: linear-gradient(90deg, #023e7d 0%, #0466c8 100%);
+  --il-gradient-order: linear-gradient(135deg, #001233 0%, #023e7d 100%);
   --il-gradient-gold: linear-gradient(to right, #efbd5f 0%, #ec7d50 100%);
   --il-gradient-up-next: radial-gradient(
     125% 190% at 86% 42%,
-    #4c1180 0%,
-    #3a0c66 36%,
-    #2e0a4f 68%
+    #0466c8 0%,
+    #023e7d 36%,
+    #001233 68%
   );
 
   /* === Semantic tokens (shadcn) mapped to the brand === */
-  --background: #eef0f5; /* cool-gray canvas so white cards stand out */
-  --dark-background: #4f2183; /* brand deep section canvas */
-  --middark-background: #63379f; /* brand mid */
-  --foreground: #0a0a0a;
-  --text-default: #434752;
-  --text-muted: #6b7280;
-  --text-dark: #09090b;
-  --text-middark: #404040;
+  --background: #e8effb; /* soft blue canvas */
+  --foreground: #0b1b3a; /* navy ink text */
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #0b1b3a;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --primary: #7e2dd1; /* Brand Violet — buttons, brand token */
+  --popover-foreground: #0b1b3a;
+  --primary: #03045e; /* deep navy — buttons, brand token */
   --primary-foreground: #ffffff;
-  --secondary: #f3efff; /* Purple Tint */
-  --secondary-foreground: #3b18a3; /* Order Purple */
-  --muted: #f3efff;
-  --muted-foreground: #6b7280;
-  --accent: #f3efff;
-  --accent-foreground: #3b18a3;
+  --secondary: #e8effb; /* blue tint */
+  --secondary-foreground: #023e7d; /* deep blue */
+  --muted: #e8effb;
+  --muted-foreground: #475a7a; /* blue-slate */
+  --accent: #e6edfb;
+  --accent-foreground: #023e7d;
   --destructive: #dc2626;
-  --border: #e9e3f7; /* subtle purple-tinted border */
-  --input: #e9e3f7;
-  --ring: #a78bfa; /* Violet Soft — focus rings */
-  --chart-1: #7c3aed;
-  --chart-2: #a78bfa;
-  --chart-3: #c155ff;
-  --chart-4: #efbd5f;
-  --chart-5: #63379f;
+  --border: #d5e1f2; /* blue-tinted hairline */
+  --input: #d5e1f2;
+  --ring: #0466c8; /* blue focus ring */
+
+  /* === Semantic design tokens (single source of truth for the UI) ===
+     Values match the colours the app currently uses, so adopting the tokens is
+     visually faithful; change them here to re-theme the whole app. */
+  /* Surfaces */
+  --surface: #ffffff;
+  --surface-hover: #f0f5fd;   /* soft blue */
+  --surface-muted: #e6eefb;   /* blue tint */
+  /* Text hierarchy (primary = --foreground) */
+  --foreground-muted: #475a7a;  /* blue-slate — secondary text */
+  --foreground-subtle: #8698b5; /* muted text / icons */
+  /* Borders */
+  --border-strong: #b9cdea;     /* blue-slate */
+  /* Primary (brand blue) */
+  --primary-hover: #023e7d;              /* deeper navy */
+  --primary-subtle: #e6edfb;             /* blue pill bg */
+  --primary-subtle-foreground: #023e7d;  /* deep blue pill text */
+  --primary-border: #c3d7f5;             /* blue-200 */
+  /* Success (emerald) */
+  --success: #059669;
+  --success-foreground: #ffffff;
+  --success-subtle: #ecfdf5;
+  --success-subtle-foreground: #047857;
+  --success-border: #a7f3d0;
+  /* Warning (amber) */
+  --warning: #d97706;
+  --warning-foreground: #ffffff;
+  --warning-subtle: #fffbeb;
+  --warning-subtle-foreground: #b45309;
+  --warning-border: #fde68a;
+  /* Error (red/rose) */
+  --error: #dc2626;
+  --error-foreground: #ffffff;
+  --error-subtle: #fef2f2;
+  --error-subtle-foreground: #b91c1c;
+  --error-border: #fecaca;
+  /* Info (cyan — distinct from the blue primary) */
+  --info: #0096c7;
+  --info-foreground: #ffffff;
+  --info-subtle: #e0f7fc;
+  --info-subtle-foreground: #006494;
+  --info-border: #ade8f4;
+  /* Interaction */
+  --focus: #0466c8;
+  --disabled: #dbe4f1;
+  --disabled-foreground: #8698b5;
   --radius: 0.625rem;
   /* Sidebar — deep purple canvas with white text */
-  --sidebar: #4f2183;
+  --sidebar: #001845;
   --sidebar-foreground: #e5e7eb;
-  --sidebar-primary: #a78bfa; /* active item highlight */
-  --sidebar-primary-foreground: #17023e;
-  --sidebar-accent: #63379f; /* hover state */
+  --sidebar-primary: #0466c8; /* active item highlight */
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #023e7d; /* hover state */
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #a78bfa;
+  --sidebar-ring: #0466c8;
 }
 
 .dark {
-  --background: #0e021b; /* Deep Ink */
+  --background: #060d1a; /* navy ink */
   --foreground: #ffffff;
-  --card: #1a1a1a; /* Card Dark */
+  --card: #121a2b; /* dark blue card */
   --card-foreground: #ffffff;
-  --popover: #1a1a1a;
+  --popover: #121a2b;
   --popover-foreground: #ffffff;
-  --primary: #7c3aed; /* Violet Medium */
+  --primary: #0466c8; /* Blue */
   --primary-foreground: #ffffff;
-  --secondary: #2a1256; /* Stats Pill */
-  --secondary-foreground: #ede9fe;
-  --muted: #252525;
-  --muted-foreground: #cbd5e1;
-  --accent: #2c0665; /* Badge BG */
-  --accent-foreground: #ede9fe;
+  --secondary: #0b2747; /* dark blue */
+  --secondary-foreground: #cfe0fb;
+  --muted: #1b2535;
+  --muted-foreground: #aebfd8;
+  --accent: #0b2747; /* dark blue */
+  --accent-foreground: #cfe0fb;
   --destructive: #f87171;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.15);
-  --ring: #a78bfa;
-  --chart-1: #a78bfa;
-  --chart-2: #7c3aed;
-  --chart-3: #c155ff;
-  --chart-4: #efbd5f;
-  --chart-5: #63379f;
-  --sidebar: #17023e; /* Dark Ink */
+  --ring: #0582ca;
+
+  /* === Semantic design tokens — dark === */
+  --surface: #121a2b;
+  --surface-hover: #1b2535;
+  --surface-muted: #0b2747;
+  --foreground-muted: #aebfd8;
+  --foreground-subtle: #7e92b4;
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --primary-hover: #0582ca;
+  --primary-subtle: #0b2747;
+  --primary-subtle-foreground: #bcd6f5;
+  --primary-border: rgba(4, 102, 200, 0.45);
+  --success: #10b981;
+  --success-foreground: #052e22;
+  --success-subtle: rgba(16, 185, 129, 0.15);
+  --success-subtle-foreground: #6ee7b7;
+  --success-border: rgba(16, 185, 129, 0.4);
+  --warning: #f59e0b;
+  --warning-foreground: #3a2503;
+  --warning-subtle: rgba(245, 158, 11, 0.15);
+  --warning-subtle-foreground: #fcd34d;
+  --warning-border: rgba(245, 158, 11, 0.4);
+  --error: #f87171;
+  --error-foreground: #450a0a;
+  --error-subtle: rgba(248, 113, 113, 0.15);
+  --error-subtle-foreground: #fca5a5;
+  --error-border: rgba(248, 113, 113, 0.4);
+  --info: #48cae4; /* cyan */
+  --info-foreground: #042f49;
+  --info-subtle: rgba(72, 202, 228, 0.15);
+  --info-subtle-foreground: #90e0ef;
+  --info-border: rgba(72, 202, 228, 0.4);
+  --focus: #0582ca;
+  --disabled: rgba(255, 255, 255, 0.1);
+  --disabled-foreground: #64748b;
+  --sidebar: #001233; /* navy ink */
   --sidebar-foreground: #e5e7eb;
-  --sidebar-primary: #a78bfa;
-  --sidebar-primary-foreground: #17023e;
-  --sidebar-accent: #63379f;
+  --sidebar-primary: #0582ca;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #023e7d;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #a78bfa;
+  --sidebar-ring: #0582ca;
 }
 
 @layer base {

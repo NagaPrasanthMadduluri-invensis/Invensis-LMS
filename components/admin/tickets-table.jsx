@@ -110,53 +110,53 @@ function TicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="!max-w-none w-full sm:!max-w-xl p-0 gap-0 flex flex-col">
-        <SheetHeader className="p-5 border-b border-slate-100 shrink-0">
+        <SheetHeader className="p-5 border-b border-border shrink-0">
           <Box className="flex items-center gap-2 flex-wrap">
-            <Text as="span" className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-2 py-0.5 rounded-md">
+            <Text as="span" className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-primary bg-primary-subtle ring-1 ring-primary-border px-2 py-0.5 rounded-md">
               <Hash className="h-3 w-3" />{t.code}
             </Text>
             <Badge className={`border-0 text-[11px] font-semibold ${status.badge}`}>{status.label}</Badge>
             <Badge className={`border-0 text-[10px] font-semibold ${priority.badge}`}>{priority.label}</Badge>
           </Box>
-          <SheetTitle className="text-base font-bold text-slate-800 mt-2">{t.subject}</SheetTitle>
-          <SheetDescription className="text-xs text-slate-400">{categoryLabel(t.category)} · Raised {formatDateTime(t.created_at)}</SheetDescription>
+          <SheetTitle className="text-base font-bold text-foreground mt-2">{t.subject}</SheetTitle>
+          <SheetDescription className="text-xs text-foreground-subtle">{categoryLabel(t.category)} · Raised {formatDateTime(t.created_at)}</SheetDescription>
         </SheetHeader>
 
         {/* Meta + status (compact, scrolls if long) */}
-        <Box className="px-5 py-4 border-b border-slate-100 space-y-4 shrink-0 max-h-[40%] overflow-y-auto">
+        <Box className="px-5 py-4 border-b border-border space-y-4 shrink-0 max-h-[40%] overflow-y-auto">
           <Box className="flex items-center gap-3">
             <Box className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 ${avatarColor(t.learner?.id || "")}`}>
               {initialsOf(t.learner?.name)}
             </Box>
             <Box className="min-w-0">
-              <ParticipantLink id={t.learner?.id} className="text-sm font-semibold text-slate-800">{t.learner?.name}</ParticipantLink>
+              <ParticipantLink id={t.learner?.id} className="text-sm font-semibold text-foreground">{t.learner?.name}</ParticipantLink>
               <Box className="flex items-center gap-1.5">
-                <Mail className="h-3 w-3 text-slate-400 shrink-0" />
-                <ParticipantLink id={t.learner?.id} className="text-xs text-slate-500 truncate">{t.learner?.email}</ParticipantLink>
+                <Mail className="h-3 w-3 text-foreground-subtle shrink-0" />
+                <ParticipantLink id={t.learner?.id} className="text-xs text-foreground-muted truncate">{t.learner?.email}</ParticipantLink>
               </Box>
             </Box>
           </Box>
 
           {t.training && (
-            <Box className="rounded-xl bg-slate-50 ring-1 ring-slate-200 px-4 py-2.5">
-              <Text as="p" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Related training</Text>
+            <Box className="rounded-xl bg-surface-hover ring-1 ring-border px-4 py-2.5">
+              <Text as="p" className="text-[10px] font-bold text-foreground-subtle uppercase tracking-widest mb-1">Related training</Text>
               <Box className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-violet-500 shrink-0" />
-                <TrainingLink id={t.training.id} className="text-sm font-semibold text-slate-700 font-mono">{t.training.code}</TrainingLink>
-                <Text as="span" className="text-sm text-slate-500 truncate">· {t.training.title}</Text>
+                <BookOpen className="h-4 w-4 text-primary shrink-0" />
+                <TrainingLink id={t.training.id} className="text-sm font-semibold text-foreground font-mono">{t.training.code}</TrainingLink>
+                <Text as="span" className="text-sm text-foreground-muted truncate">· {t.training.title}</Text>
               </Box>
             </Box>
           )}
 
           <Box>
-            <Text as="p" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Original request</Text>
-            <Text as="p" className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap break-words">{t.description}</Text>
+            <Text as="p" className="text-[10px] font-bold text-foreground-subtle uppercase tracking-widest mb-1.5">Original request</Text>
+            <Text as="p" className="text-sm text-foreground-muted leading-relaxed whitespace-pre-wrap break-words">{t.description}</Text>
           </Box>
 
           <Box className="flex items-center gap-3">
-            <Text as="span" className="text-xs font-semibold text-slate-600 shrink-0">Status</Text>
+            <Text as="span" className="text-xs font-semibold text-foreground-muted shrink-0">Status</Text>
             <Select value={t.status} onValueChange={changeStatus} disabled={busy || loading}>
-              <SelectTrigger className="h-9 bg-white border-slate-200 rounded-lg text-sm">
+              <SelectTrigger className="h-9 bg-surface border-border rounded-lg text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -171,8 +171,8 @@ function TicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }) {
         {/* Conversation */}
         <Box className="flex-1 min-h-0 flex flex-col px-5 py-4">
           <Box className="flex items-center gap-2 mb-3 shrink-0">
-            <MessageSquare className="h-4 w-4 text-slate-400" />
-            <Text as="h4" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Conversation</Text>
+            <MessageSquare className="h-4 w-4 text-foreground-subtle" />
+            <Text as="h4" className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Conversation</Text>
           </Box>
           <TicketThread
             messages={detail?.messages || []}
@@ -220,8 +220,8 @@ export function TicketsTable() {
 
   if (error) {
     return (
-      <Card className="p-6 rounded-2xl border-0 bg-red-50 shadow-sm">
-        <Text as="p" className="text-red-600 text-sm">Failed to load tickets: {error}</Text>
+      <Card className="p-6 rounded-2xl border-0 bg-error-subtle shadow-sm">
+        <Text as="p" className="text-error text-sm">Failed to load tickets: {error}</Text>
       </Card>
     );
   }
@@ -234,34 +234,34 @@ export function TicketsTable() {
     <Box className="space-y-5">
       {/* Summary */}
       <Box className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={Ticket}       value={summary.total}       label="Total"       cls="bg-slate-50 text-slate-700" />
-        <StatCard icon={Clock}        value={summary.open}        label="Open"        cls="bg-red-50 text-red-600" />
-        <StatCard icon={Loader2}      value={summary.in_progress} label="In Progress" cls="bg-amber-50 text-amber-700" />
-        <StatCard icon={CheckCircle2} value={summary.resolved}    label="Resolved"    cls="bg-emerald-50 text-emerald-700" />
+        <StatCard icon={Ticket}       value={summary.total}       label="Total"       cls="bg-surface-hover text-foreground" />
+        <StatCard icon={Clock}        value={summary.open}        label="Open"        cls="bg-error-subtle text-error" />
+        <StatCard icon={Loader2}      value={summary.in_progress} label="In Progress" cls="bg-warning-subtle text-warning-subtle-foreground" />
+        <StatCard icon={CheckCircle2} value={summary.resolved}    label="Resolved"    cls="bg-success-subtle text-success-subtle-foreground" />
       </Box>
 
       {/* Toolbar */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-3.5 space-y-3.5">
         <Box className="relative">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
           <Input
             placeholder="Search by ticket ID, subject or learner..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             autoComplete="off"
-            className="pl-10 pr-9 h-10 text-sm bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-2 focus-visible:ring-violet-400/40"
+            className="pl-10 pr-9 h-10 text-sm bg-surface-hover border-border rounded-xl focus-visible:ring-2 focus-visible:ring-violet-400/40"
           />
           {search && (
             <button type="button" onClick={() => setSearch("")} aria-label="Clear search"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-subtle hover:text-foreground-muted">
               <X className="h-4 w-4" />
             </button>
           )}
         </Box>
-        <Box className="h-px bg-slate-100" />
+        <Box className="h-px bg-surface-muted" />
         <Box className="flex items-center gap-3 flex-wrap">
           <Select value={status || "__all__"} onValueChange={(v) => setStatus(v === "__all__" ? "" : v)}>
-            <SelectTrigger className="h-9 w-[160px] bg-white border-slate-200 rounded-lg text-sm">
+            <SelectTrigger className="h-9 w-[160px] bg-surface border-border rounded-lg text-sm">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>
@@ -270,7 +270,7 @@ export function TicketsTable() {
             </SelectContent>
           </Select>
           <Select value={category || "__all__"} onValueChange={(v) => setCategory(v === "__all__" ? "" : v)}>
-            <SelectTrigger className="h-9 w-[190px] bg-white border-slate-200 rounded-lg text-sm">
+            <SelectTrigger className="h-9 w-[190px] bg-surface border-border rounded-lg text-sm">
               <SelectValue placeholder="All categories" />
             </SelectTrigger>
             <SelectContent>
@@ -280,11 +280,11 @@ export function TicketsTable() {
           </Select>
           {hasFilters && (
             <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setStatus(""); setCategory(""); }}
-              className="h-9 px-3 text-xs text-slate-500 hover:text-slate-700">
+              className="h-9 px-3 text-xs text-foreground-muted hover:text-foreground">
               <X className="h-3.5 w-3.5 mr-1" /> Clear
             </Button>
           )}
-          <Text as="p" className="ml-auto text-xs text-slate-400 shrink-0">
+          <Text as="p" className="ml-auto text-xs text-foreground-subtle shrink-0">
             {tickets.length} ticket{tickets.length !== 1 ? "s" : ""}
           </Text>
         </Box>
@@ -292,23 +292,23 @@ export function TicketsTable() {
 
       {/* Table */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-            <HeadphonesIcon className="h-4 w-4 text-violet-500" />
+        <Box className="px-5 py-4 border-b border-border flex items-center gap-2.5">
+          <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+            <HeadphonesIcon className="h-4 w-4 text-primary" />
           </Box>
-          <Text as="h3" className="text-sm font-bold text-slate-800">All Tickets</Text>
+          <Text as="h3" className="text-sm font-bold text-foreground">All Tickets</Text>
         </Box>
 
         {!data ? (
           <Box className="py-20 text-center">
-            <Text as="p" className="text-sm text-slate-400">Loading tickets...</Text>
+            <Text as="p" className="text-sm text-foreground-subtle">Loading tickets...</Text>
           </Box>
         ) : tickets.length === 0 ? (
           <Box className="py-20 text-center">
-            <Box className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-              <HeadphonesIcon className="h-6 w-6 text-slate-400" />
+            <Box className="w-12 h-12 rounded-2xl bg-surface-muted flex items-center justify-center mx-auto mb-3">
+              <HeadphonesIcon className="h-6 w-6 text-foreground-subtle" />
             </Box>
-            <Text as="p" className="text-sm font-medium text-slate-500">
+            <Text as="p" className="text-sm font-medium text-foreground-muted">
               {hasFilters ? "No tickets match your filters" : "No tickets yet"}
             </Text>
           </Box>
@@ -316,14 +316,14 @@ export function TicketsTable() {
           <Box className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-100">
-                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3 pl-5">Ticket</TableHead>
-                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Raised by</TableHead>
-                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Category</TableHead>
-                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Training</TableHead>
-                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Priority</TableHead>
-                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Status</TableHead>
-                  <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wider py-3">Raised</TableHead>
+                <TableRow className="bg-surface-hover hover:bg-surface-hover border-b border-border">
+                  <TableHead className="text-[11px] font-bold text-foreground-subtle uppercase tracking-wider py-3 pl-5">Ticket</TableHead>
+                  <TableHead className="text-[11px] font-bold text-foreground-subtle uppercase tracking-wider py-3">Raised by</TableHead>
+                  <TableHead className="text-[11px] font-bold text-foreground-subtle uppercase tracking-wider py-3">Category</TableHead>
+                  <TableHead className="text-[11px] font-bold text-foreground-subtle uppercase tracking-wider py-3">Training</TableHead>
+                  <TableHead className="text-[11px] font-bold text-foreground-subtle uppercase tracking-wider py-3">Priority</TableHead>
+                  <TableHead className="text-[11px] font-bold text-foreground-subtle uppercase tracking-wider py-3">Status</TableHead>
+                  <TableHead className="text-[11px] font-bold text-foreground-subtle uppercase tracking-wider py-3">Raised</TableHead>
                   <TableHead className="py-3 pr-5" />
                 </TableRow>
               </TableHeader>
@@ -335,13 +335,13 @@ export function TicketsTable() {
                     <TableRow
                       key={t.id}
                       onClick={() => setSelected(t)}
-                      className="group cursor-pointer hover:bg-violet-50/40 border-b border-slate-100 last:border-0 transition-colors"
+                      className="group cursor-pointer hover:bg-violet-50/40 border-b border-border last:border-0 transition-colors"
                     >
                       <TableCell className="py-4 pl-5">
-                        <Text as="span" className="text-[11px] font-mono font-bold text-violet-600">{t.code}</Text>
-                        <Text as="p" className="text-sm font-semibold text-slate-700 leading-tight mt-0.5 line-clamp-1 break-words">{t.subject}</Text>
+                        <Text as="span" className="text-[11px] font-mono font-bold text-primary">{t.code}</Text>
+                        <Text as="p" className="text-sm font-semibold text-foreground leading-tight mt-0.5 line-clamp-1 break-words">{t.subject}</Text>
                         {t.message_count > 0 && (
-                          <Box className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-slate-400">
+                          <Box className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-foreground-subtle">
                             <MessageSquare className="h-3 w-3" />{t.message_count} {t.message_count === 1 ? "reply" : "replies"}
                           </Box>
                         )}
@@ -352,24 +352,24 @@ export function TicketsTable() {
                             {initialsOf(t.learner?.name)}
                           </Box>
                           <Box className="min-w-0">
-                            <ParticipantLink id={t.learner?.id} className="block text-sm font-semibold text-slate-700 leading-tight truncate">{t.learner?.name}</ParticipantLink>
-                            <ParticipantLink id={t.learner?.id} className="text-xs text-slate-400 truncate block">{t.learner?.email}</ParticipantLink>
+                            <ParticipantLink id={t.learner?.id} className="block text-sm font-semibold text-foreground leading-tight truncate">{t.learner?.name}</ParticipantLink>
+                            <ParticipantLink id={t.learner?.id} className="text-xs text-foreground-subtle truncate block">{t.learner?.email}</ParticipantLink>
                           </Box>
                         </Box>
                       </TableCell>
                       <TableCell className="py-4">
-                        <Badge className="border-0 bg-slate-100 text-slate-600 text-[11px] font-semibold">{categoryLabel(t.category)}</Badge>
+                        <Badge className="border-0 bg-surface-muted text-foreground-muted text-[11px] font-semibold">{categoryLabel(t.category)}</Badge>
                       </TableCell>
                       <TableCell className="py-4">
                         {t.training ? (
                           <Box className="min-w-0">
-                            <TrainingLink id={t.training.id} className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-1.5 py-0.5 rounded-md">
+                            <TrainingLink id={t.training.id} className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-primary bg-primary-subtle ring-1 ring-primary-border px-1.5 py-0.5 rounded-md">
                               <Hash className="h-2.5 w-2.5" />{t.training.code}
                             </TrainingLink>
-                            <Text as="p" className="text-[11px] text-slate-400 leading-tight mt-1 max-w-[180px] truncate">{t.training.title}</Text>
+                            <Text as="p" className="text-[11px] text-foreground-subtle leading-tight mt-1 max-w-[180px] truncate">{t.training.title}</Text>
                           </Box>
                         ) : (
-                          <Text as="span" className="text-xs text-slate-300">—</Text>
+                          <Text as="span" className="text-xs text-foreground-subtle">—</Text>
                         )}
                       </TableCell>
                       <TableCell className="py-4">
@@ -380,12 +380,12 @@ export function TicketsTable() {
                       </TableCell>
                       <TableCell className="py-4">
                         <Box className="flex items-center gap-1.5">
-                          <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                          <Text as="span" className="text-xs text-slate-500">{formatDate(t.created_at)}</Text>
+                          <Calendar className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+                          <Text as="span" className="text-xs text-foreground-muted">{formatDate(t.created_at)}</Text>
                         </Box>
                       </TableCell>
                       <TableCell className="py-4 pr-5 text-right">
-                        <ChevronRight className="h-4 w-4 text-slate-300 inline-block group-hover:text-violet-500 transition-colors" />
+                        <ChevronRight className="h-4 w-4 text-foreground-subtle inline-block group-hover:text-primary transition-colors" />
                       </TableCell>
                     </TableRow>
                   );

@@ -18,18 +18,18 @@ import {
 const LIFECYCLE = {
   in_progress: {
     label: "In progress",
-    badge: "border-amber-200 bg-amber-50 text-amber-700",
+    badge: "border-warning-border bg-warning-subtle text-warning-subtle-foreground",
     tile: "bg-secondary text-primary",
   },
   upcoming: {
     label: "Upcoming",
-    badge: "border-sky-200 bg-sky-50 text-sky-700",
-    tile: "bg-sky-50 text-sky-600",
+    badge: "border-info-border bg-info-subtle text-info-subtle-foreground",
+    tile: "bg-info-subtle text-info",
   },
   completed: {
     label: "Completed",
-    badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    tile: "bg-emerald-50 text-emerald-600",
+    badge: "border-success-border bg-success-subtle text-success-subtle-foreground",
+    tile: "bg-success-subtle text-success",
   },
 };
 

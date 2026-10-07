@@ -119,21 +119,21 @@ export function ChartCard({ title, subtitle, icon: Icon, action, children, class
   const Head = (
     <Box className="flex items-center gap-2">
       {Icon && (
-        <Box className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+        <Box className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-muted text-foreground-muted">
           <Icon className="h-4 w-4" />
         </Box>
       )}
       <Box>
-        <Text as="h3" className="text-sm font-semibold text-slate-800">{title}</Text>
-        {subtitle && <Text as="span" className="text-[11px] text-slate-400">{subtitle}</Text>}
+        <Text as="h3" className="text-sm font-semibold text-foreground">{title}</Text>
+        {subtitle && <Text as="span" className="text-[11px] text-foreground-subtle">{subtitle}</Text>}
       </Box>
     </Box>
   );
 
   return (
     <>
-      <Card className={`flex flex-col overflow-hidden rounded-2xl border border-slate-200 shadow-sm ${className}`}>
-        <Box className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-3.5">
+      <Card className={`flex flex-col overflow-hidden rounded-2xl border border-border shadow-sm ${className}`}>
+        <Box className="flex items-start justify-between gap-3 border-b border-border px-5 py-3.5">
           {Head}
           <Box className="flex items-center gap-1 shrink-0">
             {action}
@@ -142,7 +142,7 @@ export function ChartCard({ title, subtitle, icon: Icon, action, children, class
               onClick={() => setExpanded(true)}
               aria-label="Expand chart to full screen"
               title="Expand to full screen"
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-foreground-subtle hover:bg-surface-muted hover:text-foreground transition-colors"
             >
               <Maximize2 className="h-4 w-4" />
             </button>
@@ -153,16 +153,16 @@ export function ChartCard({ title, subtitle, icon: Icon, action, children, class
 
       <Dialog open={expanded} onOpenChange={setExpanded}>
         <DialogContent className="!max-w-[96vw] w-[96vw] p-0 gap-0 overflow-hidden">
-          <DialogHeader className="flex flex-row items-center gap-2 border-b border-slate-100 px-6 py-4">
+          <DialogHeader className="flex flex-row items-center gap-2 border-b border-border px-6 py-4">
             {Icon && (
-              <Box className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 shrink-0">
+              <Box className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-muted text-foreground-muted shrink-0">
                 <Icon className="h-4 w-4" />
               </Box>
             )}
             <Box className="min-w-0">
-              <DialogTitle className="text-base font-semibold text-slate-800">{title}</DialogTitle>
+              <DialogTitle className="text-base font-semibold text-foreground">{title}</DialogTitle>
               {subtitle
-                ? <DialogDescription className="text-xs text-slate-400">{subtitle}</DialogDescription>
+                ? <DialogDescription className="text-xs text-foreground-subtle">{subtitle}</DialogDescription>
                 : <DialogDescription className="sr-only">Full screen view of {title}</DialogDescription>}
             </Box>
           </DialogHeader>
@@ -189,7 +189,7 @@ export function ChartCard({ title, subtitle, icon: Icon, action, children, class
 function NoData({ label = "No data for the selected filters" }) {
   return (
     <Box className="flex h-full min-h-[220px] flex-col items-center justify-center gap-1 text-center">
-      <Text as="span" className="text-sm text-slate-400">{label}</Text>
+      <Text as="span" className="text-sm text-foreground-subtle">{label}</Text>
     </Box>
   );
 }
@@ -204,11 +204,11 @@ function DonutLegend({ items }) {
         <Box key={it.label} className="flex items-center justify-between gap-2">
           <Box className="flex min-w-0 items-center gap-2">
             <Box className="h-2.5 w-2.5 shrink-0 rounded-[2px]" style={{ backgroundColor: it.color }} />
-            <Text as="span" className="truncate text-xs text-slate-600">{it.label}</Text>
+            <Text as="span" className="truncate text-xs text-foreground-muted">{it.label}</Text>
           </Box>
-          <Text as="span" className="shrink-0 text-xs font-semibold text-slate-800 tabular-nums">
+          <Text as="span" className="shrink-0 text-xs font-semibold text-foreground tabular-nums">
             {it.value}
-            <Text as="span" className="ml-1 text-[10px] font-normal text-slate-400">
+            <Text as="span" className="ml-1 text-[10px] font-normal text-foreground-subtle">
               {total > 0 ? `${Math.round((it.value / total) * 100)}%` : "0%"}
             </Text>
           </Text>
@@ -315,8 +315,8 @@ function DonutChart({ data, colorFor, labelFor, centerLabel, centerValue, emptyL
           </PieChart>
         </ChartContainer>
         <Box className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <Text as="span" className="text-2xl font-extrabold text-slate-800 leading-none">{centerValue ?? total}</Text>
-          <Text as="span" className="text-[10px] uppercase tracking-wide text-slate-400">{centerLabel}</Text>
+          <Text as="span" className="text-2xl font-extrabold text-foreground leading-none">{centerValue ?? total}</Text>
+          <Text as="span" className="text-[10px] uppercase tracking-wide text-foreground-subtle">{centerLabel}</Text>
         </Box>
       </Box>
       <DonutLegend items={rows.map((r) => ({ label: labelFor(r.key), value: r.value, color: colorFor(r.key) }))} />
@@ -449,8 +449,8 @@ export function TopTrainersChart({ data = [] }) {
               hideLabel
               formatter={(value, name, item) => (
                 <Box className="flex flex-col gap-0.5">
-                  <Text as="span" className="text-xs font-semibold text-slate-700">{item.payload.name}</Text>
-                  <Text as="span" className="text-[11px] text-slate-500">{value} training{value === 1 ? "" : "s"} delivered</Text>
+                  <Text as="span" className="text-xs font-semibold text-foreground">{item.payload.name}</Text>
+                  <Text as="span" className="text-[11px] text-foreground-muted">{value} training{value === 1 ? "" : "s"} delivered</Text>
                 </Box>
               )}
             />
@@ -563,8 +563,8 @@ export function LocationChart({ data = [] }) {
               hideLabel
               formatter={(value, name, item) => (
                 <Box className="flex flex-col gap-0.5">
-                  <Text as="span" className="text-xs font-semibold text-slate-700">{item.payload.location}</Text>
-                  <Text as="span" className="text-[11px] text-slate-500">{value} enrolments · {fmtMoney(item.payload.revenue)}</Text>
+                  <Text as="span" className="text-xs font-semibold text-foreground">{item.payload.location}</Text>
+                  <Text as="span" className="text-[11px] text-foreground-muted">{value} enrolments · {fmtMoney(item.payload.revenue)}</Text>
                 </Box>
               )}
             />
@@ -602,8 +602,8 @@ export function RevenueOverTimeChart({ data = [] }) {
             <ChartTooltipContent
               formatter={(value) => (
                 <Box className="flex w-full items-center justify-between gap-4">
-                  <Text as="span" className="text-xs text-slate-500">Revenue</Text>
-                  <Text as="span" className="font-mono text-xs font-semibold text-slate-800">{fmtMoney(value)}</Text>
+                  <Text as="span" className="text-xs text-foreground-muted">Revenue</Text>
+                  <Text as="span" className="font-mono text-xs font-semibold text-foreground">{fmtMoney(value)}</Text>
                 </Box>
               )}
             />
@@ -631,7 +631,7 @@ export function RevenueByCourseChart({ data = [] }) {
         <YAxis type="category" dataKey="title" tickLine={false} axisLine={false} width={150} fontSize={11}
           tickFormatter={(t) => (t.length > 24 ? `${t.slice(0, 23)}…` : t)} />
         <ChartTooltip content={<ChartTooltipContent hideLabel formatter={(v) => (
-          <Text as="span" className="font-mono text-xs font-semibold text-slate-800">{fmtMoney(v)}</Text>
+          <Text as="span" className="font-mono text-xs font-semibold text-foreground">{fmtMoney(v)}</Text>
         )} />} />
         <Bar dataKey="revenue" fill={PALETTE[3]} radius={[0, 4, 4, 0]} barSize={20} isAnimationActive={false}>
           <LabelList dataKey="revenue" position="right" fontSize={11} fill="#52514e" formatter={fmtMoney} />

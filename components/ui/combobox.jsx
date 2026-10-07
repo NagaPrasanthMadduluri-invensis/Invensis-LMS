@@ -103,10 +103,10 @@ export function Combobox({
             aria-invalid={invalid}
             disabled={disabled || loading}
             className={cn(
-              "h-10 w-full justify-between bg-background px-3 text-sm font-normal border border-slate-300 hover:bg-background",
-              "focus-visible:border-violet-400 focus-visible:ring-violet-400",
-              "aria-invalid:border-red-500",
-              !selected && "text-slate-400",
+              "h-10 w-full justify-between bg-background px-3 text-sm font-normal border border-border-strong hover:bg-background",
+              "focus-visible:border-primary-border focus-visible:ring-focus",
+              "aria-invalid:border-error-border",
+              !selected && "text-foreground-subtle",
               className
             )}
           />
@@ -151,7 +151,7 @@ export function Combobox({
               </CommandItem>
             ))}
             {hiddenCount > 0 && (
-              <p className="px-2 py-1.5 text-[11px] text-slate-400">
+              <p className="px-2 py-1.5 text-[11px] text-foreground-subtle">
                 {hiddenCount.toLocaleString()} more — keep typing to narrow it down.
               </p>
             )}

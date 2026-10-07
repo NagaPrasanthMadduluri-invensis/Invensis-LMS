@@ -8,7 +8,7 @@ export default function SponsorLearnersPage() {
       <Box>
         <Text as="h1" className="text-2xl">My Learners</Text>
         <Text as="p" className="text-muted-foreground text-xs mt-0.5">
-          Home &gt; <Text as="span" className="text-amber-600">My Learners</Text>
+          Home &gt; <Text as="span" className="text-warning">My Learners</Text>
         </Text>
       </Box>
       <SponsoredLearners />

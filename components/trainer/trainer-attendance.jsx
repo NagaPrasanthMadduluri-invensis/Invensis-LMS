@@ -28,21 +28,21 @@ import {
 
 /* Per-session attendance states (API §3.8). `null` = unmarked. */
 const ATT = {
-  present: { label: "Present", short: "P", cell: "bg-emerald-100 text-emerald-700 ring-emerald-200" },
-  absent: { label: "Absent", short: "A", cell: "bg-rose-100 text-rose-700 ring-rose-200" },
-  late: { label: "Late", short: "L", cell: "bg-amber-100 text-amber-700 ring-amber-200" },
-  excused: { label: "Excused", short: "E", cell: "bg-sky-100 text-sky-700 ring-sky-200" },
+  present: { label: "Present", short: "P", cell: "bg-success-subtle text-success-subtle-foreground ring-success-border" },
+  absent: { label: "Absent", short: "A", cell: "bg-error-subtle text-error-subtle-foreground ring-error-border" },
+  late: { label: "Late", short: "L", cell: "bg-warning-subtle text-warning-subtle-foreground ring-warning-border" },
+  excused: { label: "Excused", short: "E", cell: "bg-info-subtle text-info-subtle-foreground ring-info-border" },
 };
 const ATT_OPTIONS = ["present", "absent", "late", "excused"];
-const UNMARKED_CELL = "bg-slate-50 text-slate-300 ring-slate-200";
+const UNMARKED_CELL = "bg-surface-hover text-foreground-subtle ring-border";
 
 const TRAINING_STATUS = {
-  active: "bg-emerald-100 text-emerald-700",
-  ongoing: "bg-violet-100 text-violet-700",
-  scheduled: "bg-violet-100 text-violet-700",
-  pending: "bg-amber-100 text-amber-700",
-  completed: "bg-slate-100 text-slate-600",
-  cancelled: "bg-rose-100 text-rose-600",
+  active: "bg-success-subtle text-success-subtle-foreground",
+  ongoing: "bg-primary-subtle text-primary",
+  scheduled: "bg-primary-subtle text-primary",
+  pending: "bg-warning-subtle text-warning-subtle-foreground",
+  completed: "bg-surface-muted text-foreground-muted",
+  cancelled: "bg-error-subtle text-error",
 };
 
 // Session/training dates print exactly as sent — see `lib/datetime`.
@@ -55,17 +55,17 @@ function TrainingCard({ training, active, onClick }) {
       onClick={onClick}
       className={cn(
         "cursor-pointer p-4 transition-all",
-        active ? "ring-2 ring-violet-400 border-violet-300" : "hover:border-violet-200"
+        active ? "ring-2 ring-primary-border border-primary-border" : "hover:border-primary-border"
       )}
     >
       <Box className="flex items-center justify-between gap-2">
-        <Text as="span" className="font-mono text-[11px] font-bold text-violet-600">{training.code}</Text>
-        <Badge className={cn("border-0 text-[10px] font-semibold", TRAINING_STATUS[training.status] || "bg-slate-100 text-slate-600")}>
+        <Text as="span" className="font-mono text-[11px] font-bold text-primary">{training.code}</Text>
+        <Badge className={cn("border-0 text-[10px] font-semibold", TRAINING_STATUS[training.status] || "bg-surface-muted text-foreground-muted")}>
           {training.status}
         </Badge>
       </Box>
-      <Text as="p" className="mt-1.5 line-clamp-2 text-sm font-semibold text-slate-800">{training.title}</Text>
-      <Box className="mt-2 flex items-center gap-3 text-[11px] text-slate-500">
+      <Text as="p" className="mt-1.5 line-clamp-2 text-sm font-semibold text-foreground">{training.title}</Text>
+      <Box className="mt-2 flex items-center gap-3 text-[11px] text-foreground-muted">
         <span className="inline-flex items-center gap-1"><CalendarDays className="h-3 w-3" /> {fmtDate(training.start_date)}</span>
         <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> {training.enrolled_count ?? 0}</span>
       </Box>
@@ -109,7 +109,7 @@ function AttendanceCell({ status, onSet, locked = false }) {
               {ATT[opt].short}
             </span>
             {ATT[opt].label}
-            {status === opt && <Check className="ml-auto h-3.5 w-3.5 text-violet-600" />}
+            {status === opt && <Check className="ml-auto h-3.5 w-3.5 text-primary" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
@@ -198,7 +198,7 @@ function AttendanceGrid({ token, trainingRef }) {
   if (error && !data) {
     return (
       <Card className="p-6">
-        <Box className="flex items-center gap-2 text-rose-600">
+        <Box className="flex items-center gap-2 text-error">
           <AlertCircle className="h-4 w-4" />
           <Text as="p" className="text-sm">{error}</Text>
         </Box>
@@ -224,8 +224,8 @@ function AttendanceGrid({ token, trainingRef }) {
   if (participants.length === 0 || sessions.length === 0) {
     return (
       <Card className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-        <Inbox className="h-8 w-8 text-slate-300" />
-        <Text as="p" className="text-sm text-slate-500">
+        <Inbox className="h-8 w-8 text-foreground-subtle" />
+        <Text as="p" className="text-sm text-foreground-muted">
           {participants.length === 0 ? "No participants enrolled yet." : "This training has no sessions yet."}
         </Text>
       </Card>
@@ -238,8 +238,8 @@ function AttendanceGrid({ token, trainingRef }) {
   return (
     <Card className="p-0 overflow-hidden">
       {/* Toolbar */}
-      <Box className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-3">
-        <Box className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
+      <Box className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+        <Box className="flex flex-wrap items-center gap-3 text-[11px] text-foreground-muted">
           <Text as="span" className="font-semibold uppercase tracking-wide">Legend</Text>
           {ATT_OPTIONS.map((o) => (
             <span key={o} className="inline-flex items-center gap-1">
@@ -250,13 +250,13 @@ function AttendanceGrid({ token, trainingRef }) {
         </Box>
         <Box className="flex items-center gap-2">
           {saved && (
-            <Text as="span" className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+            <Text as="span" className="inline-flex items-center gap-1 text-xs font-medium text-success">
               <CheckCircle2 className="h-3.5 w-3.5" /> Saved
             </Text>
           )}
-          {error && <Text as="span" className="text-xs text-rose-600">{error}</Text>}
+          {error && <Text as="span" className="text-xs text-error">{error}</Text>}
           {locked ? (
-            <Text as="span" className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-600">
+            <Text as="span" className="inline-flex items-center gap-1.5 rounded-lg bg-surface-muted px-2.5 py-1.5 text-xs font-medium text-foreground-muted">
               <Lock className="h-3.5 w-3.5 shrink-0" />
               Attendance is locked — this training is {trainingStatus}.
             </Text>
@@ -265,7 +265,7 @@ function AttendanceGrid({ token, trainingRef }) {
               size="sm"
               onClick={save}
               disabled={saving || dirty.size === 0}
-              className="gap-1.5 bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-40"
+              className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-40"
             >
               {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
               {saving ? "Saving…" : `Save${dirty.size ? ` (${dirty.size})` : ""}`}
@@ -278,19 +278,19 @@ function AttendanceGrid({ token, trainingRef }) {
       <Box className="overflow-x-auto">
         <Box as="table" className="w-full border-collapse text-sm">
           <Box as="thead">
-            <Box as="tr" className="border-b border-slate-100">
-              <Box as="th" className="sticky left-0 z-10 bg-white px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <Box as="tr" className="border-b border-border">
+              <Box as="th" className="sticky left-0 z-10 bg-surface px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-foreground-muted">
                 Participant
               </Box>
               {sessions.map((s) => (
                 <Box as="th" key={s.id} className="px-2 py-3 text-center align-bottom">
-                  <Text as="span" className="block text-[11px] font-semibold text-slate-700">Day {s.day_number}</Text>
-                  <Text as="span" className="block text-[10px] text-slate-400">{fmtDate(s.start_time)}</Text>
+                  <Text as="span" className="block text-[11px] font-semibold text-foreground">Day {s.day_number}</Text>
+                  <Text as="span" className="block text-[10px] text-foreground-subtle">{fmtDate(s.start_time)}</Text>
                   {!locked && (
                     <button
                       type="button"
                       onClick={() => markAllPresent(s.id)}
-                      className="mt-1 inline-flex items-center gap-0.5 rounded px-1 text-[10px] font-medium text-violet-600 hover:underline"
+                      className="mt-1 inline-flex items-center gap-0.5 rounded px-1 text-[10px] font-medium text-primary hover:underline"
                       title="Mark everyone present for this day"
                     >
                       all present
@@ -298,17 +298,17 @@ function AttendanceGrid({ token, trainingRef }) {
                   )}
                 </Box>
               ))}
-              <Box as="th" className="px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              <Box as="th" className="px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-foreground-muted">
                 Attended
               </Box>
             </Box>
           </Box>
           <Box as="tbody">
             {participants.map((p, i) => (
-              <Box as="tr" key={p.participant_id} className={cn("border-b border-slate-50", i % 2 ? "bg-slate-50/40" : "bg-white")}>
+              <Box as="tr" key={p.participant_id} className={cn("border-b border-border", i % 2 ? "bg-slate-50/40" : "bg-surface")}>
                 <Box as="td" className="sticky left-0 z-10 bg-inherit px-5 py-2.5">
-                  <Text as="p" className="text-sm font-medium text-slate-800">{p.name}</Text>
-                  {p.job_title && <Text as="span" className="text-[11px] text-slate-400">{p.job_title}</Text>}
+                  <Text as="p" className="text-sm font-medium text-foreground">{p.name}</Text>
+                  {p.job_title && <Text as="span" className="text-[11px] text-foreground-subtle">{p.job_title}</Text>}
                 </Box>
                 {sessions.map((s) => (
                   <Box as="td" key={s.id} className="px-2 py-2.5 text-center">
@@ -320,7 +320,7 @@ function AttendanceGrid({ token, trainingRef }) {
                   </Box>
                 ))}
                 <Box as="td" className="px-3 py-2.5 text-center">
-                  <Text as="span" className="text-xs font-semibold text-slate-600">{presentCount(p.participant_id)}/{sessions.length}</Text>
+                  <Text as="span" className="text-xs font-semibold text-foreground-muted">{presentCount(p.participant_id)}/{sessions.length}</Text>
                 </Box>
               </Box>
             ))}
@@ -352,7 +352,7 @@ export function TrainerAttendance() {
   if (error) {
     return (
       <Card className="p-6">
-        <Text as="p" className="text-sm text-rose-600">{error}</Text>
+        <Text as="p" className="text-sm text-error">{error}</Text>
       </Card>
     );
   }
@@ -371,8 +371,8 @@ export function TrainerAttendance() {
   if (trainings.length === 0) {
     return (
       <Card className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-        <Inbox className="h-8 w-8 text-slate-300" />
-        <Text as="p" className="text-sm text-slate-500">You have no assigned trainings yet.</Text>
+        <Inbox className="h-8 w-8 text-foreground-subtle" />
+        <Text as="p" className="text-sm text-foreground-muted">You have no assigned trainings yet.</Text>
       </Card>
     );
   }

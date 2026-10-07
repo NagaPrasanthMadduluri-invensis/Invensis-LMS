@@ -34,10 +34,10 @@ const BUCKET_LABEL = {
 };
 
 const STATUS = {
-  complete: { label: "All issued", cls: "bg-emerald-100 text-emerald-700" },
-  partial: { label: "Partly issued", cls: "bg-amber-100 text-amber-700" },
-  pending: { label: "Pending", cls: "bg-rose-100 text-rose-700" },
-  none: { label: "No completions", cls: "bg-slate-100 text-slate-500" },
+  complete: { label: "All issued", cls: "bg-success-subtle text-success-subtle-foreground" },
+  partial: { label: "Partly issued", cls: "bg-warning-subtle text-warning-subtle-foreground" },
+  pending: { label: "Pending", cls: "bg-error-subtle text-error-subtle-foreground" },
+  none: { label: "No completions", cls: "bg-surface-muted text-foreground-muted" },
 };
 
 // Training dates print exactly as the API sent them — see `lib/datetime`.
@@ -65,7 +65,7 @@ function CertTrainingCard({ t, index }) {
   const st = STATUS[t.status] ?? STATUS.none;
   const pct = t.eligible > 0 ? Math.min(100, Math.round((t.issued / t.eligible) * 100)) : 0;
   return (
-    <Card className="border border-slate-100 shadow-sm bg-white rounded-xl overflow-hidden hover:shadow-md hover:border-slate-200 transition-all">
+    <Card className="border border-border shadow-sm bg-surface rounded-xl overflow-hidden hover:shadow-md hover:border-border transition-all">
       <CardContent className="p-4">
         <Box className="flex items-start justify-between mb-3">
           <Box className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${ICON_COLORS[index % ICON_COLORS.length]}`}>
@@ -74,10 +74,10 @@ function CertTrainingCard({ t, index }) {
           <Badge variant="secondary" className={`text-[10px] border-0 ${st.cls}`}>{st.label}</Badge>
         </Box>
 
-        <Text as="p" className="text-sm font-semibold text-slate-800 leading-snug">{t.title}</Text>
-        <Text as="span" className="text-[11px] text-slate-400 block mt-0.5">{t.code}</Text>
+        <Text as="p" className="text-sm font-semibold text-foreground leading-snug">{t.title}</Text>
+        <Text as="span" className="text-[11px] text-foreground-subtle block mt-0.5">{t.code}</Text>
 
-        <Box className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-500">
+        <Box className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-foreground-muted">
           <Box className="flex items-center gap-1">
             <Video className="h-3 w-3" /> {MODE_LABEL[t.delivery_mode] ?? t.delivery_mode}
           </Box>
@@ -89,25 +89,25 @@ function CertTrainingCard({ t, index }) {
           </Box>
         </Box>
 
-        <Box className="mt-2 flex items-center gap-1 text-[11px] text-slate-500">
+        <Box className="mt-2 flex items-center gap-1 text-[11px] text-foreground-muted">
           <GraduationCap className="h-3 w-3" /> {t.trainer_name || "Unassigned"}
-          <Text as="span" className="mx-1 text-slate-300">·</Text>
+          <Text as="span" className="mx-1 text-foreground-subtle">·</Text>
           <Users className="h-3 w-3" /> {t.participants} enrolled
         </Box>
 
         {/* Issuance progress */}
         <Box className="mt-3">
           <Box className="flex items-center justify-between text-xs">
-            <Text as="span" className="font-semibold text-slate-700">
+            <Text as="span" className="font-semibold text-foreground">
               {t.issued} / {t.eligible} certificates issued
             </Text>
             {t.status === "complete" && t.eligible > 0 && (
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              <CheckCircle2 className="h-4 w-4 text-success" />
             )}
           </Box>
-          <Box className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <Box className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
             <Box
-              className={`h-full rounded-full ${t.status === "complete" ? "bg-emerald-500" : t.status === "partial" ? "bg-amber-500" : "bg-slate-300"}`}
+              className={`h-full rounded-full ${t.status === "complete" ? "bg-success" : t.status === "partial" ? "bg-warning" : "bg-slate-300"}`}
               style={{ width: `${pct}%` }}
             />
           </Box>
@@ -136,7 +136,7 @@ export function CertificatesList() {
 
   if (error) {
     return (
-      <Card className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 flex items-center gap-2">
+      <Card className="rounded-xl border border-error-border bg-error-subtle p-4 text-sm text-error-subtle-foreground flex items-center gap-2">
         <AlertCircle className="h-4 w-4" /> {error}
       </Card>
     );
@@ -157,16 +157,16 @@ export function CertificatesList() {
         {tiles.map((s) => (
           <Card key={s.label} className={`p-4 border-0 shadow-sm rounded-xl ${s.bg}`}>
             <Text as="h3" className={`text-2xl font-bold ${s.val}`}>{s.value}</Text>
-            <Text as="span" className="text-xs text-slate-500">{s.label}</Text>
+            <Text as="span" className="text-xs text-foreground-muted">{s.label}</Text>
           </Card>
         ))}
       </Box>
 
       {trainings.length === 0 ? (
-        <Card className="rounded-xl border border-slate-100 bg-white p-10 text-center">
-          <Award className="mx-auto h-8 w-8 text-slate-300" />
-          <Text as="p" className="mt-2 text-sm font-medium text-slate-600">No completed trainings yet</Text>
-          <Text as="span" className="text-xs text-slate-400">
+        <Card className="rounded-xl border border-border bg-surface p-10 text-center">
+          <Award className="mx-auto h-8 w-8 text-foreground-subtle" />
+          <Text as="p" className="mt-2 text-sm font-medium text-foreground-muted">No completed trainings yet</Text>
+          <Text as="span" className="text-xs text-foreground-subtle">
             Certificates appear here once a training is marked completed and learners are certified.
           </Text>
         </Card>

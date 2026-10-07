@@ -30,10 +30,10 @@ export function CourseCatalogDetail({ slug }) {
 
   if (error) {
     return (
-      <Card className="p-5 border-red-100 bg-red-50 rounded-2xl">
+      <Card className="p-5 border-error-border bg-error-subtle rounded-2xl">
         <Box className="flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
-          <Text as="p" className="text-sm text-red-600">{error}</Text>
+          <AlertCircle className="h-4 w-4 text-error shrink-0" />
+          <Text as="p" className="text-sm text-error">{error}</Text>
         </Box>
       </Card>
     );
@@ -53,45 +53,45 @@ export function CourseCatalogDetail({ slug }) {
       {/* Course summary */}
       <Card className="p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <Box className="flex items-start gap-4">
-          <Box className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center shrink-0">
-            <Library className="h-6 w-6 text-violet-600" />
+          <Box className="w-12 h-12 rounded-2xl bg-primary-subtle flex items-center justify-center shrink-0">
+            <Library className="h-6 w-6 text-primary" />
           </Box>
           <Box className="min-w-0 flex-1">
-            <Text as="h2" className="text-lg font-bold text-slate-900 leading-snug">{course.name}</Text>
+            <Text as="h2" className="text-lg font-bold text-foreground leading-snug">{course.name}</Text>
             <Box className="flex items-center gap-1.5 mt-1">
-              <Hash className="h-3 w-3 text-slate-400 shrink-0" />
-              <Text as="span" className="text-xs text-slate-500 font-mono">{course.slug}</Text>
+              <Hash className="h-3 w-3 text-foreground-subtle shrink-0" />
+              <Text as="span" className="text-xs text-foreground-muted font-mono">{course.slug}</Text>
             </Box>
             {course.description && (
-              <Text as="p" className="text-sm text-slate-600 mt-2 line-clamp-3">{course.description}</Text>
+              <Text as="p" className="text-sm text-foreground-muted mt-2 line-clamp-3">{course.description}</Text>
             )}
             <Box className="flex flex-wrap items-center gap-2 mt-3">
               {course.cms_id == null && (
-                <Badge className="border-0 bg-emerald-50 text-emerald-700 text-[11px] font-medium">Locally defined</Badge>
+                <Badge className="border-0 bg-success-subtle text-success-subtle-foreground text-[11px] font-medium">Locally defined</Badge>
               )}
               {!course.is_active && (
-                <Badge className="border-0 bg-slate-200 text-slate-600 text-[11px] font-medium">Inactive</Badge>
+                <Badge className="border-0 bg-surface-muted text-foreground-muted text-[11px] font-medium">Inactive</Badge>
               )}
               {course.category?.name && (
-                <Badge className="border-0 bg-slate-100 text-slate-600 text-[11px] font-medium">{course.category.name}</Badge>
+                <Badge className="border-0 bg-surface-muted text-foreground-muted text-[11px] font-medium">{course.category.name}</Badge>
               )}
               {course.course_type && (
-                <Badge className="border-0 bg-violet-50 text-violet-700 text-[11px] font-medium capitalize">{course.course_type.replace(/_/g, " ")}</Badge>
+                <Badge className="border-0 bg-primary-subtle text-primary text-[11px] font-medium capitalize">{course.course_type.replace(/_/g, " ")}</Badge>
               )}
               {course.certification_included && (
-                <Badge className="border-0 bg-amber-50 text-amber-700 text-[11px] font-medium">
+                <Badge className="border-0 bg-warning-subtle text-warning-subtle-foreground text-[11px] font-medium">
                   <Award className="h-3 w-3 mr-1" /> Certification included
                 </Badge>
               )}
               {course.duration_hours != null && (
-                <Badge className="border-0 bg-slate-100 text-slate-600 text-[11px] font-medium">
+                <Badge className="border-0 bg-surface-muted text-foreground-muted text-[11px] font-medium">
                   <Clock className="h-3 w-3 mr-1" /> {course.duration_hours}h
                 </Badge>
               )}
             </Box>
           </Box>
           <Button variant="outline" onClick={() => setEditOpen(true)}
-            className="shrink-0 h-9 px-3 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-violet-700 text-sm font-semibold">
+            className="shrink-0 h-9 px-3 border-border text-foreground-muted hover:bg-surface-muted hover:text-primary text-sm font-semibold">
             <PencilLine className="h-4 w-4 mr-1.5" /> Edit
           </Button>
         </Box>

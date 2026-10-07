@@ -110,7 +110,7 @@ export function SetPasswordForm({ mode = "reset" }) {
           </Text>
           <Button
             asChild
-            className="mt-6 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
+            className="mt-6 bg-gradient-to-r from-[#0466c8] to-[#023e7d] hover:from-[#0582ca] hover:to-[#001233] text-white"
           >
             <Link href="/login">Go to sign in</Link>
           </Button>
@@ -171,7 +171,7 @@ export function SetPasswordForm({ mode = "reset" }) {
 
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
+            className="w-full bg-gradient-to-r from-[#0466c8] to-[#023e7d] hover:from-[#0582ca] hover:to-[#001233] text-white"
             disabled={loading}
           >
             {loading ? copy.busy : copy.cta}

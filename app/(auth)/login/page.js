@@ -71,13 +71,13 @@ function LoginForm() {
               required
             />
             {fieldErrors.email && (
-              <Text as="p" className="text-xs text-red-600">{fieldErrors.email[0]}</Text>
+              <Text as="p" className="text-xs text-error">{fieldErrors.email[0]}</Text>
             )}
           </Box>
           <Box className="space-y-2">
             <Box className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <Link href="/forgot-password" className="text-xs text-violet-500 font-medium hover:underline">
+              <Link href="/forgot-password" className="text-xs text-primary font-medium hover:underline">
                 Forgot password?
               </Link>
             </Box>
@@ -92,22 +92,22 @@ function LoginForm() {
                 className="pr-10"
               />
               <button type="button" onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-subtle hover:text-foreground transition-colors">
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </Box>
             {fieldErrors.password && (
-              <Text as="p" className="text-xs text-red-600">{fieldErrors.password[0]}</Text>
+              <Text as="p" className="text-xs text-error">{fieldErrors.password[0]}</Text>
             )}
           </Box>
 
           {error && !Object.keys(fieldErrors).length && (
-            <Text as="p" className="text-sm text-red-600">{error}</Text>
+            <Text as="p" className="text-sm text-error">{error}</Text>
           )}
 
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
+            className="w-full bg-gradient-to-r from-[#0466c8] to-[#023e7d] hover:from-[#0582ca] hover:to-[#001233] text-white"
             disabled={loading}
           >
             {loading ? "Signing in..." : "Sign In"}

@@ -7,7 +7,7 @@ import Link from "next/link";
    wrap a name/email/code unconditionally. stopPropagation keeps a link inside a
    clickable row from also triggering the row's navigation. */
 
-const LINK = "text-inherit hover:text-violet-700 hover:underline underline-offset-2 decoration-violet-300 transition-colors";
+const LINK = "text-inherit hover:text-primary hover:underline underline-offset-2 decoration-violet-300 transition-colors";
 
 function EntityLink({ href, children, className = "" }) {
   if (!href) return children ?? null;

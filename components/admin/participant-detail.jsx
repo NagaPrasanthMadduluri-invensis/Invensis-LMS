@@ -58,42 +58,42 @@ function formatRange(start, end) {
 
 // Category → visual treatment. Keys match the `category` field the API returns.
 const CATEGORY_META = {
-  completed:   { label: "Completed",   badge: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",  icon: CheckCircle2 },
-  ongoing:     { label: "In progress", badge: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",           icon: PlayCircle },
-  upcoming:    { label: "Upcoming",    badge: "bg-violet-50 text-violet-700 ring-1 ring-violet-200",     icon: Clock },
-  transferred: { label: "Transferred", badge: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",        icon: XCircle },
-  cancelled:   { label: "Cancelled",   badge: "bg-slate-100 text-slate-600 ring-1 ring-slate-200",       icon: XCircle },
-  failed:      { label: "Failed",      badge: "bg-rose-50 text-rose-700 ring-1 ring-rose-200",           icon: XCircle },
+  completed:   { label: "Completed",   badge: "bg-success-subtle text-success-subtle-foreground ring-1 ring-success-border",  icon: CheckCircle2 },
+  ongoing:     { label: "In progress", badge: "bg-info-subtle text-info-subtle-foreground ring-1 ring-info-border",           icon: PlayCircle },
+  upcoming:    { label: "Upcoming",    badge: "bg-primary-subtle text-primary ring-1 ring-primary-border",     icon: Clock },
+  transferred: { label: "Transferred", badge: "bg-warning-subtle text-warning-subtle-foreground ring-1 ring-warning-border",        icon: XCircle },
+  cancelled:   { label: "Cancelled",   badge: "bg-surface-muted text-foreground-muted ring-1 ring-border",       icon: XCircle },
+  failed:      { label: "Failed",      badge: "bg-error-subtle text-error-subtle-foreground ring-1 ring-error-border",           icon: XCircle },
 };
 
 // Section grouping shown on the page, in display order.
 const SECTIONS = [
-  { key: "completed", title: "Completed trainings",     accent: "text-emerald-500", cats: ["completed"] },
-  { key: "ongoing",   title: "In progress",             accent: "text-blue-500",    cats: ["ongoing"] },
-  { key: "upcoming",  title: "Upcoming trainings",      accent: "text-violet-500",  cats: ["upcoming"] },
-  { key: "inactive",  title: "Cancelled & transferred", accent: "text-slate-400",   cats: ["cancelled", "transferred", "failed"] },
+  { key: "completed", title: "Completed trainings",     accent: "text-success", cats: ["completed"] },
+  { key: "ongoing",   title: "In progress",             accent: "text-info",    cats: ["ongoing"] },
+  { key: "upcoming",  title: "Upcoming trainings",      accent: "text-primary",  cats: ["upcoming"] },
+  { key: "inactive",  title: "Cancelled & transferred", accent: "text-foreground-subtle",   cats: ["cancelled", "transferred", "failed"] },
 ];
 
 function Fact({ icon: Icon, label, value, href, title, muted = false }) {
   return (
     <Box className="flex items-start gap-3">
-      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50">
-        <Icon className="h-4 w-4 text-violet-500" />
+      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-subtle">
+        <Icon className="h-4 w-4 text-primary" />
       </Box>
       <Box className="min-w-0">
-        <Text as="p" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">{label}</Text>
+        <Text as="p" className="text-[11px] uppercase tracking-wider text-foreground-subtle font-semibold">{label}</Text>
         {href ? (
           <a
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-semibold text-violet-600 hover:text-violet-700 hover:underline leading-tight mt-0.5 break-all inline-block"
+            className="text-sm font-semibold text-primary hover:text-primary hover:underline leading-tight mt-0.5 break-all inline-block"
           >
             {value}
           </a>
         ) : (
           <Text as="p" title={title}
-            className={`text-sm leading-tight mt-0.5 break-words ${muted ? "italic font-medium text-slate-400" : "font-semibold text-slate-800"}`}>{value}</Text>
+            className={`text-sm leading-tight mt-0.5 break-words ${muted ? "italic font-medium text-foreground-subtle" : "font-semibold text-foreground"}`}>{value}</Text>
         )}
       </Box>
     </Box>
@@ -119,13 +119,13 @@ function TrainingCard({ e }) {
   const StatusIcon = meta.icon;
   return (
     <Link href={`/admin/courses/${e.training_id}`} className="block">
-    <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:border-violet-200 hover:shadow-md transition-all cursor-pointer">
+    <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:border-primary-border hover:shadow-md transition-all cursor-pointer">
       <Box className="flex items-start justify-between gap-3">
         <Box className="min-w-0">
-          <Text as="p" className="text-sm font-semibold text-slate-800 leading-snug">{e.title}</Text>
+          <Text as="p" className="text-sm font-semibold text-foreground leading-snug">{e.title}</Text>
           <Box className="flex items-center gap-1.5 mt-1">
-            <Hash className="h-3 w-3 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs text-slate-500 font-mono">{e.training_code}</Text>
+            <Hash className="h-3 w-3 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs text-foreground-muted font-mono">{e.training_code}</Text>
           </Box>
         </Box>
         <Box className="flex items-center gap-2 shrink-0">
@@ -135,7 +135,7 @@ function TrainingCard({ e }) {
           </Badge>
           <Box
             aria-hidden="true"
-            className="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 transition-colors"
+            className="w-7 h-7 rounded-lg border border-border flex items-center justify-center text-foreground-subtle transition-colors"
           >
             <ExternalLink className="h-3.5 w-3.5" />
           </Box>
@@ -144,33 +144,33 @@ function TrainingCard({ e }) {
 
       <Box className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3">
         <Box className="flex items-center gap-1.5">
-          <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-          <Text as="span" className="text-xs text-slate-600">{formatRange(e.start_date, e.end_date)}</Text>
+          <Calendar className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+          <Text as="span" className="text-xs text-foreground-muted">{formatRange(e.start_date, e.end_date)}</Text>
         </Box>
         {e.delivery_mode && (
           <Box className="flex items-center gap-1.5">
-            <Video className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs text-slate-600 capitalize">{e.delivery_mode.replace(/_/g, " ")}</Text>
+            <Video className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs text-foreground-muted capitalize">{e.delivery_mode.replace(/_/g, " ")}</Text>
           </Box>
         )}
         {e.bucket && (
           <Box className="flex items-center gap-1.5">
-            <BookOpen className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs text-slate-600 uppercase">{e.bucket}</Text>
+            <BookOpen className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs text-foreground-muted uppercase">{e.bucket}</Text>
           </Box>
         )}
       </Box>
 
       {(e.certificate_issued || e.added_manually) && (
-        <Box className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+        <Box className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border">
           {e.certificate_issued && (
-            <Box className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-amber-200">
+            <Box className="inline-flex items-center gap-1.5 bg-warning-subtle text-warning-subtle-foreground text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-warning-border">
               <Award className="h-3 w-3" />
               Certificate {e.certificate_code ? `· ${e.certificate_code}` : "issued"}
             </Box>
           )}
           {e.added_manually && (
-            <Box className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-500 text-[11px] font-medium px-2 py-0.5 rounded-lg ring-1 ring-slate-200">
+            <Box className="inline-flex items-center gap-1.5 bg-surface-hover text-foreground-muted text-[11px] font-medium px-2 py-0.5 rounded-lg ring-1 ring-border">
               <Users2 className="h-3 w-3" />
               Added manually
             </Box>
@@ -203,8 +203,8 @@ export function ParticipantDetail({ userId }) {
 
   if (error) {
     return (
-      <Card className="p-6 rounded-2xl border-0 bg-red-50 shadow-sm">
-        <Text as="p" className="text-red-600 text-sm">Failed to load learner: {error}</Text>
+      <Card className="p-6 rounded-2xl border-0 bg-error-subtle shadow-sm">
+        <Text as="p" className="text-error text-sm">Failed to load learner: {error}</Text>
       </Card>
     );
   }
@@ -265,9 +265,9 @@ export function ParticipantDetail({ userId }) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           {roleError && (
-            <Box className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-              <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
-              <Text as="p" className="text-xs text-red-700">{roleError}</Text>
+            <Box className="flex items-start gap-2 rounded-lg border border-error-border bg-error-subtle px-3 py-2">
+              <AlertCircle className="h-4 w-4 text-error shrink-0 mt-0.5" />
+              <Text as="p" className="text-xs text-error-subtle-foreground">{roleError}</Text>
             </Box>
           )}
           <AlertDialogFooter>
@@ -275,7 +275,7 @@ export function ParticipantDetail({ userId }) {
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); switchToSponsor(); }}
               disabled={roleSwitching}
-              className="bg-violet-600 hover:bg-violet-700">
+              className="bg-primary hover:bg-primary-hover">
               {roleSwitching ? "Switching…" : "Switch to sponsor"}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -292,7 +292,7 @@ export function ParticipantDetail({ userId }) {
 
       {/* Profile hero */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-7 py-7">
+        <Box className="bg-[#d7e3fc] border-b border-primary-border px-7 py-7">
           <Box className="flex items-start justify-between gap-4 flex-wrap">
           <Box className="flex items-center gap-5">
             <Box className={`h-16 w-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shrink-0 shadow-sm ${avatarColor(p.id || "")}`}>
@@ -300,32 +300,32 @@ export function ParticipantDetail({ userId }) {
             </Box>
             <Box className="min-w-0">
               <Box className="flex items-center gap-2.5 flex-wrap">
-                <Text as="h2" className="text-xl font-bold text-slate-900">{p.name}</Text>
+                <Text as="h2" className="text-xl font-bold text-foreground">{p.name}</Text>
                 <Badge className={`border-0 text-[11px] font-semibold px-2.5 py-0.5 ${
                   !p.account_active
-                    ? "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
+                    ? "bg-surface-muted text-foreground-muted ring-1 ring-border"
                     : setupPending
-                    ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
-                    : "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
+                    ? "bg-warning-subtle text-warning-subtle-foreground ring-1 ring-warning-border"
+                    : "bg-success-subtle text-success-subtle-foreground ring-1 ring-success-border"
                 }`}>
                   {!p.account_active ? "● Inactive" : setupPending ? "● Setup pending" : "● Active"}
                 </Badge>
               </Box>
               <Box className="flex items-center gap-1.5 mt-1">
-                <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                <Text as="p" className="text-sm text-slate-500 truncate">{p.email}</Text>
+                <Mail className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+                <Text as="p" className="text-sm text-foreground-muted truncate">{p.email}</Text>
               </Box>
             </Box>
           </Box>
           <Box className="flex items-center gap-2">
             {canSwitchToSponsor && (
               <Button variant="outline" onClick={() => { setRoleError(null); setRoleDialogOpen(true); }}
-                className="h-9 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-100">
+                className="h-9 gap-1.5 border-border text-foreground hover:bg-surface-muted">
                 <UserCog className="h-4 w-4" /> Switch to sponsor
               </Button>
             )}
             <Button variant="outline" onClick={() => setEmailOpen(true)}
-              className="h-9 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-100">
+              className="h-9 gap-1.5 border-border text-foreground hover:bg-surface-muted">
               <Mail className="h-4 w-4" /> Email
             </Button>
             {/* Never followed their setup link — send it again */}
@@ -369,30 +369,30 @@ export function ParticipantDetail({ userId }) {
 
       {/* Summary stats */}
       <Box className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <StatCard icon={BookOpen}     value={summary.total ?? 0}        label="Total Enrolments" bg="bg-slate-50"    border="border border-slate-200"   iconBg="bg-slate-100"   iconCls="text-slate-500"   valueCls="text-slate-800"   labelCls="text-slate-500" />
-        <StatCard icon={CheckCircle2} value={summary.completed ?? 0}    label="Completed"        bg="bg-emerald-50"  border="border border-emerald-100" iconBg="bg-emerald-100" iconCls="text-emerald-600" valueCls="text-emerald-900" labelCls="text-emerald-600" />
-        <StatCard icon={Clock}        value={summary.upcoming ?? 0}     label="Upcoming"         bg="bg-violet-50"   border="border border-violet-100"  iconBg="bg-violet-100"  iconCls="text-violet-600"  valueCls="text-violet-900"  labelCls="text-violet-500" />
-        <StatCard icon={PlayCircle}   value={summary.ongoing ?? 0}      label="In Progress"      bg="bg-blue-50"     border="border border-blue-100"    iconBg="bg-blue-100"    iconCls="text-blue-600"    valueCls="text-blue-900"    labelCls="text-blue-500" />
-        <StatCard icon={Award}        value={summary.certificates ?? 0} label="Certificates"     bg="bg-amber-50"    border="border border-amber-100"   iconBg="bg-amber-100"   iconCls="text-amber-600"   valueCls="text-amber-900"   labelCls="text-amber-500" />
+        <StatCard icon={BookOpen}     value={summary.total ?? 0}        label="Total Enrolments" bg="bg-surface-hover"    border="border border-border"   iconBg="bg-surface-muted"   iconCls="text-foreground-muted"   valueCls="text-foreground"   labelCls="text-foreground-muted" />
+        <StatCard icon={CheckCircle2} value={summary.completed ?? 0}    label="Completed"        bg="bg-success-subtle"  border="border border-success-border" iconBg="bg-success-subtle" iconCls="text-success" valueCls="text-success-subtle-foreground" labelCls="text-success" />
+        <StatCard icon={Clock}        value={summary.upcoming ?? 0}     label="Upcoming"         bg="bg-primary-subtle"   border="border border-primary-border"  iconBg="bg-primary-subtle"  iconCls="text-primary"  valueCls="text-primary"  labelCls="text-primary" />
+        <StatCard icon={PlayCircle}   value={summary.ongoing ?? 0}      label="In Progress"      bg="bg-info-subtle"     border="border border-info-border"    iconBg="bg-info-subtle"    iconCls="text-info"    valueCls="text-blue-900"    labelCls="text-info" />
+        <StatCard icon={Award}        value={summary.certificates ?? 0} label="Certificates"     bg="bg-warning-subtle"    border="border border-warning-border"   iconBg="bg-warning-subtle"   iconCls="text-warning"   valueCls="text-warning-subtle-foreground"   labelCls="text-warning" />
       </Box>
 
       {/* Enrolments */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <Box className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-            <GraduationCap className="h-4 w-4 text-violet-500" />
+        <Box className="px-6 py-4 border-b border-border flex items-center gap-2.5">
+          <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+            <GraduationCap className="h-4 w-4 text-primary" />
           </Box>
-          <Text as="h3" className="text-sm font-bold text-slate-800">Trainings &amp; Enrolments</Text>
-          <Badge className="border-0 bg-violet-50 text-violet-600 text-[11px] font-semibold ml-1">{enrolments.length}</Badge>
+          <Text as="h3" className="text-sm font-bold text-foreground">Trainings &amp; Enrolments</Text>
+          <Badge className="border-0 bg-primary-subtle text-primary text-[11px] font-semibold ml-1">{enrolments.length}</Badge>
         </Box>
 
         {enrolments.length === 0 ? (
           <Box className="py-20 text-center">
-            <Box className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-              <BookOpen className="h-6 w-6 text-slate-400" />
+            <Box className="w-12 h-12 rounded-2xl bg-surface-muted flex items-center justify-center mx-auto mb-3">
+              <BookOpen className="h-6 w-6 text-foreground-subtle" />
             </Box>
-            <Text as="p" className="text-sm font-medium text-slate-500">No enrolments yet</Text>
-            <Text as="p" className="text-xs text-slate-400 mt-1">This learner hasn&apos;t enrolled in any training.</Text>
+            <Text as="p" className="text-sm font-medium text-foreground-muted">No enrolments yet</Text>
+            <Text as="p" className="text-xs text-foreground-subtle mt-1">This learner hasn&apos;t enrolled in any training.</Text>
           </Box>
         ) : (
           <Box className="p-6 space-y-6">
@@ -403,7 +403,7 @@ export function ParticipantDetail({ userId }) {
                 <Box key={section.key} className="space-y-3">
                   <Box className="flex items-center gap-2">
                     <Text as="h4" className={`text-[11px] font-bold uppercase tracking-wider ${section.accent}`}>{section.title}</Text>
-                    <Badge className="border-0 bg-slate-100 text-slate-500 text-[10px] font-semibold">{items.length}</Badge>
+                    <Badge className="border-0 bg-surface-muted text-foreground-muted text-[10px] font-semibold">{items.length}</Badge>
                   </Box>
                   <Box className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                     {items.map((e) => <TrainingCard key={e.enrolment_id} e={e} />)}

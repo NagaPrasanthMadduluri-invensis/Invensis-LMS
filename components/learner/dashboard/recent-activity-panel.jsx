@@ -34,7 +34,7 @@ export function RecentActivityPanel({ journey = [] }) {
               <Box
                 className={cn(
                   "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                  item.type === "completed" ? "bg-emerald-500" : "bg-primary"
+                  item.type === "completed" ? "bg-success" : "bg-primary"
                 )}
               />
               <Box className="min-w-0">

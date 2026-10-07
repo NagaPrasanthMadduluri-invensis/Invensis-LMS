@@ -41,20 +41,20 @@ import {
 } from "@/services/api/trainer/trainer-api";
 
 const STATUS_CONFIG = {
-  pending: { label: "Pending", color: "bg-amber-100 text-amber-700" },
-  active: { label: "Active", color: "bg-emerald-100 text-emerald-700" },
-  ongoing: { label: "Ongoing", color: "bg-blue-100 text-blue-700" },
-  scheduled: { label: "Scheduled", color: "bg-blue-100 text-blue-700" },
-  completed: { label: "Completed", color: "bg-slate-100 text-slate-600" },
-  cancelled: { label: "Cancelled", color: "bg-red-100 text-red-600" },
-  postponed: { label: "Postponed", color: "bg-orange-100 text-orange-700" },
-  suspended: { label: "Suspended", color: "bg-rose-100 text-rose-700" },
+  pending: { label: "Pending", color: "bg-warning-subtle text-warning-subtle-foreground" },
+  active: { label: "Active", color: "bg-success-subtle text-success-subtle-foreground" },
+  ongoing: { label: "Ongoing", color: "bg-info-subtle text-info-subtle-foreground" },
+  scheduled: { label: "Scheduled", color: "bg-info-subtle text-info-subtle-foreground" },
+  completed: { label: "Completed", color: "bg-surface-muted text-foreground-muted" },
+  cancelled: { label: "Cancelled", color: "bg-error-subtle text-error" },
+  postponed: { label: "Postponed", color: "bg-warning-subtle text-warning-subtle-foreground" },
+  suspended: { label: "Suspended", color: "bg-error-subtle text-error-subtle-foreground" },
 };
 
 const PARTICIPANT_STATUS_CONFIG = {
-  confirmed: { label: "Confirmed", color: "bg-emerald-100 text-emerald-700" },
-  cancelled: { label: "Cancelled", color: "bg-red-100 text-red-600" },
-  transferred: { label: "Transferred", color: "bg-slate-100 text-slate-600" },
+  confirmed: { label: "Confirmed", color: "bg-success-subtle text-success-subtle-foreground" },
+  cancelled: { label: "Cancelled", color: "bg-error-subtle text-error" },
+  transferred: { label: "Transferred", color: "bg-surface-muted text-foreground-muted" },
 };
 
 const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Meeting" };
@@ -87,11 +87,11 @@ function formatExperience(years) {
 function PendingState({ what }) {
   return (
     <Card className="flex flex-col items-center justify-center px-6 py-14 text-center rounded-2xl border border-slate-200/80 shadow-sm">
-      <Box className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100">
-        <Hourglass className="h-7 w-7 text-violet-600" />
+      <Box className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-subtle">
+        <Hourglass className="h-7 w-7 text-primary" />
       </Box>
-      <Text as="h2" className="mt-4 text-lg font-bold text-slate-800">Coming online soon</Text>
-      <Text as="p" className="mt-1.5 max-w-md text-sm text-slate-500">
+      <Text as="h2" className="mt-4 text-lg font-bold text-foreground">Coming online soon</Text>
+      <Text as="p" className="mt-1.5 max-w-md text-sm text-foreground-muted">
         {what} will appear here as soon as the trainer endpoint is live. Once it&apos;s
         ready, your admin-assigned trainings load automatically — no further setup needed.
       </Text>
@@ -133,13 +133,13 @@ function SessionItem({ session, token, onSaved, timezone }) {
   return (
     <Box className="flex h-full flex-col rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
       <Box className="flex items-center gap-2.5">
-        <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50">
-          <CalendarDays className="h-4 w-4 text-violet-600" />
+        <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-subtle">
+          <CalendarDays className="h-4 w-4 text-primary" />
         </Box>
         <Box className="min-w-0 flex-1">
-          <Text as="p" className="text-sm font-semibold leading-tight text-slate-800">Day {session.day_number}</Text>
+          <Text as="p" className="text-sm font-semibold leading-tight text-foreground">Day {session.day_number}</Text>
           {session.start_time && (
-            <Text as="span" className="text-[11px] text-slate-400">{formatDateTime(session.start_time, timezone)}</Text>
+            <Text as="span" className="text-[11px] text-foreground-subtle">{formatDateTime(session.start_time, timezone)}</Text>
           )}
         </Box>
         <Badge className={`border-0 text-[10px] shrink-0 ${statusCfg.color}`}>{statusCfg.label}</Badge>
@@ -154,14 +154,14 @@ function SessionItem({ session, token, onSaved, timezone }) {
             placeholder="e.g. Intro to PMP, framework, process groups"
             className="text-sm"
           />
-          {error && <Text as="p" className="text-xs text-red-600">{error}</Text>}
+          {error && <Text as="p" className="text-xs text-error">{error}</Text>}
           <Box className="flex items-center gap-2">
             <Button size="sm" onClick={save} disabled={saving}
-              className="h-8 px-4 bg-violet-600 hover:bg-violet-700 text-white border-0 rounded-lg text-xs font-semibold">
+              className="h-8 px-4 bg-primary hover:bg-primary-hover text-primary-foreground border-0 rounded-lg text-xs font-semibold">
               <Check className="h-3.5 w-3.5 mr-1" /> {saving ? "Saving..." : "Save"}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={saving}
-              className="h-8 px-3 text-slate-500 hover:text-slate-700 rounded-lg text-xs">
+              className="h-8 px-3 text-foreground-muted hover:text-foreground rounded-lg text-xs">
               <X className="h-3.5 w-3.5 mr-1" /> Cancel
             </Button>
           </Box>
@@ -169,15 +169,15 @@ function SessionItem({ session, token, onSaved, timezone }) {
       ) : (
         <Box className="mt-3 flex flex-1 flex-col justify-between gap-2">
           {hasTopics ? (
-            <Text as="p" className="text-sm whitespace-pre-wrap text-slate-600">{session.planned_topics}</Text>
+            <Text as="p" className="text-sm whitespace-pre-wrap text-foreground-muted">{session.planned_topics}</Text>
           ) : (
-            <Box className="flex items-center gap-1.5 rounded-lg border border-dashed border-slate-200 px-2.5 py-2">
-              <AlertCircle className="h-3.5 w-3.5 shrink-0 text-slate-300" />
-              <Text as="p" className="text-xs text-slate-400">Topics not added yet</Text>
+            <Box className="flex items-center gap-1.5 rounded-lg border border-dashed border-border px-2.5 py-2">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0 text-foreground-subtle" />
+              <Text as="p" className="text-xs text-foreground-subtle">Topics not added yet</Text>
             </Box>
           )}
           <Button size="sm" variant="outline" onClick={startEdit}
-            className="self-start h-8 px-3 border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600 rounded-lg text-xs">
+            className="self-start h-8 px-3 border-border text-foreground-muted hover:border-primary-border hover:text-primary rounded-lg text-xs">
             <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
           </Button>
         </Box>
@@ -211,8 +211,8 @@ function SessionsPanel({ trainingRef, token }) {
   if (pending) return <PendingState what="The sessions for your assigned trainings" />;
   if (error) {
     return (
-      <Card className="p-5 border-red-100 bg-red-50">
-        <Text as="p" className="text-sm text-red-600">Failed to load sessions: {error}</Text>
+      <Card className="p-5 border-error-border bg-error-subtle">
+        <Text as="p" className="text-sm text-error">Failed to load sessions: {error}</Text>
       </Card>
     );
   }
@@ -232,26 +232,26 @@ function SessionsPanel({ trainingRef, token }) {
     <Box className="space-y-5">
       {/* Schedule — the training's date range plus the exact days it runs on */}
       <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
-        <Box className="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-4 border-b border-slate-100">
+        <Box className="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-4 border-b border-border">
           <Box className="flex items-center gap-2.5">
-            <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-              <CalendarDays className="h-4 w-4 text-violet-500" />
+            <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+              <CalendarDays className="h-4 w-4 text-primary" />
             </Box>
             <Box>
-              <Text as="p" className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Dates</Text>
-              <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5">
+              <Text as="p" className="text-[10px] uppercase tracking-wider text-foreground-subtle font-semibold">Dates</Text>
+              <Text as="p" className="text-sm font-semibold text-foreground leading-tight mt-0.5">
                 {formatDate(data.start_date)} – {formatDate(data.end_date)}
               </Text>
             </Box>
           </Box>
           {(data.start_time || data.end_time) && (
             <Box className="flex items-center gap-2.5">
-              <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-                <Clock className="h-4 w-4 text-violet-500" />
+              <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+                <Clock className="h-4 w-4 text-primary" />
               </Box>
               <Box>
-                <Text as="p" className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Daily Timing</Text>
-                <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5">
+                <Text as="p" className="text-[10px] uppercase tracking-wider text-foreground-subtle font-semibold">Daily Timing</Text>
+                <Text as="p" className="text-sm font-semibold text-foreground leading-tight mt-0.5">
                   {formatTime(data.start_time)} – {formatTime(data.end_time)}
                   {timezoneLabel(data.timezone, data.start_date) ? ` ${timezoneLabel(data.timezone, data.start_date)}` : ""}
                 </Text>
@@ -260,12 +260,12 @@ function SessionsPanel({ trainingRef, token }) {
           )}
           {data.timezone && (
             <Box className="flex items-center gap-2.5">
-              <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-                <Globe className="h-4 w-4 text-violet-500" />
+              <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+                <Globe className="h-4 w-4 text-primary" />
               </Box>
               <Box>
-                <Text as="p" className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Timezone</Text>
-                <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5">{data.timezone}</Text>
+                <Text as="p" className="text-[10px] uppercase tracking-wider text-foreground-subtle font-semibold">Timezone</Text>
+                <Text as="p" className="text-sm font-semibold text-foreground leading-tight mt-0.5">{data.timezone}</Text>
               </Box>
             </Box>
           )}
@@ -280,21 +280,21 @@ function SessionsPanel({ trainingRef, token }) {
       {/* Meeting link — visible to the assigned trainer once the admin releases it,
           the same link enrolled learners see. */}
       {data.meeting?.url ? (
-        <Card className="p-0 overflow-hidden rounded-2xl border border-emerald-200 shadow-sm">
+        <Card className="p-0 overflow-hidden rounded-2xl border border-success-border shadow-sm">
           <Box className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
             <Box className="flex items-center gap-2.5 min-w-0">
-              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-                <Video className="h-4 w-4 text-emerald-600" />
+              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success-subtle">
+                <Video className="h-4 w-4 text-success" />
               </Box>
               <Box className="min-w-0">
-                <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight">Meeting link is live</Text>
-                <Text as="span" className="text-[11px] text-slate-500">{PLATFORM_LABEL[data.meeting.platform] || "Meeting"}</Text>
+                <Text as="p" className="text-sm font-semibold text-foreground leading-tight">Meeting link is live</Text>
+                <Text as="span" className="text-[11px] text-foreground-muted">{PLATFORM_LABEL[data.meeting.platform] || "Meeting"}</Text>
               </Box>
             </Box>
             <Button
               render={<a href={data.meeting.url} target="_blank" rel="noopener noreferrer" />}
               size="sm"
-              className="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white border-0 rounded-lg text-sm font-semibold shrink-0"
+              className="h-9 px-4 bg-success hover:bg-success text-success-foreground border-0 rounded-lg text-sm font-semibold shrink-0"
             >
               Join Meeting
             </Button>
@@ -303,8 +303,8 @@ function SessionsPanel({ trainingRef, token }) {
       ) : data.delivery_mode !== "in_person" ? (
         <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
           <Box className="flex items-center gap-2.5 px-5 py-4">
-            <AlertCircle className="h-4 w-4 shrink-0 text-violet-300" />
-            <Text as="p" className="text-xs text-slate-500">
+            <AlertCircle className="h-4 w-4 shrink-0 text-primary" />
+            <Text as="p" className="text-xs text-foreground-muted">
               Meeting link hasn&apos;t been released by the admin yet — check back closer to the training date.
             </Text>
           </Box>
@@ -321,22 +321,22 @@ function SessionsPanel({ trainingRef, token }) {
       )}
 
       <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
-        <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-            <BookText className="h-4 w-4 text-violet-500" />
+        <Box className="px-5 py-4 border-b border-border flex items-center gap-2.5">
+          <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+            <BookText className="h-4 w-4 text-primary" />
           </Box>
-          <Text as="h3" className="text-sm font-bold text-slate-800">Day-wise Topics</Text>
-          <Badge className="border-0 bg-violet-50 text-violet-600 text-[11px] font-semibold">
+          <Text as="h3" className="text-sm font-bold text-foreground">Day-wise Topics</Text>
+          <Badge className="border-0 bg-primary-subtle text-primary text-[11px] font-semibold">
             {sessions.length} day{sessions.length !== 1 ? "s" : ""}
           </Badge>
         </Box>
         <Box className="p-5">
           {sessions.length === 0 ? (
-            <Box className="rounded-xl border border-dashed border-slate-200 py-10 text-center">
-              <Box className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                <BookText className="h-5 w-5 text-slate-400" />
+            <Box className="rounded-xl border border-dashed border-border py-10 text-center">
+              <Box className="w-10 h-10 rounded-xl bg-surface-muted flex items-center justify-center mx-auto mb-3">
+                <BookText className="h-5 w-5 text-foreground-subtle" />
               </Box>
-              <Text as="p" className="text-sm font-medium text-slate-500">This training has no sessions.</Text>
+              <Text as="p" className="text-sm font-medium text-foreground-muted">This training has no sessions.</Text>
             </Box>
           ) : (
             <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -349,42 +349,42 @@ function SessionsPanel({ trainingRef, token }) {
       </Card>
 
       <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
-        <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-            <Users className="h-4 w-4 text-violet-500" />
+        <Box className="px-5 py-4 border-b border-border flex items-center gap-2.5">
+          <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+            <Users className="h-4 w-4 text-primary" />
           </Box>
-          <Text as="h3" className="text-sm font-bold text-slate-800">Participants</Text>
-          <Badge className="border-0 bg-violet-50 text-violet-600 text-[11px] font-semibold">
+          <Text as="h3" className="text-sm font-bold text-foreground">Participants</Text>
+          <Badge className="border-0 bg-primary-subtle text-primary text-[11px] font-semibold">
             {participants.length} enrolled
           </Badge>
         </Box>
         <Box className="p-5">
           {participants.length === 0 ? (
-            <Box className="rounded-xl border border-dashed border-slate-200 py-10 text-center">
-              <Box className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                <Users className="h-5 w-5 text-slate-400" />
+            <Box className="rounded-xl border border-dashed border-border py-10 text-center">
+              <Box className="w-10 h-10 rounded-xl bg-surface-muted flex items-center justify-center mx-auto mb-3">
+                <Users className="h-5 w-5 text-foreground-subtle" />
               </Box>
-              <Text as="p" className="text-sm font-medium text-slate-500">No participants enrolled yet.</Text>
+              <Text as="p" className="text-sm font-medium text-foreground-muted">No participants enrolled yet.</Text>
             </Box>
           ) : (
             <Box className="overflow-x-auto">
               <Table className="min-w-[720px]">
                 <TableHeader>
-                  <TableRow className="bg-slate-50/80 hover:bg-slate-50/80 border-b border-slate-100">
-                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Learner</TableHead>
-                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                  <TableRow className="bg-slate-50/80 hover:bg-slate-50/80 border-b border-border">
+                    <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Learner</TableHead>
+                    <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                       <Box className="flex items-center gap-1"><Factory className="h-3 w-3" /> Industry</Box>
                     </TableHead>
-                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                    <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                       <Box className="flex items-center gap-1"><Network className="h-3 w-3" /> Department</Box>
                     </TableHead>
-                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                    <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                       <Box className="flex items-center gap-1"><GraduationCap className="h-3 w-3" /> Experience</Box>
                     </TableHead>
-                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">
+                    <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                       <Box className="flex items-center gap-1"><Globe className="h-3 w-3" /> Country</Box>
                     </TableHead>
-                    <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide py-3">Status</TableHead>
+                    <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -393,16 +393,16 @@ function SessionsPanel({ trainingRef, token }) {
                     return (
                       <TableRow key={p.enrolment_id} className="hover:bg-slate-50/70 transition-colors border-b border-slate-100/80 last:border-0">
                         <TableCell className="py-3.5 align-top">
-                          <Text as="p" className="font-semibold text-slate-800 text-sm leading-tight">{p.name}</Text>
+                          <Text as="p" className="font-semibold text-foreground text-sm leading-tight">{p.name}</Text>
                           <Box className="flex items-center gap-1 mt-0.5">
-                            <Briefcase className="h-3 w-3 shrink-0 text-slate-300" />
-                            <Text as="span" className="text-[11px] text-slate-400">{p.job_title || "Job title not shared"}</Text>
+                            <Briefcase className="h-3 w-3 shrink-0 text-foreground-subtle" />
+                            <Text as="span" className="text-[11px] text-foreground-subtle">{p.job_title || "Job title not shared"}</Text>
                           </Box>
                         </TableCell>
-                        <TableCell className="py-3.5 align-top text-slate-600 text-sm">{blank(p.industry)}</TableCell>
-                        <TableCell className="py-3.5 align-top text-slate-600 text-sm">{blank(p.department)}</TableCell>
-                        <TableCell className="py-3.5 align-top text-slate-600 text-sm">{formatExperience(p.experience_years)}</TableCell>
-                        <TableCell className="py-3.5 align-top text-slate-600 text-sm">{blank(p.country)}</TableCell>
+                        <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{blank(p.industry)}</TableCell>
+                        <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{blank(p.department)}</TableCell>
+                        <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{formatExperience(p.experience_years)}</TableCell>
+                        <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{blank(p.country)}</TableCell>
                         <TableCell className="py-3.5 align-top">
                           <Badge className={`border-0 text-[10px] font-medium ${cfg.color}`}>{cfg.label}</Badge>
                         </TableCell>
@@ -425,25 +425,25 @@ function TrainingCard({ training, active, onClick }) {
   return (
     <Card
       onClick={onClick}
-      className={`p-0 overflow-hidden cursor-pointer rounded-2xl border shadow-sm transition-all ${active ? "border-slate-300 shadow-md" : "border-slate-200/80 hover:shadow-md hover:border-slate-300"}`}
+      className={`p-0 overflow-hidden cursor-pointer rounded-2xl border shadow-sm transition-all ${active ? "border-border-strong shadow-md" : "border-slate-200/80 hover:shadow-md hover:border-border-strong"}`}
     >
-      <Box className="flex items-center justify-between bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-4 py-2.5">
+      <Box className="flex items-center justify-between bg-[#d7e3fc] border-b border-primary-border px-4 py-2.5">
         <Box className="flex items-center gap-1.5">
-          <Hash className="h-3.5 w-3.5 text-violet-400" />
-          <Text as="span" className="text-xs font-semibold tracking-wide text-violet-700">{training.code}</Text>
+          <Hash className="h-3.5 w-3.5 text-primary" />
+          <Text as="span" className="text-xs font-semibold tracking-wide text-primary">{training.code}</Text>
         </Box>
         <Badge className={`text-[10px] border-0 ${statusCfg.color}`}>{statusCfg.label}</Badge>
       </Box>
       <Box className="p-4 space-y-2.5">
-        <Text as="h3" className="text-sm font-bold text-slate-900 leading-snug line-clamp-2">{training.title}</Text>
-        <Box className="flex items-center gap-3 text-[11px] text-slate-500">
+        <Text as="h3" className="text-sm font-bold text-foreground leading-snug line-clamp-2">{training.title}</Text>
+        <Box className="flex items-center gap-3 text-[11px] text-foreground-muted">
           <Box className="flex items-center gap-1.5">
-            <CalendarDays className="h-3 w-3 text-slate-400" />
+            <CalendarDays className="h-3 w-3 text-foreground-subtle" />
             {formatDate(training.start_date)}
           </Box>
           {training.enrolled_count != null && (
             <Box className="flex items-center gap-1.5">
-              <Clock className="h-3 w-3 text-slate-400" />
+              <Clock className="h-3 w-3 text-foreground-subtle" />
               {training.enrolled_count} enrolled
             </Box>
           )}
@@ -475,8 +475,8 @@ export function TrainerSessions() {
 
   if (error) {
     return (
-      <Card className="p-6 border-red-100 bg-red-50">
-        <Text as="p" className="text-sm text-red-600">Failed to load your trainings: {error}</Text>
+      <Card className="p-6 border-error-border bg-error-subtle">
+        <Text as="p" className="text-sm text-error">Failed to load your trainings: {error}</Text>
       </Card>
     );
   }
@@ -492,11 +492,11 @@ export function TrainerSessions() {
   if (trainings.length === 0) {
     return (
       <Card className="flex flex-col items-center justify-center px-6 py-14 text-center rounded-2xl border border-slate-200/80 shadow-sm">
-        <Box className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-          <Inbox className="h-7 w-7 text-slate-500" />
+        <Box className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-muted">
+          <Inbox className="h-7 w-7 text-foreground-muted" />
         </Box>
-        <Text as="h2" className="mt-4 text-lg font-bold text-slate-800">No assigned trainings</Text>
-        <Text as="p" className="mt-1.5 max-w-md text-sm text-slate-500">
+        <Text as="h2" className="mt-4 text-lg font-bold text-foreground">No assigned trainings</Text>
+        <Text as="p" className="mt-1.5 max-w-md text-sm text-foreground-muted">
           When an admin assigns you to a training, it will show up here and you can set its day-wise topics.
         </Text>
       </Card>
@@ -506,7 +506,7 @@ export function TrainerSessions() {
   return (
     <Box className="space-y-5">
       <Box>
-        <Text as="h3" className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-3">
+        <Text as="h3" className="text-[11px] uppercase tracking-wider text-foreground-subtle font-semibold mb-3">
           Assigned Trainings
         </Text>
         <Box className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

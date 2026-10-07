@@ -23,7 +23,7 @@ function StarRating({ value, onChange }) {
     <Box className="flex gap-1">
       {[1, 2, 3, 4, 5].map((n) => (
         <button type="button" key={n} onClick={() => onChange(n)} className="p-0.5 transition-transform hover:scale-110" aria-label={`${n} star${n > 1 ? "s" : ""}`}>
-          <Star className={cn("h-6 w-6", n <= value ? "fill-amber-400 text-amber-400" : "text-slate-300")} />
+          <Star className={cn("h-6 w-6", n <= value ? "fill-amber-400 text-amber-400" : "text-foreground-subtle")} />
         </button>
       ))}
     </Box>
@@ -32,10 +32,10 @@ function StarRating({ value, onChange }) {
 
 function SurveyRow({ label, hint, children }) {
   return (
-    <Box className="flex items-center justify-between gap-4 py-3 border-b border-slate-100 last:border-0">
+    <Box className="flex items-center justify-between gap-4 py-3 border-b border-border last:border-0">
       <Box className="min-w-0">
-        <Text as="p" className="text-sm font-semibold text-slate-700">{label}</Text>
-        {hint && <Text as="p" className="text-xs text-slate-400 mt-0.5">{hint}</Text>}
+        <Text as="p" className="text-sm font-semibold text-foreground">{label}</Text>
+        {hint && <Text as="p" className="text-xs text-foreground-subtle mt-0.5">{hint}</Text>}
       </Box>
       <Box className="shrink-0">{children}</Box>
     </Box>
@@ -86,14 +86,14 @@ function SurveyDialog({ target, onOpenChange, token, onSubmitted }) {
   return (
     <Dialog open={open} onOpenChange={(v) => !submitting && onOpenChange(v)}>
       <DialogContent className="sm:max-w-[560px] overflow-hidden" style={{ padding: 0, gap: 0 }}>
-        <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
+        <Box className="bg-[#d7e3fc] border-b border-primary-border px-6 py-5">
           <Box className="flex items-center gap-3">
-            <Box className="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
-              <MessageSquare className="w-4 h-4 text-white" />
+            <Box className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0">
+              <MessageSquare className="w-4 h-4 text-primary-foreground" />
             </Box>
             <Box>
-              <DialogTitle className="text-base font-semibold text-slate-800">Share your feedback</DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 mt-0.5">
+              <DialogTitle className="text-base font-semibold text-foreground">Share your feedback</DialogTitle>
+              <DialogDescription className="text-xs text-foreground-muted mt-0.5">
                 A quick survey about {cert?.title}. Submitting it unlocks your certificate download.
               </DialogDescription>
             </Box>
@@ -116,8 +116,8 @@ function SurveyDialog({ target, onOpenChange, token, onSubmitted }) {
                   className={cn(
                     "h-9 px-4 rounded-xl text-sm font-semibold border transition-colors",
                     form.would_recommend === o.v
-                      ? "bg-violet-600 text-white border-violet-600"
-                      : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                      ? "bg-primary text-primary-foreground border-primary-border"
+                      : "bg-surface text-foreground-muted border-border hover:bg-surface-hover"
                   )}>
                   {o.l}
                 </button>
@@ -125,25 +125,25 @@ function SurveyDialog({ target, onOpenChange, token, onSubmitted }) {
             </Box>
           </SurveyRow>
           <Box className="pt-3">
-            <Text as="p" className="text-sm font-semibold text-slate-700 mb-1.5">Comments <Box as="span" className="text-slate-400 font-normal">(optional)</Box></Text>
+            <Text as="p" className="text-sm font-semibold text-foreground mb-1.5">Comments <Box as="span" className="text-foreground-subtle font-normal">(optional)</Box></Text>
             <textarea
               rows={3}
               value={form.comments}
               onChange={(e) => set("comments")(e.target.value)}
               placeholder="Anything you'd like to add about the sessions…"
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none resize-none focus:border-violet-400 focus:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all"
+              className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm text-foreground placeholder:text-foreground-subtle outline-none resize-none focus:border-primary-border focus:shadow-[0_0_0_3px_rgba(167,139,250,0.35)] transition-all"
             />
           </Box>
           {error && (
-            <Box className="mt-3 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3">
-              <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
-              <Text as="p" className="text-xs text-red-700 font-medium">{error}</Text>
+            <Box className="mt-3 flex items-start gap-2.5 rounded-xl border border-error-border bg-error-subtle px-3.5 py-3">
+              <AlertCircle className="h-4 w-4 text-error shrink-0 mt-0.5" />
+              <Text as="p" className="text-xs text-error-subtle-foreground font-medium">{error}</Text>
             </Box>
           )}
         </Box>
-        <DialogFooter className="px-6 pt-4 pb-6 border-t border-slate-100 bg-slate-50/50">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-slate-200 text-slate-600 hover:bg-slate-100">Cancel</Button>
-          <Button onClick={submit} disabled={submitting || !complete} className="bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
+        <DialogFooter className="px-6 pt-4 pb-6 border-t border-border bg-slate-50/50">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-border text-foreground-muted hover:bg-surface-muted">Cancel</Button>
+          <Button onClick={submit} disabled={submitting || !complete} className="bg-primary hover:bg-primary-hover text-primary-foreground border-0 shadow-sm">
             {submitting
               ? (<><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Submitting…</>)
               : (<><CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Submit &amp; download</>)}
@@ -158,17 +158,17 @@ function SurveyDialog({ target, onOpenChange, token, onSubmitted }) {
 function CertificateCard({ cert, survey, onDownload, onGiveFeedback }) {
   const canGiveFeedback = survey && !survey.answered;
   return (
-    <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-2xl bg-white flex flex-col">
-      <Box className="relative bg-slate-50/70 border-b border-slate-100 p-4">
-        <Box className={cn("rounded-lg overflow-hidden ring-1 ring-slate-200", !cert.issued && "blur-[1.5px]")}>
+    <Card className="p-0 overflow-hidden border border-slate-200/80 shadow-sm rounded-2xl bg-surface flex flex-col">
+      <Box className="relative bg-slate-50/70 border-b border-border p-4">
+        <Box className={cn("rounded-lg overflow-hidden ring-1 ring-border", !cert.issued && "blur-[1.5px]")}>
           <ScaledCertificate cert={cert} />
         </Box>
         {!cert.issued && (
           <Box className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/55 backdrop-blur-[1px]">
-            <Box className="w-11 h-11 rounded-full bg-amber-500 flex items-center justify-center shadow">
-              <Lock className="h-5 w-5 text-white" />
+            <Box className="w-11 h-11 rounded-full bg-warning flex items-center justify-center shadow">
+              <Lock className="h-5 w-5 text-warning-foreground" />
             </Box>
-            <Text as="p" className="text-xs font-semibold text-slate-600 max-w-[220px] text-center">
+            <Text as="p" className="text-xs font-semibold text-foreground-muted max-w-[220px] text-center">
               Complete a short feedback survey to unlock your certificate
             </Text>
           </Box>
@@ -178,48 +178,48 @@ function CertificateCard({ cert, survey, onDownload, onGiveFeedback }) {
       <Box className="p-5 flex flex-col gap-3 flex-1">
         <Box className="flex items-start justify-between gap-3">
           <Box className="min-w-0">
-            <Text as="h3" className="text-sm font-bold text-slate-800 leading-tight">{cert.title}</Text>
+            <Text as="h3" className="text-sm font-bold text-foreground leading-tight">{cert.title}</Text>
             <Box className="flex items-center gap-1.5 mt-1">
-              <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-              <Text as="p" className="text-xs text-slate-500">{certificateDateText(cert.start_date, cert.end_date) || "—"}</Text>
+              <Calendar className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+              <Text as="p" className="text-xs text-foreground-muted">{certificateDateText(cert.start_date, cert.end_date) || "—"}</Text>
             </Box>
           </Box>
           {cert.issued ? (
-            <Badge className="border-0 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80 text-[10px] font-semibold shrink-0">● Issued</Badge>
+            <Badge className="border-0 bg-success-subtle text-success-subtle-foreground ring-1 ring-emerald-200/80 text-[10px] font-semibold shrink-0">● Issued</Badge>
           ) : (
-            <Badge className="border-0 bg-amber-50 text-amber-700 ring-1 ring-amber-200/80 text-[10px] font-semibold shrink-0">Feedback required</Badge>
+            <Badge className="border-0 bg-warning-subtle text-warning-subtle-foreground ring-1 ring-amber-200/80 text-[10px] font-semibold shrink-0">Feedback required</Badge>
           )}
         </Box>
 
         <Box className="flex items-center gap-4 text-xs">
           <Box>
-            <Text as="p" className="text-[10px] uppercase tracking-wide text-slate-400">Training ID</Text>
-            <Text as="p" className="font-mono font-semibold text-slate-700">{cert.training_id || "—"}</Text>
+            <Text as="p" className="text-[10px] uppercase tracking-wide text-foreground-subtle">Training ID</Text>
+            <Text as="p" className="font-mono font-semibold text-foreground">{cert.training_id || "—"}</Text>
           </Box>
           <Box>
-            <Text as="p" className="text-[10px] uppercase tracking-wide text-slate-400">Certificate ID</Text>
-            <Text as="p" className="font-mono font-semibold text-slate-700">{cert.issued ? cert.certificate_id : "—"}</Text>
+            <Text as="p" className="text-[10px] uppercase tracking-wide text-foreground-subtle">Certificate ID</Text>
+            <Text as="p" className="font-mono font-semibold text-foreground">{cert.issued ? cert.certificate_id : "—"}</Text>
           </Box>
         </Box>
 
         <Box className="mt-auto pt-1">
           {cert.issued ? (
-            <Button onClick={() => onDownload(cert)} className="w-full bg-amber-500 hover:bg-amber-600 text-white border-0 shadow-sm">
+            <Button onClick={() => onDownload(cert)} className="w-full bg-warning hover:bg-warning text-warning-foreground border-0 shadow-sm">
               <Download className="h-4 w-4 mr-2" /> Download certificate
             </Button>
           ) : canGiveFeedback ? (
-            <Button onClick={() => onGiveFeedback(cert, survey)} className="w-full bg-violet-600 hover:bg-violet-700 text-white border-0 shadow-sm">
+            <Button onClick={() => onGiveFeedback(cert, survey)} className="w-full bg-primary hover:bg-primary-hover text-primary-foreground border-0 shadow-sm">
               <MessageSquare className="h-4 w-4 mr-2" /> Give feedback &amp; download
             </Button>
           ) : survey?.answered ? (
-            <Box className="flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-              <Text as="p" className="text-xs font-medium text-emerald-700">Feedback submitted — your certificate will be ready shortly.</Text>
+            <Box className="flex items-center justify-center gap-2 rounded-xl border border-success-border bg-success-subtle px-3.5 py-2.5">
+              <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+              <Text as="p" className="text-xs font-medium text-success-subtle-foreground">Feedback submitted — your certificate will be ready shortly.</Text>
             </Box>
           ) : (
-            <Box className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5">
-              <AlertCircle className="h-4 w-4 text-slate-400 shrink-0" />
-              <Text as="p" className="text-xs font-medium text-slate-500">Feedback survey isn&apos;t available yet.</Text>
+            <Box className="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface-hover px-3.5 py-2.5">
+              <AlertCircle className="h-4 w-4 text-foreground-subtle shrink-0" />
+              <Text as="p" className="text-xs font-medium text-foreground-muted">Feedback survey isn&apos;t available yet.</Text>
             </Box>
           )}
         </Box>
@@ -278,8 +278,8 @@ export function CertificatesContent() {
 
   if (error) {
     return (
-      <Card className="p-6 border border-red-200/60 bg-red-50 rounded-xl">
-        <Text as="p" className="text-red-600 text-sm">Failed to load certificates: {error}</Text>
+      <Card className="p-6 border border-red-200/60 bg-error-subtle rounded-xl">
+        <Text as="p" className="text-error text-sm">Failed to load certificates: {error}</Text>
       </Card>
     );
   }
@@ -294,12 +294,12 @@ export function CertificatesContent() {
 
   if (certs.length === 0) {
     return (
-      <Card className="p-12 border border-slate-200/80 rounded-2xl bg-white text-center">
-        <Box className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mx-auto mb-4">
-          <Award className="h-7 w-7 text-amber-500" />
+      <Card className="p-12 border border-slate-200/80 rounded-2xl bg-surface text-center">
+        <Box className="w-14 h-14 rounded-2xl bg-warning-subtle flex items-center justify-center mx-auto mb-4">
+          <Award className="h-7 w-7 text-warning" />
         </Box>
-        <Text as="h3" className="text-base font-bold text-slate-800">No certificates yet</Text>
-        <Text as="p" className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
+        <Text as="h3" className="text-base font-bold text-foreground">No certificates yet</Text>
+        <Text as="p" className="text-sm text-foreground-muted mt-1 max-w-md mx-auto">
           Once you complete a training and it&apos;s marked completed, your certificate will appear here to download.
         </Text>
       </Card>

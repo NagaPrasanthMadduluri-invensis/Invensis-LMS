@@ -28,7 +28,7 @@ import {
 const RESUME_MAX_BYTES = 500 * 1024; // 500 KB
 const RESUME_TYPE = "application/pdf";
 
-const inputCls = "h-10 w-full text-sm bg-background border border-slate-300 focus-visible:border-violet-400 focus-visible:ring-violet-400";
+const inputCls = "h-10 w-full text-sm bg-background border border-border-strong focus-visible:border-primary-border focus-visible:ring-focus";
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -48,14 +48,14 @@ function mapFieldErrors(apiErrors, keyMap) {
 function SectionCard({ icon: Icon, title, description, children }) {
   return (
     <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-      <CardHeader className="px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+      <CardHeader className="px-6 py-4 border-b border-border bg-slate-50/60">
         <Box className="flex items-center gap-2.5">
-          <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-            <Icon className="h-4 w-4 text-violet-500" />
+          <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center shrink-0">
+            <Icon className="h-4 w-4 text-primary" />
           </Box>
           <Box>
-            <CardTitle className="text-sm font-bold text-slate-800">{title}</CardTitle>
-            {description && <Text as="p" className="text-xs text-slate-400 mt-0.5">{description}</Text>}
+            <CardTitle className="text-sm font-bold text-foreground">{title}</CardTitle>
+            {description && <Text as="p" className="text-xs text-foreground-subtle mt-0.5">{description}</Text>}
           </Box>
         </Box>
       </CardHeader>
@@ -67,12 +67,12 @@ function SectionCard({ icon: Icon, title, description, children }) {
 function FieldRow({ label, htmlFor, optional, error, children }) {
   return (
     <Box className="space-y-1.5">
-      <Label htmlFor={htmlFor} className="text-xs font-semibold text-slate-600">
+      <Label htmlFor={htmlFor} className="text-xs font-semibold text-foreground-muted">
         {label}
-        {optional && <Text as="span" className="text-slate-400 font-normal ml-1">(Optional)</Text>}
+        {optional && <Text as="span" className="text-foreground-subtle font-normal ml-1">(Optional)</Text>}
       </Label>
       {children}
-      {error && <Text as="p" className="text-xs text-red-600">{error}</Text>}
+      {error && <Text as="p" className="text-xs text-error">{error}</Text>}
     </Box>
   );
 }
@@ -82,7 +82,7 @@ function ProfileSkeleton() {
     <Box className="space-y-5">
       {Array.from({ length: 3 }).map((_, i) => (
         <Card key={i} className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-          <Box className="px-6 py-4 border-b border-slate-100"><Skeleton className="h-5 w-44" /></Box>
+          <Box className="px-6 py-4 border-b border-border"><Skeleton className="h-5 w-44" /></Box>
           <Box className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
             {Array.from({ length: 4 }).map((_, j) => <Skeleton key={j} className="h-10 rounded-lg" />)}
           </Box>
@@ -253,8 +253,8 @@ export function TrainerProfileSettings() {
 
   if (loadError) {
     return (
-      <Card className="p-6 rounded-2xl border-0 bg-red-50 shadow-sm">
-        <Text as="p" className="text-red-600 text-sm">Failed to load your profile: {loadError}</Text>
+      <Card className="p-6 rounded-2xl border-0 bg-error-subtle shadow-sm">
+        <Text as="p" className="text-error text-sm">Failed to load your profile: {loadError}</Text>
       </Card>
     );
   }
@@ -273,10 +273,10 @@ export function TrainerProfileSettings() {
           </FieldRow>
           <FieldRow label="Email">
             <Box className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input value={email} disabled className={`${inputCls} pl-9 text-slate-500`} />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
+              <Input value={email} disabled className={`${inputCls} pl-9 text-foreground-muted`} />
             </Box>
-            <Text as="p" className="text-[11px] text-slate-400">Managed by your admin — contact them to change it.</Text>
+            <Text as="p" className="text-[11px] text-foreground-subtle">Managed by your admin — contact them to change it.</Text>
           </FieldRow>
         </Box>
       </SectionCard>
@@ -287,21 +287,21 @@ export function TrainerProfileSettings() {
           <Textarea
             id="bio" value={bio} onChange={(e) => setBio(e.target.value)} rows={4}
             placeholder="A short professional summary…"
-            className="w-full text-sm bg-background border border-slate-300 focus-visible:border-violet-400 focus-visible:ring-violet-400"
+            className="w-full text-sm bg-background border border-border-strong focus-visible:border-primary-border focus-visible:ring-focus"
           />
         </FieldRow>
         <FieldRow label="Experience" htmlFor="experience" optional>
           <Textarea
             id="experience" value={experience} onChange={(e) => setExperience(e.target.value)} rows={3}
             placeholder="e.g. 12 years delivering PMP & PRINCE2 corporate training."
-            className="w-full text-sm bg-background border border-slate-300 focus-visible:border-violet-400 focus-visible:ring-violet-400"
+            className="w-full text-sm bg-background border border-border-strong focus-visible:border-primary-border focus-visible:ring-focus"
           />
         </FieldRow>
         <FieldRow label="Specializations" htmlFor="specializations" optional>
-          <Box className="rounded-lg border border-slate-300 bg-background px-2.5 py-2 focus-within:border-violet-400 focus-within:ring-1 focus-within:ring-violet-400">
+          <Box className="rounded-lg border border-border-strong bg-background px-2.5 py-2 focus-within:border-primary-border focus-within:ring-1 focus-within:ring-focus">
             <Box className="flex flex-wrap items-center gap-1.5">
               {specializations.map((s) => (
-                <Badge key={s} className="border-0 bg-violet-50 text-violet-700 text-xs font-semibold gap-1 pr-1">
+                <Badge key={s} className="border-0 bg-primary-subtle text-primary text-xs font-semibold gap-1 pr-1">
                   {s}
                   <button type="button" onClick={() => removeSpecialization(s)} className="rounded-full hover:bg-violet-200/60 p-0.5">
                     <X className="h-3 w-3" />
@@ -319,7 +319,7 @@ export function TrainerProfileSettings() {
               />
             </Box>
           </Box>
-          <Text as="p" className="text-[11px] text-slate-400">Press Enter or comma to add each subject.</Text>
+          <Text as="p" className="text-[11px] text-foreground-subtle">Press Enter or comma to add each subject.</Text>
         </FieldRow>
       </SectionCard>
 
@@ -328,21 +328,21 @@ export function TrainerProfileSettings() {
         <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <FieldRow label="City" htmlFor="city" optional>
             <Box className="relative">
-              <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
               <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} className={`${inputCls} pl-9`} />
             </Box>
           </FieldRow>
           <FieldRow label="Country" htmlFor="country" optional>
             <Box className="relative">
-              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
               <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} className={`${inputCls} pl-9`} />
             </Box>
           </FieldRow>
         </Box>
         <Box className="flex items-center justify-between py-1">
           <Box>
-            <Text as="p" className="text-sm font-medium text-slate-700">Remote delivery</Text>
-            <Text as="p" className="text-xs text-slate-400">I deliver training online.</Text>
+            <Text as="p" className="text-sm font-medium text-foreground">Remote delivery</Text>
+            <Text as="p" className="text-xs text-foreground-subtle">I deliver training online.</Text>
           </Box>
           <Switch checked={isRemote} onCheckedChange={setIsRemote} />
         </Box>
@@ -351,21 +351,21 @@ export function TrainerProfileSettings() {
       {/* Resume */}
       <SectionCard icon={FileText} title="Resume / CV" description={`PDF only, up to ${formatBytes(RESUME_MAX_BYTES)}.`}>
         {resumeKey ? (
-          <Box className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3">
+          <Box className="flex items-center justify-between gap-3 rounded-xl border border-border bg-slate-50/60 px-4 py-3">
             <Box className="flex items-center gap-3 min-w-0">
-              <Box className="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">
-                <FileText className="h-4 w-4 text-rose-500" />
+              <Box className="w-9 h-9 rounded-lg bg-error-subtle flex items-center justify-center shrink-0">
+                <FileText className="h-4 w-4 text-error" />
               </Box>
               <Box className="min-w-0">
-                <Text as="p" className="text-sm font-semibold text-slate-700 truncate">Resume uploaded</Text>
-                <Text as="p" className="text-xs text-slate-400">PDF document</Text>
+                <Text as="p" className="text-sm font-semibold text-foreground truncate">Resume uploaded</Text>
+                <Text as="p" className="text-xs text-foreground-subtle">PDF document</Text>
               </Box>
             </Box>
             <Box className="flex items-center gap-2 shrink-0">
               {resumeUrl && (
                 <Button
                   variant="outline" size="sm" nativeButton={false}
-                  className="h-8 px-3 text-xs border-slate-200"
+                  className="h-8 px-3 text-xs border-border"
                   render={<a href={resumeUrl} target="_blank" rel="noopener noreferrer" />}
                 >
                   <Download className="h-3.5 w-3.5 mr-1" /> View
@@ -374,26 +374,26 @@ export function TrainerProfileSettings() {
               <Button
                 variant="ghost" size="sm" disabled={resumeUploading}
                 onClick={removeResume}
-                className="h-8 px-3 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="h-8 px-3 text-xs text-error hover:text-error-subtle-foreground hover:bg-error-subtle"
               >
                 <X className="h-3.5 w-3.5 mr-1" /> Remove
               </Button>
             </Box>
           </Box>
         ) : (
-          <Box className="rounded-xl border border-dashed border-slate-300 py-8 text-center">
-            <Box className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-              <Upload className="h-6 w-6 text-slate-400" />
+          <Box className="rounded-xl border border-dashed border-border-strong py-8 text-center">
+            <Box className="w-12 h-12 rounded-2xl bg-surface-muted flex items-center justify-center mx-auto mb-3">
+              <Upload className="h-6 w-6 text-foreground-subtle" />
             </Box>
-            <Text as="p" className="text-sm font-medium text-slate-500">No resume uploaded yet</Text>
-            <Text as="p" className="text-xs text-slate-400 mt-1">PDF, up to {formatBytes(RESUME_MAX_BYTES)}.</Text>
+            <Text as="p" className="text-sm font-medium text-foreground-muted">No resume uploaded yet</Text>
+            <Text as="p" className="text-xs text-foreground-subtle mt-1">PDF, up to {formatBytes(RESUME_MAX_BYTES)}.</Text>
           </Box>
         )}
 
         <Box>
           <Button
             variant="outline" size="sm" nativeButton={false} disabled={resumeUploading}
-            className="h-9 px-4 text-xs border-slate-200"
+            className="h-9 px-4 text-xs border-border"
             render={<label htmlFor="resume-file" className="cursor-pointer flex items-center gap-1.5" />}
           >
             <Upload className="h-3.5 w-3.5" />
@@ -403,21 +403,21 @@ export function TrainerProfileSettings() {
             id="resume-file" ref={resumeInputRef} type="file" accept="application/pdf"
             className="hidden" disabled={resumeUploading} onChange={handleResumeChange}
           />
-          {resumeError && <Text as="p" className="text-xs text-red-600 mt-2">{resumeError}</Text>}
+          {resumeError && <Text as="p" className="text-xs text-error mt-2">{resumeError}</Text>}
         </Box>
       </SectionCard>
 
       {/* Save */}
       <Box className="flex items-center gap-3">
-        <Button onClick={saveProfile} disabled={saving} className="h-10 px-5 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg">
+        <Button onClick={saveProfile} disabled={saving} className="h-10 px-5 text-sm bg-primary hover:bg-primary-hover text-primary-foreground rounded-lg">
           {saving ? "Saving…" : saved ? "Saved ✓" : "Save Changes"}
         </Button>
         {saved && (
-          <Text as="span" className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+          <Text as="span" className="text-xs text-success font-medium flex items-center gap-1">
             <CheckCircle2 className="h-3.5 w-3.5" /> Profile updated
           </Text>
         )}
-        {saveError && <Text as="span" className="text-xs text-red-600">{saveError}</Text>}
+        {saveError && <Text as="span" className="text-xs text-error">{saveError}</Text>}
       </Box>
     </Box>
   );

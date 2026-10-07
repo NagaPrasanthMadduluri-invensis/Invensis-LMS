@@ -85,17 +85,17 @@ const MODE = {
   hybrid:     { icon: Layers,    label: "Hybrid",       chip: "bg-violet-100 text-violet-700" },
   one_to_one: { icon: UserRound, label: "1-to-1",       chip: "bg-amber-100 text-amber-700" },
 };
-const modeOf = (m) => MODE[m] || { icon: Video, label: m || "—", chip: "bg-slate-100 text-slate-600" };
+const modeOf = (m) => MODE[m] || { icon: Video, label: m || "—", chip: "bg-surface-muted text-foreground-muted" };
 
 const STATUS = {
-  pending:   { label: "Upcoming",    chip: "bg-amber-100 text-amber-700",     icon: Clock3 },
-  active:    { label: "Upcoming",    chip: "bg-amber-100 text-amber-700",     icon: Clock3 },
-  scheduled: { label: "Scheduled",   chip: "bg-amber-100 text-amber-700",     icon: Clock3 },
-  ongoing:   { label: "In Progress", chip: "bg-sky-100 text-sky-700",         icon: CircleDashed },
-  completed: { label: "Completed",   chip: "bg-emerald-100 text-emerald-700", icon: CheckCircle2 },
-  postponed: { label: "Postponed",   chip: "bg-orange-100 text-orange-700",   icon: CalendarClock },
+  pending:   { label: "Upcoming",    chip: "bg-warning-subtle text-warning-subtle-foreground",     icon: Clock3 },
+  active:    { label: "Upcoming",    chip: "bg-warning-subtle text-warning-subtle-foreground",     icon: Clock3 },
+  scheduled: { label: "Scheduled",   chip: "bg-warning-subtle text-warning-subtle-foreground",     icon: Clock3 },
+  ongoing:   { label: "In Progress", chip: "bg-info-subtle text-info-subtle-foreground",         icon: CircleDashed },
+  completed: { label: "Completed",   chip: "bg-success-subtle text-success-subtle-foreground", icon: CheckCircle2 },
+  postponed: { label: "Postponed",   chip: "bg-warning-subtle text-warning-subtle-foreground",   icon: CalendarClock },
 };
-const statusOf = (s) => STATUS[s] || { label: s || "—", chip: "bg-slate-100 text-slate-600", icon: CircleDashed };
+const statusOf = (s) => STATUS[s] || { label: s || "—", chip: "bg-surface-muted text-foreground-muted", icon: CircleDashed };
 
 /* ── what this training yields ──
    Three states a learner actually needs to tell apart, and the wording is the
@@ -107,45 +107,45 @@ function credentialInfo(t) {
   if (t.credential_type === "attendance_letter") {
     return {
       kind: "Certification course",
-      kindCls: "bg-amber-50 text-amber-700 ring-amber-200",
+      kindCls: "bg-warning-subtle text-warning-subtle-foreground ring-warning-border",
       KindIcon: Medal,
       doc: "Letter of Course Attendance",
       note: "Your exam is booked with the awarding body — this letter confirms attendance, not the qualification.",
       DocIcon: ScrollText,
-      docCls: "bg-amber-50 text-amber-600",
+      docCls: "bg-warning-subtle text-warning",
     };
   }
   if (t.is_certification) {
     return {
       kind: "Certification course",
-      kindCls: "bg-amber-50 text-amber-700 ring-amber-200",
+      kindCls: "bg-warning-subtle text-warning-subtle-foreground ring-warning-border",
       KindIcon: Medal,
       doc: "Certificate of Training",
       note: "Exam certification isn't included in this booking.",
       DocIcon: Award,
-      docCls: "bg-amber-50 text-amber-600",
+      docCls: "bg-warning-subtle text-warning",
     };
   }
   return {
     kind: "Training course",
-    kindCls: "bg-slate-100 text-slate-600 ring-slate-200",
+    kindCls: "bg-surface-muted text-foreground-muted ring-border",
     KindIcon: BookOpen,
     doc: "Certificate of Training",
     note: "Awarded by Invensis Learning once your training is complete.",
     DocIcon: Award,
-    docCls: "bg-violet-50 text-violet-600",
+    docCls: "bg-primary-subtle text-primary",
   };
 }
 
 /* What a finished training actually produced, rather than what it promised. */
 function outcomeInfo(t, cred) {
   if (t.certificate_issued) {
-    return { ...cred, note: `Ready to download — ID ${t.certificate_id}`, tone: "text-emerald-700" };
+    return { ...cred, note: `Ready to download — ID ${t.certificate_id}`, tone: "text-success-subtle-foreground" };
   }
   if (t.certificate_awaiting_release) {
-    return { ...cred, note: "Issued and awaiting release by the administrator.", tone: "text-amber-700" };
+    return { ...cred, note: "Issued and awaiting release by the administrator.", tone: "text-warning-subtle-foreground" };
   }
-  return { ...cred, note: "Not issued yet.", tone: "text-slate-500" };
+  return { ...cred, note: "Not issued yet.", tone: "text-foreground-muted" };
 }
 
 /* ── one aligned detail row ──
@@ -155,11 +155,11 @@ function outcomeInfo(t, cred) {
 function Row({ icon: Icon, label, children, title }) {
   return (
     <>
-      <Icon className="h-3.5 w-3.5 self-center text-slate-300" />
-      <Text as="span" className="self-center text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+      <Icon className="h-3.5 w-3.5 self-center text-foreground-subtle" />
+      <Text as="span" className="self-center text-[10px] font-semibold uppercase tracking-wide text-foreground-subtle">
         {label}
       </Text>
-      <Text as="span" title={title} className="min-w-0 self-center truncate text-xs font-medium text-slate-700">
+      <Text as="span" title={title} className="min-w-0 self-center truncate text-xs font-medium text-foreground">
         {children}
       </Text>
     </>
@@ -182,7 +182,7 @@ function TrainingCard({ t, today }) {
   const href = `/my-courses/${encodeURIComponent(t.code ?? t.id)}`;
 
   return (
-    <Card className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-0 shadow-sm transition-shadow hover:shadow-md">
+    <Card className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-surface p-0 shadow-sm transition-shadow hover:shadow-md">
       <Box className="flex flex-1 flex-col p-5">
 
         {/* Certification vs training, and the lifecycle status. These are the
@@ -207,16 +207,16 @@ function TrainingCard({ t, today }) {
         <Text
           as="h3"
           title={t.title}
-          className="mt-3 line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-tight text-slate-900"
+          className="mt-3 line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-tight text-foreground"
         >
           {t.title}
         </Text>
         <Box className="mt-1 flex items-center gap-2">
-          <Text as="span" className="truncate font-mono text-[11px] text-slate-400">{t.code}</Text>
+          <Text as="span" className="truncate font-mono text-[11px] text-foreground-subtle">{t.code}</Text>
           {when && (
             <>
-              <Text as="span" className="text-slate-200">·</Text>
-              <Text as="span" className="shrink-0 text-[11px] font-semibold text-violet-600">{when}</Text>
+              <Text as="span" className="text-foreground-subtle">·</Text>
+              <Text as="span" className="shrink-0 text-[11px] font-semibold text-primary">{when}</Text>
             </>
           )}
         </Box>
@@ -228,16 +228,16 @@ function TrainingCard({ t, today }) {
             dividers, so the numbers line up whether there are two or three. */}
         {stats.length > 0 && (
           <Box className={cn(
-            "mt-4 grid divide-x divide-violet-100 overflow-hidden rounded-xl bg-violet-50/60 ring-1 ring-violet-100",
+            "mt-4 grid divide-x divide-violet-100 overflow-hidden rounded-xl bg-violet-50/60 ring-1 ring-primary-border",
             STAT_COLS[stats.length]
           )}>
             {stats.map((st) => (
               <Box key={st.label} className="px-2 py-2.5 text-center">
-                <Text as="p" className="text-base font-extrabold leading-none text-violet-700">
+                <Text as="p" className="text-base font-extrabold leading-none text-primary">
                   {st.value}
-                  <Text as="span" className="text-[11px] font-bold text-violet-400">{st.unit}</Text>
+                  <Text as="span" className="text-[11px] font-bold text-primary">{st.unit}</Text>
                 </Text>
-                <Text as="p" className="mt-1 text-[9px] font-bold uppercase leading-none tracking-wide text-violet-400">
+                <Text as="p" className="mt-1 text-[9px] font-bold uppercase leading-none tracking-wide text-primary">
                   {st.label}
                 </Text>
               </Box>
@@ -247,7 +247,7 @@ function TrainingCard({ t, today }) {
 
         {/* Facts. One grid for every row, so the label column is a straight
             edge down the card and the values start at the same x. */}
-        <Box className="mt-4 grid grid-cols-[0.875rem_4.25rem_minmax(0,1fr)] items-start gap-x-2 gap-y-2.5 border-t border-slate-100 pt-4">
+        <Box className="mt-4 grid grid-cols-[0.875rem_4.25rem_minmax(0,1fr)] items-start gap-x-2 gap-y-2.5 border-t border-border pt-4">
           <Row icon={CalendarClock} label="Dates" title={dateRange(t.start_date, t.end_date)}>
             {dateRange(t.start_date, t.end_date)}
           </Row>
@@ -267,18 +267,18 @@ function TrainingCard({ t, today }) {
         {/* What you walk away with. Given its own block rather than another
             fact row, because it is the answer to the question the status badge
             raises and it needs a sentence, not a value. */}
-        <Box className="mt-4 flex items-start gap-2.5 rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-100">
+        <Box className="mt-4 flex items-start gap-2.5 rounded-xl bg-surface-hover px-3 py-2.5 ring-1 ring-border">
           <Box className={cn("mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg", cred.docCls)}>
             <DocIcon className="h-3.5 w-3.5" />
           </Box>
           <Box className="min-w-0">
-            <Text as="p" className="text-[10px] font-semibold uppercase leading-none tracking-wide text-slate-400">
+            <Text as="p" className="text-[10px] font-semibold uppercase leading-none tracking-wide text-foreground-subtle">
               {done ? "Your document" : "On completion you receive"}
             </Text>
-            <Text as="p" className="mt-1 truncate text-xs font-bold text-slate-800" title={outcome.doc}>
+            <Text as="p" className="mt-1 truncate text-xs font-bold text-foreground" title={outcome.doc}>
               {outcome.doc}
             </Text>
-            <Text as="p" className={cn("mt-0.5 text-[11px] leading-snug", outcome.tone ?? "text-slate-500")}>
+            <Text as="p" className={cn("mt-0.5 text-[11px] leading-snug", outcome.tone ?? "text-foreground-muted")}>
               {outcome.note}
             </Text>
           </Box>
@@ -291,9 +291,9 @@ function TrainingCard({ t, today }) {
           <Link
             href={href}
             aria-label={`Open training details for ${t.title}`}
-            className="flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-violet-600 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+            className="flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-primary text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
           >
-            <Text as="span" className="text-xs font-semibold text-white">View training details</Text>
+            <Text as="span" className="text-xs font-semibold text-primary-foreground">View training details</Text>
             <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
           </Link>
         </Box>
@@ -312,18 +312,18 @@ function Group({ title, subtitle, icon: Icon, tone, items, empty, today }) {
         </Box>
         <Box className="min-w-0">
           <Box className="flex items-center gap-2">
-            <Text as="h2" className="text-sm font-bold text-slate-800">{title}</Text>
-            <Text as="span" className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+            <Text as="h2" className="text-sm font-bold text-foreground">{title}</Text>
+            <Text as="span" className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-bold text-foreground-muted">
               {items.length}
             </Text>
           </Box>
-          <Text as="p" className="text-[11px] text-slate-400">{subtitle}</Text>
+          <Text as="p" className="text-[11px] text-foreground-subtle">{subtitle}</Text>
         </Box>
       </Box>
 
       {items.length === 0 ? (
-        <Card className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-5 py-6">
-          <Text as="p" className="text-center text-xs text-slate-400">{empty}</Text>
+        <Card className="rounded-2xl border border-dashed border-border bg-slate-50/50 px-5 py-6">
+          <Text as="p" className="text-center text-xs text-foreground-subtle">{empty}</Text>
         </Card>
       ) : (
         <Box className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -351,8 +351,8 @@ export function MyTrainingsList() {
 
   if (error) {
     return (
-      <Card className="rounded-xl border border-red-200/60 bg-red-50 p-6">
-        <Text as="p" className="text-sm text-red-600">Failed to load your trainings: {error}</Text>
+      <Card className="rounded-xl border border-red-200/60 bg-error-subtle p-6">
+        <Text as="p" className="text-sm text-error">Failed to load your trainings: {error}</Text>
       </Card>
     );
   }
@@ -379,12 +379,12 @@ export function MyTrainingsList() {
 
   if (trainings.length === 0) {
     return (
-      <Card className="rounded-2xl border border-slate-200/80 bg-white px-6 py-16 text-center">
-        <Box className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50">
-          <BookOpen className="h-7 w-7 text-violet-300" />
+      <Card className="rounded-2xl border border-slate-200/80 bg-surface px-6 py-16 text-center">
+        <Box className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-subtle">
+          <BookOpen className="h-7 w-7 text-primary" />
         </Box>
-        <Text as="h3" className="text-sm font-bold text-slate-700">You&apos;re not enrolled in a training yet</Text>
-        <Text as="p" className="mx-auto mt-1.5 max-w-sm text-xs text-slate-400">
+        <Text as="h3" className="text-sm font-bold text-foreground">You&apos;re not enrolled in a training yet</Text>
+        <Text as="p" className="mx-auto mt-1.5 max-w-sm text-xs text-foreground-subtle">
           Enrolments are set up by our team. Once a seat is booked for you it will appear here.
         </Text>
       </Card>
@@ -395,17 +395,17 @@ export function MyTrainingsList() {
     <Box className="space-y-8">
       <Group
         title="Ongoing" subtitle="Running right now" icon={PlayCircle}
-        tone="bg-sky-100 text-sky-600" items={ongoing} today={today}
+        tone="bg-info-subtle text-info" items={ongoing} today={today}
         empty="No training is running at the moment."
       />
       <Group
         title="Upcoming" subtitle="Scheduled ahead of you" icon={Clock3}
-        tone="bg-amber-100 text-amber-600" items={upcoming} today={today}
+        tone="bg-warning-subtle text-warning" items={upcoming} today={today}
         empty="Nothing scheduled — you're all caught up."
       />
       <Group
         title="Completed" subtitle="Finished trainings and their certificates" icon={Award}
-        tone="bg-emerald-100 text-emerald-600" items={completed} today={today}
+        tone="bg-success-subtle text-success" items={completed} today={today}
         empty="No completed trainings yet."
       />
     </Box>

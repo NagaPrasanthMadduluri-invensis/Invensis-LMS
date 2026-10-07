@@ -22,13 +22,13 @@ import { fetchAdminTrainings } from "@/services/api/admin/admin-api";
 import { regionForTimezone, REGION_OPTIONS } from "@/lib/region";
 
 const STATUS_CONFIG = {
-  pending:   { label: "Pending",   badge: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",   accent: "bg-amber-400" },
-  active:    { label: "Active",    badge: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200", accent: "bg-emerald-500" },
-  ongoing:   { label: "Ongoing",   badge: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",       accent: "bg-blue-500" },
-  completed: { label: "Completed", badge: "bg-slate-100 text-slate-600",                          accent: "bg-slate-400" },
-  cancelled: { label: "Cancelled", badge: "bg-red-50 text-red-600 ring-1 ring-red-200",           accent: "bg-red-500" },
-  postponed: { label: "Postponed", badge: "bg-orange-50 text-orange-700 ring-1 ring-orange-200",  accent: "bg-orange-500" },
-  suspended: { label: "Suspended", badge: "bg-rose-50 text-rose-700 ring-1 ring-rose-200",        accent: "bg-rose-500" },
+  pending:   { label: "Pending",   badge: "bg-warning-subtle text-warning-subtle-foreground ring-1 ring-warning-border",   accent: "bg-amber-400" },
+  active:    { label: "Active",    badge: "bg-success-subtle text-success-subtle-foreground ring-1 ring-success-border", accent: "bg-success" },
+  ongoing:   { label: "Ongoing",   badge: "bg-info-subtle text-info-subtle-foreground ring-1 ring-info-border",       accent: "bg-info" },
+  completed: { label: "Completed", badge: "bg-surface-muted text-foreground-muted",                          accent: "bg-slate-400" },
+  cancelled: { label: "Cancelled", badge: "bg-error-subtle text-error ring-1 ring-error-border",           accent: "bg-error" },
+  postponed: { label: "Postponed", badge: "bg-warning-subtle text-warning-subtle-foreground ring-1 ring-warning-border",  accent: "bg-warning" },
+  suspended: { label: "Suspended", badge: "bg-error-subtle text-error-subtle-foreground ring-1 ring-error-border",        accent: "bg-error" },
 };
 
 /* Lifecycle order for the status tabs. This is an ORDERING, not a list of tabs
@@ -93,7 +93,7 @@ function TrainingCard({ training, onClick }) {
 
   return (
     <Card
-      className="rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer bg-white overflow-hidden group flex flex-col"
+      className="rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer bg-surface overflow-hidden group flex flex-col"
       onClick={onClick}
     >
       <Box className="p-5 flex flex-col flex-1 gap-4">
@@ -107,14 +107,14 @@ function TrainingCard({ training, onClick }) {
             chip is then omitted rather than shown empty. */}
         <Box className="flex items-center justify-between gap-2">
           <Box className="flex min-w-0 items-center gap-1.5">
-            <Text as="span" className="shrink-0 text-[11px] font-mono font-bold text-violet-600 bg-violet-50 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg tracking-wide">
+            <Text as="span" className="shrink-0 text-[11px] font-mono font-bold text-primary bg-primary-subtle ring-1 ring-primary-border px-2.5 py-1 rounded-lg tracking-wide">
               {training.code}
             </Text>
             {training.event_code && (
               <Text
                 as="span"
                 title={`Schedule event code · ${training.event_code}`}
-                className="shrink-0 text-[11px] font-mono font-bold text-slate-500 bg-slate-50 ring-1 ring-slate-200 px-2.5 py-1 rounded-lg tracking-wide"
+                className="shrink-0 text-[11px] font-mono font-bold text-foreground-muted bg-surface-hover ring-1 ring-border px-2.5 py-1 rounded-lg tracking-wide"
               >
                 {training.event_code}
               </Text>
@@ -122,56 +122,56 @@ function TrainingCard({ training, onClick }) {
           </Box>
           <Box className="flex shrink-0 items-center gap-1.5">
             {training.due_for_update && (
-              <Badge className="text-[10px] font-semibold border-0 bg-amber-100 text-amber-800 ring-1 ring-amber-300">Due for Update</Badge>
+              <Badge className="text-[10px] font-semibold border-0 bg-warning-subtle text-warning-subtle-foreground ring-1 ring-warning-border">Due for Update</Badge>
             )}
             <Badge className={`text-[10px] font-semibold border-0 ${statusCfg.badge}`}>{statusCfg.label}</Badge>
           </Box>
         </Box>
 
         {/* Title */}
-        <Text as="h3" className="text-base font-bold text-slate-900 leading-snug line-clamp-2 min-h-[2.75rem] break-words hyphens-none group-hover:text-violet-600 transition-colors">
+        <Text as="h3" className="text-base font-bold text-foreground leading-snug line-clamp-2 min-h-[2.75rem] break-words hyphens-none group-hover:text-primary transition-colors">
           {training.title}
         </Text>
 
         {/* Metadata pills */}
         <Box className="flex flex-wrap gap-2">
-          <Box className="flex items-center gap-2 bg-slate-50 border border-slate-200/70 rounded-xl px-3 py-2">
-            <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs font-medium text-slate-600 leading-none">{formatDate(training.start_date)}</Text>
+          <Box className="flex items-center gap-2 bg-surface-hover border border-slate-200/70 rounded-xl px-3 py-2">
+            <Calendar className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs font-medium text-foreground-muted leading-none">{formatDate(training.start_date)}</Text>
           </Box>
-          <Box className="flex items-center gap-2 bg-slate-50 border border-slate-200/70 rounded-xl px-3 py-2">
-            <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs font-medium text-slate-600 leading-none">
+          <Box className="flex items-center gap-2 bg-surface-hover border border-slate-200/70 rounded-xl px-3 py-2">
+            <Clock className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs font-medium text-foreground-muted leading-none">
               {MODE_LABEL[training.delivery_mode] || training.delivery_mode}
               {training.duration_hours != null && ` · ${training.duration_hours}h`}
             </Text>
           </Box>
-          <Box className="flex items-center gap-2 bg-slate-50 border border-slate-200/70 rounded-xl px-3 py-2">
-            <Users className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs font-medium text-slate-600 leading-none">{training.enrolled_count}/{training.capacity} seats</Text>
+          <Box className="flex items-center gap-2 bg-surface-hover border border-slate-200/70 rounded-xl px-3 py-2">
+            <Users className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs font-medium text-foreground-muted leading-none">{training.enrolled_count}/{training.capacity} seats</Text>
           </Box>
           {training.hours_per_day != null && (
-            <Box className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2" title="Session length per day">
-              <Timer className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
-              <Text as="span" className="text-xs font-medium text-indigo-700 leading-none">{training.hours_per_day}hrs</Text>
+            <Box className="flex items-center gap-2 bg-info-subtle border border-info-border rounded-xl px-3 py-2" title="Session length per day">
+              <Timer className="h-3.5 w-3.5 text-info shrink-0" />
+              <Text as="span" className="text-xs font-medium text-info-subtle-foreground leading-none">{training.hours_per_day}hrs</Text>
             </Box>
           )}
           {(() => {
             const region = regionForTimezone(training.timezone);
             return region ? (
-              <Box className="flex items-center gap-2 bg-sky-50 border border-sky-200 rounded-xl px-3 py-2" title={`Region · ${training.timezone}`}>
-                <Globe className="h-3.5 w-3.5 text-sky-500 shrink-0" />
-                <Text as="span" className="text-xs font-medium text-sky-700 leading-none">{region.label}</Text>
+              <Box className="flex items-center gap-2 bg-info-subtle border border-info-border rounded-xl px-3 py-2" title={`Region · ${training.timezone}`}>
+                <Globe className="h-3.5 w-3.5 text-info shrink-0" />
+                <Text as="span" className="text-xs font-medium text-info-subtle-foreground leading-none">{region.label}</Text>
               </Box>
             ) : null;
           })()}
           {training.setup_pending_count > 0 && (
             <Box
-              className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2"
+              className="flex items-center gap-2 bg-warning-subtle border border-warning-border rounded-xl px-3 py-2"
               title="Enrolled learners who haven't set up their account yet"
             >
-              <UserX className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-              <Text as="span" className="text-xs font-medium text-amber-700 leading-none">{training.setup_pending_count} setup pending</Text>
+              <UserX className="h-3.5 w-3.5 text-warning shrink-0" />
+              <Text as="span" className="text-xs font-medium text-warning-subtle-foreground leading-none">{training.setup_pending_count} setup pending</Text>
             </Box>
           )}
         </Box>
@@ -181,31 +181,31 @@ function TrainingCard({ training, onClick }) {
 
           {/* Trainer block */}
           {hasTrainer ? (
-            <Box className="flex items-center gap-3 bg-emerald-50 ring-1 ring-emerald-200 rounded-xl px-3.5 py-3">
-              <Box className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
-                <Text as="span" className="text-[11px] font-bold text-white leading-none">{initialsOf(training.trainer_name)}</Text>
+            <Box className="flex items-center gap-3 bg-success-subtle ring-1 ring-success-border rounded-xl px-3.5 py-3">
+              <Box className="w-8 h-8 rounded-full bg-success flex items-center justify-center shrink-0 shadow-sm">
+                <Text as="span" className="text-[11px] font-bold text-success-foreground leading-none">{initialsOf(training.trainer_name)}</Text>
               </Box>
               <Box className="min-w-0 flex-1">
-                <Text as="p" className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest leading-none mb-0.5">Trainer</Text>
-                <TrainerLink id={training.trainer_id} className="block text-sm font-semibold text-emerald-900 truncate">{training.trainer_name}</TrainerLink>
+                <Text as="p" className="text-[10px] font-bold text-success uppercase tracking-widest leading-none mb-0.5">Trainer</Text>
+                <TrainerLink id={training.trainer_id} className="block text-sm font-semibold text-success-subtle-foreground truncate">{training.trainer_name}</TrainerLink>
               </Box>
-              <UserCheck className="h-4 w-4 text-emerald-500 shrink-0" />
+              <UserCheck className="h-4 w-4 text-success shrink-0" />
             </Box>
           ) : (
             <Box
-              className="flex items-center justify-between gap-3 bg-amber-50 ring-1 ring-amber-300 rounded-xl px-3.5 py-3 hover:bg-amber-100 transition-colors"
+              className="flex items-center justify-between gap-3 bg-warning-subtle ring-1 ring-warning-border rounded-xl px-3.5 py-3 hover:bg-warning-subtle transition-colors"
               onClick={(e) => { e.stopPropagation(); onClick(); }}
             >
               <Box className="flex items-center gap-3 min-w-0">
                 <Box className="w-8 h-8 rounded-full bg-amber-200 flex items-center justify-center shrink-0">
-                  <UserX className="h-3.5 w-3.5 text-amber-700" />
+                  <UserX className="h-3.5 w-3.5 text-warning-subtle-foreground" />
                 </Box>
                 <Box className="min-w-0">
-                  <Text as="p" className="text-[10px] font-bold text-amber-700 uppercase tracking-widest leading-none mb-0.5">No Trainer</Text>
-                  <Text as="p" className="text-[11px] text-amber-600">Click to assign</Text>
+                  <Text as="p" className="text-[10px] font-bold text-warning-subtle-foreground uppercase tracking-widest leading-none mb-0.5">No Trainer</Text>
+                  <Text as="p" className="text-[11px] text-warning">Click to assign</Text>
                 </Box>
               </Box>
-              <Box className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shrink-0 transition-colors shadow-sm">
+              <Box className="flex items-center gap-1 bg-error hover:bg-error text-error-foreground text-[11px] font-bold px-3 py-1.5 rounded-lg shrink-0 transition-colors shadow-sm">
                 <UserPlus className="h-3 w-3" />
                 Assign
               </Box>
@@ -214,35 +214,35 @@ function TrainingCard({ training, onClick }) {
 
           {/* Meeting link block */}
           {training.meeting_released ? (
-            <Box className="flex items-center gap-3 bg-violet-50 ring-1 ring-violet-200 rounded-xl px-3.5 py-3">
-              <Box className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center shrink-0 shadow-sm">
-                <Link2 className="h-3.5 w-3.5 text-white" />
+            <Box className="flex items-center gap-3 bg-primary-subtle ring-1 ring-primary-border rounded-xl px-3.5 py-3">
+              <Box className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-sm">
+                <Link2 className="h-3.5 w-3.5 text-primary-foreground" />
               </Box>
               <Box className="min-w-0 flex-1">
-                <Text as="p" className="text-[10px] font-bold text-violet-600 uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
-                <Text as="p" className="text-sm font-semibold text-violet-900">Released to participants</Text>
+                <Text as="p" className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
+                <Text as="p" className="text-sm font-semibold text-primary">Released to participants</Text>
               </Box>
               <Box className="w-2 h-2 rounded-full bg-violet-500 shrink-0 shadow-sm" />
             </Box>
           ) : training.meeting_url ? (
-            <Box className="flex items-center gap-3 bg-amber-50 ring-1 ring-amber-200 rounded-xl px-3.5 py-3">
+            <Box className="flex items-center gap-3 bg-warning-subtle ring-1 ring-warning-border rounded-xl px-3.5 py-3">
               <Box className="w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center shrink-0 shadow-sm">
-                <LinkIcon className="h-3.5 w-3.5 text-white" />
+                <LinkIcon className="h-3.5 w-3.5 text-warning-foreground" />
               </Box>
               <Box className="min-w-0 flex-1">
-                <Text as="p" className="text-[10px] font-bold text-amber-700 uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
-                <Text as="p" className="text-sm font-semibold text-amber-900">Set · Not yet released</Text>
+                <Text as="p" className="text-[10px] font-bold text-warning-subtle-foreground uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
+                <Text as="p" className="text-sm font-semibold text-warning-subtle-foreground">Set · Not yet released</Text>
               </Box>
               <Box className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
             </Box>
           ) : (
-            <Box className="flex items-center gap-3 bg-slate-50 ring-1 ring-slate-200 rounded-xl px-3.5 py-3">
-              <Box className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                <LinkIcon className="h-3.5 w-3.5 text-slate-500" />
+            <Box className="flex items-center gap-3 bg-surface-hover ring-1 ring-border rounded-xl px-3.5 py-3">
+              <Box className="w-8 h-8 rounded-full bg-surface-muted flex items-center justify-center shrink-0">
+                <LinkIcon className="h-3.5 w-3.5 text-foreground-muted" />
               </Box>
               <Box className="min-w-0 flex-1">
-                <Text as="p" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
-                <Text as="p" className="text-sm font-medium text-slate-500">Not configured</Text>
+                <Text as="p" className="text-[10px] font-bold text-foreground-subtle uppercase tracking-widest leading-none mb-0.5">Meeting Link</Text>
+                <Text as="p" className="text-sm font-medium text-foreground-muted">Not configured</Text>
               </Box>
               <Box className="w-2 h-2 rounded-full bg-slate-300 shrink-0" />
             </Box>
@@ -251,10 +251,10 @@ function TrainingCard({ training, onClick }) {
         </Box>
 
         {/* Footer */}
-        <Box className="pt-3 border-t border-slate-100">
+        <Box className="pt-3 border-t border-border">
           <Button
             size="sm"
-            className="w-full h-9 bg-white border border-violet-600 text-violet-600 hover:bg-violet-50 text-xs font-semibold rounded-xl gap-1.5"
+            className="w-full h-9 bg-surface border border-primary text-primary hover:bg-primary-subtle text-xs font-semibold rounded-xl gap-1.5"
           >
             Manage Training <ChevronRight className="h-3.5 w-3.5" />
           </Button>
@@ -296,8 +296,8 @@ export function TrainingsList() {
 
   if (error) {
     return (
-      <Card className="p-6 rounded-2xl border-0 bg-red-50 shadow-sm">
-        <Text as="p" className="text-red-600 text-sm">Failed to load trainings: {error}</Text>
+      <Card className="p-6 rounded-2xl border-0 bg-error-subtle shadow-sm">
+        <Text as="p" className="text-error text-sm">Failed to load trainings: {error}</Text>
       </Card>
     );
   }
@@ -378,7 +378,7 @@ export function TrainingsList() {
       {/* Bulk actions */}
       <Box className="flex justify-end">
         <Button variant="outline" onClick={() => setImportOpen(true)}
-          className="h-9 gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-100">
+          className="h-9 gap-1.5 border-border text-foreground hover:bg-surface-muted">
           <UploadCloud className="h-4 w-4" /> Import resources (CSV)
         </Button>
       </Box>
@@ -387,42 +387,42 @@ export function TrainingsList() {
       {/* Stat cards */}
       <Box className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="Total Trainings"   value={trainings.length}              icon={LayoutGrid}
-          bg="bg-violet-50"  border="border border-violet-100"  iconBg="bg-violet-100"  iconCls="text-violet-600"  valueCls="text-violet-900"  labelCls="text-violet-500" />
+          bg="bg-primary-subtle"  border="border border-primary-border"  iconBg="bg-primary-subtle"  iconCls="text-primary"  valueCls="text-primary"  labelCls="text-primary" />
         <StatCard label="Trainer Assigned"  value={trainings.length - unassigned} icon={UserCheck}
-          bg="bg-emerald-50" border="border border-emerald-100" iconBg="bg-emerald-100" iconCls="text-emerald-600" valueCls="text-emerald-900" labelCls="text-emerald-600" />
+          bg="bg-success-subtle" border="border border-success-border" iconBg="bg-success-subtle" iconCls="text-success" valueCls="text-success-subtle-foreground" labelCls="text-success" />
         <StatCard label="Awaiting Trainer"  value={unassigned}                    icon={UserX}
-          bg="bg-amber-50"   border="border border-amber-100"   iconBg="bg-amber-100"   iconCls="text-amber-600"   valueCls="text-amber-900"   labelCls="text-amber-600" />
+          bg="bg-warning-subtle"   border="border border-warning-border"   iconBg="bg-warning-subtle"   iconCls="text-warning"   valueCls="text-warning-subtle-foreground"   labelCls="text-warning" />
       </Box>
 
       {/* Toolbar: search + status filters */}
       <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-3.5 space-y-3.5">
         {/* Search */}
         <Box className="relative">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
           <Input
             placeholder="Search by training ID, event code or title..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             autoComplete="off"
-            className="pl-10 pr-9 h-10 text-sm bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-2 focus-visible:ring-violet-400/40 focus-visible:border-violet-300"
+            className="pl-10 pr-9 h-10 text-sm bg-surface-hover border-border rounded-xl focus-visible:ring-2 focus-visible:ring-violet-400/40 focus-visible:border-primary-border"
           />
           {search && (
             <button
               type="button"
               onClick={() => setSearch("")}
               aria-label="Clear search"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-subtle hover:text-foreground-muted transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </Box>
 
-        <Box className="h-px bg-slate-100" />
+        <Box className="h-px bg-surface-muted" />
 
         {/* Status filters + result count */}
         <Box className="flex items-center gap-3 flex-wrap">
-          <SlidersHorizontal className="h-4 w-4 text-slate-400 shrink-0" />
+          <SlidersHorizontal className="h-4 w-4 text-foreground-subtle shrink-0" />
           <Box className="flex items-center gap-1.5 flex-wrap">
             {STATUS_TABS.map((tab) => {
               const count = tab.key === "all" ? trainings.length : (statusCounts[tab.key] || 0);
@@ -434,15 +434,15 @@ export function TrainingsList() {
                   onClick={() => setStatusFilter(tab.key)}
                   className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
                     activeTab
-                      ? "bg-violet-600 border-violet-600 text-white shadow-sm"
-                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                      ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                      : "bg-surface border-border text-foreground-muted hover:border-border-strong hover:bg-surface-hover"
                   }`}
                 >
                   {tab.label}
                   <Text
                     as="span"
                     className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
-                      activeTab ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                      activeTab ? "bg-white/20 text-white" : "bg-surface-muted text-foreground-muted"
                     }`}
                   >
                     {count}
@@ -454,20 +454,20 @@ export function TrainingsList() {
             {/* Not a status — a cross-cutting "needs attention" filter — so it
                 sits after a divider rather than reading as another status. Same
                 dimensions as the tabs so the row stays one control strip. */}
-            <Box className="mx-1 h-5 w-px bg-slate-200 shrink-0" aria-hidden="true" />
+            <Box className="mx-1 h-5 w-px bg-surface-muted shrink-0" aria-hidden="true" />
             <button
               type="button"
               onClick={() => setDueOnly((v) => !v)}
               aria-pressed={dueOnly}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
                 dueOnly
-                  ? "bg-amber-500 border-amber-500 text-white shadow-sm"
-                  : "bg-white border-slate-200 text-slate-600 hover:border-amber-300 hover:text-amber-600"
+                  ? "bg-warning border-amber-500 text-warning-foreground shadow-sm"
+                  : "bg-surface border-border text-foreground-muted hover:border-warning-border hover:text-warning"
               }`}
             >
               <AlertCircle className="h-3.5 w-3.5" /> Due for update
               <Text as="span" className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
-                dueOnly ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                dueOnly ? "bg-white/20 text-white" : "bg-surface-muted text-foreground-muted"
               }`}>{dueCount}</Text>
             </button>
 
@@ -477,13 +477,13 @@ export function TrainingsList() {
               aria-pressed={upcomingOnly}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
                 upcomingOnly
-                  ? "bg-violet-600 border-violet-600 text-white shadow-sm"
-                  : "bg-white border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600"
+                  ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                  : "bg-surface border-border text-foreground-muted hover:border-primary-border hover:text-primary"
               }`}
             >
               <CalendarClock className="h-3.5 w-3.5" /> Upcoming
               <Text as="span" className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
-                upcomingOnly ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                upcomingOnly ? "bg-white/20 text-white" : "bg-surface-muted text-foreground-muted"
               }`}>{upcomingCount}</Text>
             </button>
 
@@ -491,28 +491,28 @@ export function TrainingsList() {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-xs font-semibold text-foreground-muted transition-colors hover:bg-surface-hover hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" /> Clear
               </button>
             )}
           </Box>
-          <Text as="p" className="ml-auto text-xs text-slate-400 shrink-0 tabular-nums">
+          <Text as="p" className="ml-auto text-xs text-foreground-subtle shrink-0 tabular-nums">
             Showing {filtered.length} of {trainings.length}
           </Text>
         </Box>
 
-        <Box className="h-px bg-slate-100" />
+        <Box className="h-px bg-surface-muted" />
 
         {/* Region / duration / start-date range filters */}
         <Box className="flex items-center gap-2.5 flex-wrap">
           {/* Region */}
-          <Box className="flex items-center gap-1.5 h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <Globe className="h-4 w-4 text-slate-400 shrink-0" />
+          <Box className="flex items-center gap-1.5 h-9 px-2.5 bg-surface-hover border border-border rounded-xl">
+            <Globe className="h-4 w-4 text-foreground-subtle shrink-0" />
             <select
               value={regionFilter}
               onChange={(e) => setRegionFilter(e.target.value)}
-              className="h-8 bg-transparent text-xs font-medium text-slate-600 focus:outline-none"
+              className="h-8 bg-transparent text-xs font-medium text-foreground-muted focus:outline-none"
             >
               <option value="">All regions</option>
               {REGION_OPTIONS.map((r) => (
@@ -522,12 +522,12 @@ export function TrainingsList() {
           </Box>
 
           {/* Per-day duration */}
-          <Box className="flex items-center gap-1.5 h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <Timer className="h-4 w-4 text-slate-400 shrink-0" />
+          <Box className="flex items-center gap-1.5 h-9 px-2.5 bg-surface-hover border border-border rounded-xl">
+            <Timer className="h-4 w-4 text-foreground-subtle shrink-0" />
             <select
               value={durationFilter}
               onChange={(e) => setDurationFilter(e.target.value)}
-              className="h-8 bg-transparent text-xs font-medium text-slate-600 focus:outline-none"
+              className="h-8 bg-transparent text-xs font-medium text-foreground-muted focus:outline-none"
             >
               <option value="">Any duration</option>
               {durationOptions.map((h) => (
@@ -537,23 +537,23 @@ export function TrainingsList() {
           </Box>
 
           {/* Start-date range */}
-          <Box className="flex items-center gap-1.5 h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <Calendar className="h-4 w-4 text-slate-400 shrink-0" />
+          <Box className="flex items-center gap-1.5 h-9 px-2.5 bg-surface-hover border border-border rounded-xl">
+            <Calendar className="h-4 w-4 text-foreground-subtle shrink-0" />
             <input
               type="date"
               value={dateFrom}
               max={dateTo || undefined}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="h-8 bg-transparent text-xs font-medium text-slate-600 focus:outline-none"
+              className="h-8 bg-transparent text-xs font-medium text-foreground-muted focus:outline-none"
               title="Start date from"
             />
-            <Text as="span" className="text-slate-400 text-xs">–</Text>
+            <Text as="span" className="text-foreground-subtle text-xs">–</Text>
             <input
               type="date"
               value={dateTo}
               min={dateFrom || undefined}
               onChange={(e) => setDateTo(e.target.value)}
-              className="h-8 bg-transparent text-xs font-medium text-slate-600 focus:outline-none"
+              className="h-8 bg-transparent text-xs font-medium text-foreground-muted focus:outline-none"
               title="Start date to"
             />
           </Box>
@@ -561,11 +561,11 @@ export function TrainingsList() {
       </Card>
 
       {filtered.length === 0 ? (
-        <Card className="p-14 text-center rounded-2xl border border-slate-200/80 shadow-sm bg-white">
-          <Box className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-            <BookOpen className="h-7 w-7 text-slate-400" />
+        <Card className="p-14 text-center rounded-2xl border border-slate-200/80 shadow-sm bg-surface">
+          <Box className="w-14 h-14 rounded-2xl bg-surface-muted flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="h-7 w-7 text-foreground-subtle" />
           </Box>
-          <Text as="p" className="text-sm font-semibold text-slate-600">
+          <Text as="p" className="text-sm font-semibold text-foreground-muted">
             {search || statusFilter !== "all" ? "No trainings match your filters" : "No trainings yet"}
           </Text>
         </Card>

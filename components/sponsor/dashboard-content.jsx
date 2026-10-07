@@ -75,7 +75,7 @@ export function SponsorDashboardContent() {
   if (error) {
     return (
       <Card className="p-6">
-        <Text as="p" className="text-red-600">Failed to load dashboard: {error}</Text>
+        <Text as="p" className="text-error">Failed to load dashboard: {error}</Text>
       </Card>
     );
   }
@@ -95,10 +95,10 @@ export function SponsorDashboardContent() {
     v === null || v === undefined ? "—" : `${currency_code} ${v}`.trim();
 
   const stats = [
-    { label: "My Learners", value: fmt(learners_count), icon: Users, color: "bg-amber-100 text-amber-600" },
-    { label: "Active", value: fmt(active_count), icon: UserCheck, color: "bg-emerald-100 text-emerald-600" },
-    { label: "Invoices", value: fmt(invoices_count), icon: Receipt, color: "bg-violet-100 text-violet-600" },
-    { label: "Outstanding", value: fmtMoney(outstanding_amount), icon: CircleDollarSign, color: "bg-red-100 text-red-600" },
+    { label: "My Learners", value: fmt(learners_count), icon: Users, color: "bg-warning-subtle text-warning" },
+    { label: "Active", value: fmt(active_count), icon: UserCheck, color: "bg-success-subtle text-success" },
+    { label: "Invoices", value: fmt(invoices_count), icon: Receipt, color: "bg-primary-subtle text-primary" },
+    { label: "Outstanding", value: fmtMoney(outstanding_amount), icon: CircleDollarSign, color: "bg-error-subtle text-error" },
   ];
 
   const learnerPreview = (learners ?? []).slice(0, PREVIEW_LIMIT);
@@ -151,7 +151,7 @@ export function SponsorDashboardContent() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
             <CardTitle className="text-sm font-semibold">My Learners</CardTitle>
-            <Link href="/sponsor/learners" className="text-xs text-amber-600 font-medium hover:underline">
+            <Link href="/sponsor/learners" className="text-xs text-warning font-medium hover:underline">
               View All →
             </Link>
           </CardHeader>
@@ -171,7 +171,7 @@ export function SponsorDashboardContent() {
                 {learnerPreview.map((l) => (
                   <Box key={l.id} className="flex items-center gap-3 py-2.5">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-amber-100 text-amber-700 text-xs">
+                      <AvatarFallback className="bg-warning-subtle text-warning-subtle-foreground text-xs">
                         {initialsOf(l.name)}
                       </AvatarFallback>
                     </Avatar>
@@ -184,8 +184,8 @@ export function SponsorDashboardContent() {
                     <Badge
                       variant="secondary"
                       className={l.status === "confirmed" || l.status === "active"
-                        ? "bg-emerald-100 text-emerald-700 text-[10px] shrink-0"
-                        : "bg-gray-200 text-gray-600 text-[10px] shrink-0"}
+                        ? "bg-success-subtle text-success-subtle-foreground text-[10px] shrink-0"
+                        : "bg-surface-muted text-foreground-muted text-[10px] shrink-0"}
                     >
                       {l.status || "—"}
                     </Badge>
@@ -200,7 +200,7 @@ export function SponsorDashboardContent() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between py-3 px-4">
             <CardTitle className="text-sm font-semibold">Recent Invoices</CardTitle>
-            <Link href="/sponsor/invoices" className="text-xs text-amber-600 font-medium hover:underline">
+            <Link href="/sponsor/invoices" className="text-xs text-warning font-medium hover:underline">
               View All →
             </Link>
           </CardHeader>
@@ -219,7 +219,7 @@ export function SponsorDashboardContent() {
               <Box className="divide-y">
                 {invoicePreview.map((inv) => (
                   <Box key={inv.id} className="flex items-center gap-3 py-2.5">
-                    <Box className="w-9 h-9 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center shrink-0">
+                    <Box className="w-9 h-9 rounded-lg bg-primary-subtle text-primary flex items-center justify-center shrink-0">
                       <Receipt className="h-4 w-4" />
                     </Box>
                     <Box className="min-w-0 flex-1">
@@ -233,8 +233,8 @@ export function SponsorDashboardContent() {
                     <Badge
                       variant="secondary"
                       className={inv.status === "paid"
-                        ? "bg-emerald-100 text-emerald-700 text-[10px] shrink-0"
-                        : "bg-red-100 text-red-700 text-[10px] shrink-0"}
+                        ? "bg-success-subtle text-success-subtle-foreground text-[10px] shrink-0"
+                        : "bg-error-subtle text-error-subtle-foreground text-[10px] shrink-0"}
                     >
                       {inv.status || "—"}
                     </Badge>

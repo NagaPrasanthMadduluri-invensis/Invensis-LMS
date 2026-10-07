@@ -39,17 +39,17 @@ import { formatInstantDateTime } from "@/lib/datetime";
 import { fetchOrders } from "@/services/api/admin/admin-api";
 
 const STATUS_STYLE = {
-  paid:     "bg-emerald-100 text-emerald-700",
-  pending:  "bg-amber-100 text-amber-700",
-  failed:   "bg-red-100 text-red-700",
-  refunded: "bg-slate-100 text-slate-600",
+  paid:     "bg-success-subtle text-success-subtle-foreground",
+  pending:  "bg-warning-subtle text-warning-subtle-foreground",
+  failed:   "bg-error-subtle text-error-subtle-foreground",
+  refunded: "bg-surface-muted text-foreground-muted",
 };
 
 const EVENT_STYLE = {
-  "order.paid":     "bg-emerald-50 text-emerald-600",
-  "order.pending":  "bg-amber-50 text-amber-600",
-  "order.failed":   "bg-red-50 text-red-600",
-  "order.refunded": "bg-slate-50 text-slate-500",
+  "order.paid":     "bg-success-subtle text-success",
+  "order.pending":  "bg-warning-subtle text-warning",
+  "order.failed":   "bg-error-subtle text-error",
+  "order.refunded": "bg-surface-hover text-foreground-muted",
 };
 
 function StatCard({ icon: Icon, label, value, color, borderColor }) {
@@ -60,8 +60,8 @@ function StatCard({ icon: Icon, label, value, color, borderColor }) {
           <Icon className="h-4 w-4" />
         </Box>
         <Box>
-          <Text as="h3" className="text-xl font-bold text-slate-800 leading-none">{value}</Text>
-          <Text as="span" className="text-[11px] text-slate-500 mt-0.5 block">{label}</Text>
+          <Text as="h3" className="text-xl font-bold text-foreground leading-none">{value}</Text>
+          <Text as="span" className="text-[11px] text-foreground-muted mt-0.5 block">{label}</Text>
         </Box>
       </Box>
     </Card>
@@ -154,14 +154,14 @@ export function OrdersTable() {
       )}
 
       {/* ── Table Card ── */}
-      <Card className="border border-slate-100 shadow-sm bg-white rounded-xl overflow-hidden">
-        <CardHeader className="py-3 px-4 flex-row items-center justify-between space-y-0 flex-wrap gap-2 border-b border-slate-100">
+      <Card className="border border-border shadow-sm bg-surface rounded-xl overflow-hidden">
+        <CardHeader className="py-3 px-4 flex-row items-center justify-between space-y-0 flex-wrap gap-2 border-b border-border">
           <Box className="flex items-center gap-2">
             <Box className="w-1 h-4 rounded-full bg-violet-500" />
-            <CardTitle className="text-sm font-semibold text-slate-800">
+            <CardTitle className="text-sm font-semibold text-foreground">
               Orders
               {data && (
-                <Badge variant="secondary" className="ml-2 text-[10px] bg-violet-100 text-violet-700 border-0">
+                <Badge variant="secondary" className="ml-2 text-[10px] bg-primary-subtle text-primary border-0">
                   {total} total
                 </Badge>
               )}
@@ -171,22 +171,22 @@ export function OrdersTable() {
           {/* Filters */}
           <Box className="flex items-center gap-2 flex-wrap">
             <Box className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
               <Input
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="Search name, email, course…"
-                className="h-10 pl-9 pr-9 text-sm bg-white border-violet-400 focus-visible:ring-violet-400"
+                className="h-10 pl-9 pr-9 text-sm bg-surface border-violet-400 focus-visible:ring-focus"
               />
               {search && (
-                <button onClick={() => handleSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <button onClick={() => handleSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-subtle hover:text-foreground-muted">
                   <X className="h-4 w-4" />
                 </button>
               )}
             </Box>
 
             <Select value={status} onValueChange={handleStatus}>
-              <SelectTrigger className="h-8 text-xs w-32 border-slate-200">
+              <SelectTrigger className="h-8 text-xs w-32 border-border">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -201,7 +201,7 @@ export function OrdersTable() {
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8 border-slate-200 hover:border-violet-300 hover:text-violet-600"
+              className="h-8 w-8 border-border hover:border-primary-border hover:text-primary"
               onClick={() => load()}
               disabled={loading}
             >
@@ -213,8 +213,8 @@ export function OrdersTable() {
         <CardContent className="px-0 pb-0">
           {error ? (
             <Box className="px-4 py-10 text-center">
-              <Text as="p" className="text-red-500 text-sm">{error}</Text>
-              <Button variant="outline" size="sm" className="mt-3 border-violet-200 text-violet-600 hover:bg-violet-50" onClick={() => load()}>
+              <Text as="p" className="text-error text-sm">{error}</Text>
+              <Button variant="outline" size="sm" className="mt-3 border-primary-border text-primary hover:bg-primary-subtle" onClick={() => load()}>
                 Retry
               </Button>
             </Box>
@@ -222,63 +222,63 @@ export function OrdersTable() {
             <TableSkeleton />
           ) : orders.length === 0 ? (
             <Box className="px-4 py-12 text-center">
-              <Box className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <CreditCard className="h-6 w-6 text-slate-400" />
+              <Box className="w-12 h-12 bg-surface-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                <CreditCard className="h-6 w-6 text-foreground-subtle" />
               </Box>
-              <Text as="p" className="text-sm font-medium text-slate-600">No orders found</Text>
-              <Text as="p" className="text-xs text-slate-400 mt-1">Try adjusting your filters</Text>
+              <Text as="p" className="text-sm font-medium text-foreground-muted">No orders found</Text>
+              <Text as="p" className="text-xs text-foreground-subtle mt-1">Try adjusting your filters</Text>
             </Box>
           ) : (
             <Box className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50 hover:bg-slate-50 border-b border-slate-100">
-                    <TableHead className="text-xs font-semibold text-slate-600 pl-4">Order ID</TableHead>
-                    <TableHead className="text-xs font-semibold text-slate-600">Customer</TableHead>
-                    <TableHead className="text-xs font-semibold text-slate-600">Course</TableHead>
-                    <TableHead className="text-xs font-semibold text-slate-600 text-center">Participants</TableHead>
-                    <TableHead className="text-xs font-semibold text-slate-600">Ordered At</TableHead>
-                    <TableHead className="text-xs font-semibold text-slate-600">Status</TableHead>
-                    <TableHead className="text-xs font-semibold text-slate-600 pr-4">Last Event</TableHead>
+                  <TableRow className="bg-surface-hover hover:bg-surface-hover border-b border-border">
+                    <TableHead className="text-xs font-semibold text-foreground-muted pl-4">Order ID</TableHead>
+                    <TableHead className="text-xs font-semibold text-foreground-muted">Customer</TableHead>
+                    <TableHead className="text-xs font-semibold text-foreground-muted">Course</TableHead>
+                    <TableHead className="text-xs font-semibold text-foreground-muted text-center">Participants</TableHead>
+                    <TableHead className="text-xs font-semibold text-foreground-muted">Ordered At</TableHead>
+                    <TableHead className="text-xs font-semibold text-foreground-muted">Status</TableHead>
+                    <TableHead className="text-xs font-semibold text-foreground-muted pr-4">Last Event</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {orders.map((order) => (
                     <TableRow
                       key={order.order_id}
-                      className="text-xs border-b border-slate-50 hover:bg-slate-50 transition-colors"
+                      className="text-xs border-b border-border hover:bg-surface-hover transition-colors"
                     >
-                      <TableCell className="pl-4 font-mono font-semibold text-violet-600 whitespace-nowrap">
+                      <TableCell className="pl-4 font-mono font-semibold text-primary whitespace-nowrap">
                         {order.order_id}
                       </TableCell>
                       <TableCell>
                         <Box>
-                          <Text as="p" className="text-xs font-medium text-slate-800 capitalize">{order.name}</Text>
-                          <Text as="span" className="text-[11px] text-slate-400">{order.email}</Text>
+                          <Text as="p" className="text-xs font-medium text-foreground capitalize">{order.name}</Text>
+                          <Text as="span" className="text-[11px] text-foreground-subtle">{order.email}</Text>
                           {order.company && (
-                            <Text as="span" className="text-[11px] text-slate-400 block">{order.company}</Text>
+                            <Text as="span" className="text-[11px] text-foreground-subtle block">{order.company}</Text>
                           )}
                         </Box>
                       </TableCell>
                       <TableCell className="max-w-[180px]">
-                        <Text as="p" className="text-xs text-slate-700 truncate">{order.course_name}</Text>
+                        <Text as="p" className="text-xs text-foreground truncate">{order.course_name}</Text>
                       </TableCell>
                       <TableCell className="text-center">
                         <Box className="flex items-center justify-center gap-1">
-                          <Users className="h-3 w-3 text-slate-400" />
-                          <Text as="span" className="text-slate-700">{order.participants}</Text>
+                          <Users className="h-3 w-3 text-foreground-subtle" />
+                          <Text as="span" className="text-foreground">{order.participants}</Text>
                         </Box>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-slate-400">
+                      <TableCell className="whitespace-nowrap text-foreground-subtle">
                         {formatDate(order.ordered_at)}
                       </TableCell>
                       <TableCell>
-                        <Badge className={`text-[10px] border-0 capitalize font-medium ${STATUS_STYLE[order.payment_status] ?? "bg-slate-100 text-slate-600"}`}>
+                        <Badge className={`text-[10px] border-0 capitalize font-medium ${STATUS_STYLE[order.payment_status] ?? "bg-surface-muted text-foreground-muted"}`}>
                           {order.payment_status}
                         </Badge>
                       </TableCell>
                       <TableCell className="pr-4">
-                        <Badge className={`text-[10px] border-0 ${EVENT_STYLE[order.last_event] ?? "bg-slate-50 text-slate-500"}`}>
+                        <Badge className={`text-[10px] border-0 ${EVENT_STYLE[order.last_event] ?? "bg-surface-hover text-foreground-muted"}`}>
                           {order.last_event}
                         </Badge>
                       </TableCell>
@@ -291,15 +291,15 @@ export function OrdersTable() {
 
           {/* ── Pagination ── */}
           {data && totalPages > 1 && (
-            <Box className="flex items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50/50">
-              <Text as="span" className="text-xs text-slate-400">
-                Page <Text as="span" className="font-semibold text-slate-700">{page}</Text> of {totalPages} · {total} orders
+            <Box className="flex items-center justify-between px-4 py-3 border-t border-border bg-slate-50/50">
+              <Text as="span" className="text-xs text-foreground-subtle">
+                Page <Text as="span" className="font-semibold text-foreground">{page}</Text> of {totalPages} · {total} orders
               </Text>
               <Box className="flex items-center gap-1">
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-7 w-7 border-slate-200 hover:border-violet-300 hover:text-violet-600"
+                  className="h-7 w-7 border-border hover:border-primary-border hover:text-primary"
                   disabled={page <= 1 || loading}
                   onClick={() => goPage(page - 1)}
                 >
@@ -308,7 +308,7 @@ export function OrdersTable() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-7 w-7 border-slate-200 hover:border-violet-300 hover:text-violet-600"
+                  className="h-7 w-7 border-border hover:border-primary-border hover:text-primary"
                   disabled={page >= totalPages || loading}
                   onClick={() => goPage(page + 1)}
                 >

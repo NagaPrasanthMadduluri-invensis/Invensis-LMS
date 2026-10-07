@@ -163,7 +163,7 @@ export function CourseModulesContent({ courseId }) {
   if (error && !modules) {
     return (
       <Card className="p-6">
-        <Text as="p" className="text-red-600">Failed to load modules: {error}</Text>
+        <Text as="p" className="text-error">Failed to load modules: {error}</Text>
       </Card>
     );
   }
@@ -183,7 +183,7 @@ export function CourseModulesContent({ courseId }) {
         </Button>
       </Box>
 
-      {error && <Text as="p" className="text-sm text-red-600">{error}</Text>}
+      {error && <Text as="p" className="text-sm text-error">{error}</Text>}
 
       {/* Modules */}
       {modules.length === 0 ? (
@@ -211,7 +211,7 @@ export function CourseModulesContent({ courseId }) {
                         <Text as="p" className="text-sm font-semibold truncate">{mod.title}</Text>
                         <Badge
                           variant="secondary"
-                          className={`text-[10px] shrink-0 ${mod.is_active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}`}
+                          className={`text-[10px] shrink-0 ${mod.is_active ? "bg-success-subtle text-success-subtle-foreground" : "bg-surface-muted text-foreground-muted"}`}
                         >
                           {mod.is_active ? "Active" : "Inactive"}
                         </Badge>
@@ -237,7 +237,7 @@ export function CourseModulesContent({ courseId }) {
 
                   <Box className="flex items-center gap-0.5 shrink-0">
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleToggleActive(mod, e)}>
-                      {mod.is_active ? <Eye className="h-4 w-4 text-emerald-600" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                      {mod.is_active ? <Eye className="h-4 w-4 text-success" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleEdit(mod, e)}>
                       <Pencil className="h-4 w-4" />
@@ -245,7 +245,7 @@ export function CourseModulesContent({ courseId }) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                      className="h-8 w-8 text-error hover:text-error hover:bg-error-subtle"
                       onClick={(e) => { e.stopPropagation(); setDeleteTarget(mod); }}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -281,7 +281,7 @@ export function CourseModulesContent({ courseId }) {
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               />
-              {formErrors.title && <Text as="p" className="text-xs text-red-600">{formErrors.title[0]}</Text>}
+              {formErrors.title && <Text as="p" className="text-xs text-error">{formErrors.title[0]}</Text>}
             </Box>
 
             {/* Description */}
@@ -344,7 +344,7 @@ export function CourseModulesContent({ courseId }) {
               <Text as="span" className="text-xs text-muted-foreground">({form.is_active ? "Active" : "Inactive"})</Text>
             </Box>
 
-            {formErrors._general && <Text as="p" className="text-sm text-red-600">{formErrors._general}</Text>}
+            {formErrors._general && <Text as="p" className="text-sm text-error">{formErrors._general}</Text>}
           </Box>
           <DialogFooter className="px-6 pt-4 pb-6">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
@@ -370,7 +370,7 @@ export function CourseModulesContent({ courseId }) {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-error hover:bg-error text-error-foreground"
             >
               {deleting ? "Deleting..." : "Delete Module"}
             </AlertDialogAction>

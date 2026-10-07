@@ -46,17 +46,17 @@ export function VerifyByCode({ code }) {
       </Box>
 
       {state.loading && (
-        <Box className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
+        <Box className="rounded-2xl border border-border bg-white px-6 py-14 text-center shadow-sm">
           <Loader2 className="mx-auto h-7 w-7 animate-spin text-[#1553a3]" />
-          <Text as="p" className="mt-3 text-sm text-slate-600">
-            Verifying <Text as="span" className="font-mono font-semibold text-slate-800">{code}</Text>…
+          <Text as="p" className="mt-3 text-sm text-foreground-muted">
+            Verifying <Text as="span" className="font-mono font-semibold text-foreground">{code}</Text>…
           </Text>
         </Box>
       )}
 
       {!state.loading && state.error && (
-        <Box className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-8 text-center">
-          <Text as="p" className="text-sm text-amber-800">{state.error}</Text>
+        <Box className="rounded-2xl border border-warning-border bg-warning-subtle px-6 py-8 text-center">
+          <Text as="p" className="text-sm text-warning-subtle-foreground">{state.error}</Text>
         </Box>
       )}
 

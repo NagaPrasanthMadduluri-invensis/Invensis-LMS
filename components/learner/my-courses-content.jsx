@@ -43,13 +43,13 @@ const MODE_CONFIG = {
 };
 
 const STATUS_CONFIG = {
-  pending: { label: "Pending", color: "bg-amber-100 text-amber-700" },
-  active: { label: "Active", color: "bg-emerald-100 text-emerald-700" },
-  ongoing: { label: "Ongoing", color: "bg-blue-100 text-blue-700" },
-  completed: { label: "Completed", color: "bg-gray-100 text-gray-700" },
-  cancelled: { label: "Cancelled", color: "bg-red-100 text-red-700" },
-  postponed: { label: "Postponed", color: "bg-orange-100 text-orange-700" },
-  suspended: { label: "Suspended", color: "bg-rose-100 text-rose-700" },
+  pending: { label: "Pending", color: "bg-warning-subtle text-warning-subtle-foreground" },
+  active: { label: "Active", color: "bg-success-subtle text-success-subtle-foreground" },
+  ongoing: { label: "Ongoing", color: "bg-info-subtle text-info-subtle-foreground" },
+  completed: { label: "Completed", color: "bg-surface-muted text-foreground" },
+  cancelled: { label: "Cancelled", color: "bg-error-subtle text-error-subtle-foreground" },
+  postponed: { label: "Postponed", color: "bg-warning-subtle text-warning-subtle-foreground" },
+  suspended: { label: "Suspended", color: "bg-error-subtle text-error-subtle-foreground" },
 };
 
 const BATCH_LABEL = {
@@ -69,14 +69,14 @@ const formatTime = (timeStr) => fmtTime(timeStr);
 function Fact({ icon: Icon, label, children }) {
   return (
     <Box className="flex items-start gap-3">
-      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50">
-        <Icon className="h-4 w-4 text-violet-500" />
+      <Box className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-subtle">
+        <Icon className="h-4 w-4 text-primary" />
       </Box>
       <Box className="min-w-0">
-        <Text as="p" className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+        <Text as="p" className="text-[10px] uppercase tracking-wider text-foreground-subtle font-semibold">
           {label}
         </Text>
-        <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight mt-0.5">
+        <Text as="p" className="text-sm font-semibold text-foreground leading-tight mt-0.5">
           {children}
         </Text>
       </Box>
@@ -115,20 +115,20 @@ function ScheduleCard({ training, enrolmentId }) {
   return (
     <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
       {/* Header band */}
-      <Box className="bg-gradient-to-r from-violet-50 via-purple-50 to-violet-50 border-b border-violet-100 px-6 py-5">
+      <Box className="bg-[#d7e3fc] border-b border-primary-border px-6 py-5">
         <Box className="flex flex-wrap items-start justify-between gap-3">
           <Box className="min-w-0">
             <Box className="flex flex-wrap items-center gap-1.5">
-              <Text as="span" className="text-[11px] font-mono font-bold text-violet-500 bg-violet-100 ring-1 ring-violet-200 px-2.5 py-1 rounded-lg tracking-wide">
+              <Text as="span" className="text-[11px] font-mono font-bold text-primary bg-primary-subtle ring-1 ring-primary-border px-2.5 py-1 rounded-lg tracking-wide">
                 {training.training_id}
               </Text>
               {enrolmentId && (
-                <Text as="span" className="text-[11px] font-mono font-bold text-slate-500 bg-white ring-1 ring-slate-200 px-2.5 py-1 rounded-lg tracking-wide">
+                <Text as="span" className="text-[11px] font-mono font-bold text-foreground-muted bg-surface ring-1 ring-border px-2.5 py-1 rounded-lg tracking-wide">
                   Enrolment ID: {enrolmentId}
                 </Text>
               )}
             </Box>
-            <Text as="h2" className="text-xl font-bold text-slate-900 leading-tight mt-2.5">
+            <Text as="h2" className="text-xl font-bold text-foreground leading-tight mt-2.5">
               {training.title}
             </Text>
           </Box>
@@ -187,20 +187,20 @@ function ScheduleCard({ training, enrolmentId }) {
       {/* Live meeting link — shown under the sessions, not in the heading */}
       {training.meeting?.url && (
         <Box className="border-t px-6 py-4">
-          <Box className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white/70 ring-1 ring-violet-200 px-4 py-3">
+          <Box className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white/70 ring-1 ring-primary-border px-4 py-3">
             <Box className="flex items-center gap-2.5 min-w-0">
-              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-                <Video className="h-4 w-4 text-emerald-600" />
+              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success-subtle">
+                <Video className="h-4 w-4 text-success" />
               </Box>
               <Box className="min-w-0">
-                <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight">Meeting link is live</Text>
-                <Text as="span" className="text-[11px] text-slate-500">{PLATFORM_LABEL[training.meeting.platform] || "Meeting"}</Text>
+                <Text as="p" className="text-sm font-semibold text-foreground leading-tight">Meeting link is live</Text>
+                <Text as="span" className="text-[11px] text-foreground-muted">{PLATFORM_LABEL[training.meeting.platform] || "Meeting"}</Text>
               </Box>
             </Box>
             <Button
               render={<a href={training.meeting.url} target="_blank" rel="noopener noreferrer" />}
               size="sm"
-              className="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white border-0 rounded-lg text-sm font-semibold shrink-0"
+              className="h-9 px-4 bg-success hover:bg-success text-success-foreground border-0 rounded-lg text-sm font-semibold shrink-0"
             >
               Join Meeting
             </Button>
@@ -211,9 +211,9 @@ function ScheduleCard({ training, enrolmentId }) {
       {/* Meeting-link status — shown under the sessions, not at the top */}
       {!training.meeting?.url && training.delivery_mode !== "in_person" && (
         <Box className="border-t px-6 py-4">
-          <Box className="flex items-center gap-2.5 rounded-xl border border-dashed border-violet-200 bg-white/50 px-4 py-3">
-            <AlertCircle className="h-4 w-4 shrink-0 text-violet-300" />
-            <Text as="p" className="text-xs text-slate-500">
+          <Box className="flex items-center gap-2.5 rounded-xl border border-dashed border-primary-border bg-white/50 px-4 py-3">
+            <AlertCircle className="h-4 w-4 shrink-0 text-primary" />
+            <Text as="p" className="text-xs text-foreground-muted">
               Meeting link hasn&apos;t been released yet — check back closer to the training date.
             </Text>
           </Box>
@@ -226,12 +226,12 @@ function ScheduleCard({ training, enrolmentId }) {
           below rather than sitting alongside it. */}
       {addons.length > 0 && (
         <Box className="border-t px-6 py-4">
-          <Box className="flex items-start gap-3 rounded-xl bg-emerald-50 ring-1 ring-emerald-200 px-4 py-3">
-            <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-              <BadgeCheck className="h-4 w-4 text-emerald-600" />
+          <Box className="flex items-start gap-3 rounded-xl bg-success-subtle ring-1 ring-success-border px-4 py-3">
+            <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success-subtle">
+              <BadgeCheck className="h-4 w-4 text-success" />
             </Box>
             <Box className="min-w-0">
-              <Text as="p" className="text-sm font-semibold text-emerald-800 leading-tight">
+              <Text as="p" className="text-sm font-semibold text-success-subtle-foreground leading-tight">
                 {addons.length === 1 ? "Add-on included" : "Add-ons included"} with your purchase
               </Text>
               <Box className="mt-1.5 flex flex-wrap gap-1.5">
@@ -239,7 +239,7 @@ function ScheduleCard({ training, enrolmentId }) {
                   <Text
                     key={`${a.name}-${i}`}
                     as="span"
-                    className="inline-flex items-center gap-1 rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                    className="inline-flex items-center gap-1 rounded-md bg-success-subtle px-2 py-0.5 text-xs font-medium text-success-subtle-foreground"
                   >
                     <BadgeCheck className="h-3 w-3 shrink-0" />
                     {a.name}
@@ -256,15 +256,15 @@ function ScheduleCard({ training, enrolmentId }) {
           true → included (good news); false → offer a voucher request; null → nothing. */}
       {training.certification_included === true && (
         <Box className="border-t px-6 py-4">
-          <Box className="flex items-start gap-3 rounded-xl bg-emerald-50 ring-1 ring-emerald-200 px-4 py-3">
-            <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-              <BadgeCheck className="h-4 w-4 text-emerald-600" />
+          <Box className="flex items-start gap-3 rounded-xl bg-success-subtle ring-1 ring-success-border px-4 py-3">
+            <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success-subtle">
+              <BadgeCheck className="h-4 w-4 text-success" />
             </Box>
             <Box className="min-w-0">
-              <Text as="p" className="text-sm font-semibold text-emerald-800 leading-tight">
+              <Text as="p" className="text-sm font-semibold text-success-subtle-foreground leading-tight">
                 🎉 Exam certification is included!
               </Text>
-              <Text as="p" className="text-xs text-emerald-700 mt-0.5">
+              <Text as="p" className="text-xs text-success-subtle-foreground mt-0.5">
                 The exam certification cost is already covered in your training fee — nothing extra to pay.
               </Text>
             </Box>
@@ -274,16 +274,16 @@ function ScheduleCard({ training, enrolmentId }) {
 
       {training.certification_included === false && addons.length === 0 && (
         <Box className="border-t px-6 py-4">
-          <Box className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-50 ring-1 ring-amber-200 px-4 py-3">
+          <Box className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-warning-subtle ring-1 ring-warning-border px-4 py-3">
             <Box className="flex items-start gap-3 min-w-0">
-              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100">
-                <Ticket className="h-4 w-4 text-amber-600" />
+              <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-warning-subtle">
+                <Ticket className="h-4 w-4 text-warning" />
               </Box>
               <Box className="min-w-0">
-                <Text as="p" className="text-sm font-semibold text-amber-900 leading-tight">
+                <Text as="p" className="text-sm font-semibold text-warning-subtle-foreground leading-tight">
                   Exam certification isn&apos;t included
                 </Text>
-                <Text as="p" className="text-xs text-amber-700 mt-0.5">
+                <Text as="p" className="text-xs text-warning-subtle-foreground mt-0.5">
                   You can request an exam voucher — an additional cost applies depending on the course.
                 </Text>
               </Box>
@@ -291,7 +291,7 @@ function ScheduleCard({ training, enrolmentId }) {
             <Button
               render={<a href="/tickets/new" />}
               size="sm"
-              className="h-9 px-4 bg-amber-600 hover:bg-amber-700 text-white border-0 rounded-lg text-sm font-semibold shrink-0"
+              className="h-9 px-4 bg-warning hover:bg-warning text-warning-foreground border-0 rounded-lg text-sm font-semibold shrink-0"
             >
               Request Exam Voucher
             </Button>
@@ -325,12 +325,12 @@ function SessionTopics({ sessions, timezone }) {
 
   return (
     <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
-      <Box className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
-        <Box className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-          <BookText className="h-4 w-4 text-violet-500" />
+      <Box className="px-5 py-4 border-b border-border flex items-center gap-2.5">
+        <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+          <BookText className="h-4 w-4 text-primary" />
         </Box>
-        <Text as="h3" className="text-sm font-bold text-slate-800">Day-wise Topics Covered</Text>
-        <Badge className="border-0 bg-violet-50 text-violet-600 text-[11px] font-semibold">
+        <Text as="h3" className="text-sm font-bold text-foreground">Day-wise Topics Covered</Text>
+        <Badge className="border-0 bg-primary-subtle text-primary text-[11px] font-semibold">
           {list.length} day{list.length !== 1 ? "s" : ""}
         </Badge>
       </Box>
@@ -342,20 +342,20 @@ function SessionTopics({ sessions, timezone }) {
             return (
               <Box key={s.day_number} className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
                 <Box className="flex items-center gap-2.5">
-                  <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50">
-                    <Calendar className="h-4 w-4 text-violet-600" />
+                  <Box className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-subtle">
+                    <Calendar className="h-4 w-4 text-primary" />
                   </Box>
                   <Box className="min-w-0">
-                    <Text as="p" className="text-sm font-semibold leading-tight text-slate-800">Day {s.day_number}</Text>
-                    {when && <Text as="span" className="text-[11px] text-slate-400">{when}</Text>}
+                    <Text as="p" className="text-sm font-semibold leading-tight text-foreground">Day {s.day_number}</Text>
+                    {when && <Text as="span" className="text-[11px] text-foreground-subtle">{when}</Text>}
                   </Box>
                 </Box>
                 {hasTopics ? (
-                  <Text as="p" className="mt-3 text-sm whitespace-pre-wrap text-slate-600">{s.planned_topics}</Text>
+                  <Text as="p" className="mt-3 text-sm whitespace-pre-wrap text-foreground-muted">{s.planned_topics}</Text>
                 ) : (
-                  <Box className="mt-3 flex items-center gap-1.5 rounded-lg border border-dashed border-slate-200 px-2.5 py-2">
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0 text-slate-300" />
-                    <Text as="p" className="text-xs text-slate-400">Topics not published yet</Text>
+                  <Box className="mt-3 flex items-center gap-1.5 rounded-lg border border-dashed border-border px-2.5 py-2">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0 text-foreground-subtle" />
+                    <Text as="p" className="text-xs text-foreground-subtle">Topics not published yet</Text>
                   </Box>
                 )}
               </Box>
@@ -383,8 +383,8 @@ function NotEnrolledState({ user, message }) {
 
   return (
     <Card className="flex flex-col items-center justify-center px-2 py-14 text-center">
-      <Box className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
-        <ShieldAlert className="h-7 w-7 text-amber-600" />
+      <Box className="flex h-14 w-14 items-center justify-center rounded-full bg-warning-subtle">
+        <ShieldAlert className="h-7 w-7 text-warning" />
       </Box>
       <Text as="h2" className="mt-4 text-lg font-semibold">
         You&apos;re not enrolled in a training yet
@@ -404,7 +404,7 @@ function NotEnrolledState({ user, message }) {
       )}
 
       <Box className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
-        <Button asChild className="bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700">
+        <Button asChild className="bg-gradient-to-r from-[#0466c8] to-[#023e7d] text-white hover:from-[#0582ca] hover:to-[#001233]">
           <a href={`mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`} className="flex items-center justify-center gap-1.5">
             <Mail className="mr-1.5 h-4 w-4" />
             Contact Admin
@@ -533,7 +533,7 @@ export function MyCoursesContent({ trainingRef: requestedRef = null }) {
   if (error) {
     return (
       <Card className="p-6">
-        <Text as="p" className="text-red-600">
+        <Text as="p" className="text-error">
           Failed to load training schedule: {error.message || String(error)}
         </Text>
       </Card>

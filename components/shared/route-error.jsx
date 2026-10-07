@@ -23,12 +23,12 @@ import Box from "@/components/ui/box";
 
 export function RouteError({ error, reset, what = "this page" }) {
   return (
-    <Card className="mx-auto max-w-lg rounded-2xl border border-red-200/70 bg-white p-8 text-center shadow-sm">
-      <Box className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50">
-        <AlertTriangle className="h-7 w-7 text-red-500" />
+    <Card className="mx-auto max-w-lg rounded-2xl border border-red-200/70 bg-surface p-8 text-center shadow-sm">
+      <Box className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-error-subtle">
+        <AlertTriangle className="h-7 w-7 text-error" />
       </Box>
-      <Text as="h2" className="text-base font-bold text-slate-800">Something went wrong loading {what}</Text>
-      <Text as="p" className="mx-auto mt-2 max-w-sm text-sm text-slate-500">
+      <Text as="h2" className="text-base font-bold text-foreground">Something went wrong loading {what}</Text>
+      <Text as="p" className="mx-auto mt-2 max-w-sm text-sm text-foreground-muted">
         The page couldn&apos;t be displayed. Trying again often clears it — if it
         doesn&apos;t, send the reference below to support and we can trace exactly
         what failed.
@@ -37,13 +37,13 @@ export function RouteError({ error, reset, what = "this page" }) {
       {/* A production build strips the message, so the digest is usually the
           only identifying detail available on the client. */}
       {(error?.digest || error?.message) && (
-        <Text as="p" className="mt-4 rounded-lg bg-slate-50 px-3 py-2 font-mono text-[11px] break-all text-slate-500">
+        <Text as="p" className="mt-4 rounded-lg bg-surface-hover px-3 py-2 font-mono text-[11px] break-all text-foreground-muted">
           {error.digest ? `Reference: ${error.digest}` : error.message}
         </Text>
       )}
 
       <Box className="mt-5 flex items-center justify-center gap-2">
-        <Button onClick={() => reset?.()} className="h-9 gap-1.5 rounded-lg bg-violet-600 px-4 text-sm font-semibold text-white hover:bg-violet-700">
+        <Button onClick={() => reset?.()} className="h-9 gap-1.5 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary-hover">
           <RotateCw className="h-3.5 w-3.5" /> Try again
         </Button>
         <Button

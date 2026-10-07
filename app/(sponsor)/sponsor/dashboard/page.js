@@ -8,7 +8,7 @@ export default function SponsorDashboardPage() {
       <Box>
         <Text as="h1" className="text-2xl">Sponsor Dashboard</Text>
         <Text as="p" className="text-muted-foreground text-xs mt-0.5">
-          Home &gt; <Text as="span" className="text-amber-600">Dashboard</Text>
+          Home &gt; <Text as="span" className="text-warning">Dashboard</Text>
         </Text>
       </Box>
       <SponsorDashboardContent />

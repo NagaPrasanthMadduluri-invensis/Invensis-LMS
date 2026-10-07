@@ -59,46 +59,46 @@ function CohortCard({ c }) {
   const seatsLeft = c.capacity != null && c.enrolled_count != null ? c.capacity - c.enrolled_count : null;
 
   return (
-    <Box className="rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-violet-200 hover:shadow-sm">
+    <Box className="rounded-xl border border-border bg-surface p-4 transition-all hover:border-primary-border hover:shadow-sm">
       <Box className="flex items-start justify-between gap-3">
         <Box className="flex items-center gap-2 min-w-0">
-          <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-50">
-            <CalendarClock className="h-4 w-4 text-violet-600" />
+          <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-subtle">
+            <CalendarClock className="h-4 w-4 text-primary" />
           </Box>
           <Box className="min-w-0">
-            <Text as="p" className="text-sm font-semibold text-slate-800 leading-tight">
+            <Text as="p" className="text-sm font-semibold text-foreground leading-tight">
               {fmtDateRange(c.start_date, c.end_date)}
             </Text>
             {c.event_code && (
-              <Text as="span" className="text-[11px] text-slate-400 font-mono">{c.event_code}</Text>
+              <Text as="span" className="text-[11px] text-foreground-subtle font-mono">{c.event_code}</Text>
             )}
           </Box>
         </Box>
         {price && (
-          <Text as="span" className="text-sm font-bold text-slate-900 shrink-0">{price}</Text>
+          <Text as="span" className="text-sm font-bold text-foreground shrink-0">{price}</Text>
         )}
       </Box>
 
       <Box className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
         <Box className="flex items-center gap-1.5">
-          <Video className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-          <Text as="span" className="text-xs text-slate-600">{mode}</Text>
+          <Video className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+          <Text as="span" className="text-xs text-foreground-muted">{mode}</Text>
         </Box>
         {time && (
           <Box className="flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <Text as="span" className="text-xs text-slate-600">
+            <Clock className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+            <Text as="span" className="text-xs text-foreground-muted">
               {time}{c.timezone_code ? ` ${c.timezone_code}` : ""}
             </Text>
           </Box>
         )}
         {c.batch_type && (
-          <Badge className="border-0 bg-slate-100 text-slate-600 text-[10px] font-medium capitalize">{c.batch_type}</Badge>
+          <Badge className="border-0 bg-surface-muted text-foreground-muted text-[10px] font-medium capitalize">{c.batch_type}</Badge>
         )}
         {seatsLeft != null && seatsLeft > 0 && (
           <Box className="flex items-center gap-1.5 ml-auto">
-            <Users2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-            <Text as="span" className="text-[11px] font-medium text-emerald-600">{seatsLeft} seats left</Text>
+            <Users2 className="h-3.5 w-3.5 text-success shrink-0" />
+            <Text as="span" className="text-[11px] font-medium text-success">{seatsLeft} seats left</Text>
           </Box>
         )}
       </Box>
@@ -132,17 +132,17 @@ export function UpcomingCohortsPanel() {
 
   return (
     <Card className="rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-      <Box className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+      <Box className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
         <Box className="flex items-center gap-2.5">
-          <Box className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50">
-            <CalendarClock className="h-4 w-4 text-violet-500" />
+          <Box className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-subtle">
+            <CalendarClock className="h-4 w-4 text-primary" />
           </Box>
           <Box>
-            <Text as="h3" className="text-sm font-bold text-slate-800 leading-tight">Upcoming Cohorts</Text>
-            <Text as="p" className="text-[11px] text-slate-400">More batches for your course</Text>
+            <Text as="h3" className="text-sm font-bold text-foreground leading-tight">Upcoming Cohorts</Text>
+            <Text as="p" className="text-[11px] text-foreground-subtle">More batches for your course</Text>
           </Box>
         </Box>
-        <Globe className="h-4 w-4 text-slate-300" />
+        <Globe className="h-4 w-4 text-foreground-subtle" />
       </Box>
 
       <Box className="p-5 space-y-3">
@@ -151,7 +151,7 @@ export function UpcomingCohortsPanel() {
         <Button
           variant="outline"
           nativeButton={false}
-          className="w-full h-10 border-slate-200 text-violet-600 hover:text-violet-700 hover:border-violet-300 rounded-xl text-sm font-semibold"
+          className="w-full h-10 border-border text-primary hover:text-primary hover:border-primary-border rounded-xl text-sm font-semibold"
           render={<a href="#" />}
         >
           View more cohorts <ArrowRight className="h-3.5 w-3.5 ml-1.5" />

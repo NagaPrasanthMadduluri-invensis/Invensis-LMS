@@ -24,7 +24,7 @@ export default async function TrainingDetailPage({ params }) {
     <Box className="space-y-5">
       <Link
         href="/my-courses"
-        className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition-colors hover:text-violet-600"
+        className="inline-flex items-center gap-1 text-xs font-medium text-foreground-muted transition-colors hover:text-primary"
       >
         <ChevronLeft className="h-3.5 w-3.5" />
         <Text as="span" className="text-xs text-inherit">All trainings</Text>

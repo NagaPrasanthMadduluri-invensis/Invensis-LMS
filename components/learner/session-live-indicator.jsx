@@ -56,9 +56,9 @@ export function SessionLiveIndicator() {
   if (!live) return null;
 
   return (
-    <Box className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5">
-      <Box className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-emerald-500" />
-      <Text as="span" className="text-xs font-semibold text-emerald-700">
+    <Box className="flex items-center gap-1.5 rounded-full border border-success-border bg-success-subtle px-3 py-1.5">
+      <Box className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-success" />
+      <Text as="span" className="text-xs font-semibold text-success-subtle-foreground">
         Session live now
       </Text>
     </Box>

@@ -41,12 +41,12 @@ export function FilterSelect({
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger
         className={cn(
-          "h-11 bg-white border-slate-300/70 rounded-xl text-sm shadow-sm text-slate-700",
+          "h-11 bg-surface border-slate-300/70 rounded-xl text-sm shadow-sm text-foreground",
           width,
           className
         )}
       >
-        {Icon && <Icon className="h-4 w-4 text-slate-400 shrink-0" />}
+        {Icon && <Icon className="h-4 w-4 text-foreground-subtle shrink-0" />}
         <SelectValue placeholder={allLabel} className="truncate">
           {(v) => labelFor(v)}
         </SelectValue>

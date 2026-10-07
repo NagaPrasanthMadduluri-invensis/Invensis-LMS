@@ -37,18 +37,18 @@ function CertificatePdfDialog({ open, pdf, error, title, onClose }) {
 
         <Box className="mt-2">
           {error ? (
-            <Box className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <Box className="flex items-center gap-2 rounded-lg border border-error-border bg-error-subtle px-4 py-3 text-sm text-error">
               <AlertCircle className="h-4 w-4 shrink-0" /> {error}
             </Box>
           ) : pdf ? (
             <iframe
               src={pdf.url}
               title="Certificate PDF"
-              className="w-full h-[78vh] rounded-lg border border-slate-200 bg-slate-50"
+              className="w-full h-[78vh] rounded-lg border border-border bg-surface-hover"
             />
           ) : (
-            <Box className="flex h-[78vh] flex-col items-center justify-center gap-3 rounded-lg border border-slate-200 bg-slate-50 text-slate-500">
-              <Loader2 className="h-7 w-7 animate-spin text-amber-500" />
+            <Box className="flex h-[78vh] flex-col items-center justify-center gap-3 rounded-lg border border-border bg-surface-hover text-foreground-muted">
+              <Loader2 className="h-7 w-7 animate-spin text-warning" />
               <Text as="p" className="text-sm">Generating the certificate PDF…</Text>
             </Box>
           )}
@@ -59,10 +59,10 @@ function CertificatePdfDialog({ open, pdf, error, title, onClose }) {
           {pdf && (
             <Button
               render={<a href={pdf.url} download={pdf.name} />}
-              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white border-0"
+              className="inline-flex items-center gap-2 bg-warning hover:bg-warning text-warning-foreground border-0"
             >
               <Download className="h-4 w-4 shrink-0" />
-              <Text as="span" className="text-sm font-medium text-white">Download PDF</Text>
+              <Text as="span" className="text-sm font-medium text-warning-foreground">Download PDF</Text>
             </Button>
           )}
         </DialogFooter>

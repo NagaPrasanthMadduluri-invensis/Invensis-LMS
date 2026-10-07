@@ -45,32 +45,32 @@ export function CorporateAccounts() {
         ].map((s) => (
           <Card key={s.label} className={`p-4 border-0 shadow-sm rounded-xl ${s.bg}`}>
             <Text as="h3" className={`text-2xl font-bold ${s.val}`}>{s.value}</Text>
-            <Text as="span" className="text-xs text-slate-500">{s.label}</Text>
+            <Text as="span" className="text-xs text-foreground-muted">{s.label}</Text>
           </Card>
         ))}
       </Box>
 
       {/* Search */}
       <Box className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
         <Input
           placeholder="Search by company or contact name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 pr-9 h-10 text-sm bg-white border-slate-400 focus-visible:ring-violet-400"
+          className="pl-9 pr-9 h-10 text-sm bg-surface border-border-strong focus-visible:ring-focus"
         />
         {search && (
-          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-subtle hover:text-foreground-muted">
             <X className="h-4 w-4" />
           </button>
         )}
       </Box>
 
-      <Card className="border border-slate-100 shadow-sm bg-white rounded-xl overflow-hidden">
-        <CardHeader className="py-3 px-4 flex-row items-center justify-between space-y-0 border-b border-slate-100">
+      <Card className="border border-border shadow-sm bg-surface rounded-xl overflow-hidden">
+        <CardHeader className="py-3 px-4 flex-row items-center justify-between space-y-0 border-b border-border">
           <Box className="flex items-center gap-2">
             <Box className="w-1 h-4 rounded-full bg-violet-500" />
-            <CardTitle className="text-sm font-semibold text-slate-800">Corporate Clients</CardTitle>
+            <CardTitle className="text-sm font-semibold text-foreground">Corporate Clients</CardTitle>
           </Box>
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-0">
@@ -78,32 +78,32 @@ export function CorporateAccounts() {
             {filtered.map((a, i) => {
               const pct = Math.round((a.used / a.seats) * 100);
               return (
-                <Box key={a.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-violet-200 hover:shadow-sm transition-all">
+                <Box key={a.id} className="flex items-center justify-between p-3 rounded-xl border border-border hover:border-primary-border hover:shadow-sm transition-all">
                   <Box className="flex items-center gap-3">
                     <Box className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${COMPANY_COLORS[i % COMPANY_COLORS.length]}`}>
                       {a.company[0]}
                     </Box>
                     <Box>
-                      <Text as="p" className="text-sm font-semibold text-slate-800">{a.company}</Text>
-                      <Text as="span" className="text-[11px] text-slate-400">{a.contact} · {a.email}</Text>
+                      <Text as="p" className="text-sm font-semibold text-foreground">{a.company}</Text>
+                      <Text as="span" className="text-[11px] text-foreground-subtle">{a.contact} · {a.email}</Text>
                     </Box>
                   </Box>
                   <Box className="flex items-center gap-4 text-right">
                     <Box className="hidden sm:block">
                       <Box className="flex items-center gap-1 justify-end mb-1">
-                        <Users className="h-3 w-3 text-slate-400" />
-                        <Text as="span" className="text-xs text-slate-600 font-medium">{a.used}/{a.seats}</Text>
+                        <Users className="h-3 w-3 text-foreground-subtle" />
+                        <Text as="span" className="text-xs text-foreground-muted font-medium">{a.used}/{a.seats}</Text>
                       </Box>
-                      <Box className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <Box className={`h-full rounded-full ${pct > 80 ? "bg-rose-500" : "bg-violet-400"}`} style={{ width: `${pct}%` }} />
+                      <Box className="w-20 h-1.5 bg-surface-muted rounded-full overflow-hidden">
+                        <Box className={`h-full rounded-full ${pct > 80 ? "bg-error" : "bg-violet-400"}`} style={{ width: `${pct}%` }} />
                       </Box>
                     </Box>
                     <Box className="hidden md:flex items-center gap-1">
-                      <BookOpen className="h-3 w-3 text-slate-400" />
-                      <Text as="span" className="text-xs text-slate-500">{a.courses} courses</Text>
+                      <BookOpen className="h-3 w-3 text-foreground-subtle" />
+                      <Text as="span" className="text-xs text-foreground-muted">{a.courses} courses</Text>
                     </Box>
-                    <Text as="span" className="text-[11px] text-slate-400">{a.since}</Text>
-                    <Badge variant="secondary" className={`text-[10px] border-0 ${a.status === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+                    <Text as="span" className="text-[11px] text-foreground-subtle">{a.since}</Text>
+                    <Badge variant="secondary" className={`text-[10px] border-0 ${a.status === "Active" ? "bg-success-subtle text-success-subtle-foreground" : "bg-surface-muted text-foreground-muted"}`}>
                       {a.status}
                     </Badge>
                   </Box>
