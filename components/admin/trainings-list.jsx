@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import {
   Search, Calendar, Users, Clock, UserCheck, UserX, UserPlus,
   ChevronRight, BookOpen, LayoutGrid, Link2, LinkIcon, X, SlidersHorizontal,
-  AlertCircle, UploadCloud, Globe, Timer, CalendarClock,
+  AlertCircle, UploadCloud, Globe, Timer, CalendarClock, Activity,
 } from "lucide-react";
 import { ImportResourcesDialog } from "@/components/admin/import-resources-dialog";
 import Text from "@/components/ui/text";
@@ -254,7 +254,7 @@ function TrainingCard({ training, onClick }) {
         <Box className="pt-3 border-t border-border">
           <Button
             size="sm"
-            className="w-full h-9 bg-surface border border-primary text-primary hover:bg-primary-subtle text-xs font-semibold rounded-xl gap-1.5"
+            className="w-full h-9 bg-primary text-primary-foreground hover:bg-primary-hover text-xs font-semibold rounded-xl border-0 gap-1.5"
           >
             Manage Training <ChevronRight className="h-3.5 w-3.5" />
           </Button>
@@ -272,8 +272,6 @@ export function TrainingsList() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
   const [importOpen, setImportOpen] = useState(false);
-  const [dueOnly, setDueOnly] = useState(false);
-  const [upcomingOnly, setUpcomingOnly] = useState(false);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [regionFilter, setRegionFilter] = useState("");     // region key
@@ -332,12 +330,18 @@ export function TrainingsList() {
       t.code.toLowerCase().includes(q) ||
       (t.event_code ?? "").toLowerCase().includes(q);
     if (!matchesSearch) return false;
-    if (statusFilter !== "all" && t.status !== statusFilter) return false;
-    // "Due for update" = ended but never marked completed. The single most
-    // actionable subset in this list, so it gets its own toggle.
-    if (dueOnly && !t.due_for_update) return false;
-    // Upcoming = starts today or later (start_date is a wall-clock YYYY-MM-DD).
-    if (upcomingOnly && !(t.start_date && t.start_date >= today)) return false;
+    // Lifecycle / status — a single-select group (only one active at a time):
+    //   upcoming = starts in the future; ongoing = running now; due = ended but
+    //   not marked completed; otherwise a real training status (or "all").
+    if (statusFilter === "upcoming") {
+      if (!(t.start_date && t.start_date > today)) return false;
+    } else if (statusFilter === "ongoing") {
+      if (!(t.start_date && t.end_date && t.start_date <= today && t.end_date >= today)) return false;
+    } else if (statusFilter === "due") {
+      if (!t.due_for_update) return false;
+    } else if (statusFilter !== "all" && t.status !== statusFilter) {
+      return false;
+    }
     if (dateFrom && (!t.start_date || t.start_date < dateFrom)) return false;
     if (dateTo && (!t.start_date || t.start_date > dateTo)) return false;
     if (regionFilter && regionForTimezone(t.timezone)?.key !== regionFilter) return false;
@@ -345,16 +349,17 @@ export function TrainingsList() {
     return true;
   });
 
-  const hasFilters = !!search || statusFilter !== "all" || dueOnly || upcomingOnly
+  const hasFilters = !!search || statusFilter !== "all"
     || !!dateFrom || !!dateTo || !!regionFilter || !!durationFilter;
 
   function clearFilters() {
-    setSearch(""); setStatusFilter("all"); setDueOnly(false); setUpcomingOnly(false);
+    setSearch(""); setStatusFilter("all");
     setDateFrom(""); setDateTo(""); setRegionFilter(""); setDurationFilter("");
   }
 
   const dueCount = trainings.filter((t) => t.due_for_update).length;
-  const upcomingCount = trainings.filter((t) => t.start_date && t.start_date >= today).length;
+  const upcomingCount = trainings.filter((t) => t.start_date && t.start_date > today).length;
+  const ongoingCount = trainings.filter((t) => t.start_date && t.end_date && t.start_date <= today && t.end_date >= today).length;
   // Only offer the per-day durations actually present, smallest first.
   const durationOptions = [...new Set(trainings.map((t) => t.hours_per_day).filter((v) => v != null))].sort((a, b) => a - b);
 
@@ -365,7 +370,8 @@ export function TrainingsList() {
   const STATUS_TABS = [
     { key: "all", label: "All" },
     ...Object.keys(statusCounts)
-      .filter((k) => statusCounts[k] > 0 || k === statusFilter)
+      // "ongoing" is offered as a date-based lifecycle chip below, not a raw tab.
+      .filter((k) => k !== "ongoing" && (statusCounts[k] > 0 || k === statusFilter))
       .sort((a, b) => {
         const ia = STATUS_ORDER.indexOf(a), ib = STATUS_ORDER.indexOf(b);
         return (ia === -1 ? STATUS_ORDER.length : ia) - (ib === -1 ? STATUS_ORDER.length : ib);
@@ -451,40 +457,55 @@ export function TrainingsList() {
               );
             })}
 
-            {/* Not a status — a cross-cutting "needs attention" filter — so it
-                sits after a divider rather than reading as another status. Same
-                dimensions as the tabs so the row stays one control strip. */}
+            {/* Lifecycle filters — part of the SAME single-select group as the
+                status tabs above, so only one filter is ever active at a time. */}
             <Box className="mx-1 h-5 w-px bg-surface-muted shrink-0" aria-hidden="true" />
             <button
               type="button"
-              onClick={() => setDueOnly((v) => !v)}
-              aria-pressed={dueOnly}
+              onClick={() => setStatusFilter("upcoming")}
+              aria-pressed={statusFilter === "upcoming"}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
-                dueOnly
-                  ? "bg-warning border-amber-500 text-warning-foreground shadow-sm"
-                  : "bg-surface border-border text-foreground-muted hover:border-warning-border hover:text-warning"
-              }`}
-            >
-              <AlertCircle className="h-3.5 w-3.5" /> Due for update
-              <Text as="span" className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
-                dueOnly ? "bg-white/20 text-white" : "bg-surface-muted text-foreground-muted"
-              }`}>{dueCount}</Text>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setUpcomingOnly((v) => !v)}
-              aria-pressed={upcomingOnly}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
-                upcomingOnly
+                statusFilter === "upcoming"
                   ? "bg-primary border-primary text-primary-foreground shadow-sm"
                   : "bg-surface border-border text-foreground-muted hover:border-primary-border hover:text-primary"
               }`}
             >
               <CalendarClock className="h-3.5 w-3.5" /> Upcoming
               <Text as="span" className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
-                upcomingOnly ? "bg-white/20 text-white" : "bg-surface-muted text-foreground-muted"
+                statusFilter === "upcoming" ? "bg-white/20 text-white" : "bg-surface-muted text-foreground-muted"
               }`}>{upcomingCount}</Text>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStatusFilter("ongoing")}
+              aria-pressed={statusFilter === "ongoing"}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
+                statusFilter === "ongoing"
+                  ? "bg-success border-success text-success-foreground shadow-sm"
+                  : "bg-surface border-border text-foreground-muted hover:border-success-border hover:text-success"
+              }`}
+            >
+              <Activity className="h-3.5 w-3.5" /> Ongoing
+              <Text as="span" className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
+                statusFilter === "ongoing" ? "bg-white/20 text-white" : "bg-surface-muted text-foreground-muted"
+              }`}>{ongoingCount}</Text>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStatusFilter("due")}
+              aria-pressed={statusFilter === "due"}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
+                statusFilter === "due"
+                  ? "bg-warning border-warning text-warning-foreground shadow-sm"
+                  : "bg-surface border-border text-foreground-muted hover:border-warning-border hover:text-warning"
+              }`}
+            >
+              <AlertCircle className="h-3.5 w-3.5" /> Due for update
+              <Text as="span" className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums ${
+                statusFilter === "due" ? "bg-white/20 text-white" : "bg-surface-muted text-foreground-muted"
+              }`}>{dueCount}</Text>
             </button>
 
             {hasFilters && (
