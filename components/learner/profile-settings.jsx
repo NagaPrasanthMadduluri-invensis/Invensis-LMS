@@ -564,7 +564,7 @@ export function LearnerProfileSettings() {
 
   return (
     <Box className="space-y-5">
-      <Box className="sticky top-0 z-10 -mx-1 px-1 py-1.5 bg-background/80 backdrop-blur">
+      <Box className="sticky -top-6 z-30 -mx-6 -mt-6 px-6 pt-6 pb-3 bg-background border-b border-border">
         <Box className="h-auto w-full sm:w-fit flex flex-wrap gap-1 rounded-full bg-surface-muted p-1.5">
           {PROFILE_SECTIONS.map(({ id, label, icon: Icon }) => (
             <button
