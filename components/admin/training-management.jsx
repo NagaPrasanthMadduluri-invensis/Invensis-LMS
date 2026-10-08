@@ -46,6 +46,8 @@ import { TrainingSurveys } from "@/components/admin/training-surveys";
 import { TrainingAttendance } from "@/components/admin/training-attendance";
 import { ResourceManager } from "@/components/admin/resource-manager";
 import { SessionDates, sessionDatesOf } from "@/components/shared/session-dates";
+import { buildConvertedRows, ZONE_OPTIONS } from "@/components/shared/timezone-converter";
+import { Combobox } from "@/components/ui/combobox";
 import {
   datesBetween,
   formatDate,
@@ -203,7 +205,7 @@ function trainingDaysHint(detail) {
 }
 
 /* ── Day-wise topics timeline ── */
-function SessionTopicsCard({ sessions, timezone }) {
+function SessionTopicsCard({ sessions, timezone, tzRows = {}, converting = false }) {
   const list = Array.isArray(sessions) ? sessions : [];
   const anyTopics = list.some((s) => s.planned_topics?.trim());
 
@@ -231,7 +233,10 @@ function SessionTopicsCard({ sessions, timezone }) {
         ) : (
           <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {list.map((s) => {
-              const when = formatSessionDateTime(s.start_time, timezone);
+              const conv = converting ? tzRows[s.day_number] : null;
+              const when = conv
+                ? `${conv.date} · ${conv.start}${conv.end ? ` – ${conv.end}` : ""} ${conv.abbr}`
+                : formatSessionDateTime(s.start_time, timezone);
               const hasTopics = !!s.planned_topics?.trim();
               return (
                 <Box key={s.day_number} className="rounded-xl border border-slate-200/70 bg-slate-50/60 p-4">
@@ -1284,6 +1289,8 @@ export function TrainingManagement({ trainingId }) {
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [statusAction, setStatusAction] = useState(null); // "completed" | "suspended" | "active"
   const [emailOpen, setEmailOpen] = useState(false);
+  // Timezone to VIEW session dates/times in. Defaults to the training's own zone.
+  const [viewTz, setViewTz] = useState("");
 
   const load = useCallback(() => {
     if (!token) return;
@@ -1298,6 +1305,8 @@ export function TrainingManagement({ trainingId }) {
   }, [token, trainingId]);
 
   useEffect(() => { load(); }, [load]);
+  // Default the viewing timezone to the training's own zone once it loads.
+  useEffect(() => { if (detail?.timezone) setViewTz((cur) => cur || detail.timezone); }, [detail?.timezone]);
 
   if (error) {
     return (
@@ -1323,6 +1332,13 @@ export function TrainingManagement({ trainingId }) {
   const canRelease = detail.enrolled_count >= (detail.min_seats ?? 1);
   const confirmedCount = detail.participants.filter((p) => p.status === "confirmed").length;
   const sessionDays = sessionDatesOf(detail);
+  // Convert session dates/times to the admin's chosen viewing timezone.
+  const sourceTz = detail.timezone || "";
+  const tzConv = buildConvertedRows(detail.sessions, sourceTz, undefined, viewTz || sourceTz);
+  const converting = !!viewTz && !!sourceTz && viewTz !== sourceTz && tzConv.rows.length > 0;
+  const tzRowByDay = converting ? Object.fromEntries(tzConv.rows.map((r) => [r.day, r])) : {};
+  const tzAbbr = converting ? (tzConv.rows[0]?.abbr || "") : "";
+  const convertedDates = converting ? tzConv.rows.map((r) => r.date) : [];
 
   function onMeetingSaved(training) {
     setMeeting({ url: training?.meeting_url ?? null, platform: training?.meeting_platform ?? null, released: !!training?.meeting_released });
@@ -1331,6 +1347,22 @@ export function TrainingManagement({ trainingId }) {
 
   return (
     <Box className="space-y-5">
+      {/* View session dates & times in any timezone (defaults to the training's own). */}
+      <Box className="flex items-center justify-end gap-2">
+        <Globe className="h-4 w-4 text-foreground-subtle" />
+        <Text as="span" className="text-xs text-foreground-muted">Show session dates &amp; times in</Text>
+        <Box className="w-[280px]">
+          <Combobox
+            value={viewTz}
+            onChange={(z) => z && setViewTz(z)}
+            options={ZONE_OPTIONS}
+            placeholder="Select a timezone"
+            searchPlaceholder="Search country or city..."
+            emptyText="No timezone found."
+          />
+        </Box>
+      </Box>
+
       <ComposeEmailDialog
         open={emailOpen}
         onOpenChange={setEmailOpen}
@@ -1379,15 +1411,23 @@ export function TrainingManagement({ trainingId }) {
           <Fact
             icon={Calendar}
             label="Dates"
-            value={`${formatDate(detail.start_date)} – ${formatDate(detail.end_date)}`}
+            value={
+              converting && convertedDates.length
+                ? `${convertedDates[0]} – ${convertedDates[convertedDates.length - 1]}`
+                : `${formatDate(detail.start_date)} – ${formatDate(detail.end_date)}`
+            }
             hint={trainingDaysHint(detail)}
           />
           <Fact
             icon={Clock}
             label="Daily Timing"
-            value={`${formatTime(detail.start_time)} – ${formatTime(detail.end_time)}${
-              timezoneLabel(detail.timezone, detail.start_date) ? ` ${timezoneLabel(detail.timezone, detail.start_date)}` : ""
-            }`}
+            value={
+              converting
+                ? `${tzConv.rows[0].start} – ${tzConv.rows[0].end || ""} ${tzAbbr}`
+                : `${formatTime(detail.start_time)} – ${formatTime(detail.end_time)}${
+                    timezoneLabel(detail.timezone, detail.start_date) ? ` ${timezoneLabel(detail.timezone, detail.start_date)}` : ""
+                  }`
+            }
           />
           <Fact icon={Globe} label="Timezone" value={detail.timezone || "—"} />
           <Fact icon={Hourglass} label="Duration" value={detail.duration_hours != null ? `${detail.duration_hours} hours` : "—"} />
@@ -1398,7 +1438,25 @@ export function TrainingManagement({ trainingId }) {
         {/* The individual training days behind the date range above */}
         {sessionDays.length > 0 && (
           <Box className="border-t border-border px-6 py-4">
-            <SessionDates dates={sessionDays} />
+            {converting ? (
+              <Box>
+                <Box className="flex items-center gap-1.5 mb-2.5">
+                  <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Text as="span" className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                    {tzConv.rows.length} Session{tzConv.rows.length !== 1 ? "s" : ""} · {viewTz}
+                  </Text>
+                </Box>
+                <Box className="flex flex-wrap gap-2">
+                  {tzConv.rows.map((r) => (
+                    <Text as="span" key={r.day} className="rounded-lg border border-primary-border bg-primary-subtle text-primary px-2.5 py-1 text-xs font-medium">
+                      Day {r.day} · {r.date} · {r.start}{r.end ? `–${r.end}` : ""}
+                    </Text>
+                  ))}
+                </Box>
+              </Box>
+            ) : (
+              <SessionDates dates={sessionDays} />
+            )}
           </Box>
         )}
       </Card>
@@ -1693,7 +1751,7 @@ export function TrainingManagement({ trainingId }) {
       </Card>
 
       {/* ── Day-wise topics ── */}
-      <SessionTopicsCard sessions={detail.sessions} timezone={detail.timezone} />
+      <SessionTopicsCard sessions={detail.sessions} timezone={detail.timezone} tzRows={tzRowByDay} converting={converting} />
 
       {/* ── Attendance (matrix + CSV export) ── */}
       <TrainingAttendance trainingRef={trainingId} />

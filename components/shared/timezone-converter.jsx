@@ -139,7 +139,7 @@ const SOURCE_ZONE = {
 };
 
 // Every zone in the tz database, as picker options. Built once at module load.
-const ZONE_OPTIONS = listTimeZones().map((z) => ({
+export const ZONE_OPTIONS = listTimeZones().map((z) => ({
   value: z.zone,
   label: z.label,
   // Searchable by any of the zone's cities and by the IANA name, not just the
@@ -233,6 +233,33 @@ function fmtDay(instant, zone) {
 // that genuinely have no lettered form.
 const zoneAbbr = (instant, zone) => zoneAbbreviation(zone, instant);
 
+/**
+ * Re-anchor each session's wall-clock time (stored in the training's own zone)
+ * and format it in `targetZone`. Reusable by any view that wants to show session
+ * dates/times in a chosen timezone. Returns { rows: [{day,date,start,end,abbr}],
+ * sourceZone, reason } — `rows` is empty when conversion isn't possible.
+ */
+export function buildConvertedRows(sessions = [], sourceZoneCode, sourceCountryCode, targetZone) {
+  const { zone: sourceZone, reason } = resolveSourceZone(sourceZoneCode, sourceCountryCode);
+  if (!sourceZone || !isKnownZone(targetZone)) return { rows: [], sourceZone, reason: reason || "unknown-target" };
+  const rows = (Array.isArray(sessions) ? sessions : [])
+    .filter((s) => s.start_time)
+    .map((s) => {
+      const startInstant = wallInSourceToInstant(s.start_time, sourceZone);
+      const endInstant = s.end_time ? wallInSourceToInstant(s.end_time, sourceZone) : null;
+      if (!startInstant) return null;
+      return {
+        day: s.day_number,
+        date: fmtDay(startInstant, targetZone),
+        start: fmtTime(startInstant, targetZone),
+        end: endInstant ? fmtTime(endInstant, targetZone) : null,
+        abbr: zoneAbbr(startInstant, targetZone),
+      };
+    })
+    .filter(Boolean);
+  return { rows, sourceZone, reason: null };
+}
+
 export function SessionTimezoneConverter({ sessions = [], sourceZoneCode, sourceCountryCode }) {
   const { zone: sourceZone, reason } = resolveSourceZone(sourceZoneCode, sourceCountryCode);
 
@@ -244,24 +271,10 @@ export function SessionTimezoneConverter({ sessions = [], sourceZoneCode, source
   const initial = detected || "Asia/Kolkata";
   const [targetZone, setTargetZone] = useState(initial);
 
-  const rows = useMemo(() => {
-    if (!sourceZone || !isKnownZone(targetZone)) return [];
-    return sessions
-      .filter((s) => s.start_time)
-      .map((s) => {
-        const startInstant = wallInSourceToInstant(s.start_time, sourceZone);
-        const endInstant = s.end_time ? wallInSourceToInstant(s.end_time, sourceZone) : null;
-        if (!startInstant) return null;
-        return {
-          day: s.day_number,
-          date: fmtDay(startInstant, targetZone),
-          start: fmtTime(startInstant, targetZone),
-          end: endInstant ? fmtTime(endInstant, targetZone) : null,
-          abbr: zoneAbbr(startInstant, targetZone),
-        };
-      })
-      .filter(Boolean);
-  }, [sessions, sourceZone, targetZone]);
+  const rows = useMemo(
+    () => buildConvertedRows(sessions, sourceZoneCode, sourceCountryCode, targetZone).rows,
+    [sessions, sourceZoneCode, sourceCountryCode, targetZone]
+  );
 
   return (
     <Box className="rounded-2xl border border-primary-border bg-violet-50/50 overflow-hidden">

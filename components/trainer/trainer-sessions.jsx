@@ -31,7 +31,7 @@ import {
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
-import { SessionTimezoneConverter } from "@/components/trainer/timezone-converter";
+import { SessionTimezoneConverter } from "@/components/shared/timezone-converter";
 import { SessionDates, sessionDatesOf } from "@/components/shared/session-dates";
 import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatTime as fmtTime, timezoneLabel } from "@/lib/datetime";
 import {
