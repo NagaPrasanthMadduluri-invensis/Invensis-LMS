@@ -48,6 +48,21 @@ export async function fetchParticipants({ token, search = "", location = "", job
 }
 
 /**
+ * POST /admin/imports/corporate
+ * Bulk-import sponsors + learners from a parsed Excel sheet. `dryRun` previews
+ * (validates against the DB, writes nothing); `sendSetupEmails` toggles the
+ * set-password email for new accounts. Returns { sponsors_created, ...,
+ * enrolled, failed[], warnings[], dry_run }.
+ */
+export async function bulkImportCorporate({ token, rows, dryRun = false, sendSetupEmails = true }) {
+  return apiClient("/admin/imports/corporate", {
+    method: "POST",
+    token,
+    body: { rows, dry_run: dryRun, send_setup_emails: sendSetupEmails },
+  });
+}
+
+/**
  * PATCH /admin/trainings/:trainingRef
  * Generic training update. Two independent, both-optional operations — pass any
  * of: trainer_id, meeting_url, meeting_platform ("zoom"|"teams"|"other"),

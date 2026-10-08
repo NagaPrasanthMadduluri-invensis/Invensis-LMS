@@ -13,8 +13,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Search, Users, X, BookOpen, UserCheck, UserX, Mail, Calendar, Briefcase, MapPin, LogIn, Building2, ChevronRight as RowChevron,
+  Search, Users, X, BookOpen, UserCheck, UserX, Mail, Calendar, Briefcase, MapPin, LogIn, Building2, ChevronRight as RowChevron, UploadCloud,
 } from "lucide-react";
+import { ImportCorporateDialog } from "@/components/admin/import-corporate-dialog";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
@@ -89,6 +90,8 @@ export function UsersTable() {
   const [filterOptions, setFilterOptions] = useState({ locations: [], job_titles: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!token) return;
@@ -104,7 +107,7 @@ export function UsersTable() {
         .finally(() => setLoading(false));
     }, 300);
     return () => clearTimeout(handle);
-  }, [token, search, location, jobTitle, status, joinedFrom, joinedTo, page]);
+  }, [token, search, location, jobTitle, status, joinedFrom, joinedTo, page, refreshKey]);
 
   const hasFilters = !!(search || location || jobTitle || status || joinedFrom || joinedTo);
   const users = data?.participants || [];
@@ -137,6 +140,15 @@ export function UsersTable() {
 
   return (
     <Box className="space-y-5">
+
+      {/* Bulk actions */}
+      <Box className="flex justify-end">
+        <Button variant="outline" onClick={() => setImportOpen(true)}
+          className="h-9 gap-1.5 border-border text-foreground hover:bg-surface-muted">
+          <UploadCloud className="h-4 w-4" /> Import sponsors &amp; learners (Excel)
+        </Button>
+      </Box>
+      <ImportCorporateDialog open={importOpen} onOpenChange={setImportOpen} onImported={() => setRefreshKey((k) => k + 1)} />
 
       {/* Stat cards */}
       <Box className="grid grid-cols-2 md:grid-cols-4 gap-4">
