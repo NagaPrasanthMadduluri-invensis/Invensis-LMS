@@ -1670,6 +1670,10 @@ export function TrainingManagement({ trainingId }) {
                   <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                     <Box className="flex items-center gap-1"><Briefcase className="h-3 w-3" /> Job Title</Box>
                   </TableHead>
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Company</TableHead>
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Department</TableHead>
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Experience</TableHead>
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Agent</TableHead>
                   <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                     <Box className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Location</Box>
                   </TableHead>
@@ -1686,6 +1690,10 @@ export function TrainingManagement({ trainingId }) {
                     <TableCell className="py-3.5 text-foreground-muted text-sm"><ParticipantLink id={p.participant_id}>{p.email}</ParticipantLink></TableCell>
                     <TableCell className="py-3.5 text-foreground-muted text-sm">{p.phone || "—"}</TableCell>
                     <TableCell className="py-3.5 text-foreground-muted text-sm">{p.job_title || "—"}</TableCell>
+                    <TableCell className="py-3.5 text-foreground-muted text-sm">{p.company || "—"}</TableCell>
+                    <TableCell className="py-3.5 text-foreground-muted text-sm">{p.department || "—"}</TableCell>
+                    <TableCell className="py-3.5 text-foreground-muted text-sm">{p.experience_years != null ? `${p.experience_years} yr${p.experience_years === 1 ? "" : "s"}` : "—"}</TableCell>
+                    <TableCell className="py-3.5 text-foreground-muted text-sm">{p.agent || "—"}</TableCell>
                     <TableCell className="py-3.5 text-foreground-muted text-sm">{p.location || "—"}</TableCell>
                     <TableCell className="py-3.5">
                       {(() => {
