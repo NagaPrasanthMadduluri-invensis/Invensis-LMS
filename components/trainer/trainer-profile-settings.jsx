@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Combobox } from "@/components/ui/combobox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   User, Mail, MapPin, Sparkles, FileText, Upload, X, Download,
-  Briefcase, Globe, CheckCircle2,
+  CheckCircle2,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -108,6 +109,9 @@ export function TrainerProfileSettings() {
   const [specInput, setSpecInput] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
+  const [countryOptions, setCountryOptions] = useState([]);
+  const [cityOptions, setCityOptions] = useState([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
   const [isRemote, setIsRemote] = useState(false);
 
   /* ── resume ── */
@@ -141,6 +145,44 @@ export function TrainerProfileSettings() {
       .catch((e) => setLoadError(e.message))
       .finally(() => setLoading(false));
   }, [token]);
+
+  // Country list — static, fetched once.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/locations?type=countries")
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        setCountryOptions(
+          (d.countries || []).map((c) => ({
+            value: c.name,
+            label: c.name,
+            iso: c.iso,
+            prefix: <Text as="span" className="text-base leading-none">{c.flag}</Text>,
+          }))
+        );
+      })
+      .catch(() => setCountryOptions([]));
+    return () => { cancelled = true; };
+  }, []);
+
+  // Cities for the selected country (country is stored by name → resolve its ISO).
+  const countryIso = countryOptions.find((c) => c.value === country)?.iso;
+
+  useEffect(() => {
+    if (!countryIso) { setCityOptions([]); return; }
+    let cancelled = false;
+    setCitiesLoading(true);
+    fetch(`/api/locations?type=cities&country=${countryIso}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        setCityOptions((d.cities || []).map((name) => ({ value: name, label: name })));
+      })
+      .catch(() => { if (!cancelled) setCityOptions([]); })
+      .finally(() => { if (!cancelled) setCitiesLoading(false); });
+    return () => { cancelled = true; };
+  }, [countryIso]);
 
   function addSpecialization(raw) {
     const value = raw.trim();
@@ -210,16 +252,24 @@ export function TrainerProfileSettings() {
   }
 
   async function saveProfile() {
-    const nextErrors = {};
-    if (!name.trim()) nextErrors.name = "Name is required.";
-    setErrors(nextErrors);
-    setSaveError("");
-    if (Object.keys(nextErrors).length) return;
-
-    // Fold any half-typed specialization into the list before saving.
+    // Fold any half-typed specialization into the list before validating.
     const specs = specInput.trim() && !specializations.includes(specInput.trim())
       ? [...specializations, specInput.trim()]
       : specializations;
+
+    // All profile fields are mandatory — a trainer's profile must be complete.
+    const nextErrors = {};
+    if (!name.trim()) nextErrors.name = "Name is required.";
+    if (!bio.trim()) nextErrors.bio = "Bio is required.";
+    if (!experience.trim()) nextErrors.experience = "Experience is required.";
+    if (specs.length === 0) nextErrors.specializations = "Add at least one specialization.";
+    if (!country.trim()) nextErrors.country = "Country is required.";
+    if (!city.trim()) nextErrors.city = "City is required.";
+    if (!resumeKey) nextErrors.resume = "A resume (PDF) is required.";
+    setErrors(nextErrors);
+    setResumeError(nextErrors.resume || "");
+    setSaveError(Object.keys(nextErrors).length ? "Please complete all required fields before saving." : "");
+    if (Object.keys(nextErrors).length) return;
 
     setSaving(true);
     try {
@@ -227,11 +277,11 @@ export function TrainerProfileSettings() {
         token,
         data: {
           name: name.trim(),
-          bio: bio.trim() || null,
-          experience: experience.trim() || null,
+          bio: bio.trim(),
+          experience: experience.trim(),
           specializations: specs,
-          city: city.trim() || null,
-          country: country.trim() || null,
+          city: city.trim(),
+          country: country.trim(),
           is_remote: isRemote,
         },
       });
@@ -242,7 +292,7 @@ export function TrainerProfileSettings() {
       completion?.refresh?.();
       setTimeout(() => setSaved(false), 2000);
     } catch (e) {
-      setErrors(mapFieldErrors(e.errors, { name: "name", bio: "bio", experience: "experience" }));
+      setErrors(mapFieldErrors(e.errors, { name: "name", bio: "bio", experience: "experience", specializations: "specializations", city: "city", country: "country" }));
       setSaveError(e.message || "Failed to save. Please try again.");
     } finally {
       setSaving(false);
@@ -283,21 +333,21 @@ export function TrainerProfileSettings() {
 
       {/* About & expertise */}
       <SectionCard icon={Sparkles} title="About & Expertise" description="How you're presented to learners and admins.">
-        <FieldRow label="Bio" htmlFor="bio" optional>
+        <FieldRow label="Bio" htmlFor="bio" error={errors.bio}>
           <Textarea
             id="bio" value={bio} onChange={(e) => setBio(e.target.value)} rows={4}
             placeholder="A short professional summary…"
             className="w-full text-sm bg-background border border-border-strong focus-visible:border-primary-border focus-visible:ring-focus"
           />
         </FieldRow>
-        <FieldRow label="Experience" htmlFor="experience" optional>
+        <FieldRow label="Experience" htmlFor="experience" error={errors.experience}>
           <Textarea
             id="experience" value={experience} onChange={(e) => setExperience(e.target.value)} rows={3}
             placeholder="e.g. 12 years delivering PMP & PRINCE2 corporate training."
             className="w-full text-sm bg-background border border-border-strong focus-visible:border-primary-border focus-visible:ring-focus"
           />
         </FieldRow>
-        <FieldRow label="Specializations" htmlFor="specializations" optional>
+        <FieldRow label="Specializations" htmlFor="specializations" error={errors.specializations}>
           <Box className="rounded-lg border border-border-strong bg-background px-2.5 py-2 focus-within:border-primary-border focus-within:ring-1 focus-within:ring-focus">
             <Box className="flex flex-wrap items-center gap-1.5">
               {specializations.map((s) => (
@@ -326,17 +376,30 @@ export function TrainerProfileSettings() {
       {/* Location */}
       <SectionCard icon={MapPin} title="Location & Availability" description="Where you're based and how you deliver.">
         <Box className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <FieldRow label="City" htmlFor="city" optional>
-            <Box className="relative">
-              <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
-              <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} className={`${inputCls} pl-9`} />
-            </Box>
+          <FieldRow label="Country" htmlFor="country" error={errors.country}>
+            <Combobox
+              id="country" value={country}
+              onChange={(v) => { setCountry(v); setCity(""); }}
+              options={countryOptions}
+              placeholder="Select your country"
+              searchPlaceholder="Search countries..."
+              emptyText="No country found."
+              loading={countryOptions.length === 0}
+              invalid={!!errors.country}
+            />
           </FieldRow>
-          <FieldRow label="Country" htmlFor="country" optional>
-            <Box className="relative">
-              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-subtle" />
-              <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} className={`${inputCls} pl-9`} />
-            </Box>
+          <FieldRow label="City" htmlFor="city" error={errors.city}>
+            <Combobox
+              id="city" value={city}
+              onChange={(v) => setCity(v)}
+              options={cityOptions}
+              placeholder={country ? "Select your city" : "Pick a country first"}
+              searchPlaceholder="Search cities..."
+              emptyText="No city found for this country."
+              disabled={!countryIso}
+              loading={citiesLoading}
+              invalid={!!errors.city}
+            />
           </FieldRow>
         </Box>
         <Box className="flex items-center justify-between py-1">
