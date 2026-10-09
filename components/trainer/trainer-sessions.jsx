@@ -35,8 +35,10 @@ import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { AttendanceGrid } from "@/components/trainer/trainer-attendance";
-import { SessionTimezoneConverter } from "@/components/shared/timezone-converter";
+import { buildConvertedRows, ZONE_OPTIONS } from "@/components/shared/timezone-converter";
+import { Combobox } from "@/components/ui/combobox";
 import { SessionDates, sessionDatesOf } from "@/components/shared/session-dates";
+import { useTrainingFilters, statusBadge } from "@/components/shared/training-filters";
 import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatTime as fmtTime, timezoneLabel } from "@/lib/datetime";
 import {
   fetchMyTrainings,
@@ -104,7 +106,7 @@ function PendingState({ what }) {
 }
 
 /* ── One day's session, with inline topic editing ── */
-function SessionItem({ session, token, onSaved, timezone }) {
+function SessionItem({ session, token, onSaved, timezone, when }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(session.planned_topics || "");
   const [saving, setSaving] = useState(false);
@@ -112,6 +114,9 @@ function SessionItem({ session, token, onSaved, timezone }) {
 
   const statusCfg = STATUS_CONFIG[session.status] || STATUS_CONFIG.scheduled;
   const hasTopics = !!session.planned_topics?.trim();
+  // `when` is the converted date/time when a target timezone is selected on the
+  // panel; otherwise fall back to the session's own wall clock plus its zone.
+  const whenLabel = when ?? (session.start_time ? formatDateTime(session.start_time, timezone) : null);
 
   function startEdit() {
     setValue(session.planned_topics || "");
@@ -142,8 +147,8 @@ function SessionItem({ session, token, onSaved, timezone }) {
         </Box>
         <Box className="min-w-0 flex-1">
           <Text as="p" className="text-sm font-semibold leading-tight text-foreground">Day {session.day_number}</Text>
-          {session.start_time && (
-            <Text as="span" className="text-[11px] text-foreground-subtle">{formatDateTime(session.start_time, timezone)}</Text>
+          {whenLabel && (
+            <Text as="span" className="text-[11px] text-foreground-subtle">{whenLabel}</Text>
           )}
         </Box>
         <Badge className={`border-0 text-[10px] shrink-0 ${statusCfg.color}`}>{statusCfg.label}</Badge>
@@ -195,6 +200,8 @@ export function SessionsPanel({ trainingRef, token }) {
   const [data, setData] = useState(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
+  // Chosen display timezone — empty means "the training's own zone" (no conversion).
+  const [viewTz, setViewTz] = useState("");
 
   const load = useCallback(() => {
     setData(null); setPending(false); setError(null);
@@ -232,11 +239,36 @@ export function SessionsPanel({ trainingRef, token }) {
   const participants = data.participants || [];
   const sessionDays = sessionDatesOf(data);
 
+  // Page-wide timezone conversion — re-anchor each session's wall clock into the
+  // chosen zone. Empty/same zone leaves every date & time exactly as stored.
+  const sourceTz = data.timezone || "";
+  const tzConv = buildConvertedRows(sessions, sourceTz, data.country_code, viewTz || sourceTz);
+  const converting = !!viewTz && !!sourceTz && viewTz !== sourceTz && tzConv.rows.length > 0;
+  const tzRowByDay = converting ? Object.fromEntries(tzConv.rows.map((r) => [r.day, r])) : {};
+  const tzAbbr = converting ? (tzConv.rows[0]?.abbr || "") : "";
+  const convertedDates = converting ? tzConv.rows.map((r) => r.date) : [];
+
   const statusCfg = STATUS_CONFIG[data.status] || STATUS_CONFIG.active;
   const modeLabel = { virtual: "Live Virtual", in_person: "In Person", hybrid: "Hybrid", one_to_one: "One-to-One" }[data.delivery_mode] || data.delivery_mode;
 
   return (
     <Box className="space-y-5">
+      {/* View session dates & times in any timezone (defaults to the training's own). */}
+      <Box className="flex items-center justify-end gap-2">
+        <Globe className="h-4 w-4 text-foreground-subtle" />
+        <Text as="span" className="text-xs text-foreground-muted">Show session dates &amp; times in</Text>
+        <Box className="w-[280px]">
+          <Combobox
+            value={viewTz}
+            onChange={(z) => z && setViewTz(z)}
+            options={ZONE_OPTIONS}
+            placeholder="Select a timezone"
+            searchPlaceholder="Search country or city..."
+            emptyText="No timezone found."
+          />
+        </Box>
+      </Box>
+
       {/* Training header */}
       <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
         <Box className="bg-[#d7e3fc] border-b border-primary-border px-6 py-5">
@@ -260,11 +292,13 @@ export function SessionsPanel({ trainingRef, token }) {
             <Box>
               <Text as="p" className="text-[10px] uppercase tracking-wider text-foreground-subtle font-semibold">Dates</Text>
               <Text as="p" className="text-sm font-semibold text-foreground leading-tight mt-0.5">
-                {formatDate(data.start_date)} – {formatDate(data.end_date)}
+                {converting && convertedDates.length
+                  ? `${convertedDates[0]} – ${convertedDates[convertedDates.length - 1]}`
+                  : `${formatDate(data.start_date)} – ${formatDate(data.end_date)}`}
               </Text>
             </Box>
           </Box>
-          {(data.start_time || data.end_time) && (
+          {(data.start_time || data.end_time || converting) && (
             <Box className="flex items-center gap-2.5">
               <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
                 <Clock className="h-4 w-4 text-primary" />
@@ -272,8 +306,11 @@ export function SessionsPanel({ trainingRef, token }) {
               <Box>
                 <Text as="p" className="text-[10px] uppercase tracking-wider text-foreground-subtle font-semibold">Daily Timing</Text>
                 <Text as="p" className="text-sm font-semibold text-foreground leading-tight mt-0.5">
-                  {formatTime(data.start_time)} – {formatTime(data.end_time)}
-                  {timezoneLabel(data.timezone, data.start_date) ? ` ${timezoneLabel(data.timezone, data.start_date)}` : ""}
+                  {converting
+                    ? `${tzConv.rows[0].start} – ${tzConv.rows[0].end || ""} ${tzAbbr}`
+                    : `${formatTime(data.start_time)} – ${formatTime(data.end_time)}${
+                        timezoneLabel(data.timezone, data.start_date) ? ` ${timezoneLabel(data.timezone, data.start_date)}` : ""
+                      }`}
                 </Text>
               </Box>
             </Box>
@@ -292,7 +329,25 @@ export function SessionsPanel({ trainingRef, token }) {
         </Box>
         {sessionDays.length > 0 && (
           <Box className="px-5 py-4">
-            <SessionDates dates={sessionDays} />
+            {converting ? (
+              <Box>
+                <Box className="flex items-center gap-1.5 mb-2.5">
+                  <CalendarDays className="h-3.5 w-3.5 text-foreground-subtle" />
+                  <Text as="span" className="text-[11px] uppercase tracking-wide text-foreground-subtle">
+                    {tzConv.rows.length} Session{tzConv.rows.length !== 1 ? "s" : ""} · {viewTz}
+                  </Text>
+                </Box>
+                <Box className="flex flex-wrap gap-2">
+                  {tzConv.rows.map((r) => (
+                    <Text as="span" key={r.day} className="rounded-lg border border-primary-border bg-primary-subtle text-primary px-2.5 py-1 text-xs font-medium">
+                      Day {r.day} · {r.date} · {r.start}{r.end ? `–${r.end}` : ""}
+                    </Text>
+                  ))}
+                </Box>
+              </Box>
+            ) : (
+              <SessionDates dates={sessionDays} />
+            )}
           </Box>
         )}
       </Card>
@@ -331,15 +386,6 @@ export function SessionsPanel({ trainingRef, token }) {
         </Card>
       ) : null}
 
-      {/* Timezone converter — helps the trainer see the session start in their own zone */}
-      {sessions.length > 0 && (
-        <SessionTimezoneConverter
-          sessions={sessions}
-          sourceZoneCode={data.timezone}
-          sourceCountryCode={data.country_code}
-        />
-      )}
-
       <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
         <Box className="px-5 py-4 border-b border-border flex items-center gap-2.5">
           <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
@@ -360,9 +406,15 @@ export function SessionsPanel({ trainingRef, token }) {
             </Box>
           ) : (
             <Box className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-              {sessions.map((s) => (
-                <SessionItem key={s.id ?? s.day_number} session={s} token={token} onSaved={onSaved} timezone={data.timezone} />
-              ))}
+              {sessions.map((s) => {
+                const conv = converting ? tzRowByDay[s.day_number] : null;
+                const when = conv
+                  ? `${conv.date} · ${conv.start}${conv.end ? ` – ${conv.end}` : ""} ${conv.abbr}`
+                  : null;
+                return (
+                  <SessionItem key={s.id ?? s.day_number} session={s} token={token} onSaved={onSaved} timezone={data.timezone} when={when} />
+                );
+              })}
             </Box>
           )}
         </Box>
@@ -452,7 +504,7 @@ export function SessionsPanel({ trainingRef, token }) {
 
 /* ── Training picker card ── */
 function TrainingCard({ training, active, onClick }) {
-  const statusCfg = STATUS_CONFIG[training.status] || STATUS_CONFIG.active;
+  const statusCfg = statusBadge(training);
   return (
     <Card
       onClick={onClick}
@@ -463,7 +515,7 @@ function TrainingCard({ training, active, onClick }) {
           <Hash className="h-3.5 w-3.5 text-primary" />
           <Text as="span" className="text-xs font-semibold tracking-wide text-primary">{training.code}</Text>
         </Box>
-        <Badge className={`text-[10px] border-0 ${statusCfg.color}`}>{statusCfg.label}</Badge>
+        <Badge className={`text-[10px] border-0 ${statusCfg.badge}`}>{statusCfg.label}</Badge>
       </Box>
       <Box className="p-4 space-y-2.5">
         <Text as="h3" className="text-sm font-bold text-foreground leading-snug line-clamp-2">{training.title}</Text>
@@ -496,6 +548,15 @@ export function TrainerSessions() {
       .then((d) => setTrainings(d.trainings || []))
       .catch((e) => (e?.pending ? setPending(true) : setError(e.message)));
   }, [token, user]);
+
+  // Called unconditionally (before any early return) to satisfy the Rules of Hooks.
+  const { filtered, bar } = useTrainingFilters(trainings || [], {
+    initialStatus: "all",
+    searchPlaceholder: "Search by training ID, event code or title...",
+    // "Due for update" prompts an admin-only status change — a trainer can't act
+    // on it, so the chip is hidden here.
+    showDue: false,
+  });
 
   if (pending) return <PendingState what="The trainings your admin assigns to you" />;
 
@@ -531,12 +592,17 @@ export function TrainerSessions() {
 
   return (
     <Box className="space-y-5">
-      <Box>
-        <Text as="h3" className="text-[11px] uppercase tracking-wider text-foreground-subtle font-semibold mb-3">
-          Assigned Trainings
-        </Text>
+      {bar}
+      {filtered.length === 0 ? (
+        <Card className="flex flex-col items-center justify-center px-6 py-14 text-center rounded-2xl border border-slate-200/80 shadow-sm">
+          <Box className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-muted">
+            <Inbox className="h-7 w-7 text-foreground-muted" />
+          </Box>
+          <Text as="p" className="mt-4 text-sm font-semibold text-foreground-muted">No trainings match your filters</Text>
+        </Card>
+      ) : (
         <Box className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {trainings.map((t) => {
+          {filtered.map((t) => {
             const ref = t.id ?? t.code;
             return (
               <Link key={ref} href={`/trainer/sessions/${ref}`} className="block">
@@ -545,7 +611,7 @@ export function TrainerSessions() {
             );
           })}
         </Box>
-      </Box>
+      )}
     </Box>
   );
 }
