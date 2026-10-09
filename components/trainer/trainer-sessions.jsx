@@ -57,12 +57,6 @@ const STATUS_CONFIG = {
   suspended: { label: "Suspended", color: "bg-error-subtle text-error-subtle-foreground" },
 };
 
-const PARTICIPANT_STATUS_CONFIG = {
-  confirmed: { label: "Confirmed", color: "bg-success-subtle text-success-subtle-foreground" },
-  cancelled: { label: "Cancelled", color: "bg-error-subtle text-error" },
-  transferred: { label: "Transferred", color: "bg-surface-muted text-foreground-muted" },
-};
-
 const PLATFORM_LABEL = { zoom: "Zoom", teams: "Microsoft Teams", other: "Meeting" };
 
 // Scheduled dates print exactly as sent. See `lib/datetime`.
@@ -456,31 +450,24 @@ export function SessionsPanel({ trainingRef, token }) {
                     <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                       <Box className="flex items-center gap-1"><Globe className="h-3 w-3" /> Country</Box>
                     </TableHead>
-                    <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {participants.map((p) => {
-                    const cfg = PARTICIPANT_STATUS_CONFIG[p.status] || PARTICIPANT_STATUS_CONFIG.confirmed;
-                    return (
-                      <TableRow key={p.enrolment_id} className="hover:bg-slate-50/70 transition-colors border-b border-slate-100/80 last:border-0">
-                        <TableCell className="py-3.5 align-top">
-                          <Text as="p" className="font-semibold text-foreground text-sm leading-tight">{p.name}</Text>
-                          <Box className="flex items-center gap-1 mt-0.5">
-                            <Briefcase className="h-3 w-3 shrink-0 text-foreground-subtle" />
-                            <Text as="span" className="text-[11px] text-foreground-subtle">{p.job_title || "Job title not shared"}</Text>
-                          </Box>
-                        </TableCell>
-                        <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{blank(p.industry)}</TableCell>
-                        <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{blank(p.department)}</TableCell>
-                        <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{formatExperience(p.experience_years)}</TableCell>
-                        <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{blank(p.country)}</TableCell>
-                        <TableCell className="py-3.5 align-top">
-                          <Badge className={`border-0 text-[10px] font-medium ${cfg.color}`}>{cfg.label}</Badge>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {participants.map((p) => (
+                    <TableRow key={p.enrolment_id} className="hover:bg-slate-50/70 transition-colors border-b border-slate-100/80 last:border-0">
+                      <TableCell className="py-3.5 align-top">
+                        <Text as="p" className="font-semibold text-foreground text-sm leading-tight">{p.name}</Text>
+                        <Box className="flex items-center gap-1 mt-0.5">
+                          <Briefcase className="h-3 w-3 shrink-0 text-foreground-subtle" />
+                          <Text as="span" className="text-[11px] text-foreground-subtle">{p.job_title || "Job title not shared"}</Text>
+                        </Box>
+                      </TableCell>
+                      <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{blank(p.industry)}</TableCell>
+                      <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{blank(p.department)}</TableCell>
+                      <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{formatExperience(p.experience_years)}</TableCell>
+                      <TableCell className="py-3.5 align-top text-foreground-muted text-sm">{blank(p.country)}</TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </Box>
