@@ -27,10 +27,14 @@ import {
   Network,
   GraduationCap,
   Globe,
+  ArrowLeft,
+  ClipboardCheck,
 } from "lucide-react";
+import Link from "next/link";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
+import { AttendanceGrid } from "@/components/trainer/trainer-attendance";
 import { SessionTimezoneConverter } from "@/components/shared/timezone-converter";
 import { SessionDates, sessionDatesOf } from "@/components/shared/session-dates";
 import { formatDate as fmtDate, formatDateTime as fmtDateTime, formatTime as fmtTime, timezoneLabel } from "@/lib/datetime";
@@ -186,8 +190,8 @@ function SessionItem({ session, token, onSaved, timezone }) {
   );
 }
 
-/* ── Sessions panel for the selected training ── */
-function SessionsPanel({ trainingRef, token }) {
+/* ── Full single-page view for one training (details + topics + attendance) ── */
+export function SessionsPanel({ trainingRef, token }) {
   const [data, setData] = useState(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
@@ -228,8 +232,24 @@ function SessionsPanel({ trainingRef, token }) {
   const participants = data.participants || [];
   const sessionDays = sessionDatesOf(data);
 
+  const statusCfg = STATUS_CONFIG[data.status] || STATUS_CONFIG.active;
+  const modeLabel = { virtual: "Live Virtual", in_person: "In Person", hybrid: "Hybrid", one_to_one: "One-to-One" }[data.delivery_mode] || data.delivery_mode;
+
   return (
     <Box className="space-y-5">
+      {/* Training header */}
+      <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
+        <Box className="bg-[#d7e3fc] border-b border-primary-border px-6 py-5">
+          <Box className="flex flex-wrap items-center gap-2 mb-2">
+            <Hash className="h-4 w-4 text-primary" />
+            <Text as="span" className="text-sm font-mono font-semibold tracking-wide text-primary">{data.training_id}</Text>
+            <Badge className={`border-0 text-[10px] font-semibold ${statusCfg.color}`}>{statusCfg.label}</Badge>
+            {modeLabel && <Badge className="border-0 bg-white/70 text-foreground-muted text-[10px] font-medium ring-1 ring-border">{modeLabel}</Badge>}
+          </Box>
+          <Text as="h2" className="text-xl font-bold text-foreground leading-tight">{data.title}</Text>
+        </Box>
+      </Card>
+
       {/* Schedule — the training's date range plus the exact days it runs on */}
       <Card className="p-0 overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm">
         <Box className="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-4 border-b border-border">
@@ -415,6 +435,17 @@ function SessionsPanel({ trainingRef, token }) {
           )}
         </Box>
       </Card>
+
+      {/* Attendance — mark participants per session, saved on this page (no separate tab) */}
+      <Box className="space-y-2.5">
+        <Box className="flex items-center gap-2.5">
+          <Box className="w-8 h-8 rounded-lg bg-primary-subtle flex items-center justify-center">
+            <ClipboardCheck className="h-4 w-4 text-primary" />
+          </Box>
+          <Text as="h3" className="text-sm font-bold text-foreground">Attendance</Text>
+        </Box>
+        <AttendanceGrid token={token} trainingRef={trainingRef} />
+      </Box>
     </Box>
   );
 }
@@ -456,18 +487,13 @@ function TrainingCard({ training, active, onClick }) {
 export function TrainerSessions() {
   const { token, user } = useAuth();
   const [trainings, setTrainings] = useState(null);
-  const [selected, setSelected] = useState(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!token || !user) return;
     fetchMyTrainings({ token })
-      .then((d) => {
-        const list = d.trainings || [];
-        setTrainings(list);
-        if (list.length) setSelected(list[0].id ?? list[0].code);
-      })
+      .then((d) => setTrainings(d.trainings || []))
       .catch((e) => (e?.pending ? setPending(true) : setError(e.message)));
   }, [token, user]);
 
@@ -513,13 +539,36 @@ export function TrainerSessions() {
           {trainings.map((t) => {
             const ref = t.id ?? t.code;
             return (
-              <TrainingCard key={ref} training={t} active={selected === ref} onClick={() => setSelected(ref)} />
+              <Link key={ref} href={`/trainer/sessions/${ref}`} className="block">
+                <TrainingCard training={t} />
+              </Link>
             );
           })}
         </Box>
       </Box>
+    </Box>
+  );
+}
 
-      {selected && <SessionsPanel trainingRef={selected} token={token} />}
+/* ── Single training view (opened from the Sessions list) ── */
+export function TrainerTrainingView({ trainingRef }) {
+  const { token } = useAuth();
+
+  return (
+    <Box className="space-y-5">
+      <Link
+        href="/trainer/sessions"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground-muted hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" /> Back to trainings
+      </Link>
+      {token ? (
+        <SessionsPanel trainingRef={trainingRef} token={token} />
+      ) : (
+        <Box className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
+        </Box>
+      )}
     </Box>
   );
 }

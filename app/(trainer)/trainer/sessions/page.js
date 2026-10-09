@@ -11,8 +11,8 @@ export default function TrainerSessionsPage() {
           <CalendarDays className="w-6 h-6 text-primary-foreground" />
         </Box>
         <Box>
-          <Text as="h1" className="text-xl font-bold text-foreground leading-tight">Sessions</Text>
-          <Text as="p" className="text-foreground-muted text-xs mt-0.5">Set day-wise topics for your trainings — learners see these immediately.</Text>
+          <Text as="h1" className="text-xl font-bold text-foreground leading-tight">Trainings</Text>
+          <Text as="p" className="text-foreground-muted text-xs mt-0.5">Open a training to manage its sessions — day-wise topics and attendance, all on one page.</Text>
         </Box>
       </Box>
       <TrainerSessions />

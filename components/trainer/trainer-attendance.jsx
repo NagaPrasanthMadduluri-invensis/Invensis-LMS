@@ -118,7 +118,7 @@ function AttendanceCell({ status, onSet, locked = false }) {
 }
 
 /* ── Attendance grid for the selected training ── */
-function AttendanceGrid({ token, trainingRef }) {
+export function AttendanceGrid({ token, trainingRef }) {
   const [data, setData] = useState(null); // { sessions, participants, trainingStatus }
   const [marks, setMarks] = useState({}); // { [sessionId]: { [participantId]: status } }
   const [dirty, setDirty] = useState(() => new Set());
