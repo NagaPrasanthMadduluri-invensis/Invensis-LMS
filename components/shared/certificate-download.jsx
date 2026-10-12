@@ -17,6 +17,24 @@ import {
   documentSpec, generateCertificatePdf, certificatePdfName,
 } from "@/components/shared/certificate-document";
 
+/* The verification QR is produced asynchronously (QRCode.toDataURL → state →
+   <img>), so it can still be missing from the DOM one frame after the certificate
+   mounts. Snapshotting then bakes the empty fallback box into the PDF. Wait for
+   the QR <img> to render and decode before capture; time out so a QR that
+   genuinely failed to generate can't hang the download. */
+async function waitForQr(node, { timeout = 4000 } = {}) {
+  const deadline = performance.now() + timeout;
+  for (;;) {
+    const img = node.querySelector("img[data-qr]");
+    if (img) {
+      if (img.complete && img.naturalWidth > 0) return;
+      try { await img.decode(); return; } catch { /* not ready yet — retry */ }
+    }
+    if (performance.now() >= deadline) return;
+    await new Promise((r) => requestAnimationFrame(() => r()));
+  }
+}
+
 /* ── PDF viewer dialog ──
    Shows a spinner while the PDF is generated, then embeds it in the browser's
    native PDF viewer and offers a direct download. */
@@ -103,6 +121,9 @@ export function useCertificateDownload() {
         return;
       }
       try {
+        // The QR renders a frame or two after mount; wait for it before snapshot.
+        await waitForQr(node);
+        if (cancelled) return;
         const { width, height } = documentSpec(captureCert);
         const blob = await generateCertificatePdf(node, { width, height });
         if (cancelled) return;

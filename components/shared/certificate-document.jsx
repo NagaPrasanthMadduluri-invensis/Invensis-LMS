@@ -438,7 +438,7 @@ function AttendanceLetterCanvas({ cert }) {
         <Box className="mt-7">
           {qrUrl ? (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={qrUrl} alt={`Scan to verify ${cert.certificate_id}`} width={104} height={104} className="block" />
+            <img data-qr="" src={qrUrl} alt={`Scan to verify ${cert.certificate_id}`} width={104} height={104} className="block" />
           ) : (
             <Box className="h-[104px] w-[104px] bg-surface-muted" />
           )}
@@ -668,7 +668,7 @@ function CertificateCanvas({ cert }) {
       <Box className="absolute right-[96px] bottom-[54px] text-center" style={{ fontFamily: FONT_BODY }}>
         {qrUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={qrUrl} alt={`Scan to verify certificate ${cert.certificate_id}`} width={104} height={104} className="mx-auto block" />
+          <img data-qr="" src={qrUrl} alt={`Scan to verify certificate ${cert.certificate_id}`} width={104} height={104} className="mx-auto block" />
         ) : (
           <Box className="mx-auto h-[104px] w-[104px] bg-surface-muted" />
         )}
