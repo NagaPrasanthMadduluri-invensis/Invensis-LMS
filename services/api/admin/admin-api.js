@@ -17,6 +17,20 @@ export async function fetchAdminTrainingDetail({ token, trainingRef }) {
   return apiClient(`/admin/trainings/${trainingRef}`, { token });
 }
 
+/** GET /admin/trainings/tracker → { trainings:[…] } for the sales tracker grid. */
+export async function fetchTrainingTracker({ token }) {
+  return apiClient("/admin/trainings/tracker", { token });
+}
+
+/** PATCH /admin/trainings/:trainingRef/zoom-id { zoom_id } → { training }. */
+export async function updateTrainingZoomId({ token, trainingRef, zoomId }) {
+  return apiClient(`/admin/trainings/${trainingRef}/zoom-id`, {
+    method: "PATCH",
+    token,
+    body: { zoom_id: zoomId },
+  });
+}
+
 /**
  * GET /admin/trainers → { trainers: [...] }
  * Each trainer: { id, name, email, bio, experience, rate, certificates,
