@@ -586,7 +586,12 @@ function TransferDialog({ participant, onOpenChange, token, currentTrainingId, o
             <Field label="Target training" required>
               <Select value={target} onValueChange={setTarget}>
                 <SelectTrigger style={{height:"44px",borderRadius:"12px",backgroundColor:"white",borderColor:"rgb(226,232,240)",boxShadow:"0 1px 2px 0 rgba(0,0,0,0.05)"}}>
-                  <SelectValue placeholder={trainings ? "Choose a training" : "Loading…"} />
+                  <SelectValue placeholder={trainings ? "Choose a training" : "Loading…"}>
+                    {(val) => {
+                      const o = options.find((t) => t.id === val);
+                      return o ? `${o.code} · ${o.title}` : (trainings ? "Choose a training" : "Loading…");
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {options.map((t) => (
