@@ -328,3 +328,22 @@
     box-shadow: none !important;
   }
 }
+
+/* ── Webinar announcement marquee (learner + sponsor shells) ──
+   The track holds the message twice; sliding it by half its width loops
+   seamlessly. Pauses on hover so the CTA stays readable, and honours
+   reduced-motion by standing still. */
+@keyframes webinar-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.webinar-marquee {
+  animation: webinar-marquee 30s linear infinite;
+  will-change: transform;
+}
+.webinar-marquee:hover {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .webinar-marquee { animation: none; }
+}

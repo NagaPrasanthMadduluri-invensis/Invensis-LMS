@@ -79,7 +79,9 @@ export function LearnerSidebar() {
   );
 
   return (
-    <Sidebar collapsible="icon">
+    // top-24 (not the default top-16) leaves room for the 32px webinar banner
+    // that sits below the top nav in this shell.
+    <Sidebar collapsible="icon" className="top-24">
       <SidebarBrandHeader
         icon={GraduationCap}
         title="Invensis Learning"

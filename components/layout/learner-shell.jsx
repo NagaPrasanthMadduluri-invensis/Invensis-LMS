@@ -8,6 +8,7 @@ import { ProfileCompletionProvider } from "@/providers/profile-completion-provid
 import { ProfileCompletionModal } from "@/components/layout/profile-completion-modal";
 import { SessionLiveIndicator } from "@/components/learner/session-live-indicator";
 import { HelpWidget } from "@/components/layout/help-widget";
+import { WebinarBanner } from "@/components/layout/webinar-banner";
 import Box from "@/components/ui/box";
 
 export function LearnerShell({ children }) {
@@ -19,6 +20,7 @@ export function LearnerShell({ children }) {
             {/* The live-session pill is learner-only, so the shell injects it
                 rather than TopNav branching on portal. */}
             <TopNav portalLabel="Invensis Learning" statusSlot={<SessionLiveIndicator />} />
+            <WebinarBanner />
             <Box className="flex flex-1 overflow-hidden bg-sidebar">
               <LearnerSidebar />
               <Box as="main" className="flex-1 overflow-auto p-6 bg-background">
