@@ -64,7 +64,7 @@ export function TicketThread({ messages = [], viewerRole, onSend, onEdit, sendin
   }
 
   return (
-    <Box className="flex flex-col min-h-0">
+    <Box className="flex flex-1 flex-col min-h-0">
       {/* Thread */}
       <Box className="flex-1 overflow-y-auto space-y-4 pr-1">
         {messages.length === 0 ? (
@@ -98,7 +98,7 @@ export function TicketThread({ messages = [], viewerRole, onSend, onEdit, sendin
                         rows={3}
                         maxLength={4000}
                         autoFocus
-                        className="bg-surface border-border rounded-xl text-sm resize-none"
+                        className="max-h-48 overflow-y-auto bg-surface border-border rounded-xl text-sm resize-none"
                       />
                       <Box className="flex items-center gap-2 justify-end">
                         <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} disabled={savingEdit}
@@ -152,7 +152,7 @@ export function TicketThread({ messages = [], viewerRole, onSend, onEdit, sendin
               placeholder="Write a reply…  (Enter to send, Shift+Enter for a new line)"
               rows={2}
               maxLength={4000}
-              className="flex-1 bg-surface border-border rounded-xl text-sm resize-none focus-visible:ring-2 focus-visible:ring-violet-400/40 focus-visible:border-primary-border"
+              className="flex-1 max-h-32 overflow-y-auto bg-surface border-border rounded-xl text-sm resize-none focus-visible:ring-2 focus-visible:ring-violet-400/40 focus-visible:border-primary-border"
             />
             <Button
               onClick={send}
