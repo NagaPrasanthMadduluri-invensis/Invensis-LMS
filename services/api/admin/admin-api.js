@@ -529,6 +529,15 @@ export async function replyToAdminTicket({ token, ticketId, body }) {
   return apiClient(`/admin/tickets/${ticketId}/messages`, { method: "POST", token, body: { body } });
 }
 
+/**
+ * PATCH /admin/tickets/:ticketId/messages/:messageId { body } — edit an admin
+ * message (allowed only before the participant replies after it). Returns the
+ * full { ticket } with updated messages[].
+ */
+export async function editAdminTicketMessage({ token, ticketId, messageId, body }) {
+  return apiClient(`/admin/tickets/${ticketId}/messages/${messageId}`, { method: "PATCH", token, body: { body } });
+}
+
 /* ──────────────────────────────────────
    ORDERS (proxied from xCRM)
    ────────────────────────────────────── */

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, MessagesSquare, Lock } from "lucide-react";
+import { Send, MessagesSquare, Lock, Pencil, Check, X } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { formatInstantDateTime } from "@/lib/datetime";
@@ -21,13 +21,33 @@ function formatTime(iso) {
  * Conversation thread + reply composer, shared by the learner and admin ticket
  * views. `viewerRole` decides which bubbles are "mine" (right-aligned, indigo).
  */
-export function TicketThread({ messages = [], viewerRole, onSend, sending = false, disabled = false, disabledHint }) {
+export function TicketThread({ messages = [], viewerRole, onSend, onEdit, sending = false, disabled = false, disabledHint }) {
   const [text, setText] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
   const endRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
+
+  function startEdit(m) {
+    setEditingId(m.id);
+    setEditText(m.body);
+  }
+
+  async function saveEdit(id) {
+    const body = editText.trim();
+    if (!body || savingEdit) return;
+    setSavingEdit(true);
+    try {
+      await onEdit(id, body);
+      setEditingId(null);
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   async function send() {
     const body = text.trim();
@@ -63,18 +83,51 @@ export function TicketThread({ messages = [], viewerRole, onSend, sending = fals
                 <Box className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${isAdmin ? "bg-primary-subtle text-primary" : "bg-success-subtle text-success-subtle-foreground"}`}>
                   {initialsOf(m.author_name)}
                 </Box>
-                <Box className={`max-w-[78%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
+                <Box className={`group max-w-[78%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
                   <Box className={`flex items-center gap-1.5 mb-1 ${mine ? "flex-row-reverse" : "flex-row"}`}>
                     <Text as="span" className="text-[11px] font-semibold text-foreground-muted">{m.author_name}</Text>
                     <Text as="span" className="text-[10px] text-foreground-subtle">{formatTime(m.created_at)}</Text>
+                    {m.edited_at && <Text as="span" className="text-[10px] italic text-foreground-subtle">· edited</Text>}
                   </Box>
-                  <Box className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed break-words whitespace-pre-wrap ${
-                    mine
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : "bg-surface-muted text-foreground rounded-bl-md"
-                  }`}>
-                    {m.body}
-                  </Box>
+
+                  {editingId === m.id ? (
+                    <Box className="w-full min-w-[260px] flex flex-col gap-2">
+                      <Textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        rows={3}
+                        maxLength={4000}
+                        autoFocus
+                        className="bg-surface border-border rounded-xl text-sm resize-none"
+                      />
+                      <Box className="flex items-center gap-2 justify-end">
+                        <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} disabled={savingEdit}
+                          className="h-8 px-3 text-foreground-muted text-xs">
+                          <X className="h-3.5 w-3.5 mr-1" /> Cancel
+                        </Button>
+                        <Button size="sm" onClick={() => saveEdit(m.id)} disabled={savingEdit || !editText.trim()}
+                          className="h-8 px-3 bg-primary hover:bg-primary-hover text-primary-foreground text-xs">
+                          <Check className="h-3.5 w-3.5 mr-1" /> {savingEdit ? "Saving…" : "Save"}
+                        </Button>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <>
+                      <Box className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed break-words whitespace-pre-wrap ${
+                        mine
+                          ? "bg-primary text-primary-foreground rounded-br-md"
+                          : "bg-surface-muted text-foreground rounded-bl-md"
+                      }`}>
+                        {m.body}
+                      </Box>
+                      {onEdit && mine && m.editable && (
+                        <button type="button" onClick={() => startEdit(m)}
+                          className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium text-foreground-subtle opacity-0 transition-opacity group-hover:opacity-100 hover:text-primary">
+                          <Pencil className="h-3 w-3" /> Edit
+                        </button>
+                      )}
+                    </>
+                  )}
                 </Box>
               </Box>
             );

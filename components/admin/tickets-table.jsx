@@ -23,7 +23,7 @@ import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import { formatInstantDate, formatInstantDateTime } from "@/lib/datetime";
 import { markTicketSeen } from "@/lib/ticket-unread";
-import { fetchAdminTickets, fetchAdminTicket, updateTicketStatus, replyToAdminTicket } from "@/services/api/admin/admin-api";
+import { fetchAdminTickets, fetchAdminTicket, updateTicketStatus, replyToAdminTicket, editAdminTicketMessage } from "@/services/api/admin/admin-api";
 import { STATUS_META, PRIORITY_META, categoryLabel, TICKET_CATEGORIES } from "@/lib/ticket-meta";
 import { TicketThread } from "@/components/shared/ticket-thread";
 import { ParticipantLink, TrainingLink } from "@/components/admin/entity-links";
@@ -107,6 +107,12 @@ function TicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }) {
     }
   }
 
+  async function editMessage(messageId, body) {
+    const res = await editAdminTicketMessage({ token, ticketId: t.id, messageId, body });
+    setDetail(res.ticket);
+    onChanged?.(res.ticket);
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="!max-w-none w-full sm:!max-w-xl p-0 gap-0 flex flex-col">
@@ -178,6 +184,7 @@ function TicketDrawer({ ticketRow, open, onOpenChange, token, onChanged }) {
             messages={detail?.messages || []}
             viewerRole="admin"
             onSend={sendReply}
+            onEdit={editMessage}
             sending={sending}
             disabled={isClosed}
             disabledHint="This ticket is closed. Reopen it to reply."
