@@ -895,7 +895,10 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
   /* ── Derived: previews ── */
   const startMins = minutesOf(times.start_time);
   const endMins = minutesOf(times.end_time);
-  const perDayMins = startMins != null && endMins != null && endMins > startMins ? endMins - startMins : null;
+  // A daily window may cross midnight (end earlier than start = next day), so
+  // wrap into [0,1440). null only when start == end (a zero-length day).
+  const perDayMins =
+    startMins != null && endMins != null ? (((endMins - startMins) % 1440) + 1440) % 1440 || null : null;
 
   const dayCount = picked.length;
   const newStart = picked[0] || null;
@@ -941,7 +944,7 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
   async function submit() {
     if (!windowValid) { setError("The window's end date must be on or after its start date."); return; }
     if (!dayCount) { setError("Pick at least one training day on the calendar."); return; }
-    if (perDayMins == null) { setError("The daily end time must be after the start time."); return; }
+    if (perDayMins == null) { setError("The daily end time can't be the same as the start time."); return; }
     setSubmitting(true); setError(null);
     try {
       const { training } = await rescheduleTraining({
@@ -1106,7 +1109,7 @@ function RescheduleDialog({ open, onOpenChange, token, trainingRef, detail, onDo
               </Box>
             </Box>
             {startMins != null && endMins != null && perDayMins == null && (
-              <Text as="p" className="text-[11px] text-warning">The end time must be after the start time.</Text>
+              <Text as="p" className="text-[11px] text-warning">The end time can&apos;t be the same as the start time.</Text>
             )}
           </Box>
 
