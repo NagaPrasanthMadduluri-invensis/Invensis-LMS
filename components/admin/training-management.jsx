@@ -319,7 +319,7 @@ function AssignTrainerDialog({ open, onOpenChange, token, trainingRef, currentTr
                 >
                   {(trainers || []).map((t) => (
                     <option key={t.id} value={t.id} disabled={t.id === currentTrainerId}>
-                      {t.name}{t.id === currentTrainerId ? " (current)" : ""}{t.experience ? ` · ${t.experience}` : ""}
+                      {t.name}{t.email ? ` · ${t.email}` : ""}{t.id === currentTrainerId ? " (current)" : ""}
                     </option>
                   ))}
                 </FSelect>
