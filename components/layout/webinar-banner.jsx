@@ -13,7 +13,7 @@ const WEBINAR_URL =
   "https://www.invensislearning.com/webinar/new-pmp-exam-what-has-changed-how-should-you-prepare/";
 
 const MESSAGE =
-  "UPCOMING WEBINAR  ·  The New PMP Exam: What Has Changed and How Should You Prepare?  ·  Oct 22, 2026 · 1:00–2:00 PM EST  ·  60 mins  ·  Speaker: Youssef Belaid";
+  "UPCOMING WEBINAR  ·  The New PMP Exam: What Has Changed and How Should You Prepare?  ·  Nov 24, 2026 · 8:00–9:00 AM EST  ·  60 mins  ·  Speaker: Youssef Belaid";
 
 export function WebinarBanner() {
   return (
