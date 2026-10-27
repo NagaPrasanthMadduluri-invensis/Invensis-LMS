@@ -471,7 +471,6 @@ function CertificateCanvas({ cert }) {
   // never recorded them.
   const dateText =
     sessionDatesText(cert.session_dates) || certificateDateText(cert.start_date, cert.end_date);
-  const pdus = cert.pdus ?? null;
   const qrUrl = useQrDataUrl(cert.certificate_id);
   const centerRef = useRef(null);
   const datesRef = useRef(null);
@@ -535,48 +534,12 @@ function CertificateCanvas({ cert }) {
         <img src="/invensis-learning-logo.png" alt="Invensis Learning" width={210} height={51} className="block" />
       </Box>
 
-      {/* Certified badge (top right), with the PDU count beneath it */}
+      {/* Certified badge (top right). PDUs are deliberately NOT shown on the
+          certificate — they live in the LMS (learner Certificates page, admin
+          certificate management) instead, to keep the printed credential clean. */}
       <Box className="absolute top-[36px] right-[60px] flex flex-col items-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/certified-badge.png" alt="Invensis Learning Certified" width={118} height={118} className="block" />
-        {pdus != null && (
-          /* Gold "35 PDUs" pill, matched to the certified seal above it.
-             Built from stacked gradient layers rather than one background with
-             an inset shadow: html2canvas-pro rasterises linear-gradients
-             faithfully but drops inset box-shadows, so the sheen has to be a
-             real element or it vanishes from the downloaded PDF. */
-          <Box className="relative mt-1 overflow-hidden rounded-full ring-1 ring-[#8f5f14]/60">
-            {/* Base metal, graded LEFT TO RIGHT. Previously this ran top-to-
-                bottom with a bright stop at 50%, which painted a light stripe
-                straight across the middle of the pill — the banding has to run
-                the same way as the glaze or the two cross and produce that
-                stripe. */}
-            <Box
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(90deg,#8f5f14 0%,#c7942f 12%,#e8c45a 30%,#f7e694 46%,#e0b34e 62%,#c7942f 80%,#8f5f14 100%)",
-              }}
-            />
-            {/* Glaze: a soft sheen travelling left to right, peaking just past
-                the middle where the base is brightest, so the highlight lands
-                on the metal's own light band instead of fighting it. */}
-            <Box
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.30) 30%,rgba(255,255,255,0.55) 46%,rgba(255,255,255,0.18) 66%,rgba(255,255,255,0) 100%)",
-              }}
-            />
-            <Box
-              as="span"
-              className="relative block px-4 py-[3px] text-[13px] font-bold text-[#4a3105]"
-              style={{ fontFamily: FONT_BODY }}
-            >
-              {pdus} PDUs
-            </Box>
-          </Box>
-        )}
       </Box>
 
       {/* Center content — `top` is owned by useFitCenterBlock (see above). */}
@@ -655,12 +618,6 @@ function CertificateCanvas({ cert }) {
           <Box as="p" className={`text-[17px] font-bold tracking-wide ${INK_NAVY}`}>{cert.course_identifier || "—"}</Box>
           <Box as="p" className={`text-[12.5px] mt-1 ${INK_BLACK}`}>Course Identifier</Box>
         </Box>
-        {cert.pdu_claim_code && (
-          <Box>
-            <Box as="p" className={`text-[17px] font-bold tracking-wide ${INK_NAVY}`}>{cert.pdu_claim_code}</Box>
-            <Box as="p" className={`text-[12.5px] mt-1 ${INK_BLACK}`}>PDU Claim Code</Box>
-          </Box>
-        )}
       </Box>
 
       {/* Footer — verification QR (right), in place of the signature block.

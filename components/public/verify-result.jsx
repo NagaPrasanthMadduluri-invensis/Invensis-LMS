@@ -4,10 +4,14 @@
  * Certificate verification result.
  *
  * Mirrors the four states in the reference design:
- *   1. Certificate of Training, PMI course with PDUs → PDU seal + accreditation
- *   2. Certificate of Training, non-PMI              → same card, seal omitted
- *   3. Letter of Course Attendance                   → amber banner + advisory
- *   4. Not found                                     → the empty state
+ *   1. Certificate of Training, PMI course → PMI® accreditation mark
+ *   2. Certificate of Training, non-PMI    → same card, Invensis line instead
+ *   3. Letter of Course Attendance         → amber banner + advisory
+ *   4. Not found                           → the empty state
+ *
+ * PDU details are deliberately not shown here — they live in the LMS (the
+ * learner's Certificates page, admin certificate management), not on the public
+ * credential or its verification page.
  *
  * State 3 is driven by `credential_type` from the API: a certification course
  * that INCLUDES the certification is examined by the awarding body, so Invensis
@@ -139,14 +143,6 @@ export function VerifiedCertificate({ certificate: c }) {
             )}
           </Text>
         </Box>
-        {/* PDU seal — never on an attendance letter: no qualification is claimed. */}
-        {!isAttendance && c.pdus != null && (
-          <Box className="flex h-[74px] w-[74px] shrink-0 flex-col items-center justify-center rounded-full text-[#4a3105] ring-2 ring-[#8f5f14]/50"
-               style={{ background: "linear-gradient(90deg,#8f5f14 0%,#c7942f 12%,#e8c45a 30%,#f7e694 46%,#e0b34e 62%,#c7942f 80%,#8f5f14 100%)" }}>
-            <Text as="span" className="text-xl font-extrabold leading-none">{c.pdus}</Text>
-            <Text as="span" className="text-[10px] font-bold tracking-wide">PDUs</Text>
-          </Box>
-        )}
       </Box>
 
       {/* Holder */}
@@ -169,11 +165,10 @@ export function VerifiedCertificate({ certificate: c }) {
             carries no Certificate ID, because no certificate was awarded. */}
         {!isAttendance && <Detail label="Certificate ID" value={c.certificate_id} mono />}
         <Detail label="Training ID" value={c.training_id} mono />
-        {/* Course Identifier and the claim code are PMI accreditation fields —
-            a non-certification course has neither, so the rows are omitted
-            rather than shown empty. */}
+        {/* Course Identifier is a PMI accreditation field — a non-certification
+            course has none, so the row is omitted rather than shown empty. PDU
+            details are intentionally not shown here; they live in the LMS. */}
         {!isAttendance && c.is_certification && <Detail label="Course Identifier" value={c.course_identifier} mono />}
-        {!isAttendance && c.pdu_claim_code && <Detail label="PDU Claim Code" value={c.pdu_claim_code} mono />}
         <Detail label="Training Mode" value={c.training_mode} />
         <Detail label="Date of Issue" value={formatInstantDate(c.issued_at)} />
         <Detail label="Training Dates" value={dates} full />
@@ -185,12 +180,7 @@ export function VerifiedCertificate({ certificate: c }) {
           <Text as="p" className="text-[11px] font-semibold uppercase tracking-wide text-foreground-muted">Accreditation</Text>
           <Box className="mt-1 flex flex-wrap gap-1.5">
             {c.is_certification ? (
-              <>
-                <Text as="span" className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-semibold text-foreground">PMI®</Text>
-                {c.pdus != null && (
-                  <Text as="span" className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-semibold text-foreground">{c.pdus} PDUs</Text>
-                )}
-              </>
+              <Text as="span" className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-semibold text-foreground">PMI®</Text>
             ) : (
               <Text as="span" className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-semibold text-foreground">
                 Invensis Certified Learning

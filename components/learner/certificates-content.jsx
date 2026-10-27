@@ -191,7 +191,9 @@ function CertificateCard({ cert, survey, onDownload, onGiveFeedback }) {
           )}
         </Box>
 
-        <Box className="flex items-center gap-4 text-xs">
+        {/* PDUs and the claim code are shown here, in the LMS, rather than on the
+            certificate itself — the printed credential is kept clean. */}
+        <Box className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
           <Box>
             <Text as="p" className="text-[10px] uppercase tracking-wide text-foreground-subtle">Training ID</Text>
             <Text as="p" className="font-mono font-semibold text-foreground">{cert.training_id || "—"}</Text>
@@ -200,6 +202,18 @@ function CertificateCard({ cert, survey, onDownload, onGiveFeedback }) {
             <Text as="p" className="text-[10px] uppercase tracking-wide text-foreground-subtle">Certificate ID</Text>
             <Text as="p" className="font-mono font-semibold text-foreground">{cert.issued ? cert.certificate_id : "—"}</Text>
           </Box>
+          {cert.pdus != null && (
+            <Box>
+              <Text as="p" className="text-[10px] uppercase tracking-wide text-foreground-subtle">PDUs</Text>
+              <Text as="p" className="font-semibold text-foreground">{cert.pdus}</Text>
+            </Box>
+          )}
+          {cert.pdu_claim_code && (
+            <Box>
+              <Text as="p" className="text-[10px] uppercase tracking-wide text-foreground-subtle">PDU Claim Code</Text>
+              <Text as="p" className="font-mono font-semibold text-foreground">{cert.pdu_claim_code}</Text>
+            </Box>
+          )}
         </Box>
 
         <Box className="mt-auto pt-1">
