@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
 import { TrainingsList } from "@/components/admin/trainings-list";
@@ -15,7 +16,9 @@ export default function AdminCoursesPage() {
           <Text as="p" className="text-foreground-muted text-xs mt-0.5">Manage all training sessions and participants</Text>
         </Box>
       </Box>
-      <TrainingsList />
+      <Suspense fallback={null}>
+        <TrainingsList />
+      </Suspense>
     </Box>
   );
 }

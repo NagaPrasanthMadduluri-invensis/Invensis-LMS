@@ -183,5 +183,5 @@ export function useTrainingFilters(trainings, { initialStatus = "all", searchPla
     </Card>
   );
 
-  return { filtered, bar };
+  return { filtered, bar, statusFilter };
 }

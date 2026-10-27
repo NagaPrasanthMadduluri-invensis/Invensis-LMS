@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,15 @@ import { useTrainingFilters, statusBadge } from "@/components/shared/training-fi
 const MODE_LABEL = {
   virtual: "Live Virtual", in_person: "In Person", hybrid: "Hybrid", one_to_one: "1-to-1",
 };
+
+// Valid status-tab keys (lifecycle statuses + the derived tabs). Used to carry
+// the selected tab across the list → detail → back navigation via the `?tab`
+// query, so returning from a detail restores the tab the admin was on.
+const TAB_KEYS = new Set([
+  "all", "upcoming", "ongoing", "due",
+  "pending", "active", "completed", "cancelled", "postponed", "suspended",
+]);
+const sanitizeTab = (v) => (v && TAB_KEYS.has(v) ? v : "active");
 
 // Training dates print exactly as the API sent them — see `lib/datetime`.
 const formatDate = (d) => fmtDate(d);
@@ -247,12 +256,16 @@ function TrainingCard({ training, onClick }) {
 export function TrainingsList() {
   const { token } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [trainings, setTrainings] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
   const [error, setError] = useState(null);
 
-  const { filtered, bar } = useTrainingFilters(trainings, {
-    initialStatus: "active",
+  // Seed the tab from `?tab` so returning from a training's detail view lands on
+  // the tab the admin left from (e.g. Ongoing), not the default. Read once as the
+  // hook's initial state; the tab is user-controlled thereafter.
+  const { filtered, bar, statusFilter } = useTrainingFilters(trainings, {
+    initialStatus: sanitizeTab(searchParams.get("tab")),
     searchPlaceholder: "Search by training ID, event code or title...",
   });
 
@@ -328,7 +341,7 @@ export function TrainingsList() {
       ) : (
         <Box className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {filtered.map((t) => (
-            <TrainingCard key={t.id} training={t} onClick={() => router.push(`/admin/courses/${t.id}`)} />
+            <TrainingCard key={t.id} training={t} onClick={() => router.push(`/admin/courses/${t.id}?tab=${encodeURIComponent(statusFilter)}`)} />
           ))}
         </Box>
       )}
