@@ -15,6 +15,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { SidebarBrandHeader } from "@/components/layout/sidebar-brand-header";
+import { useWebinarBanner } from "@/providers/webinar-banner-provider";
 import { Wallet } from "lucide-react";
 import Text from "@/components/ui/text";
 import { sponsorNav } from "@/lib/nav-config";
@@ -47,12 +48,13 @@ function NavGroup({ label, items, pathname }) {
 
 export function SponsorSidebar() {
   const pathname = usePathname();
+  const { webinar } = useWebinarBanner();
   const { logout } = useAuth();
 
   return (
-    // top-24 (not the default top-16) leaves room for the 32px webinar banner
-    // that sits below the top nav in this shell.
-    <Sidebar collapsible="icon" className="top-24">
+    // Drop to top-24 only while a webinar banner is showing (it adds 32px below
+    // the top nav); otherwise sit at the default top-16.
+    <Sidebar collapsible="icon" className={webinar ? "top-24" : undefined}>
       <SidebarBrandHeader
         icon={Wallet}
         title="Invensis Learning"

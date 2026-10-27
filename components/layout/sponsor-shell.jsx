@@ -6,11 +6,13 @@ import { SponsorSidebar } from "@/components/layout/sponsor-sidebar";
 import { AuthProvider } from "@/providers/auth-provider";
 import { HelpWidget } from "@/components/layout/help-widget";
 import { WebinarBanner } from "@/components/layout/webinar-banner";
+import { WebinarBannerProvider } from "@/providers/webinar-banner-provider";
 import Box from "@/components/ui/box";
 
 export function SponsorShell({ children }) {
   return (
     <AuthProvider>
+      <WebinarBannerProvider>
       <SidebarProvider>
         <Box className="flex h-full flex-col">
           <TopNav portalLabel="Invensis Sponsor" />
@@ -24,6 +26,7 @@ export function SponsorShell({ children }) {
         </Box>
         <HelpWidget />
       </SidebarProvider>
+      </WebinarBannerProvider>
     </AuthProvider>
   );
 }

@@ -9,11 +9,13 @@ import { ProfileCompletionModal } from "@/components/layout/profile-completion-m
 import { SessionLiveIndicator } from "@/components/learner/session-live-indicator";
 import { HelpWidget } from "@/components/layout/help-widget";
 import { WebinarBanner } from "@/components/layout/webinar-banner";
+import { WebinarBannerProvider } from "@/providers/webinar-banner-provider";
 import Box from "@/components/ui/box";
 
 export function LearnerShell({ children }) {
   return (
     <AuthProvider>
+      <WebinarBannerProvider>
       <ProfileCompletionProvider>
         <SidebarProvider>
           <Box className="flex h-full flex-col">
@@ -32,6 +34,7 @@ export function LearnerShell({ children }) {
           <HelpWidget />
         </SidebarProvider>
       </ProfileCompletionProvider>
+      </WebinarBannerProvider>
     </AuthProvider>
   );
 }
