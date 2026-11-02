@@ -308,6 +308,19 @@ export async function completeEnrolment({ token, enrolmentId }) {
 }
 
 /**
+ * PUT /admin/enrolments/:enrolmentId/voucher — mark a seat's exam voucher as
+ * booked (with a validity window in months) or not booked. Booking emails the
+ * participant a confirmation. Returns { voucher, email_sent }.
+ */
+export async function setExamVoucherBooking({ token, enrolmentId, status, validityMonths }) {
+  return apiClient(`/admin/enrolments/${enrolmentId}/voucher`, {
+    method: "PUT",
+    token,
+    body: { status, validity_months: validityMonths },
+  });
+}
+
+/**
  * PATCH /admin/trainings/:trainingRef/enrolments/complete-all — mark every
  * currently-confirmed participant in the training 'completed' in one go.
  * Already-completed / cancelled / transferred enrolments are skipped.

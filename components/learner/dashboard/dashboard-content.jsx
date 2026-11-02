@@ -15,6 +15,7 @@ import { ThisWeekPanel } from "./this-week-panel";
 import { CertificatesPanel } from "./certificates-panel";
 import { RecentActivityPanel } from "./recent-activity-panel";
 import { UpcomingCohortsPanel } from "./upcoming-cohorts-panel";
+import { VoucherBanner } from "./voucher-banner";
 import { DashboardSkeleton } from "./dashboard-skeleton";
 import { activeCoursesOf, countdownTo, nextSessionOf, weekAheadOf } from "./dashboard-utils";
 import { apiNow, dateValue } from "@/lib/datetime";
@@ -135,6 +136,9 @@ export function DashboardContent() {
       {/* Prefer the dashboard payload's name; fall back to the signed-in
           account when the learner profile hasn't got one. */}
       <DashboardHeader name={learner.name || user?.name} summary={summaryLine({ stats, nextUp, generatedAt })} />
+
+      {/* In-portal notice when the team books this learner's exam voucher. */}
+      <VoucherBanner />
 
       {nextUp && (
         <UpNextBanner

@@ -252,6 +252,28 @@ function ScheduleCard({ training, enrolmentId }) {
         </Box>
       )}
 
+      {/* Exam voucher booked for this seat by the team. Persistent record of the
+          booking + validity, so the learner can always see when it expires. */}
+      {training.voucher?.booked && (
+        <Box className="border-t px-6 py-4">
+          <Box className="flex items-start gap-3 rounded-xl bg-success-subtle ring-1 ring-success-border px-4 py-3">
+            <Box className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success-subtle">
+              <Ticket className="h-4 w-4 text-success" />
+            </Box>
+            <Box className="min-w-0">
+              <Text as="p" className="text-sm font-semibold text-success-subtle-foreground leading-tight">
+                Your exam voucher is booked
+              </Text>
+              <Text as="p" className="text-xs text-success-subtle-foreground mt-0.5">
+                {training.voucher.expires_at
+                  ? `Valid until ${formatDate(training.voucher.expires_at)} — redeem it and sit your exam before then.`
+                  : "Redeem it and sit your exam before it expires."}
+              </Text>
+            </Box>
+          </Box>
+        </Box>
+      )}
+
       {/* Exam certification — driven by the CMS `certification_included` flag.
           true → included (good news); false → offer a voucher request; null → nothing. */}
       {training.certification_included === true && (

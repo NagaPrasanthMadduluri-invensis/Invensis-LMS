@@ -9,6 +9,7 @@ import {
   BookOpen, CheckCircle2, Clock, PlayCircle, Award, XCircle, Mail,
   Briefcase, MapPin, Calendar, Hash, Video, Users2, Phone, GraduationCap,
   Building2, Layers, Clock3, Link2, ExternalLink, LogIn, UserCheck, UserCog, AlertCircle, BadgeCheck,
+  Ticket, Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import Text from "@/components/ui/text";
@@ -19,7 +20,7 @@ import { lastLoginLabel, lastLoginTitle, hasNeverLoggedIn } from "@/lib/last-log
 import {
   fetchParticipantDetail, resendParticipantSetupEmail,
   fetchParticipantEmailRecipients, sendParticipantEmail, changeParticipantRole,
-  fetchParticipantEmails,
+  fetchParticipantEmails, setExamVoucherBooking,
 } from "@/services/api/admin/admin-api";
 import { ResendSetupButton } from "@/components/admin/resend-setup-button";
 import { ComposeEmailDialog } from "@/components/admin/compose-email-dialog";
@@ -114,12 +115,117 @@ function StatCard({ icon: Icon, value, label, bg, border, iconBg, iconCls, value
   );
 }
 
-function TrainingCard({ e }) {
+// Exam-voucher validity windows (months) — mirrors the backend's
+// VOUCHER_VALIDITY_MONTHS, the single source of truth that re-validates on save.
+const VOUCHER_VALIDITY_MONTHS = [3, 6, 12];
+
+/**
+ * Admin control to book / un-book a seat's exam voucher and pick its validity.
+ * Lives OUTSIDE the card's navigation link (it's interactive), and booking
+ * emails the participant a confirmation server-side. `onSaved` refreshes the
+ * detail so the new status shows immediately.
+ */
+function VoucherControl({ enrolmentId, voucher, token, onSaved }) {
+  const booked = !!voucher?.booked;
+  const [editing, setEditing] = useState(false);
+  const [validity, setValidity] = useState(voucher?.validity_months ?? 6);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState(null);
+
+  async function save(status, months) {
+    setSaving(true); setErr(null);
+    try {
+      await setExamVoucherBooking({ token, enrolmentId, status, validityMonths: months });
+      setEditing(false);
+      onSaved?.();
+    } catch (ex) {
+      setErr(ex.message || "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (editing) {
+    return (
+      <Box className="mt-3 pt-3 border-t border-border">
+        <Box className="flex flex-wrap items-center gap-2">
+          <Ticket className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
+          <Text as="span" className="text-xs font-semibold text-foreground">Voucher validity</Text>
+          <select
+            value={validity}
+            disabled={saving}
+            onChange={(ev) => setValidity(Number(ev.target.value))}
+            className="h-8 rounded-lg border border-border bg-surface px-2 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary-border"
+          >
+            {VOUCHER_VALIDITY_MONTHS.map((m) => (
+              <option key={m} value={m}>{m} months</option>
+            ))}
+          </select>
+          <Button
+            size="sm" disabled={saving}
+            onClick={() => save("booked", validity)}
+            className="h-8 px-3 bg-primary hover:bg-primary-hover text-primary-foreground border-0 rounded-lg text-xs font-semibold"
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+          </Button>
+          <Button
+            size="sm" variant="ghost" disabled={saving}
+            onClick={() => { setEditing(false); setErr(null); }}
+            className="h-8 px-3 rounded-lg text-xs font-semibold"
+          >
+            Cancel
+          </Button>
+        </Box>
+        {err && <Text as="p" className="text-xs text-error mt-1.5">{err}</Text>}
+      </Box>
+    );
+  }
+
+  return (
+    <Box className="mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2">
+      {booked ? (
+        <>
+          <Box className="inline-flex items-center gap-1.5 bg-success-subtle text-success-subtle-foreground text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-success-border">
+            <Ticket className="h-3 w-3" />
+            Voucher booked
+            {voucher?.expires_at ? ` · valid until ${formatDate(voucher.expires_at)}` : ""}
+          </Box>
+          <Button
+            size="sm" variant="ghost" disabled={saving}
+            onClick={() => { setValidity(voucher?.validity_months ?? 6); setEditing(true); }}
+            className="h-7 px-2.5 rounded-lg text-xs font-semibold"
+          >
+            Change
+          </Button>
+          <Button
+            size="sm" variant="ghost" disabled={saving}
+            onClick={() => save("not_booked", null)}
+            className="h-7 px-2.5 rounded-lg text-xs font-semibold text-error hover:text-error"
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Remove"}
+          </Button>
+        </>
+      ) : (
+        <Button
+          size="sm" variant="outline" disabled={saving}
+          onClick={() => setEditing(true)}
+          className="h-8 px-3 rounded-lg text-xs font-semibold"
+        >
+          <Ticket className="h-3.5 w-3.5 mr-1.5" />
+          Book exam voucher
+        </Button>
+      )}
+      {err && <Text as="p" className="text-xs text-error w-full">{err}</Text>}
+    </Box>
+  );
+}
+
+function TrainingCard({ e, token, onSaved }) {
   const meta = CATEGORY_META[e.category] || CATEGORY_META.upcoming;
   const StatusIcon = meta.icon;
   return (
-    <Link href={`/admin/courses/${e.training_id}`} className="block">
-    <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:border-primary-border hover:shadow-md transition-all cursor-pointer">
+    <Card className="rounded-2xl border border-slate-200/80 shadow-sm p-4 hover:border-primary-border hover:shadow-md transition-all">
+    <Link href={`/admin/courses/${e.training_id}`} className="block cursor-pointer">
       <Box className="flex items-start justify-between gap-3">
         <Box className="min-w-0">
           <Text as="p" className="text-sm font-semibold text-foreground leading-snug">{e.title}</Text>
@@ -187,8 +293,9 @@ function TrainingCard({ e }) {
           )}
         </Box>
       )}
-    </Card>
     </Link>
+    <VoucherControl enrolmentId={e.enrolment_id} voucher={e.voucher} token={token} onSaved={onSaved} />
+    </Card>
   );
 }
 
@@ -416,7 +523,7 @@ export function ParticipantDetail({ userId }) {
                     <Badge className="border-0 bg-surface-muted text-foreground-muted text-[10px] font-semibold">{items.length}</Badge>
                   </Box>
                   <Box className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                    {items.map((e) => <TrainingCard key={e.enrolment_id} e={e} />)}
+                    {items.map((e) => <TrainingCard key={e.enrolment_id} e={e} token={token} onSaved={load} />)}
                   </Box>
                 </Box>
               );

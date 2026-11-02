@@ -45,6 +45,16 @@ export async function fetchMyTrainings({ token }) {
 }
 
 /**
+ * GET /learner/voucher-bookings
+ * The caller's currently-booked, unexpired exam vouchers. Returns
+ * { vouchers: [{ id, training_id, training_code, course_name, validity_months,
+ *   booked_at, expires_at }] }. Powers the in-portal booking banner.
+ */
+export async function fetchMyVoucherBookings({ token }) {
+  return apiClient(`/learner/voucher-bookings`, { token });
+}
+
+/**
  * GET /learner/certificates
  * The caller's training certificates (one per completed enrolment). Each item:
  *   { training_id, training_code, title, delivery_mode, start_date, end_date,

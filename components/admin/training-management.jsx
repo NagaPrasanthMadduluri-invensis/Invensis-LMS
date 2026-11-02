@@ -29,6 +29,7 @@ import {
   Mail, Phone, Briefcase, MapPin, Video, MoreHorizontal, Pencil, ArrowLeftRight, XCircle,
   ExternalLink, Plus, BookText, AlertCircle, User, Link2, MessageSquare, CheckSquare2, ChevronDown,
   CheckCircle2, GraduationCap, Loader2, CalendarClock, Ban, PlayCircle, AlertTriangle, BadgeCheck,
+  Ticket,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -1683,6 +1684,7 @@ export function TrainingManagement({ trainingId }) {
                   <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Experience</TableHead>
                   <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Agent</TableHead>
                   <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Add-ons</TableHead>
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Voucher</TableHead>
                   <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                     <Box className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Location</Box>
                   </TableHead>
@@ -1716,6 +1718,15 @@ export function TrainingManagement({ trainingId }) {
                               {a.name}{a.quantity > 1 ? ` ×${a.quantity}` : ""}
                             </Box>
                           ))}
+                        </Box>
+                      ) : "—"}
+                    </TableCell>
+                    <TableCell className="py-3.5 text-foreground-muted text-sm">
+                      {/* Exam-voucher booking status (set in the participant's profile). */}
+                      {p.voucher?.booked ? (
+                        <Box className="inline-flex items-center gap-1 bg-success-subtle text-success-subtle-foreground text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-success-border whitespace-nowrap">
+                          <Ticket className="h-3 w-3 shrink-0" />
+                          {p.voucher.expires_at ? `Until ${formatDate(p.voucher.expires_at)}` : "Booked"}
                         </Box>
                       ) : "—"}
                     </TableCell>
