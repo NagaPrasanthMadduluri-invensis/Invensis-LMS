@@ -28,7 +28,7 @@ import {
   Hash, Calendar, Clock, Globe, Hourglass, Users, UserCheck, UserX, UserPlus,
   Mail, Phone, Briefcase, MapPin, Video, MoreHorizontal, Pencil, ArrowLeftRight, XCircle,
   ExternalLink, Plus, BookText, AlertCircle, User, Link2, MessageSquare, CheckSquare2, ChevronDown,
-  CheckCircle2, GraduationCap, Loader2, CalendarClock, Ban, PlayCircle, AlertTriangle,
+  CheckCircle2, GraduationCap, Loader2, CalendarClock, Ban, PlayCircle, AlertTriangle, BadgeCheck,
 } from "lucide-react";
 import Text from "@/components/ui/text";
 import Box from "@/components/ui/box";
@@ -1682,6 +1682,7 @@ export function TrainingManagement({ trainingId }) {
                   <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Department</TableHead>
                   <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Experience</TableHead>
                   <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Agent</TableHead>
+                  <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">Add-ons</TableHead>
                   <TableHead className="text-[11px] font-semibold text-foreground-muted uppercase tracking-wide py-3">
                     <Box className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Location</Box>
                   </TableHead>
@@ -1702,7 +1703,22 @@ export function TrainingManagement({ trainingId }) {
                     <TableCell className="py-3.5 text-foreground-muted text-sm">{p.department || "—"}</TableCell>
                     <TableCell className="py-3.5 text-foreground-muted text-sm">{p.experience_years != null ? `${p.experience_years} yr${p.experience_years === 1 ? "" : "s"}` : "—"}</TableCell>
                     <TableCell className="py-3.5 text-foreground-muted text-sm">{p.agent || "—"}</TableCell>
-                    <TableCell className="py-3.5 text-foreground-muted text-sm">{p.location || "—"}</TableCell>
+                    <TableCell className="py-3.5 text-foreground-muted text-sm">
+                      {/* Add-ons bought with this seat (exam voucher, membership, …). */}
+                      {p.addons?.length > 0 ? (
+                        <Box className="flex flex-wrap gap-1">
+                          {p.addons.map((a, i) => (
+                            <Box
+                              key={`${a.name}-${i}`}
+                              className="inline-flex items-center gap-1 bg-success-subtle text-success-subtle-foreground text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-success-border whitespace-nowrap"
+                            >
+                              <BadgeCheck className="h-3 w-3 shrink-0" />
+                              {a.name}{a.quantity > 1 ? ` ×${a.quantity}` : ""}
+                            </Box>
+                          ))}
+                        </Box>
+                      ) : "—"}
+                    </TableCell>
                     <TableCell className="py-3.5">
                       {(() => {
                         const cfg = ENROLMENT_STATUS[p.status] || { label: p.status, className: "bg-surface-muted text-foreground-muted" };

@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CheckCircle2, Clock, PlayCircle, Award, XCircle, Mail,
   Briefcase, MapPin, Calendar, Hash, Video, Users2, Phone, GraduationCap,
-  Building2, Layers, Clock3, Link2, ExternalLink, LogIn, UserCheck, UserCog, AlertCircle,
+  Building2, Layers, Clock3, Link2, ExternalLink, LogIn, UserCheck, UserCog, AlertCircle, BadgeCheck,
 } from "lucide-react";
 import Link from "next/link";
 import Text from "@/components/ui/text";
@@ -161,7 +161,7 @@ function TrainingCard({ e }) {
         )}
       </Box>
 
-      {(e.certificate_issued || e.added_manually) && (
+      {(e.certificate_issued || e.added_manually || e.addons?.length > 0) && (
         <Box className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border">
           {e.certificate_issued && (
             <Box className="inline-flex items-center gap-1.5 bg-warning-subtle text-warning-subtle-foreground text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-warning-border">
@@ -169,6 +169,16 @@ function TrainingCard({ e }) {
               Certificate {e.certificate_code ? `· ${e.certificate_code}` : "issued"}
             </Box>
           )}
+          {/* Add-ons bought with this seat (exam voucher, membership, …). */}
+          {(e.addons ?? []).map((a, i) => (
+            <Box
+              key={`${a.name}-${i}`}
+              className="inline-flex items-center gap-1.5 bg-success-subtle text-success-subtle-foreground text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-success-border"
+            >
+              <BadgeCheck className="h-3 w-3" />
+              {a.name}{a.quantity > 1 ? ` ×${a.quantity}` : ""}
+            </Box>
+          ))}
           {e.added_manually && (
             <Box className="inline-flex items-center gap-1.5 bg-surface-hover text-foreground-muted text-[11px] font-medium px-2 py-0.5 rounded-lg ring-1 ring-border">
               <Users2 className="h-3 w-3" />
