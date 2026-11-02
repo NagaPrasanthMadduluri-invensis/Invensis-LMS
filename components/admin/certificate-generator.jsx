@@ -41,6 +41,7 @@ import {
 } from "@/services/api/admin/admin-api";
 import { useCertificateDownload } from "@/components/shared/certificate-download";
 import { ParticipantLink, TrainingLink } from "@/components/admin/entity-links";
+import { CERTIFICATES_CHANGED_EVENT } from "@/hooks/use-certificate-pending-release";
 
 // PDUs are chosen, not typed: the business awards between 8 and 60 and a
 // mistyped figure on a certificate is a compliance problem.
@@ -203,13 +204,19 @@ export function CertificateGenerator() {
   // Off-screen render → PDF flow, shared with the learner certificates view.
   const { requestDownload, captureNode } = useCertificateDownload();
 
-  useEffect(() => {
+  const loadTrainings = useCallback(async () => {
     if (!token) return;
-    fetchCertifiableTrainings({ token })
-      .then((r) => setTrainings(r.trainings || []))
-      .catch((e) => setError(e.message))
-      .finally(() => setLoadingList(false));
+    try {
+      const r = await fetchCertifiableTrainings({ token });
+      setTrainings(r.trainings || []);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoadingList(false);
+    }
   }, [token]);
+
+  useEffect(() => { loadTrainings(); }, [loadTrainings]);
 
   const loadDetail = useCallback(async (ref) => {
     if (!ref) { setDetail(null); return; }
@@ -238,13 +245,24 @@ export function CertificateGenerator() {
       value: t.code,
       label: `${t.code} — ${t.title}`,
       keywords: `${t.title} ${t.code}`,
+      // Red dot flags a training with certificates ready to release.
+      prefix:
+        t.pending_release_count > 0 ? (
+          <span className="h-2 w-2 shrink-0 rounded-full bg-error" aria-label="Certificates ready to release" />
+        ) : null,
     })),
     [trainings]
   );
 
   async function run(label, fn) {
     setBusy(label); setError(null);
-    try { await fn(); await loadDetail(trainingRef); }
+    try {
+      await fn();
+      // Refresh the open training AND the picker, so per-training release dots
+      // stay in step; nudge the sidebar's pending-release dot to re-check now.
+      await Promise.all([loadDetail(trainingRef), loadTrainings()]);
+      if (typeof window !== "undefined") window.dispatchEvent(new Event(CERTIFICATES_CHANGED_EVENT));
+    }
     catch (e) { setError(e.message); }
     finally { setBusy(null); }
   }

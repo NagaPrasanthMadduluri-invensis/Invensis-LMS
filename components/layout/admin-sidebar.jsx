@@ -21,9 +21,10 @@ import Text from "@/components/ui/text";
 import { adminNav } from "@/lib/nav-config";
 import { useAuth } from "@/hooks/use-auth";
 import { useTicketUnread } from "@/hooks/use-ticket-unread";
+import { useCertificatePendingRelease } from "@/hooks/use-certificate-pending-release";
 import { fetchAdminTickets } from "@/services/api/admin/admin-api";
 
-function NavGroup({ label, items, pathname, badges = {} }) {
+function NavGroup({ label, items, pathname, badges = {}, dots = {} }) {
   return (
     <SidebarGroup>
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
@@ -31,6 +32,7 @@ function NavGroup({ label, items, pathname, badges = {} }) {
         <SidebarMenu>
           {items.map((item) => {
             const badge = badges[item.href];
+            const dot = dots[item.href];
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
@@ -41,6 +43,9 @@ function NavGroup({ label, items, pathname, badges = {} }) {
                   <Text as="span" className="flex-1 text-sidebar-foreground font-medium">
                     {item.title}
                   </Text>
+                  {dot && (
+                    <span className="ml-auto h-2 w-2 shrink-0 rounded-full bg-error" aria-label="Certificates ready to release" />
+                  )}
                 </SidebarMenuButton>
                 {badge > 0 && (
                   <SidebarMenuBadge className="bg-destructive text-white">{badge > 99 ? "99+" : badge}</SidebarMenuBadge>
@@ -58,6 +63,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const { logout, user, token } = useAuth();
   const ticketUnread = useTicketUnread({ token, userId: user?.id, fetchTickets: fetchAdminTickets });
+  const certPendingRelease = useCertificatePendingRelease({ token });
 
   const handleFooterClick = (href) => {
     if (href === "/logout") {
@@ -75,7 +81,7 @@ export function AdminSidebar() {
       <SidebarContent>
         <NavGroup label="Overview" items={adminNav.main} pathname={pathname} />
         <NavGroup label="Users & Teams" items={adminNav.users} pathname={pathname} />
-        <NavGroup label="Trainings & Certificates" items={adminNav.content} pathname={pathname} />
+        <NavGroup label="Trainings & Certificates" items={adminNav.content} pathname={pathname} dots={{ "/admin/certificates": certPendingRelease > 0 }} />
         <NavGroup label="Communication" items={adminNav.communication} pathname={pathname} badges={{ "/admin/tickets": ticketUnread }} />
       </SidebarContent>
       <SidebarSeparator />

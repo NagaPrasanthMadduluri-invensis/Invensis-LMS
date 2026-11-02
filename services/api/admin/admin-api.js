@@ -388,6 +388,11 @@ export async function fetchCertifiableTrainings({ token }) {
   return apiClient("/admin/certificates/trainings", { token });
 }
 
+/** Count of completed trainings with certificates ready to release (sidebar dot). */
+export async function fetchCertificatePendingReleaseCount({ token }) {
+  return apiClient("/admin/certificates/pending-release-count", { token });
+}
+
 /** One training: header, summary counts and every learner's certificate line. */
 export async function fetchTrainingCertificates({ token, trainingRef }) {
   return apiClient(`/admin/certificates/trainings/${trainingRef}`, { token });
