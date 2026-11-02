@@ -115,12 +115,15 @@ function StatCard({ icon: Icon, value, label, bg, border, iconBg, iconCls, value
   );
 }
 
-// Exam-voucher validity windows (months) — mirrors the backend's
-// VOUCHER_VALIDITY_MONTHS, the single source of truth that re-validates on save.
-const VOUCHER_VALIDITY_MONTHS = [3, 6, 12];
+// Local "today" as YYYY-MM-DD, for the date input's `min` so a past expiry
+// can't be chosen (the backend re-checks it must be today or later).
+function todayInputValue() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 /**
- * Admin control to book / un-book a seat's exam voucher and pick its validity.
+ * Admin control to book / un-book a seat's exam voucher and pick its expiry date.
  * Lives OUTSIDE the card's navigation link (it's interactive), and booking
  * emails the participant a confirmation server-side. `onSaved` refreshes the
  * detail so the new status shows immediately.
@@ -128,14 +131,14 @@ const VOUCHER_VALIDITY_MONTHS = [3, 6, 12];
 function VoucherControl({ enrolmentId, voucher, token, onSaved }) {
   const booked = !!voucher?.booked;
   const [editing, setEditing] = useState(false);
-  const [validity, setValidity] = useState(voucher?.validity_months ?? 6);
+  const [expiry, setExpiry] = useState(voucher?.expires_at ?? "");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState(null);
 
-  async function save(status, months) {
+  async function save(status, expiresAt) {
     setSaving(true); setErr(null);
     try {
-      await setExamVoucherBooking({ token, enrolmentId, status, validityMonths: months });
+      await setExamVoucherBooking({ token, enrolmentId, status, expiresAt });
       setEditing(false);
       onSaved?.();
     } catch (ex) {
@@ -150,20 +153,18 @@ function VoucherControl({ enrolmentId, voucher, token, onSaved }) {
       <Box className="mt-3 pt-3 border-t border-border">
         <Box className="flex flex-wrap items-center gap-2">
           <Ticket className="h-3.5 w-3.5 text-foreground-subtle shrink-0" />
-          <Text as="span" className="text-xs font-semibold text-foreground">Voucher validity</Text>
-          <select
-            value={validity}
+          <Text as="span" className="text-xs font-semibold text-foreground">Voucher expires</Text>
+          <input
+            type="date"
+            value={expiry}
+            min={todayInputValue()}
             disabled={saving}
-            onChange={(ev) => setValidity(Number(ev.target.value))}
+            onChange={(ev) => setExpiry(ev.target.value)}
             className="h-8 rounded-lg border border-border bg-surface px-2 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary-border"
-          >
-            {VOUCHER_VALIDITY_MONTHS.map((m) => (
-              <option key={m} value={m}>{m} months</option>
-            ))}
-          </select>
+          />
           <Button
-            size="sm" disabled={saving}
-            onClick={() => save("booked", validity)}
+            size="sm" disabled={saving || !expiry}
+            onClick={() => save("booked", expiry)}
             className="h-8 px-3 bg-primary hover:bg-primary-hover text-primary-foreground border-0 rounded-lg text-xs font-semibold"
           >
             {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
@@ -192,7 +193,7 @@ function VoucherControl({ enrolmentId, voucher, token, onSaved }) {
           </Box>
           <Button
             size="sm" variant="ghost" disabled={saving}
-            onClick={() => { setValidity(voucher?.validity_months ?? 6); setEditing(true); }}
+            onClick={() => { setExpiry(voucher?.expires_at ?? ""); setEditing(true); }}
             className="h-7 px-2.5 rounded-lg text-xs font-semibold"
           >
             Change

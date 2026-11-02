@@ -309,14 +309,14 @@ export async function completeEnrolment({ token, enrolmentId }) {
 
 /**
  * PUT /admin/enrolments/:enrolmentId/voucher — mark a seat's exam voucher as
- * booked (with a validity window in months) or not booked. Booking emails the
- * participant a confirmation. Returns { voucher, email_sent }.
+ * booked (with an explicit expiry date, YYYY-MM-DD) or not booked. Booking emails
+ * the participant a confirmation. Returns { voucher, email_sent }.
  */
-export async function setExamVoucherBooking({ token, enrolmentId, status, validityMonths }) {
+export async function setExamVoucherBooking({ token, enrolmentId, status, expiresAt }) {
   return apiClient(`/admin/enrolments/${enrolmentId}/voucher`, {
     method: "PUT",
     token,
-    body: { status, validity_months: validityMonths },
+    body: { status, expires_at: expiresAt },
   });
 }
 
