@@ -36,7 +36,7 @@ import Box from "@/components/ui/box";
 import { useAuth } from "@/hooks/use-auth";
 import {
   fetchAdminTrainingDetail, fetchAdminTrainings, fetchTrainers, assignTrainer,
-  addParticipant, updateMeeting, updateParticipant, cancelEnrolment, transferEnrolment,
+  addParticipant, updateMeeting, updateDeliveryMode, updateParticipant, cancelEnrolment, transferEnrolment,
   completeEnrolment, completeAllEnrolments, setTrainingStatus, rescheduleTraining,
   fetchTrainingEmailRecipients, sendTrainingEmail,
 } from "@/services/api/admin/admin-api";
@@ -709,6 +709,63 @@ function MeetingDialog({ open, onOpenChange, token, trainingRef, meeting, canRel
   );
 }
 
+/* ── Change the operational delivery mode ── */
+function ModeDialog({ open, onOpenChange, token, trainingRef, current, onSaved }) {
+  const [mode, setMode] = useState(current || "virtual");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => { if (open) { setMode(current || "virtual"); setError(null); } }, [open, current]);
+
+  async function submit() {
+    setSubmitting(true); setError(null);
+    try {
+      const res = await updateDeliveryMode({ token, trainingRef, mode });
+      onSaved(res.training); onOpenChange(false);
+    } catch (e) { setError(e.message); } finally { setSubmitting(false); }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[520px] overflow-hidden" style={{padding:0,gap:0}}>
+        <Box className="bg-[#d7e3fc] border-b border-info-border px-6 py-5">
+          <Box className="flex items-center gap-3">
+            <Box className="w-9 h-9 rounded-xl bg-info flex items-center justify-center shrink-0">
+              <Video className="w-4 h-4 text-info-foreground" />
+            </Box>
+            <Box>
+              <DialogTitle className="text-base font-semibold text-foreground">Training mode</DialogTitle>
+              <DialogDescription className="text-xs text-foreground-muted mt-0.5">How this training is delivered. Shown on the card, roster and learner views.</DialogDescription>
+            </Box>
+          </Box>
+        </Box>
+        <Box className="px-6 py-6 space-y-5">
+          <Field label="Delivery mode">
+            <Select value={mode} onValueChange={setMode}>
+              <SelectTrigger style={{height:"44px",borderRadius:"12px",backgroundColor:"white",borderColor:"rgb(226,232,240)",boxShadow:"0 1px 2px 0 rgba(0,0,0,0.05)"}}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="virtual">{MODE_LABEL.virtual}</SelectItem>
+                <SelectItem value="in_person">{MODE_LABEL.in_person}</SelectItem>
+                <SelectItem value="hybrid">{MODE_LABEL.hybrid}</SelectItem>
+                <SelectItem value="one_to_one">{MODE_LABEL.one_to_one}</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <FormError error={error} />
+        </Box>
+        <DialogFooter className="px-6 pt-4 pb-6 border-t border-border bg-slate-50/50">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting} className="border-border text-foreground-muted hover:bg-surface-muted">Cancel</Button>
+          <Button onClick={submit} disabled={submitting || mode === current} className="bg-primary hover:bg-primary-hover text-primary-foreground border-0 shadow-sm">
+            {submitting ? "Saving..." : "Save"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ── Mark completed confirm dialog (single participant or bulk) ── */
 function CompleteConfirmDialog({ open, onOpenChange, token, mode, participant, trainingRef, confirmedCount, onDone }) {
   const [submitting, setSubmitting] = useState(false);
@@ -1290,6 +1347,7 @@ export function TrainingManagement({ trainingId }) {
   const [assignOpen, setAssignOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [meetingOpen, setMeetingOpen] = useState(false);
+  const [modeOpen, setModeOpen] = useState(false);
   const [editParticipant, setEditParticipant] = useState(null);
   const [cancelParticipant, setCancelParticipant] = useState(null);
   const [transferParticipant, setTransferParticipant] = useState(null);
@@ -1409,9 +1467,15 @@ export function TrainingManagement({ trainingId }) {
                 className="h-8 px-3 border-border bg-surface text-foreground hover:bg-surface-hover rounded-lg text-xs font-semibold">
                 <Mail className="h-3.5 w-3.5 mr-1" /> Email
               </Button>
-              <Badge className="border-0 bg-primary-subtle text-primary text-[11px] font-medium">
+              <button
+                type="button"
+                onClick={() => setModeOpen(true)}
+                title="Change training mode"
+                className="inline-flex items-center gap-1 rounded-full bg-primary-subtle px-2.5 py-1 text-[11px] font-medium text-primary ring-1 ring-transparent hover:ring-primary-border transition-colors"
+              >
                 {MODE_LABEL[detail.delivery_mode] || detail.delivery_mode}
-              </Badge>
+                <Pencil className="h-3 w-3" />
+              </button>
             </Box>
           </Box>
           <Text as="h2" className="text-xl font-bold text-foreground leading-tight">{detail.title}</Text>
@@ -1813,6 +1877,7 @@ export function TrainingManagement({ trainingId }) {
       <AssignTrainerDialog open={assignOpen} onOpenChange={setAssignOpen} token={token} trainingRef={trainingId} currentTrainerId={detail.trainer?.id} onAssigned={load} />
       <AddParticipantDialog open={addOpen} onOpenChange={setAddOpen} token={token} trainingRef={trainingId} onAdded={load} />
       <MeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} token={token} trainingRef={trainingId} meeting={meeting} canRelease={canRelease} onSaved={onMeetingSaved} />
+      <ModeDialog open={modeOpen} onOpenChange={setModeOpen} token={token} trainingRef={trainingId} current={detail.delivery_mode} onSaved={() => load()} />
       <EditParticipantDialog participant={editParticipant} onOpenChange={() => setEditParticipant(null)} token={token} onSaved={load} />
       <CancelEnrolmentDialog participant={cancelParticipant} onOpenChange={() => setCancelParticipant(null)} token={token} onDone={load} />
       <TransferDialog participant={transferParticipant} onOpenChange={() => setTransferParticipant(null)} token={token} currentTrainingId={detail.id} onDone={load} />

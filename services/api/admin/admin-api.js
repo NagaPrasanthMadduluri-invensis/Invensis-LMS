@@ -141,6 +141,14 @@ export async function updateMeeting({ token, trainingRef, data }) {
 }
 
 /**
+ * PATCH /admin/trainings/:trainingRef — change the operational delivery mode.
+ * mode is one of: virtual | in_person | hybrid | one_to_one. Returns { training }.
+ */
+export async function updateDeliveryMode({ token, trainingRef, mode }) {
+  return updateTraining({ token, trainingRef, data: { delivery_mode: mode } });
+}
+
+/**
  * POST /admin/trainings/:trainingRef/participants
  * data = { name, email, phone?, job_title? }
  */
