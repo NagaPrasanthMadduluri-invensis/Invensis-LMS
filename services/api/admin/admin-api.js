@@ -329,6 +329,19 @@ export async function setExamVoucherBooking({ token, enrolmentId, status, expire
 }
 
 /**
+ * PUT /admin/enrolments/:enrolmentId/voucher/result — record (or clear) the
+ * exam result for a booked voucher. result is "pass" | "fail" | null. Setting a
+ * result emails the participant. Returns { voucher, email_sent }.
+ */
+export async function setExamVoucherResult({ token, enrolmentId, result }) {
+  return apiClient(`/admin/enrolments/${enrolmentId}/voucher/result`, {
+    method: "PUT",
+    token,
+    body: { result },
+  });
+}
+
+/**
  * PATCH /admin/trainings/:trainingRef/enrolments/complete-all — mark every
  * currently-confirmed participant in the training 'completed' in one go.
  * Already-completed / cancelled / transferred enrolments are skipped.

@@ -39,6 +39,7 @@ import {
   addParticipant, updateMeeting, updateDeliveryMode, updateParticipant, cancelEnrolment, transferEnrolment,
   completeEnrolment, completeAllEnrolments, setTrainingStatus, rescheduleTraining,
   fetchTrainingEmailRecipients, sendTrainingEmail,
+  setExamVoucherBooking, setExamVoucherResult,
 } from "@/services/api/admin/admin-api";
 import { TrainerFormDialog } from "@/components/admin/trainer-form-dialog";
 import { ComposeEmailDialog } from "@/components/admin/compose-email-dialog";
@@ -766,6 +767,127 @@ function ModeDialog({ open, onOpenChange, token, trainingRef, current, onSaved }
   );
 }
 
+/* ── Exam voucher: book + record result, per participant ── */
+function voucherTodayValue() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function VoucherDialog({ participant, onOpenChange, token, onSaved }) {
+  const open = !!participant;
+  const [v, setV] = useState(null);
+  const [expiry, setExpiry] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [note, setNote] = useState(null);
+
+  useEffect(() => {
+    if (!participant) return;
+    setV(participant.voucher ?? null);
+    setExpiry(participant.voucher?.expires_at ?? "");
+    setError(null); setNote(null);
+  }, [participant]);
+
+  const enrolmentId = participant?.enrolment_id;
+  const booked = !!v?.booked;
+
+  async function run(fn, successNote) {
+    setBusy(true); setError(null); setNote(null);
+    try {
+      const res = await fn();
+      setV(res.voucher);
+      if (res.voucher?.expires_at) setExpiry(res.voucher.expires_at);
+      if (successNote) setNote(typeof successNote === "function" ? successNote(res) : successNote);
+      onSaved?.();
+    } catch (e) { setError(e.message || "Failed to save"); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onOpenChange(null)}>
+      <DialogContent className="sm:max-w-[520px] overflow-hidden" style={{padding:0,gap:0}}>
+        <Box className="bg-[#d7e3fc] border-b border-info-border px-6 py-5">
+          <Box className="flex items-center gap-3">
+            <Box className="w-9 h-9 rounded-xl bg-info flex items-center justify-center shrink-0">
+              <Ticket className="w-4 h-4 text-info-foreground" />
+            </Box>
+            <Box>
+              <DialogTitle className="text-base font-semibold text-foreground">Exam voucher</DialogTitle>
+              <DialogDescription className="text-xs text-foreground-muted mt-0.5">{participant?.name}</DialogDescription>
+            </Box>
+          </Box>
+        </Box>
+        <Box className="px-6 py-6 space-y-5">
+          {/* Booking */}
+          <Section label="Booking">
+            <Field label="Voucher expiry date">
+              <input
+                type="date" value={expiry} min={voucherTodayValue()} disabled={busy}
+                onChange={(e) => setExpiry(e.target.value)}
+                className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-border" />
+            </Field>
+            <Box className="flex items-center gap-2">
+              <Button size="sm" disabled={busy || !expiry}
+                onClick={() => run(() => setExamVoucherBooking({ token, enrolmentId, status: "booked", expiresAt: expiry }),
+                  (r) => r.email_sent ? "Voucher booked — confirmation emailed to the participant." : "Voucher booked.")}
+                className="h-9 px-4 bg-primary hover:bg-primary-hover text-primary-foreground border-0 rounded-lg text-xs font-semibold">
+                {booked ? "Update booking" : "Book voucher"}
+              </Button>
+              {booked && (
+                <Button size="sm" variant="ghost" disabled={busy}
+                  onClick={() => run(() => setExamVoucherBooking({ token, enrolmentId, status: "not_booked" }), "Voucher removed.")}
+                  className="h-9 px-3 rounded-lg text-xs font-semibold text-error hover:text-error">
+                  Remove
+                </Button>
+              )}
+            </Box>
+          </Section>
+
+          {/* Result — only once booked */}
+          <Section label="Exam result">
+            {!booked ? (
+              <Text as="p" className="text-xs text-foreground-muted">Book the voucher first to record a result.</Text>
+            ) : (
+              <Box className="space-y-2.5">
+                <Box className="flex items-center gap-2">
+                  <Button size="sm" disabled={busy || v?.result === "pass"}
+                    onClick={() => run(() => setExamVoucherResult({ token, enrolmentId, result: "pass" }),
+                      (r) => r.email_sent ? "Marked Pass — result emailed to the participant." : "Marked Pass.")}
+                    className={`h-9 px-4 rounded-lg text-xs font-semibold border-0 ${v?.result === "pass" ? "bg-success text-success-foreground" : "bg-success-subtle text-success-subtle-foreground ring-1 ring-success-border hover:bg-success-subtle"}`}>
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Pass
+                  </Button>
+                  <Button size="sm" disabled={busy || v?.result === "fail"}
+                    onClick={() => run(() => setExamVoucherResult({ token, enrolmentId, result: "fail" }),
+                      (r) => r.email_sent ? "Marked Fail — result emailed to the participant." : "Marked Fail.")}
+                    className={`h-9 px-4 rounded-lg text-xs font-semibold border-0 ${v?.result === "fail" ? "bg-error text-white" : "bg-error-subtle text-error-subtle-foreground ring-1 ring-error-border hover:bg-error-subtle"}`}>
+                    <XCircle className="h-3.5 w-3.5 mr-1" /> Fail
+                  </Button>
+                  {v?.result && (
+                    <Button size="sm" variant="ghost" disabled={busy}
+                      onClick={() => run(() => setExamVoucherResult({ token, enrolmentId, result: null }), "Result cleared.")}
+                      className="h-9 px-3 rounded-lg text-xs font-semibold text-foreground-muted">
+                      Clear
+                    </Button>
+                  )}
+                </Box>
+                <Text as="p" className="text-xs text-foreground-muted">
+                  {v?.result ? `Current: ${v.result === "pass" ? "Pass" : "Fail"}` : "No result recorded yet."}
+                </Text>
+              </Box>
+            )}
+          </Section>
+
+          {note && <Text as="p" className="text-xs text-success">{note}</Text>}
+          <FormError error={error} />
+        </Box>
+        <DialogFooter className="px-6 pt-4 pb-6 border-t border-border bg-slate-50/50">
+          <Button variant="outline" onClick={() => onOpenChange(null)} disabled={busy} className="border-border text-foreground-muted hover:bg-surface-muted">Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ── Mark completed confirm dialog (single participant or bulk) ── */
 function CompleteConfirmDialog({ open, onOpenChange, token, mode, participant, trainingRef, confirmedCount, onDone }) {
   const [submitting, setSubmitting] = useState(false);
@@ -1349,6 +1471,7 @@ export function TrainingManagement({ trainingId }) {
   const [meetingOpen, setMeetingOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false);
   const [editParticipant, setEditParticipant] = useState(null);
+  const [voucherParticipant, setVoucherParticipant] = useState(null);
   const [cancelParticipant, setCancelParticipant] = useState(null);
   const [transferParticipant, setTransferParticipant] = useState(null);
   const [completeParticipant, setCompleteParticipant] = useState(null);
@@ -1786,13 +1909,31 @@ export function TrainingManagement({ trainingId }) {
                       ) : "—"}
                     </TableCell>
                     <TableCell className="py-3.5 text-foreground-muted text-sm">
-                      {/* Exam-voucher booking status (set in the participant's profile). */}
-                      {p.voucher?.booked ? (
-                        <Box className="inline-flex items-center gap-1 bg-success-subtle text-success-subtle-foreground text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-success-border whitespace-nowrap">
-                          <Ticket className="h-3 w-3 shrink-0" />
-                          {p.voucher.expires_at ? `Until ${formatDate(p.voucher.expires_at)}` : "Booked"}
-                        </Box>
-                      ) : "—"}
+                      {/* Exam voucher — book and record the exam result from here. */}
+                      <button
+                        type="button"
+                        onClick={() => setVoucherParticipant(p)}
+                        title="Manage exam voucher"
+                        className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-0.5 hover:bg-surface-hover transition-colors"
+                      >
+                        {p.voucher?.booked ? (
+                          <Box className="inline-flex items-center gap-1 bg-success-subtle text-success-subtle-foreground text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 ring-success-border whitespace-nowrap">
+                            <Ticket className="h-3 w-3 shrink-0" />
+                            {p.voucher.expires_at ? `Until ${formatDate(p.voucher.expires_at)}` : "Booked"}
+                          </Box>
+                        ) : (
+                          <Box className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
+                            <Ticket className="h-3 w-3 shrink-0" /> Book
+                          </Box>
+                        )}
+                        {p.voucher?.result && (
+                          <Box className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-lg ring-1 whitespace-nowrap ${p.voucher.result === "pass" ? "bg-success-subtle text-success-subtle-foreground ring-success-border" : "bg-error-subtle text-error-subtle-foreground ring-error-border"}`}>
+                            {p.voucher.result === "pass" ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                            {p.voucher.result === "pass" ? "Pass" : "Fail"}
+                          </Box>
+                        )}
+                        <Pencil className="h-3 w-3 text-foreground-subtle" />
+                      </button>
                     </TableCell>
                     <TableCell className="py-3.5">
                       {(() => {
@@ -1878,6 +2019,7 @@ export function TrainingManagement({ trainingId }) {
       <AddParticipantDialog open={addOpen} onOpenChange={setAddOpen} token={token} trainingRef={trainingId} onAdded={load} />
       <MeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} token={token} trainingRef={trainingId} meeting={meeting} canRelease={canRelease} onSaved={onMeetingSaved} />
       <ModeDialog open={modeOpen} onOpenChange={setModeOpen} token={token} trainingRef={trainingId} current={detail.delivery_mode} onSaved={() => load()} />
+      <VoucherDialog participant={voucherParticipant} onOpenChange={setVoucherParticipant} token={token} onSaved={load} />
       <EditParticipantDialog participant={editParticipant} onOpenChange={() => setEditParticipant(null)} token={token} onSaved={load} />
       <CancelEnrolmentDialog participant={cancelParticipant} onOpenChange={() => setCancelParticipant(null)} token={token} onDone={load} />
       <TransferDialog participant={transferParticipant} onOpenChange={() => setTransferParticipant(null)} token={token} currentTrainingId={detail.id} onDone={load} />
