@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchMyProfile } from "@/services/api/me";
 import { fetchMyTrainerProfile } from "@/services/api/trainer/trainer-api";
-import { missingProfileFields } from "@/lib/profile-completion";
+import { missingProfileFields, applicableRequired } from "@/lib/profile-completion";
 
 export const ProfileCompletionContext = createContext(null);
 
@@ -43,23 +43,26 @@ export function ProfileCompletionProvider({ children }) {
   const role = user?.role;
   const tracked = role === "trainer" || role === "learner";
 
-  const [state, setState] = useState({ loading: true, complete: true, missing: [] });
+  const [state, setState] = useState({ loading: true, complete: true, missing: [], total: 0 });
   const [dismissed, setDismissed] = useState(false);
 
   const check = useCallback(async () => {
     if (!token || !tracked) {
-      setState({ loading: false, complete: true, missing: [] });
+      setState({ loading: false, complete: true, missing: [], total: 0 });
       return;
     }
     try {
       const data = role === "trainer"
         ? await fetchMyTrainerProfile({ token })
         : await fetchMyProfile({ token });
-      const missing = missingProfileFields(role, flatten(role, data));
-      setState({ loading: false, complete: missing.length === 0, missing });
+      const flat = flatten(role, data);
+      const missing = missingProfileFields(role, flat);
+      // Total applicable required fields — drives the completion percentage.
+      const total = applicableRequired(role, flat).length;
+      setState({ loading: false, complete: missing.length === 0, missing, total });
     } catch {
       // On error, don't nag — treat as complete so we never block on a hiccup.
-      setState({ loading: false, complete: true, missing: [] });
+      setState({ loading: false, complete: true, missing: [], total: 0 });
     }
   }, [token, role, tracked]);
 
